@@ -1,0 +1,123 @@
+# Tariff Advantage Campaign
+# Highlighting US tariff benefits for plant-based fibers
+
+campaign:
+  id: "tariff_advantage"
+  name: "US Tariff Advantage Campaign"
+  type: "acquisition"
+  segment: "us_b2b_prospects"
+  status: "active"
+  created_date: "2024-01-20"
+  version: "1.0"
+
+email:
+  subject: "Beat the Tariffs: Plant-Based Fibers for US Exports"
+  subject_variants:
+    - "Tariff-Free Natural Fibers for Your US Carpet Exports"
+    - "Why US Exporters Are Switching to Himalayan Plant Fibers"
+    - "{{contact_name}}, Reduce Tariff Costs with Natural Fibers"
+  preview_text: "Our nettle & hemp yarns can help reduce your tariff burden on US exports"
+  from_name: "Prashant Agarwal | Himalayan Fibres"
+  reply_to: "prashant@himalayanfibres.com"
+
+layout: "hero_with_cta"
+
+content:
+  hero:
+    image_ref: "campaigns.tariff_advantage_banner"
+    alt: "Tariff Advantage - Himalayan Fibres"
+    fallback_color: "#232323"
+
+  greeting: "Dear {{contact_name}},"
+
+  introduction: |
+    If you're exporting carpets to the United States, you're likely
+    feeling the pressure of increasing tariffs on synthetic and
+    traditional materials.
+
+    There's a solution that's not only cost-effective but also
+    aligns with the growing demand for sustainable products.
+
+  body_sections:
+    - heading: "The Tariff Advantage"
+      type: "text_block"
+      content: |
+        **Plant-based natural fibers** like Himalayan nettle and hemp
+        currently enjoy favorable tariff treatment for US imports compared
+        to many synthetic alternatives.
+
+        This means:
+        - **Lower import duties** on your finished products
+        - **Competitive pricing** in the US market
+        - **Sustainability story** that resonates with American consumers
+
+    - heading: "Why It Matters for Your Business"
+      type: "comparison_table"
+      content:
+        headers: ["Factor", "Synthetic Fibers", "Himalayan Plant Fibers"]
+        rows:
+          - ["Tariff Impact", "Higher duties", "Favorable treatment"]
+          - ["Market Demand", "Declining interest", "Growing rapidly"]
+          - ["Sustainability", "Questions raised", "Clear eco-credentials"]
+          - ["Quality", "Consistent", "Premium, unique texture"]
+
+    - heading: "Our Plant-Based Solutions"
+      type: "product_showcase"
+      products:
+        - ref: "nettle.special_nettle_yarn"
+          highlight: "Premium 'Himalayan Silk' - tariff-advantaged"
+        - ref: "hemp.white_hemp_yarn"
+          highlight: "Clean, white finish - perfect for dyed carpets"
+        - ref: "nettle.nettle_plant_fibre"
+          highlight: "Raw fiber for industrial blending"
+
+    - heading: "Documentation & Compliance"
+      type: "bullet_list"
+      content:
+        - "Certificate of Origin for customs clearance"
+        - "Fiber composition documentation"
+        - "Sustainability certifications"
+        - "HS code guidance for optimal tariff treatment"
+
+  cta:
+    text: "Get Tariff Consultation"
+    url: "https://himalayanfibres.com/tariff-consultation"
+    style: "primary"
+    secondary:
+      text: "Request Samples"
+      url: "https://himalayanfibres.com/samples"
+      style: "secondary"
+
+  closing: |
+    We've helped several carpet exporters optimize their material
+    sourcing for US market requirements. I'd be happy to share
+    how this could work for {{company_name}}.
+
+    Would you be open to a quick call to discuss the specifics?
+
+  signature:
+    name: "Prashant Agarwal"
+    title: "Founder"
+    company: "Himalayan Fibres"
+    phone: "+91-9816030093"
+    include_photo: true
+
+personalization:
+  variables:
+    - name: "{{contact_name}}"
+      fallback: "there"
+      source: "contact.first_name"
+    - name: "{{company_name}}"
+      fallback: "your company"
+      source: "contact.company"
+
+tracking:
+  utm_source: "email"
+  utm_medium: "campaign"
+  utm_campaign: "tariff_advantage_2024"
+
+follow_up:
+  enabled: true
+  trigger: "no_response_after_days"
+  days: 7
+  follow_up_template: "tariff_advantage_followup"

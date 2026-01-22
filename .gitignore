@@ -1,0 +1,82 @@
+# Environment variables
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+myvenv/
+ENV/
+env/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+
+# Output directory (generated files)
+output/
+
+# Credentials (sensitive files)
+google_credentials.json
+*credentials*.json
+*.pem
+*.key
+
+# Claude/MCP
+.claude/
+.mcp.json
+.playwright-mcp/
+
+# Database
+*.db
+*.sqlite3
+
+# Alembic versions (optional - uncomment if you want to track migrations)
+# alembic/versions/

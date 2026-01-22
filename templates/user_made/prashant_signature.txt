@@ -1,0 +1,89 @@
+<div>
+  <br clear="all">
+</div>
+<div>
+  <div class="gmail_signature" dir="ltr" data-smartmail="gmail_signature">
+    <div dir="ltr">
+      <table style="font-family: Amiri,serif; color: #222222; font-size: 14px; line-height: 1.5; width: 520px; max-width: 520px;" cellspacing="0" cellpadding="0">
+        <tbody>
+          <tr>
+            <td style="padding: 0px;">
+              <div style="font-size: 16px; font-weight: bold; color: #000000;">Prashant Agarwal</div>
+              <div style="margin-top: 2px; color: #232323;">Manager</div>
+              <div style="color: #232323;">ERB Textile Private Limited</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-top: 8px;">
+              <div style="font-weight: 600; word-break: break-word;">
+                <div style="margin: 2px 0px;">
+                  <img style="vertical-align: middle; margin-right: 6px; border: 0px;" src="https://lh3.googleusercontent.com/d/1sH81IDQE0TJqIlsdUqrtMLyVAi_Xczs9" alt="Website" width="16" height="16">&nbsp; 
+                  <a href="https://www.himalayanfibres.com/" style="color: #c38513; vertical-align: middle;" target="_blank" rel="noopener">Himalayan Fibres</a>
+                </div>
+                <div style="margin: 2px 0px;">
+                  <img style="vertical-align: middle; margin-right: 6px; border: 0px;" src="https://lh3.googleusercontent.com/d/15Nzax6erVg9zuODUAr4HKKIbmzuGTnBq" alt="Email" width="16" height="16">&nbsp; 
+                  <a href="mailto:info@himalayanfibres.com" style="color: #c38513; vertical-align: middle; word-break: break-word;" target="_blank" rel="noopener">info@himalayanfibres.com</a>
+                </div>
+                <div style="margin: 2px 0px;">
+                  <img style="vertical-align: middle; margin-right: 6px; border: 0px;" src="https://lh3.googleusercontent.com/d/1eo2oMKIOCE0ZRGC8JgAD5McrYNl8Fe3N" alt="Telephone" width="16" height="16">&nbsp; 
+                  <a href="tel:+918582952074" style="color: #c38513; vertical-align: middle;" target="_blank" rel="noopener">+91 858-295-2074</a>
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 0px 0px 8px;">
+              <img style="display: block; width: 160px; height: auto; border: 0px; outline: 0px; margin: 0px;" src="https://lh3.googleusercontent.com/d/11p0sSpgCc5WDMRYBFoDdy9LT95kAzm72" alt="Himalayan Fibres" width="160">
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-top: 10px; color: #232323;">
+              <div>S.K Complex,</div>
+              <div>Khurje Wala Mohalla, Daulat Ganj,</div>
+              <div>Gwalior (M.P.) 474001</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-top: 30px;">
+              <a href="https://himalayanfibres.com" style="display: inline-block; background: #c38513; color: #ffffff; padding: 8px 14px; border-radius: 4px; font-weight: bold;" target="_blank" rel="noopener">Visit Our Website</a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-top: 20px;">
+              <span style="color: #444444; margin-right: 8px;">Follow us:</span>&nbsp; 
+              <a href="https://www.instagram.com/himalayan_fibres" style="margin-right: 10px;" target="_blank" rel="noopener">
+                <img style="vertical-align: middle; border: 0px;" src="https://lh3.googleusercontent.com/d/1uxQVjWXNrn-Z1dmX_QDiS1_vKZcdNdGN" alt="Instagram" width="28" height="28">&nbsp;
+              </a> 
+              <a href="https://www.facebook.com/Himalayanfibres" target="_blank" rel="noopener">
+                <img style="vertical-align: middle; border: 0px;" src="https://lh3.googleusercontent.com/d/1lxQXqEY9e6sLTiHXkVe6huueh_Ix2ZC9" alt="Facebook" width="28" height="28">
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-top: 12px;">
+              <div style="border-top: 1px solid #dddddd; height: 0px; line-height: 0; font-size: 0px;">&nbsp;</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-top: 10px;">
+              <div style="font-size: 11px; color: #2e7d32; line-height: 1.4;">
+                <img style="vertical-align: middle; margin-right: 6px; border: 0px;" src="https://lh3.googleusercontent.com/d/113R2bHn9dyDpQvyOH37LalVprvazUvKh" alt="" width="12" height="12">&nbsp; 
+                <span style="font-style: italic;">Before printing, please consider the environment.</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-top: 20px; padding-bottom: 2px;">
+              <div style="font-size: 11px; color: #666666; line-height: 1.45;">
+                <div style="color: #b00020; font-weight: bold; margin-bottom: 6px;">
+                  <img style="vertical-align: middle; margin-right: 6px; border: 0px;" src="https://lh3.googleusercontent.com/d/1Funwx0jywxjeS-P_1rwYy8aOPdCJJI7O" alt="" width="12" height="12">&nbsp;Confidentiality Notice
+                </div>
+                <div style="font-style: italic;">This message may contain confidential and/or legally privileged information and is intended solely for the use of the named recipient(s). If you are not an intended recipient, please notify the sender immediately and delete this message and any attachments without retaining copies. Any unauthorized review, use, disclosure, or distribution is prohibited and may result in legal action.</div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,189 @@
+# =============================================================================
+# IMAGE ASSETS CONFIGURATION
+# =============================================================================
+# This file stores all Google Drive image URLs for email campaigns
+#
+# HOW TO ADD NEW IMAGES:
+# 1. Upload image to Google Drive
+# 2. Right-click > Share > "Anyone with the link"
+# 3. Copy the share link (e.g., https://drive.google.com/file/d/XXXXX/view)
+# 4. Extract the FILE_ID from the URL
+# 5. Create the direct URL: https://lh3.googleusercontent.com/d/{FILE_ID}
+# 6. Add it below in the appropriate section
+#
+# LOCAL BACKUP:
+# Also save the original image in: assets/images/{category}/
+# This helps you track what images you have
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# BRANDING - Company logos, banners, hero images
+# Local folder: assets/images/branding/
+# -----------------------------------------------------------------------------
+branding:
+  hero_banner:
+    url: "https://lh3.googleusercontent.com/d/1X5ZjPrePv9SvKVy960MlxJ_hb_SJ-DMk"
+    description: "Main hero banner - Raw Fibres to Yarns process"
+    dimensions: "851x315"
+    local_file: "hero_banner.png"
+
+  logo:
+    url: ""
+    description: "Company logo"
+    dimensions: ""
+    local_file: ""
+
+  logo_white:
+    url: ""
+    description: "White version of logo for dark backgrounds"
+    dimensions: ""
+    local_file: ""
+
+# -----------------------------------------------------------------------------
+# SOCIAL ICONS - WhatsApp, Instagram, Facebook, LinkedIn, etc.
+# Local folder: assets/images/social_icons/
+# -----------------------------------------------------------------------------
+social_icons:
+  whatsapp:
+    url: "https://lh3.googleusercontent.com/d/1A-OaA8_8ReOz5F1TEFbjqTxbDXGz4UAo"
+    description: "WhatsApp icon (green)"
+    local_file: "whatsapp.png"
+
+  instagram:
+    url: "https://lh3.googleusercontent.com/d/1uxQVjWXNrn-Z1dmX_QDiS1_vKZcdNdGN"
+    description: "Instagram icon"
+    local_file: "instagram.png"
+
+  facebook:
+    url: "https://lh3.googleusercontent.com/d/1lxQXqEY9e6sLTiHXkVe6huueh_Ix2ZC9"
+    description: "Facebook icon (blue)"
+    local_file: "facebook.png"
+
+  linkedin:
+    url: ""
+    description: "LinkedIn icon"
+    local_file: ""
+
+  twitter:
+    url: ""
+    description: "Twitter/X icon"
+    local_file: ""
+
+# -----------------------------------------------------------------------------
+# SIGNATURE ICONS - Small icons for email signature
+# Local folder: assets/images/signature/
+# -----------------------------------------------------------------------------
+signature_icons:
+  website:
+    url: "https://lh3.googleusercontent.com/d/1sH81IDQE0TJqIlsdUqrtMLyVAi_Xczs9"
+    description: "Website/globe icon"
+    local_file: "website.png"
+
+  email:
+    url: "https://lh3.googleusercontent.com/d/15Nzax6erVg9zuODUAr4HKKIbmzuGTnBq"
+    description: "Email envelope icon"
+    local_file: "email.png"
+
+  phone:
+    url: "https://lh3.googleusercontent.com/d/1eo2oMKIOCE0ZRGC8JgAD5McrYNl8Fe3N"
+    description: "Phone icon"
+    local_file: "phone.png"
+
+  location:
+    url: ""
+    description: "Location/map pin icon"
+    local_file: ""
+
+# -----------------------------------------------------------------------------
+# PRODUCTS - Product images for showcasing in emails
+# Local folder: assets/images/products/
+# -----------------------------------------------------------------------------
+products:
+  stinging_nettle:
+    url: ""
+    description: "Himalayan Stinging Nettle fiber/yarn"
+    local_file: ""
+
+  himalayan_hemp:
+    url: ""
+    description: "Himalayan Hemp fiber/yarn"
+    local_file: ""
+
+  tibetan_wool:
+    url: ""
+    description: "Tibetan Wool"
+    local_file: ""
+
+  nettle_yarn_spool:
+    url: ""
+    description: "Nettle yarn on spool"
+    local_file: ""
+
+  hemp_fabric:
+    url: ""
+    description: "Hemp fabric sample"
+    local_file: ""
+
+  raw_fibers:
+    url: ""
+    description: "Raw fibers before processing"
+    local_file: ""
+
+  finished_yarn:
+    url: ""
+    description: "Finished yarn product"
+    local_file: ""
+
+# -----------------------------------------------------------------------------
+# CAMPAIGNS - Campaign-specific banners and images
+# Local folder: assets/images/campaigns/
+# -----------------------------------------------------------------------------
+campaigns:
+  # B2B Carpet Exporters Campaign
+  b2b_carpet_intro:
+    url: ""
+    description: "Banner for B2B carpet exporters introduction"
+    local_file: ""
+
+  # Tariff Advantage Campaign
+  tariff_advantage:
+    url: ""
+    description: "US-India trade advantage banner"
+    local_file: ""
+
+  # Sustainability Campaign
+  sustainability:
+    url: ""
+    description: "Eco-friendly/sustainability themed banner"
+    local_file: ""
+
+  # Seasonal/Promotional
+  new_year_2025:
+    url: ""
+    description: "New Year 2025 promotional banner"
+    local_file: ""
+
+  trade_show:
+    url: ""
+    description: "Trade show announcement banner"
+    local_file: ""
+
+# -----------------------------------------------------------------------------
+# CERTIFICATES & TRUST BADGES
+# Local folder: assets/images/branding/
+# -----------------------------------------------------------------------------
+certificates:
+  gots_certified:
+    url: ""
+    description: "GOTS Certification badge"
+    local_file: ""
+
+  oeko_tex:
+    url: ""
+    description: "OEKO-TEX certification"
+    local_file: ""
+
+  fair_trade:
+    url: ""
+    description: "Fair Trade certification"
+    local_file: ""

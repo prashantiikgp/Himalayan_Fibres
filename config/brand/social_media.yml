@@ -1,0 +1,79 @@
+# Social Media Configuration
+# All social links, handles, and platform-specific settings
+
+platforms:
+  whatsapp:
+    handle: "+919816030093"
+    url: "https://wa.me/919816030093"
+    message_template: "Hello! I'm interested in Himalayan Fibres products."
+    display_name: "WhatsApp"
+    active: true
+    priority: 1
+
+  instagram:
+    handle: "@himalayanfibres"
+    url: "https://www.instagram.com/himalayanfibres/"
+    display_name: "Instagram"
+    active: true
+    priority: 2
+
+  facebook:
+    handle: "HimalayanFibres"
+    url: "https://www.facebook.com/HimalayanFibres/"
+    display_name: "Facebook"
+    active: true
+    priority: 3
+
+  linkedin:
+    handle: "himalayan-fibres"
+    url: "https://www.linkedin.com/company/himalayan-fibres/"
+    display_name: "LinkedIn"
+    active: true
+    priority: 4
+
+  twitter:
+    handle: "@HimalayanFibres"
+    url: "https://twitter.com/HimalayanFibres"
+    display_name: "Twitter/X"
+    active: false
+    priority: 5
+
+  youtube:
+    handle: ""
+    url: ""
+    display_name: "YouTube"
+    active: false
+    priority: 6
+
+  pinterest:
+    handle: "himalayanfibres"
+    url: "https://www.pinterest.com/himalayanfibres/"
+    display_name: "Pinterest"
+    active: true
+    priority: 7
+
+# Social proof / stats to display
+social_stats:
+  instagram_followers: "5K+"
+  facebook_likes: "3K+"
+  happy_customers: "500+"
+  villages_impacted: "75+"
+
+# Hashtags for campaigns
+hashtags:
+  brand:
+    - "#HimalayanFibres"
+    - "#HimalayanSilk"
+  products:
+    - "#NettleYarn"
+    - "#HempYarn"
+    - "#HimalayanWool"
+  sustainability:
+    - "#SustainableTextiles"
+    - "#EcoFriendlyFashion"
+    - "#NaturalFibers"
+    - "#FairTrade"
+  craft:
+    - "#HandmadeInIndia"
+    - "#ArtisanMade"
+    - "#SlowFashion"

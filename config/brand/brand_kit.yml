@@ -1,0 +1,73 @@
+# Brand Kit Configuration
+# Contains brand identity elements: colors, fonts, logos, voice & tone
+
+brand:
+  name: "Himalayan Fibres"
+  tagline: "Nature's Finest Fibers, Crafted with Care"
+  established: 2018
+
+colors:
+  primary: "#232323"       # Main brand color - dark charcoal
+  accent: "#c38513"        # Gold/amber accent
+  secondary: "#5D4037"     # Warm brown
+  background: "#f2f2f2"    # Light gray background
+  text: "#222222"          # Main text color
+  text_light: "#666666"    # Secondary text
+  white: "#ffffff"
+  success: "#4CAF50"       # For positive messages
+  warning: "#FF9800"       # For alerts
+
+  # Gradient combinations
+  gradients:
+    hero: ["#232323", "#3E2723"]
+    cta: ["#c38513", "#D4A017"]
+
+fonts:
+  heading:
+    family: "Georgia, serif"
+    weight: "bold"
+  body:
+    family: "Georgia, serif"
+    weight: "normal"
+  accent:
+    family: "Arial, sans-serif"
+    weight: "normal"
+
+voice:
+  tone: "warm, professional, sustainable-focused"
+  personality: "knowledgeable, authentic, eco-conscious"
+  keywords:
+    - "sustainable"
+    - "handcrafted"
+    - "Himalayan"
+    - "eco-friendly"
+    - "premium"
+    - "artisanal"
+    - "natural"
+    - "fair trade"
+  avoid:
+    - "cheap"
+    - "discount"
+    - "fast fashion"
+
+logos:
+  main:
+    gdrive_url: ""
+    local_file: "assets/images/branding/logo.png"
+    alt: "Himalayan Fibres Logo"
+  white:
+    gdrive_url: ""
+    local_file: "assets/images/branding/logo_white.png"
+    alt: "Himalayan Fibres Logo (White)"
+  icon:
+    gdrive_url: ""
+    local_file: "assets/images/branding/icon.png"
+    alt: "Himalayan Fibres Icon"
+
+email_styles:
+  # Default styling for email templates
+  header_bg: "#232323"
+  footer_bg: "#f2f2f2"
+  button_radius: "4px"
+  max_width: "600px"
+  padding: "20px"

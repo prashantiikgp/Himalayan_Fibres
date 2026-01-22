@@ -1,0 +1,129 @@
+# Himalayan Stinging Nettle Plant Fibre
+# Raw fibre for spinning or industrial use
+
+product:
+  id: "nettle_plant_fibre"
+  name: "Himalayan Stinging Nettle Plant Fibre"
+  nickname: null
+  category: "nettle"
+  subcategory: "fibre"
+  sku: "NET-FBR-RAW-001"
+  active: true
+
+pricing:
+  inr: 250
+  inr_max: 375  # Price range based on grade
+  usd: 3.00
+  usd_max: 4.50
+  currency_symbol: "₹"
+  unit: "per 100gm"
+  wholesale_discount: 20
+
+pricing_tiers:
+  standard_grade:
+    inr: 250
+    description: "Good quality for general textile use"
+  premium_grade:
+    inr: 375
+    description: "Fine fibre for high-end applications"
+
+specifications:
+  fiber_length: "60-120mm"
+  fiber_diameter: "20-50 microns"
+  tensile_strength: "High"
+  composition: "100% Raw Nettle Plant Fiber"
+  moisture_content: "<12%"
+  packaging: "Compressed bales or loose"
+
+grades:
+  - name: "Standard Grade"
+    description: "Mixed fiber lengths, suitable for blending"
+    price_inr: 250
+  - name: "Premium Grade"
+    description: "Selected long fibers, minimal processing"
+    price_inr: 375
+
+colors:
+  - name: "Natural Golden"
+    hex: "#C4A86D"
+    available: true
+  - name: "Raw Brown"
+    hex: "#8B7355"
+    available: true
+
+description:
+  short: "Raw nettle plant fibre for spinning, blending, or industrial textile production"
+  long: |
+    Our Himalayan Stinging Nettle Plant Fibre is sourced directly from wild
+    nettle plants growing in the pristine Himalayan ecosystem. This raw fibre
+    is ideal for spinners who want to create their own custom yarns, or for
+    textile manufacturers looking for sustainable, high-quality plant fiber.
+
+    The fibre is hand-harvested and initially processed to remove the outer
+    bark, leaving clean, ready-to-spin fibre with excellent strength and
+    natural luster.
+  tagline: "Raw Material, Infinite Possibilities"
+
+features:
+  - "Wild-harvested from Himalayan nettle"
+  - "Hand-processed, chemical-free"
+  - "Suitable for hand spinning or industrial processing"
+  - "Can be blended with wool, cotton, or silk"
+  - "Natural antibacterial properties"
+  - "Biodegradable packaging available"
+
+applications:
+  - "Hand spinning"
+  - "Industrial yarn production"
+  - "Blending with other fibers"
+  - "Paper making"
+  - "Composite materials"
+  - "Textile research"
+
+benefits:
+  for_spinners:
+    - "Create unique custom yarns"
+    - "Control over final yarn weight"
+    - "Authentic handcraft experience"
+  for_manufacturers:
+    - "Sustainable raw material"
+    - "Consistent quality supply"
+    - "Scalable quantities available"
+    - "Documentation for traceability"
+
+images:
+  hero:
+    gdrive_url: ""
+    local_file: "assets/images/products/nettle/nettle_fibre_hero.jpg"
+    alt: "Himalayan Stinging Nettle Plant Fibre"
+  gallery:
+    - gdrive_url: ""
+      local_file: "assets/images/products/nettle/nettle_fibre_closeup.jpg"
+      alt: "Raw fibre closeup"
+    - gdrive_url: ""
+      local_file: "assets/images/products/nettle/nettle_fibre_bale.jpg"
+      alt: "Fibre bale packaging"
+  thumbnail:
+    gdrive_url: ""
+    local_file: "assets/images/products/nettle/nettle_fibre_thumb.jpg"
+    alt: "Nettle Fibre thumbnail"
+
+website_url: "https://www.himalayanfibres.com/product-page/himalayan-stinging-nettle-plant-fibre"
+
+inventory:
+  track_stock: true
+  min_order_qty: 5  # 500gm minimum
+  bulk_order_qty: 100
+  lead_time_days: 14
+
+related_products:
+  - "natural_nettle_yarn"
+  - "special_nettle_yarn"
+
+tags:
+  - "nettle"
+  - "raw fibre"
+  - "spinning"
+  - "industrial"
+  - "sustainable"
+  - "b2b"

@@ -1,0 +1,127 @@
+# Special Stinging Nettle Yarn ("Himalayan Silk")
+# Premium nettle yarn with silky finish
+
+product:
+  id: "special_nettle_yarn"
+  name: "Special Stinging Nettle Yarn"
+  nickname: "Himalayan Silk"
+  category: "nettle"
+  subcategory: "yarn"
+  sku: "NET-YRN-SPL-001"
+  active: true
+  featured: true
+
+pricing:
+  inr: 450
+  usd: 5.40
+  currency_symbol: "₹"
+  unit: "per 100gm skein"
+  wholesale_discount: 12
+
+specifications:
+  length: "250m/100gms"
+  composition: "100% Himalayan Nettle Plant"
+  weight_type: "Medium/Worsted"
+  needle_size: "4-5mm"
+  gauge: "20 stitches = 10cm"
+  care:
+    - "Hand wash in lukewarm water"
+    - "Use mild detergent"
+    - "Lay flat to dry"
+    - "Steam iron on low if needed"
+
+colors:
+  - name: "Rich Walnut"
+    hex: "#5D4037"
+    available: true
+  - name: "Deep Earthy Brown"
+    hex: "#3E2723"
+    available: true
+  - name: "Natural Beige"
+    hex: "#D7CCC8"
+    available: true
+  - name: "Golden Amber"
+    hex: "#c38513"
+    available: true
+
+description:
+  short: "Nicknamed 'Himalayan Silk' for its stunning shine and lustre"
+  long: |
+    Our Special Stinging Nettle Yarn is the crown jewel of our nettle collection.
+    Hand-extracted from remote Himalayan villages and processed using our
+    proprietary technology, this yarn achieves a silky, lustrous finish that
+    rivals traditional silk. The smooth texture and beautiful drape make it
+    perfect for luxury garments and high-end textile applications.
+
+    Each skein represents hours of careful handwork by our skilled women
+    artisans, who have perfected the art of nettle processing over generations.
+  tagline: "The Silk of the Himalayas"
+
+features:
+  - "Silky, lustrous finish"
+  - "Hand-extracted from remote Himalayan villages"
+  - "Proprietary processing technology"
+  - "Fair trade - supports local women artisans"
+  - "Exceptional drape and softness"
+  - "Natural temperature regulation"
+
+benefits:
+  for_crafters:
+    - "Luxury feel at accessible price"
+    - "Beautiful sheen for special projects"
+    - "Excellent stitch definition"
+    - "Comfortable against skin"
+  for_business:
+    - "Premium positioning opportunity"
+    - "Unique 'Himalayan Silk' story"
+    - "High perceived value"
+    - "Repeat customer favorite"
+
+usp:
+  primary: "The only nettle yarn with a silk-like finish"
+  secondary: "Proprietary processing preserves natural lustre"
+  proof_points:
+    - "250m length per 100gm (25% more than standard)"
+    - "Smoother hand feel than regular nettle"
+    - "Consistent quality across batches"
+
+images:
+  hero:
+    gdrive_url: ""
+    local_file: "assets/images/products/nettle/special_nettle_yarn_hero.jpg"
+    alt: "Special Stinging Nettle Yarn - Himalayan Silk"
+  gallery:
+    - gdrive_url: ""
+      local_file: "assets/images/products/nettle/special_nettle_yarn_texture.jpg"
+      alt: "Silky yarn texture closeup"
+    - gdrive_url: ""
+      local_file: "assets/images/products/nettle/special_nettle_yarn_colors.jpg"
+      alt: "Color variations"
+    - gdrive_url: ""
+      local_file: "assets/images/products/nettle/special_nettle_yarn_swatch.jpg"
+      alt: "Knitted swatch sample"
+  thumbnail:
+    gdrive_url: ""
+    local_file: "assets/images/products/nettle/special_nettle_yarn_thumb.jpg"
+    alt: "Special Nettle Yarn thumbnail"
+
+website_url: "https://www.himalayanfibres.com/product-page/special-stinging-nettle-yarn"
+
+inventory:
+  track_stock: true
+  min_order_qty: 1
+  bulk_order_qty: 25
+  lead_time_days: 10
+
+related_products:
+  - "natural_nettle_yarn"
+  - "nettle_plant_fibre"
+  - "snow_white_series"
+
+tags:
+  - "nettle"
+  - "premium"
+  - "himalayan silk"
+  - "luxury"
+  - "sustainable"
+  - "bestseller"

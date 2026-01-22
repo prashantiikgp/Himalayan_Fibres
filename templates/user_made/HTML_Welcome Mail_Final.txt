@@ -1,0 +1,166 @@
+<style>@import url('https://fonts.googleapis.com/css2?family=Amiri&display=swap');
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f2f2f2;
+      font-family: 'Amiri', serif;
+    }</style>
+<table style="padding: 40px 0;" width="100%" cellspacing="0" cellpadding="0">
+  <tbody>
+    <tr>
+      <td align="center">
+        <table style="max-width: 640px; background-color: #ffffff; border-radius: 10px; box-shadow: 0 0 18px rgba(0, 0, 0, 0.15); margin: 0 20px;" width="100%" cellspacing="0" cellpadding="0">
+          <tbody>
+            <!-- Hero Image -->
+            <tr>
+              <td>
+                <img style="width: 100%; height: auto; display: block; border-top-left-radius: 10px; border-top-right-radius: 10px;" src="https://share1.cloudhq-mkt3.net/1ed21a03b9a9f5.png" alt="Hero Image">
+              </td>
+            </tr>
+
+            <!-- Main Content -->
+            <tr>
+              <td style="padding: 30px;">
+                <!-- Greeting / Intro (font & color aligned to offer section) -->
+                <p style="font-size: 16px; color: #222; margin: 0 0 10px ;font-family: 'Amiri', serif;">Hi <strong>{{}}</strong>,</p>
+                <p style="font-size: 16px; color: #222; margin: 0 0 10px; font-family: 'Amiri', serif;">Thanks for signing up at <strong>Himalayan Fibers</strong> 🌿</p>
+                <p style="font-size: 16px; color: #222; margin: 0 0 10px;font-family: 'Amiri', serif;">We’d love to know what kind of products you're exploring — are you working with hemp, nettle, or some other natural material?</p>
+                <p style="font-size: 16px; color: #222; margin: 0;font-family: 'Amiri', serif;">Let us know what you're planning to build — we're here to support your journey!</p>
+
+                <!-- CTA Button -->
+                <table style="margin-top: 25px;" width="100%" cellspacing="0" cellpadding="0">
+                  <tbody>
+                    <tr>
+                      <td align="center">
+                        <a href="https://himalayanfibres.com" style="background-color: #232323; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 5px; display: inline-block; font-size: 16px; font-weight: bold;">Explore Himalayan Fibers</a>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <!-- Social + WhatsApp Links -->
+                <table style="margin-top: 30px;" width="100%" cellspacing="0" cellpadding="0">
+                  <tbody>
+                    <tr>
+                      <td align="center">
+                        <!-- WhatsApp -->
+                        <a href="https://wa.me/918582952074?text=Hi%20Himalayan%20Fibres%20-%20I%27d%20like%20to%20chat%20about%20products%20or%20place%20an%20order." target="_blank" style="margin: 0 10px;" rel="noopener">
+                          <img style="display: inline-block;" title="WhatsApp" src="https://lh3.googleusercontent.com/d/1A-OaA8_8ReOz5F1TEFbjqTxbDXGz4UAo" alt="WhatsApp" width="32" height="32">
+                        </a>
+                        <!-- Instagram -->
+                        <a href="https://www.instagram.com/himalayan_fibres/" target="_blank" style="margin: 0 10px;" rel="noopener">
+                          <img style="display: inline-block;" src="https://lh3.googleusercontent.com/d/1uxQVjWXNrn-Z1dmX_QDiS1_vKZcdNdGN" alt="Instagram" width="32" height="32">
+                        </a>
+                        <!-- Facebook -->
+                        <a href="https://www.facebook.com/Himalayanfibres" target="_blank" style="margin: 0 10px;" rel="noopener">
+                          <img style="display: inline-block;" src="https://lh3.googleusercontent.com/d/1lxQXqEY9e6sLTiHXkVe6huueh_Ix2ZC9" alt="Facebook" width="32" height="32">
+                        </a>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <!-- Offerings Section -->
+                <div style="margin: 30px 0;">
+                  <h3 style="font-family: 'Amiri', serif; font-size: 20px; font-weight: bold; color: #222; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.5px;">🧶 What We Offer</h3>
+
+                  <!-- Offering 1 -->
+                  <div style="margin-bottom: 20px;">
+                    <h4 style="font-size: 16px; font-weight: 600; color: #2c3e50; margin-bottom: 6px; font-family: 'Amiri', serif;">🌿 Himalayan Stinging Nettle</h4>
+                    <p style="font-size: 14px; color: #222; margin: 0; font-family: 'Amiri', serif;">A wild Himalayan plant (1200–2000m) naturally grown without pesticides or fertilizers. Sustainably harvested and spun into 100% or blended yarns — popular across Europe and the US.</p>
+                  </div>
+
+                  <!-- Offering 2 -->
+                  <div style="margin-bottom: 20px;">
+                    <h4 style="font-size: 16px; font-weight: 600; color: #2c3e50; margin-bottom: 6px; font-family: 'Amiri', serif;">🌱 Himalayan Hemp</h4>
+                    <p style="font-size: 14px; color: #222; margin: 0; font-family: 'Amiri', serif;">Sourced from wild Cannabis Sativa in the Himalayas. Durable, breathable, and eco-friendly — ideal for sustainable textile collections.</p>
+                  </div>
+
+                  <!-- Offering 3 -->
+                  <div style="margin-bottom: 20px;">
+                    <h4 style="font-size: 16px; font-weight: 600; color: #2c3e50; margin-bottom: 6px; font-family: 'Amiri', serif;">🐑 Tibetan Wool</h4>
+                    <p style="font-size: 14px; color: #222; margin: 0; font-family: 'Amiri', serif;">Authentic wool from high-altitude regions. Soft, strong, and perfect for warm, luxurious blends.</p>
+                  </div>
+
+                  <p style="font-size: 14px; color: #222; font-weight: 500; margin-top: 20px; font-family: 'Amiri', serif;">We offer <strong>fibres, yarns, and custom blends</strong> — crafted for conscious brands and export-ready markets.</p>
+                </div>
+
+                <!-- Sign-off / Signature -->
+                <div>
+                  <br clear="all">
+                </div>
+                <div>
+                  <div class="gmail_signature" dir="ltr" data-smartmail="gmail_signature">
+                    <div dir="ltr">
+                      <table style="font-family: Amiri,serif; color: #222222; font-size: 14px; line-height: 1.5; width: 520px; max-width: 520px;" cellspacing="0" cellpadding="0">
+                        <tbody>
+                          <tr>
+                            <td style="padding: 0px;">
+                              <div style="font-size: 16px; font-weight: bold; color: #000000;">Prashant Agarwal</div>
+                              <div style="margin-top: 2px; color: #232323;">Manager</div>
+                              <div style="color: #232323;">ERB Textile Private Limited</div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding-top: 8px;">
+                              <div style="font-weight: 600; word-break: break-word;">
+                                <div style="margin: 2px 0px;">
+                                  <img style="vertical-align: middle; margin-right: 6px; border: 0px;" src="https://lh3.googleusercontent.com/d/1sH81IDQE0TJqIlsdUqrtMLyVAi_Xczs9" alt="Website" width="16" height="16">&nbsp;
+                                  <a href="https://www.himalayanfibres.com/" style="color: #c38513; vertical-align: middle;" target="_blank" rel="noopener">Himalayan Fibres</a>
+                                </div>
+                                <div style="margin: 2px 0px;">
+                                  <img style="vertical-align: middle; margin-right: 6px; border: 0px;" src="https://lh3.googleusercontent.com/d/15Nzax6erVg9zuODUAr4HKKIbmzuGTnBq" alt="Email" width="16" height="16">&nbsp;
+                                  <a href="mailto:info@himalayanfibres.com" style="color: #c38513; vertical-align: middle; word-break: break-word;" target="_blank" rel="noopener">info@himalayanfibres.com</a>
+                                </div>
+                                <div style="margin: 2px 0px;">
+                                  <img style="vertical-align: middle; margin-right: 6px; border: 0px;" src="https://lh3.googleusercontent.com/d/1eo2oMKIOCE0ZRGC8JgAD5McrYNl8Fe3N" alt="Telephone" width="16" height="16">&nbsp;
+                                  <a href="tel:+918582952074" style="color: #c38513; vertical-align: middle;" target="_blank" rel="noopener">+91 858-295-2074</a>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+              </td>
+            </tr>
+
+            <!-- Footer (separate rows so it stays at the bottom) -->
+            <tr>
+              <td>
+                <hr style="margin: 0 0 10px 0; border: none; border-top: 1px solid #ddd;">
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div style="background-color: #f5f5f5; padding: 10px 24px; font-size: 12px; color: #232323; text-align: center; font-family: 'Amiri', serif;">
+                  <p>
+                    <em>📍 Address:</em>
+                    <em>S.K. Complex, Khurje Wala Mohalla, Daulat Ganj, Lashkar, Gwalior 474001</em>
+                  </p>
+                  <p>
+                    <em>📧 info@himalayanfibres.com | 📞 +91 8582952074</em>
+                  </p>
+                  <p style="margin: 0;">
+                    <a href="https://www.himalayanfibres.com/privacy-policy" style="color: #232323; margin: 0 5px;">Privacy Policy</a> |
+                    <a href="https://www.himalayanfibres.com/terms-conditions" style="color: #232323; margin: 0 5px;">Terms &amp; Conditions</a> |
+                    <a href="https://www.himalayanfibres.com/refund-cancellation" style="color: #232323; margin: 0 5px;">Refund &amp; Cancellation</a>
+                  </p>
+                  <p style="font-size: 12px; font-style: italic; margin-top: 10px;">To unsubscribe, please
+                    <a href="mailto:info@himalayanfibres.com?subject=Unsubscribe" style="color: #555;">email us</a> with subject line
+                    <strong>"Unsubscribe"</strong>.
+                  </p>
+                  <p style="margin-top: 10px;">© 2025 Himalayan Fibres. All rights reserved.</p>
+                </div>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </td>
+    </tr>
+  </tbody>
+</table>

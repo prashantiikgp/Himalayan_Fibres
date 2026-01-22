@@ -1,0 +1,228 @@
+# Customer Segments Configuration
+# Define audience segments for targeted campaigns
+
+segments:
+  # B2B Segments
+  potential_b2b:
+    id: "potential_b2b"
+    name: "Potential B2B Clients"
+    description: "Businesses that haven't purchased yet but are potential wholesale customers"
+    criteria:
+      - field: "contact_type"
+        operator: "equals"
+        value: "b2b"
+      - field: "total_orders"
+        operator: "equals"
+        value: 0
+    tags:
+      - "b2b"
+      - "prospect"
+    default_sender: "founder"
+    campaigns:
+      - "b2b_carpet_exporters"
+      - "tariff_advantage"
+
+  active_b2b:
+    id: "active_b2b"
+    name: "Active B2B Clients"
+    description: "Businesses with at least one purchase in the last 6 months"
+    criteria:
+      - field: "contact_type"
+        operator: "equals"
+        value: "b2b"
+      - field: "last_order_date"
+        operator: "within_days"
+        value: 180
+    tags:
+      - "b2b"
+      - "active"
+      - "customer"
+    default_sender: "founder"
+
+  carpet_exporters:
+    id: "carpet_exporters"
+    name: "Carpet Exporters"
+    description: "B2B clients specifically in carpet export business"
+    criteria:
+      - field: "contact_type"
+        operator: "equals"
+        value: "b2b"
+      - field: "industry"
+        operator: "contains"
+        value: "carpet"
+    tags:
+      - "b2b"
+      - "carpet"
+      - "exporter"
+    default_sender: "founder"
+    campaigns:
+      - "b2b_carpet_exporters"
+      - "tariff_advantage"
+
+  us_b2b_prospects:
+    id: "us_b2b_prospects"
+    name: "US B2B Prospects"
+    description: "B2B prospects targeting the US market"
+    criteria:
+      - field: "contact_type"
+        operator: "equals"
+        value: "b2b"
+      - field: "target_market"
+        operator: "contains"
+        value: "US"
+    tags:
+      - "b2b"
+      - "us_market"
+      - "tariff"
+    campaigns:
+      - "tariff_advantage"
+
+  # B2C Segments
+  yarn_stores:
+    id: "yarn_stores"
+    name: "Yarn Store Owners"
+    description: "Small yarn shops and craft store owners"
+    criteria:
+      - field: "business_type"
+        operator: "equals"
+        value: "yarn_store"
+    tags:
+      - "retail"
+      - "yarn_store"
+    default_sender: "sales"
+
+  crafters:
+    id: "crafters"
+    name: "Individual Crafters"
+    description: "Individual customers who purchase for personal projects"
+    criteria:
+      - field: "contact_type"
+        operator: "equals"
+        value: "b2c"
+    tags:
+      - "b2c"
+      - "crafter"
+    default_sender: "newsletter"
+
+  # Engagement-based Segments
+  new_signups:
+    id: "new_signups"
+    name: "New Signups"
+    description: "People who just signed up for the newsletter"
+    criteria:
+      - field: "signup_date"
+        operator: "within_days"
+        value: 7
+      - field: "total_orders"
+        operator: "equals"
+        value: 0
+    tags:
+      - "new"
+      - "welcome"
+    campaigns:
+      - "welcome_new_signup"
+
+  engaged_subscribers:
+    id: "engaged_subscribers"
+    name: "Engaged Subscribers"
+    description: "Subscribers who opened at least 2 emails in the last 30 days"
+    criteria:
+      - field: "emails_opened_30d"
+        operator: "greater_than"
+        value: 1
+    tags:
+      - "engaged"
+      - "active"
+
+  inactive_subscribers:
+    id: "inactive_subscribers"
+    name: "Inactive Subscribers"
+    description: "Subscribers who haven't opened an email in 90 days"
+    criteria:
+      - field: "last_email_open"
+        operator: "not_within_days"
+        value: 90
+    tags:
+      - "inactive"
+      - "re_engagement"
+
+  eco_conscious_buyers:
+    id: "eco_conscious_buyers"
+    name: "Eco-Conscious Buyers"
+    description: "Customers interested in sustainability"
+    criteria:
+      - field: "interests"
+        operator: "contains"
+        value: "sustainability"
+    tags:
+      - "sustainability"
+      - "eco"
+    campaigns:
+      - "sustainability"
+
+  # Purchase-based Segments
+  first_time_buyers:
+    id: "first_time_buyers"
+    name: "First-Time Buyers"
+    description: "Customers who made their first purchase"
+    criteria:
+      - field: "total_orders"
+        operator: "equals"
+        value: 1
+    tags:
+      - "new_customer"
+      - "nurture"
+
+  repeat_customers:
+    id: "repeat_customers"
+    name: "Repeat Customers"
+    description: "Customers with 2+ orders"
+    criteria:
+      - field: "total_orders"
+        operator: "greater_than"
+        value: 1
+    tags:
+      - "loyal"
+      - "repeat"
+
+  high_value_customers:
+    id: "high_value_customers"
+    name: "High-Value Customers"
+    description: "Customers with total spend over ₹10,000"
+    criteria:
+      - field: "total_spent"
+        operator: "greater_than"
+        value: 10000
+    tags:
+      - "vip"
+      - "high_value"
+
+# Segment rules for automatic assignment
+auto_assignment_rules:
+  - trigger: "signup"
+    add_to_segment: "new_signups"
+    remove_after_days: 7
+
+  - trigger: "first_purchase"
+    add_to_segment: "first_time_buyers"
+    remove_from_segment: "new_signups"
+
+  - trigger: "second_purchase"
+    add_to_segment: "repeat_customers"
+    remove_from_segment: "first_time_buyers"
+
+# Exclusion rules
+exclusions:
+  global:
+    - "unsubscribed"
+    - "bounced"
+    - "complained"
+
+  campaign_specific:
+    b2b_campaigns:
+      exclude_segments:
+        - "crafters"
+        - "inactive_subscribers"
+    newsletter:
+      exclude_segments:
+        - "unsubscribed"

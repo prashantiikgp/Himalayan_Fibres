@@ -1,0 +1,228 @@
+# Master Image Registry
+# Centralized registry of all image assets with Google Drive URLs
+
+# Instructions for adding images:
+# 1. Upload image to Google Drive
+# 2. Get shareable link
+# 3. Convert to direct URL format: https://lh3.googleusercontent.com/d/{FILE_ID}
+# 4. Add entry below with gdrive_url and local_file path
+
+branding:
+  logo:
+    gdrive_url: ""
+    local_file: "assets/images/branding/logo.png"
+    description: "Main Himalayan Fibres logo"
+    dimensions: "400x100"
+    alt: "Himalayan Fibres Logo"
+
+  logo_white:
+    gdrive_url: ""
+    local_file: "assets/images/branding/logo_white.png"
+    description: "White version of logo for dark backgrounds"
+    dimensions: "400x100"
+    alt: "Himalayan Fibres Logo (White)"
+
+  logo_icon:
+    gdrive_url: ""
+    local_file: "assets/images/branding/logo_icon.png"
+    description: "Square icon version of logo"
+    dimensions: "200x200"
+    alt: "Himalayan Fibres Icon"
+
+  hero_banner:
+    gdrive_url: ""
+    local_file: "assets/images/branding/hero_banner.jpg"
+    description: "Main hero banner for emails"
+    dimensions: "600x300"
+    alt: "Himalayan Fibres - Premium Natural Fibers"
+
+  welcome_banner:
+    gdrive_url: ""
+    local_file: "assets/images/branding/welcome_banner.jpg"
+    description: "Welcome email hero image"
+    dimensions: "600x300"
+    alt: "Welcome to Himalayan Fibres"
+
+  sustainability_banner:
+    gdrive_url: ""
+    local_file: "assets/images/branding/sustainability_banner.jpg"
+    description: "Sustainability campaign banner"
+    dimensions: "600x300"
+    alt: "Sustainable Himalayan Craftsmanship"
+
+  footer_logo:
+    gdrive_url: ""
+    local_file: "assets/images/branding/footer_logo.png"
+    description: "Smaller logo for email footer"
+    dimensions: "150x40"
+    alt: "Himalayan Fibres"
+
+products:
+  # Nettle Products
+  nettle:
+    natural_nettle_yarn:
+      hero:
+        gdrive_url: ""
+        local_file: "assets/images/products/nettle/natural_nettle_yarn_hero.jpg"
+        alt: "Natural Stinging Nettle Yarn"
+      thumbnail:
+        gdrive_url: ""
+        local_file: "assets/images/products/nettle/natural_nettle_yarn_thumb.jpg"
+        alt: "Natural Nettle Yarn thumbnail"
+
+    special_nettle_yarn:
+      hero:
+        gdrive_url: ""
+        local_file: "assets/images/products/nettle/special_nettle_yarn_hero.jpg"
+        alt: "Special Stinging Nettle Yarn - Himalayan Silk"
+      thumbnail:
+        gdrive_url: ""
+        local_file: "assets/images/products/nettle/special_nettle_yarn_thumb.jpg"
+        alt: "Special Nettle Yarn thumbnail"
+      texture:
+        gdrive_url: ""
+        local_file: "assets/images/products/nettle/special_nettle_yarn_texture.jpg"
+        alt: "Silky yarn texture closeup"
+
+    nettle_plant_fibre:
+      hero:
+        gdrive_url: ""
+        local_file: "assets/images/products/nettle/nettle_fibre_hero.jpg"
+        alt: "Himalayan Stinging Nettle Plant Fibre"
+      thumbnail:
+        gdrive_url: ""
+        local_file: "assets/images/products/nettle/nettle_fibre_thumb.jpg"
+        alt: "Nettle Fibre thumbnail"
+
+  # Hemp Products
+  hemp:
+    white_hemp_yarn:
+      hero:
+        gdrive_url: ""
+        local_file: "assets/images/products/hemp/white_hemp_yarn_hero.jpg"
+        alt: "White Himalayan Hemp Yarn"
+      thumbnail:
+        gdrive_url: ""
+        local_file: "assets/images/products/hemp/white_hemp_yarn_thumb.jpg"
+        alt: "White Hemp Yarn thumbnail"
+
+    thick_hemp_yarn:
+      hero:
+        gdrive_url: ""
+        local_file: "assets/images/products/hemp/thick_hemp_yarn_hero.jpg"
+        alt: "Himalayan Hemp Yarn Thick"
+      thumbnail:
+        gdrive_url: ""
+        local_file: "assets/images/products/hemp/thick_hemp_yarn_thumb.jpg"
+        alt: "Thick Hemp Yarn thumbnail"
+
+  # Wool Products
+  wool:
+    himalayan_woollen_yarn:
+      hero:
+        gdrive_url: ""
+        local_file: "assets/images/products/wool/himalayan_wool_hero.jpg"
+        alt: "Himalayan Woollen Yarn"
+      thumbnail:
+        gdrive_url: ""
+        local_file: "assets/images/products/wool/himalayan_wool_thumb.jpg"
+        alt: "Himalayan Wool thumbnail"
+
+  # Collections
+  collections:
+    snow_white_series:
+      hero:
+        gdrive_url: ""
+        local_file: "assets/images/products/collections/snow_white_hero.jpg"
+        alt: "Snow White Series"
+      thumbnail:
+        gdrive_url: ""
+        local_file: "assets/images/products/collections/snow_white_thumb.jpg"
+        alt: "Snow White Series thumbnail"
+
+    seriry_series:
+      hero:
+        gdrive_url: ""
+        local_file: "assets/images/products/collections/seriry_hero.jpg"
+        alt: "Seriry Series"
+      thumbnail:
+        gdrive_url: ""
+        local_file: "assets/images/products/collections/seriry_thumb.jpg"
+        alt: "Seriry Series thumbnail"
+
+    noor_series:
+      hero:
+        gdrive_url: ""
+        local_file: "assets/images/products/collections/noor_hero.jpg"
+        alt: "Noor Series"
+      thumbnail:
+        gdrive_url: ""
+        local_file: "assets/images/products/collections/noor_thumb.jpg"
+        alt: "Noor Series thumbnail"
+
+    burberry_series:
+      hero:
+        gdrive_url: ""
+        local_file: "assets/images/products/collections/burberry_hero.jpg"
+        alt: "Burberry Series"
+      thumbnail:
+        gdrive_url: ""
+        local_file: "assets/images/products/collections/burberry_thumb.jpg"
+        alt: "Burberry Series thumbnail"
+
+campaigns:
+  tariff_advantage_banner:
+    gdrive_url: ""
+    local_file: "assets/images/campaigns/tariff_advantage_banner.jpg"
+    description: "US Tariff Advantage campaign banner"
+    dimensions: "600x300"
+    alt: "Tariff Advantage - Save on US Exports"
+
+  b2b_intro_banner:
+    gdrive_url: ""
+    local_file: "assets/images/campaigns/b2b_intro_banner.jpg"
+    description: "B2B introduction campaign banner"
+    dimensions: "600x300"
+    alt: "Partner with Himalayan Fibres"
+
+  seasonal_winter:
+    gdrive_url: ""
+    local_file: "assets/images/campaigns/seasonal_winter.jpg"
+    description: "Winter season promotional banner"
+    dimensions: "600x300"
+    alt: "Winter Collection - Himalayan Fibres"
+
+  seasonal_summer:
+    gdrive_url: ""
+    local_file: "assets/images/campaigns/seasonal_summer.jpg"
+    description: "Summer season promotional banner"
+    dimensions: "600x300"
+    alt: "Summer Collection - Himalayan Fibres"
+
+signature:
+  prashant_photo:
+    gdrive_url: ""
+    local_file: "assets/images/signature/prashant_photo.jpg"
+    description: "Prashant Agarwal headshot for email signature"
+    dimensions: "120x120"
+    alt: "Prashant Agarwal"
+
+certificates:
+  fair_trade:
+    gdrive_url: ""
+    local_file: "assets/images/certificates/fair_trade_cert.png"
+    description: "Fair Trade certification badge"
+    dimensions: "100x100"
+    alt: "Fair Trade Certified"
+
+  organic:
+    gdrive_url: ""
+    local_file: "assets/images/certificates/organic_cert.png"
+    description: "Organic processing certification"
+    dimensions: "100x100"
+    alt: "Organic Certified"
+
+# Image utility function reference
+# To convert Google Drive share link to direct URL:
+# Share link: https://drive.google.com/file/d/{FILE_ID}/view?usp=sharing
+# Direct URL: https://lh3.googleusercontent.com/d/{FILE_ID}

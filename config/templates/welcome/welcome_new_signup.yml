@@ -1,0 +1,127 @@
+# Welcome Email - New Signup
+# First email for new newsletter/website signups
+
+campaign:
+  id: "welcome_new_signup"
+  name: "Welcome Email - New Signup"
+  type: "welcome"
+  segment: "new_signups"
+  status: "active"
+  trigger: "signup"
+  created_date: "2024-01-15"
+  version: "1.0"
+
+email:
+  subject: "Welcome to Himalayan Fibres, {{contact_name}}!"
+  subject_variants:
+    - "Welcome! Your Journey with Natural Fibers Begins"
+    - "{{contact_name}}, Welcome to the Himalayan Fibres Family"
+  preview_text: "Thank you for joining us - here's what to expect"
+  from_name: "Prashant Agarwal | Himalayan Fibres"
+  reply_to: "prashant@himalayanfibres.com"
+
+layout: "hero_with_cta"
+
+content:
+  hero:
+    image_ref: "branding.welcome_banner"
+    alt: "Welcome to Himalayan Fibres"
+    fallback_color: "#232323"
+
+  greeting: "Dear {{contact_name}},"
+
+  introduction: |
+    Welcome to Himalayan Fibres! I'm Prashant, the founder, and I'm
+    thrilled you've joined our community of craft enthusiasts and
+    sustainability advocates.
+
+    Whether you're a yarn store owner, a passionate crafter, or simply
+    curious about natural fibers, you're now part of something special.
+
+  body_sections:
+    - heading: "What We Offer"
+      type: "icon_list"
+      items:
+        - icon: "yarn"
+          title: "Premium Natural Yarns"
+          description: "Nettle, hemp, and wool yarns hand-processed from wild Himalayan plants"
+        - icon: "leaf"
+          title: "Sustainable & Fair Trade"
+          description: "Every purchase supports artisan communities across 75+ villages"
+        - icon: "star"
+          title: "Unique 'Himalayan Silk'"
+          description: "Our special nettle yarn with a lustrous, silk-like finish"
+
+    - heading: "Popular Products"
+      type: "product_showcase"
+      products:
+        - ref: "nettle.special_nettle_yarn"
+          highlight: "Bestseller - 'Himalayan Silk'"
+        - ref: "hemp.white_hemp_yarn"
+          highlight: "Perfect for summer projects"
+        - ref: "collections.snow_white_series"
+          highlight: "Elegant white collection"
+
+    - heading: "What to Expect from Us"
+      type: "bullet_list"
+      content:
+        - "New product announcements and exclusive early access"
+        - "Crafting tips and project inspiration"
+        - "Behind-the-scenes stories from Himalayan villages"
+        - "Special offers for our community members"
+        - "We email 1-2 times per month (no spam, ever!)"
+
+  cta:
+    text: "Explore Our Shop"
+    url: "https://himalayanfibres.com/shop"
+    style: "primary"
+    secondary:
+      text: "Follow Us on Instagram"
+      url: "https://instagram.com/himalayanfibres"
+      style: "secondary"
+
+  closing: |
+    As a welcome gift, use code **WELCOME10** for 10% off your first order.
+
+    If you have any questions about our products or need recommendations,
+    just reply to this email - I personally read every message.
+
+    Happy crafting!
+
+  signature:
+    name: "Prashant Agarwal"
+    title: "Founder"
+    company: "Himalayan Fibres"
+    phone: "+91-9816030093"
+    include_photo: true
+    include_social: true
+
+personalization:
+  variables:
+    - name: "{{contact_name}}"
+      fallback: "there"
+      source: "contact.first_name"
+
+  conditional_content:
+    - condition: "contact.type == 'b2b'"
+      replace_section: "closing"
+      with: |
+        For wholesale inquiries and bulk pricing, please reply to this
+        email or visit our B2B portal at himalayanfibres.com/wholesale.
+
+        Looking forward to a great partnership!
+
+tracking:
+  utm_source: "email"
+  utm_medium: "welcome_series"
+  utm_campaign: "welcome_email"
+
+automation:
+  send_delay: "0"  # Send immediately on signup
+  follow_up:
+    - delay_days: 3
+      template: "welcome_product_education"
+    - delay_days: 7
+      template: "welcome_story_behind"
+    - delay_days: 14
+      template: "welcome_first_purchase_reminder"

@@ -1,0 +1,149 @@
+<div style="background-color: #f5f5f5; padding: 0; font-family: 'Amiri', serif; overflow-x: hidden; color-scheme: light dark;">
+  <div style="max-width: 800px; margin: 0 auto; background-color: #ffffff; border-radius: 0; padding: 0; color: #222;">
+    <!-- Hero Image -->
+    <img style="width: 100%; height: auto;" src="https://share1.cloudhq-mkt3.net/5379982c2c1d2d.jpeg" alt="Himalayan Fibres">
+
+    <!-- Header -->
+    <h2 style="text-align: center; font-size: 22px; font-weight: bold; color: #222; margin: 24px 20px 10px; font-family: 'Amiri', serif;">🎉 Thank You for Your Order!</h2>
+
+    <!-- Greeting -->
+    <p style="font-size: 16px; color: #444; margin: 0 24px; font-family: 'Amiri', serif;">Hello Alisha,</p>
+    <p style="font-size: 16px; color: #444; margin: 10px 24px 20px; font-family: 'Amiri', serif;">
+      We're thrilled to confirm your order with <strong>Himalayan Fibres</strong> 🌿. Your support means the world to us, and we're excited to begin preparing your items with care and love from the Himalayas.
+    </p>
+
+    <!-- ORDER SUMMARY (boxed, ends before the invoice) -->
+    <div style="margin: 0 24px 20px; border: 1px solid #e8e8e8; border-radius: 6px; padding: 16px;">
+      <h3 style="font-family: 'Amiri', serif; font-size: 18px; font-weight: bold; color: #222; margin: 0 0 10px;">Order Summary</h3>
+
+      <!-- Top details -->
+      <table role="presentation" cellspacing="0" cellpadding="0" style="width:100%; font-family:'Amiri', serif; font-size:14px; color:#555;">
+        <tr>
+          <td style="padding:4px 0; width:120px; color:#2c3e50;"><strong>Order ID:</strong></td>
+          <td style="padding:4px 0;">10014</td>
+        </tr>
+        <tr>
+          <td style="padding:4px 0; color:#2c3e50;"><strong>Date:</strong></td>
+          <td style="padding:4px 0;">30-Aug-2025</td>
+        </tr>
+        <tr>
+          <td style="padding:4px 0; vertical-align:top; color:#2c3e50;"><strong>Ship To:</strong></td>
+          <td style="padding:4px 0;">
+            Mrs. Alisha Panda<br>
+            House No.- 74, Gajapati Nagar 14th lane<br>
+            Brahmapur, Odisha 760004<br>
+            India
+          </td>
+        </tr>
+      </table>
+
+      <!-- Items (highlighted) -->
+      <div style="margin-top:10px; background:#fafafa; border:1px solid #eee; border-radius:6px; padding:10px;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="font-family:'Amiri', serif; font-size:14px; color:#555;">
+          <!-- Item 1 -->
+          <tr>
+            <td width="64" valign="top" style="padding:8px 0;">
+              <a href="{{ITEM_1_URL}}" target="_blank" rel="noopener" style="text-decoration:none;">
+                <img src="https://static.wixstatic.com/media/b6e546_ebd6f23cff234283bceeb190fe2a22a2~mv2.jpg/v1/fill/w_625,h_625,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/b6e546_ebd6f23cff234283bceeb190fe2a22a2~mv2.jpg"
+                     alt="Himalayan Woollen Yarn" width="64" height="64"
+                     style="display:block; border-radius:4px; border:1px solid #eee; object-fit:cover;">
+              </a>
+            </td>
+            <td valign="top" style="padding:8px 0 8px 12px;">
+              <!-- Bigger item name -->
+              <div style="color:#2c3e50; font-weight:700; font-size:15px; line-height:1.3;">
+                <a href="{{ITEM_1_URL}}" target="_blank" rel="noopener" style="color:#2c3e50; text-decoration:none;">Himalayan Woollen Yarn</a>
+              </div>
+              <!-- Smaller, italic SKU -->
+              <div style="color:#777; font-size:12px; font-style:italic; margin-top:2px;">SKU: YAR/TIB/01</div>
+              <!-- Qty on its own line, bold number -->
+              <div style="color:#2c3e50; font-size:13px; margin-top:2px;">Qty: <strong>500</strong> gms</div>
+            </td>
+            <!-- Centered price -->
+            <td width="90" valign="middle" align="center" style="padding:8px 0; color:#2c3e50; text-align:center; white-space:nowrap;">
+              Rs 750
+            </td>
+          </tr>
+          <!-- Duplicate this <tr> for more items -->
+        </table>
+      </div>
+
+      <!-- Charges / totals -->
+      <table role="presentation" cellspacing="0" cellpadding="0" style="width:100%; font-family:'Amiri', serif; font-size:14px; color:#2c3e50; margin-top:10px;">
+        <tr>
+          <td style="padding:6px 0; color:#555;">Subtotal</td>
+          <td style="padding:6px 0;" align="right">Rs 750</td>
+        </tr>
+        <tr>
+          <td style="padding:6px 0; color:#555;">Courier Charges</td>
+          <td style="padding:6px 0;" align="right">Rs 200</td>
+        </tr>
+        <tr>
+          <td colspan="2" style="border-top:1px solid #e8e8e8; height:1px; line-height:1px;"></td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0; font-weight:bold;">Total</td>
+          <td style="padding:8px 0; font-weight:bold;" align="right">Rs 950</td>
+        </tr>
+        <tr>
+          <td style="padding:2px 0; color:#555;">Payment</td>
+          <td style="padding:2px 0;" align="right">UPI</td>
+        </tr>
+      </table>
+    </div>
+    <!-- /ORDER SUMMARY -->
+
+    <!-- CTA: Download Invoice -->
+    <div style="text-align: center; margin: 20px 0 10px;">
+      <a href="https://drive.google.com/file/1KHcqv9sQrvmmB2R_epiGG53rreC_0YSJ/view?usp=sharing" target="_blank" title="Download your invoice (PDF)" aria-label="Download your invoice (PDF)" style="background-color: #232323; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-size: 16px; display: inline-block; font-family: 'Amiri', serif;" rel="noopener">🧾 Download Invoice (PDF)</a>
+    </div>
+
+    <!-- Quick WhatsApp chat button (small, directly under invoice) -->
+    <div style="text-align: center; margin: 6px 0 20px;">
+      <a href="https://wa.me/918582952074?text=Hi%20Himalayan%20Fibres%20%E2%80%94%20I%20have%20a%20question%20about%20Order%20%2310014."
+         target="_blank" rel="noopener"
+         style="display:inline-flex; align-items:center; gap:8px; background-color:#25d366; color:#fff; text-decoration:none; padding:8px 12px; border-radius:5px; font-size:14px; font-family:'Amiri', serif;">
+        Get help on WhatsApp
+      </a>
+    </div>
+
+    <!-- Product Overview Section (unchanged) -->
+    <div style="margin: 30px 24px;">
+      <h3 style="font-family: 'Amiri', serif; font-size: 20px; font-weight: bold; color: #222; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.5px;">🧶 What We Offer</h3>
+      <div style="margin-bottom: 20px;">
+        <h4 style="font-size: 16px; font-weight: 600; color: #2c3e50; margin-bottom: 6px; font-family: 'Amiri', serif;">🌿 Himalayan Stinging Nettle</h4>
+        <p style="font-size: 14px; color: #555; margin: 0; font-family: 'Amiri', serif;">A wild Himalayan plant (1200–2000m) naturally grown without pesticides or fertilizers. Sustainably harvested and spun into 100% or blended yarns — popular across Europe and the US.</p>
+      </div>
+      <div style="margin-bottom: 20px;">
+        <h4 style="font-size: 16px; font-weight: 600; color: #2c3e50; margin-bottom: 6px; font-family: 'Amiri', serif;">🌱 Himalayan Hemp</h4>
+        <p style="font-size: 14px; color: #555; margin: 0; font-family: 'Amiri', serif;">Sourced from wild Cannabis Sativa in the Himalayas. Durable, breathable, and eco-friendly — ideal for sustainable textile collections.</p>
+      </div>
+      <div style="margin-bottom: 20px;">
+        <h4 style="font-size: 16px; font-weight: 600; color: #2c3e50; margin-bottom: 6px; font-family: 'Amiri', serif;">🐑 Tibetan Wool</h4>
+        <p style="font-size: 14px; color: #555; margin: 0; font-family: 'Amiri', serif;">Authentic wool from high-altitude regions. Soft, strong, and perfect for warm, luxurious blends.</p>
+      </div>
+      <p style="font-size: 14px; color: #333; font-weight: 500; margin-top: 20px; font-family: 'Amiri', serif;">
+        We offer <strong>fibres, yarns, and custom blends</strong> — crafted for conscious brands and export-ready markets.
+      </p>
+    </div>
+
+    <!-- Soft divider before footer to avoid merging -->
+    <hr style="border:none; border-top:1px solid #eaeaea; margin: 10px 24px 0 24px;">
+
+    <!-- Footer -->
+    <div style="background-color: #f5f5f5; padding: 10px 24px; font-size: 12px; color: #232323; text-align: center; font-family: 'Amiri', serif;">
+      <p><em>📍 Address:</em> <em>S.K. Complex, Khurje Wala Mohalla, Daulat Ganj, Lashkar, Gwalior 474001</em></p>
+      <p><em>📧 info@himalayanfibres.com | 📞 +91 85829532074</em></p>
+      <p style="margin: 0;">
+        <a href="https://www.himalayanfibres.com/privacy-policy" style="color: #232323; margin: 0 5px;">Privacy Policy</a> |
+        <a href="https://www.himalayanfibres.com/terms-conditions" style="color: #232323; margin: 0 5px;">Terms &amp; Conditions</a> |
+        <a href="https://www.himalayanfibres.com/refund-cancellation" style="color: #232323; margin: 0 5px;">Refund &amp; Cancellation</a>
+      </p>
+      <p style="font-size: 12px; font-style: italic; margin-top: 10px;">To unsubscribe, please
+        <a href="mailto:info@himalayanfibres.com?subject=Unsubscribe" style="color: #555;">email us</a> with subject line
+        <strong>"Unsubscribe"</strong>.
+      </p>
+      <p style="margin-top: 10px;">© 2025 Himalayan Fibres. All rights reserved.</p>
+    </div>
+  </div>
+</div>

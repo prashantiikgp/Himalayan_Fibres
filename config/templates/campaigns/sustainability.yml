@@ -1,0 +1,119 @@
+# Sustainability Campaign
+# Highlighting eco-friendly and ethical aspects
+
+campaign:
+  id: "sustainability"
+  name: "Sustainability Story Campaign"
+  type: "nurture"
+  segment: "eco_conscious_buyers"
+  status: "active"
+  created_date: "2024-01-20"
+  version: "1.0"
+
+email:
+  subject: "The Story Behind Your Sustainable Yarn"
+  subject_variants:
+    - "From Himalayan Villages to Your Hands - Our Sustainability Story"
+    - "Meet the Artisans Behind Himalayan Fibres"
+    - "How Your Purchase Supports 75+ Himalayan Villages"
+  preview_text: "Discover how we're creating positive impact while crafting premium natural fibers"
+  from_name: "Himalayan Fibres"
+  reply_to: "info@himalayanfibres.com"
+
+layout: "newsletter"
+
+content:
+  hero:
+    image_ref: "branding.sustainability_banner"
+    alt: "Himalayan Village Artisans"
+    fallback_color: "#5D4037"
+
+  greeting: "Hello {{contact_name}},"
+
+  introduction: |
+    At Himalayan Fibres, sustainability isn't just a buzzword -
+    it's the foundation of everything we do. Today, we want to
+    share the story behind our fibers and the positive impact
+    your purchase creates.
+
+  body_sections:
+    - heading: "Our Sustainability Pillars"
+      type: "icon_grid"
+      items:
+        - icon: "leaf"
+          title: "Wild & Natural"
+          content: "Our nettle and hemp plants grow wild in the Himalayas - no pesticides, no artificial fertilizers, just pure mountain nature."
+        - icon: "hands"
+          title: "Fair Trade"
+          content: "Every artisan receives fair wages. We work directly with village communities, ensuring 100% of the value stays local."
+        - icon: "recycle"
+          title: "Zero Waste"
+          content: "From fiber extraction to packaging, we minimize waste. Even plant remnants return to the soil as natural compost."
+        - icon: "heart"
+          title: "Women Empowerment"
+          content: "Over 80% of our artisan partners are women, earning independent incomes while preserving traditional crafts."
+
+    - heading: "Impact by Numbers"
+      type: "stats_block"
+      stats:
+        - number: "75+"
+          label: "Villages supported"
+        - number: "500+"
+          label: "Artisan partners"
+        - number: "80%"
+          label: "Women artisans"
+        - number: "0"
+          label: "Chemical pesticides used"
+
+    - heading: "The Journey of Your Fiber"
+      type: "timeline"
+      steps:
+        - title: "Wild Harvest"
+          description: "Nettle and hemp plants are hand-harvested from pristine Himalayan slopes"
+        - title: "Village Processing"
+          description: "Local artisans extract fibers using traditional, chemical-free methods"
+        - title: "Hand Spinning"
+          description: "Skilled women spin raw fiber into beautiful yarn by hand"
+        - title: "Quality Check"
+          description: "Each batch is inspected for consistency and quality"
+        - title: "To You"
+          description: "Your yarn arrives, carrying stories of Himalayan craftsmanship"
+
+    - heading: "Certifications & Commitments"
+      type: "bullet_list"
+      content:
+        - "Fair Trade certified production"
+        - "Organic processing methods"
+        - "Carbon-neutral shipping options available"
+        - "Biodegradable packaging"
+        - "Transparent supply chain documentation"
+
+  cta:
+    text: "Shop Sustainable Yarns"
+    url: "https://himalayanfibres.com/shop"
+    style: "primary"
+    secondary:
+      text: "Read Our Impact Report"
+      url: "https://himalayanfibres.com/impact"
+      style: "text"
+
+  closing: |
+    When you choose Himalayan Fibres, you're not just buying yarn -
+    you're supporting sustainable livelihoods and traditional crafts.
+
+    Thank you for being part of our journey.
+
+  signature:
+    name: "The Himalayan Fibres Team"
+    include_photo: false
+
+personalization:
+  variables:
+    - name: "{{contact_name}}"
+      fallback: "friend"
+      source: "contact.first_name"
+
+tracking:
+  utm_source: "email"
+  utm_medium: "campaign"
+  utm_campaign: "sustainability_story"

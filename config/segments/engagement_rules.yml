@@ -1,0 +1,203 @@
+# Engagement Rules Configuration
+# Define when to send what to whom
+
+engagement_rules:
+  # Welcome Series
+  welcome_series:
+    trigger: "signup"
+    enabled: true
+    emails:
+      - template: "welcome_new_signup"
+        delay_hours: 0
+        conditions: []
+
+      - template: "welcome_product_education"
+        delay_hours: 72
+        conditions:
+          - type: "did_not_purchase"
+
+      - template: "welcome_story_behind"
+        delay_hours: 168  # 7 days
+        conditions:
+          - type: "did_not_purchase"
+          - type: "opened_previous_email"
+
+      - template: "welcome_first_purchase_reminder"
+        delay_hours: 336  # 14 days
+        conditions:
+          - type: "did_not_purchase"
+
+  # Post-Purchase Series
+  post_purchase:
+    trigger: "purchase"
+    enabled: true
+    emails:
+      - template: "order_confirmation"
+        delay_hours: 0
+        conditions: []
+
+      - template: "shipping_update"
+        delay_hours: 24
+        conditions:
+          - type: "order_shipped"
+
+      - template: "product_care_tips"
+        delay_hours: 168  # 7 days after purchase
+        conditions: []
+
+      - template: "review_request"
+        delay_hours: 336  # 14 days after purchase
+        conditions:
+          - type: "order_delivered"
+
+      - template: "replenishment_reminder"
+        delay_hours: 2160  # 90 days
+        conditions:
+          - type: "no_recent_purchase"
+            days: 90
+
+  # Re-engagement Series
+  re_engagement:
+    trigger: "inactive_90_days"
+    enabled: true
+    emails:
+      - template: "we_miss_you"
+        delay_hours: 0
+        conditions: []
+
+      - template: "special_comeback_offer"
+        delay_hours: 168  # 7 days
+        conditions:
+          - type: "did_not_open_previous"
+
+      - template: "last_chance_before_removal"
+        delay_hours: 336  # 14 days
+        conditions:
+          - type: "did_not_engage"
+
+  # B2B Follow-up Series
+  b2b_nurture:
+    trigger: "b2b_initial_contact"
+    enabled: true
+    segment: "potential_b2b"
+    emails:
+      - template: "b2b_carpet_exporters"
+        delay_hours: 0
+        conditions: []
+
+      - template: "b2b_followup_1"
+        delay_hours: 120  # 5 days
+        conditions:
+          - type: "no_reply"
+          - type: "did_not_click"
+
+      - template: "b2b_case_study"
+        delay_hours: 240  # 10 days
+        conditions:
+          - type: "opened_previous_email"
+          - type: "no_reply"
+
+      - template: "b2b_final_followup"
+        delay_hours: 360  # 15 days
+        conditions:
+          - type: "no_reply"
+
+# Timing Rules
+send_timing:
+  # Best times to send by segment
+  by_segment:
+    b2b:
+      best_days: ["tuesday", "wednesday", "thursday"]
+      best_hours: [10, 11, 14, 15]  # 10-11 AM, 2-3 PM
+      timezone: "Asia/Kolkata"
+
+    b2c:
+      best_days: ["saturday", "sunday", "wednesday"]
+      best_hours: [10, 11, 19, 20]  # 10-11 AM, 7-8 PM
+      timezone: "Asia/Kolkata"
+
+    international:
+      best_days: ["tuesday", "wednesday"]
+      best_hours: [9, 10, 14, 15]  # Based on recipient timezone
+      use_recipient_timezone: true
+
+  # Avoid sending during
+  blackout_periods:
+    - name: "Late Night"
+      hours: [22, 23, 0, 1, 2, 3, 4, 5, 6]
+
+    - name: "Major Holidays"
+      dates:
+        - "2024-01-26"  # Republic Day
+        - "2024-08-15"  # Independence Day
+        - "2024-10-02"  # Gandhi Jayanti
+
+# Frequency Caps
+frequency_caps:
+  # Maximum emails per contact
+  per_contact:
+    daily: 1
+    weekly: 3
+    monthly: 8
+
+  # By email type
+  by_type:
+    promotional:
+      weekly: 2
+      monthly: 6
+    transactional:
+      no_limit: true
+    newsletter:
+      monthly: 2
+
+  # Override for segments
+  segment_overrides:
+    engaged_subscribers:
+      weekly: 4
+      monthly: 12
+    new_signups:
+      first_week: 3  # Welcome series
+
+# Conditional Content Rules
+conditional_content:
+  # Show tariff info only for US-related contacts
+  tariff_section:
+    show_if:
+      - field: "country"
+        operator: "in"
+        values: ["USA", "United States", "US"]
+      - field: "target_market"
+        operator: "contains"
+        value: "US"
+
+  # Show B2B pricing for business accounts
+  wholesale_pricing:
+    show_if:
+      - field: "contact_type"
+        operator: "equals"
+        value: "b2b"
+
+  # Show eco-certifications for sustainability-focused contacts
+  eco_certifications:
+    show_if:
+      - field: "interests"
+        operator: "contains"
+        value: "sustainability"
+
+# A/B Testing Rules
+ab_testing:
+  # Minimum audience size for A/B tests
+  min_audience_size: 200
+
+  # Test duration before declaring winner
+  test_duration_hours: 24
+
+  # Metrics to determine winner
+  primary_metric: "open_rate"
+  secondary_metric: "click_rate"
+
+  # Auto-send winner after test
+  auto_send_winner: true
+
+  # Statistical significance threshold
+  confidence_level: 0.95

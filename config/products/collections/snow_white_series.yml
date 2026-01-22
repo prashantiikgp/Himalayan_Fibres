@@ -1,0 +1,107 @@
+# Snow White Series
+# Premium white yarn collection
+
+product:
+  id: "snow_white_series"
+  name: "Snow White Series"
+  nickname: null
+  category: "collections"
+  subcategory: "series"
+  sku: "COL-SNW-001"
+  active: true
+  featured: true
+
+pricing:
+  inr: 375
+  usd: 4.50
+  currency_symbol: "₹"
+  unit: "per 100gm skein"
+  wholesale_discount: 12
+
+specifications:
+  length: "200m/100gms"
+  composition: "Himalayan Nettle & Wool Blend"
+  weight_type: "DK/Light Worsted"
+  needle_size: "3.5-4.5mm"
+  gauge: "22 stitches = 10cm"
+  care:
+    - "Hand wash in cool water"
+    - "Lay flat to dry"
+    - "Do not bleach"
+
+colors:
+  - name: "Pure Snow"
+    hex: "#FFFAFA"
+    available: true
+  - name: "Winter White"
+    hex: "#F5F5F5"
+    available: true
+  - name: "Ivory"
+    hex: "#FFFFF0"
+    available: true
+
+description:
+  short: "Pristine white yarn collection inspired by Himalayan snow peaks"
+  long: |
+    The Snow White Series captures the pristine beauty of Himalayan snow peaks.
+    This carefully curated collection features our finest white and off-white
+    yarns, perfect for elegant projects that demand a clean, sophisticated look.
+
+    The blend of nettle and wool creates a yarn that combines the silky sheen
+    of nettle with the warmth and softness of wool. Ideal for wedding shawls,
+    baby items, and luxury garments.
+  tagline: "Pure as Himalayan Snow"
+
+collection_theme:
+  inspiration: "Himalayan snow peaks and winter landscapes"
+  mood: "Pure, elegant, serene"
+  season: "All year (especially winter)"
+  occasions:
+    - "Weddings"
+    - "Baby showers"
+    - "Winter celebrations"
+
+features:
+  - "Exclusive white color palette"
+  - "Premium fiber blend"
+  - "Elegant silk-like sheen"
+  - "Soft and luxurious hand feel"
+  - "Perfect for special occasions"
+
+images:
+  hero:
+    gdrive_url: ""
+    local_file: "assets/images/products/collections/snow_white_hero.jpg"
+    alt: "Snow White Series - Himalayan Fibres"
+  gallery:
+    - gdrive_url: ""
+      local_file: "assets/images/products/collections/snow_white_texture.jpg"
+      alt: "Snow White yarn texture"
+    - gdrive_url: ""
+      local_file: "assets/images/products/collections/snow_white_project.jpg"
+      alt: "Sample project"
+  thumbnail:
+    gdrive_url: ""
+    local_file: "assets/images/products/collections/snow_white_thumb.jpg"
+    alt: "Snow White Series thumbnail"
+
+website_url: "https://www.himalayanfibres.com/product-page/snow-white-series"
+
+inventory:
+  track_stock: true
+  min_order_qty: 1
+  bulk_order_qty: 25
+  lead_time_days: 10
+
+related_products:
+  - "seriry_series"
+  - "noor_series"
+  - "special_nettle_yarn"
+
+tags:
+  - "collection"
+  - "white"
+  - "premium"
+  - "wedding"
+  - "baby"
+  - "luxury"

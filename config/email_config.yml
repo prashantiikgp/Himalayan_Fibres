@@ -1,0 +1,88 @@
+# =============================================================================
+# EMAIL MARKETING CONFIGURATION
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# SENDER INFORMATION
+# -----------------------------------------------------------------------------
+sender:
+  name: "Himalayan Fibres"
+  email: "info@himalayanfibres.com"
+  reply_to: "info@himalayanfibres.com"
+
+# -----------------------------------------------------------------------------
+# COMPANY INFORMATION (for email footers)
+# -----------------------------------------------------------------------------
+company:
+  name: "Himalayan Fibres"
+  legal_name: "ERB Textile Private Limited"
+  address: "S.K. Complex, Khurje Wala Mohalla, Daulat Ganj, Lashkar"
+  city: "Gwalior"
+  state: "Madhya Pradesh"
+  pincode: "474001"
+  country: "India"
+  phone: "+91 858-295-2074"
+  website: "https://www.himalayanfibres.com"
+
+# -----------------------------------------------------------------------------
+# SOCIAL MEDIA LINKS
+# -----------------------------------------------------------------------------
+social:
+  whatsapp: "https://wa.me/918582952074?text=Hi%20Himalayan%20Fibres%20-%20I%27d%20like%20to%20chat%20about%20products%20or%20place%20an%20order."
+  instagram: "https://www.instagram.com/himalayan_fibres/"
+  facebook: "https://www.facebook.com/Himalayanfibres"
+  linkedin: ""
+  twitter: ""
+
+# -----------------------------------------------------------------------------
+# EMAIL SIGNATURE
+# -----------------------------------------------------------------------------
+signature:
+  name: "Prashant Agarwal"
+  title: "Manager"
+  company: "ERB Textile Private Limited"
+
+# -----------------------------------------------------------------------------
+# WEBSITE LINKS (for CTAs)
+# -----------------------------------------------------------------------------
+links:
+  main_website: "https://himalayanfibres.com"
+  products_page: "https://himalayanfibres.com/products"
+  contact_page: "https://himalayanfibres.com/contact"
+  privacy_policy: "https://www.himalayanfibres.com/privacy-policy"
+  terms_conditions: "https://www.himalayanfibres.com/terms-conditions"
+  refund_policy: "https://www.himalayanfibres.com/refund-cancellation"
+
+# -----------------------------------------------------------------------------
+# EMAIL SENDING LIMITS (Gmail/Google Workspace)
+# -----------------------------------------------------------------------------
+limits:
+  daily_limit: 500  # Google Workspace limit, increase if you have higher plan
+  batch_size: 50    # Emails per batch
+  delay_between_emails: 2  # Seconds between individual emails
+  delay_between_batches: 60  # Seconds between batches
+
+# -----------------------------------------------------------------------------
+# CUSTOMER SEGMENTS
+# -----------------------------------------------------------------------------
+segments:
+  - name: "potential_b2b"
+    description: "Potential B2B customers - carpet exporters, textile companies"
+
+  - name: "existing_clients"
+    description: "Existing customers who have purchased before"
+
+  - name: "yarn_stores"
+    description: "Yarn stores and retail outlets"
+
+# -----------------------------------------------------------------------------
+# DEFAULT EMAIL STYLING (keep simple for deliverability)
+# -----------------------------------------------------------------------------
+styling:
+  # Keep these simple - complex CSS can trigger spam filters
+  max_images: 5  # Recommended max images per email
+  font_family: "Georgia, serif"
+  primary_color: "#232323"
+  accent_color: "#c38513"
+  background_color: "#f2f2f2"
+  text_color: "#222222"

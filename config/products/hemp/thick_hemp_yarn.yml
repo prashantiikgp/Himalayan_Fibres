@@ -1,0 +1,116 @@
+# Himalayan Hemp Yarn [Thick]
+# Heavy weight hemp yarn for rugs and home textiles
+
+product:
+  id: "thick_hemp_yarn"
+  name: "Himalayan Hemp Yarn [Thick]"
+  nickname: null
+  category: "hemp"
+  subcategory: "yarn"
+  sku: "HMP-YRN-THK-001"
+  active: true
+
+pricing:
+  inr: 275
+  usd: 3.30
+  currency_symbol: "₹"
+  unit: "per 100gm skein"
+  wholesale_discount: 18
+
+specifications:
+  length: "80m/100gms"
+  composition: "100% Himalayan Hemp"
+  weight_type: "Bulky/Chunky"
+  needle_size: "6-8mm"
+  gauge: "12 stitches = 10cm"
+  care:
+    - "Machine wash cold"
+    - "Air dry recommended"
+    - "Can be tumble dried on low"
+
+colors:
+  - name: "Natural Brown"
+    hex: "#A0522D"
+    available: true
+  - name: "Raw Hemp"
+    hex: "#C4A86D"
+    available: true
+  - name: "Dark Earth"
+    hex: "#5D4037"
+    available: true
+
+description:
+  short: "Thick, sturdy hemp yarn ideal for rugs, baskets, and home decor"
+  long: |
+    Our Thick Himalayan Hemp Yarn is perfect for projects that require durability
+    and substance. The chunky weight makes it ideal for rugs, baskets, placemats,
+    bags, and other home decor items that need to withstand daily use.
+
+    This yarn showcases the natural rustic beauty of hemp fiber, with slight
+    variations in thickness that add character to finished projects. The sturdy
+    construction ensures your creations will last for years.
+  tagline: "Built to Last, Made to Impress"
+
+features:
+  - "Extra thick for durability"
+  - "Perfect for home decor"
+  - "Natural variations add character"
+  - "Extremely strong"
+  - "Eco-friendly alternative to jute"
+  - "Suitable for crochet and macrame"
+
+benefits:
+  for_crafters:
+    - "Quick projects due to thick weight"
+    - "Great for beginners"
+    - "Sturdy for bags and baskets"
+    - "Works well for macrame"
+  for_business:
+    - "Home decor market appeal"
+    - "Value pricing point"
+    - "Sustainable material story"
+
+applications:
+  - "Rugs and floor mats"
+  - "Baskets and storage"
+  - "Placemats and coasters"
+  - "Market bags"
+  - "Macrame projects"
+  - "Garden ties"
+
+images:
+  hero:
+    gdrive_url: ""
+    local_file: "assets/images/products/hemp/thick_hemp_yarn_hero.jpg"
+    alt: "Himalayan Hemp Yarn Thick"
+  gallery:
+    - gdrive_url: ""
+      local_file: "assets/images/products/hemp/thick_hemp_yarn_texture.jpg"
+      alt: "Thick hemp yarn texture"
+    - gdrive_url: ""
+      local_file: "assets/images/products/hemp/thick_hemp_yarn_basket.jpg"
+      alt: "Hemp basket project"
+  thumbnail:
+    gdrive_url: ""
+    local_file: "assets/images/products/hemp/thick_hemp_yarn_thumb.jpg"
+    alt: "Thick Hemp Yarn thumbnail"
+
+website_url: "https://www.himalayanfibres.com/product-page/himalayan-hemp-yarn-thick"
+
+inventory:
+  track_stock: true
+  min_order_qty: 1
+  bulk_order_qty: 100
+  lead_time_days: 7
+
+related_products:
+  - "white_hemp_yarn"
+  - "himalayan_woollen_yarn"
+
+tags:
+  - "hemp"
+  - "thick"
+  - "bulky"
+  - "home decor"
+  - "rugs"
+  - "sustainable"

@@ -1,0 +1,105 @@
+# White Himalayan Hemp Yarn
+# Premium white hemp yarn
+
+product:
+  id: "white_hemp_yarn"
+  name: "White Himalayan Hemp Yarn"
+  nickname: null
+  category: "hemp"
+  subcategory: "yarn"
+  sku: "HMP-YRN-WHT-001"
+  active: true
+
+pricing:
+  inr: 350
+  usd: 4.20
+  currency_symbol: "₹"
+  unit: "per 100gm skein"
+  wholesale_discount: 15
+
+specifications:
+  length: "200m/100gms"
+  composition: "100% Himalayan Hemp"
+  weight_type: "DK/Light Worsted"
+  needle_size: "3.5-4.5mm"
+  gauge: "22 stitches = 10cm"
+  care:
+    - "Machine wash cold, gentle cycle"
+    - "Tumble dry low"
+    - "Iron on medium heat"
+    - "Improves with washing"
+
+colors:
+  - name: "Natural White"
+    hex: "#F5F5DC"
+    available: true
+  - name: "Cream"
+    hex: "#FFFDD0"
+    available: true
+
+description:
+  short: "Soft, white hemp yarn perfect for summer garments and home textiles"
+  long: |
+    Our White Himalayan Hemp Yarn is carefully processed to achieve a soft,
+    creamy white color while retaining all the natural benefits of hemp fiber.
+    This yarn is perfect for summer garments, baby items, and home textiles
+    where a lighter color is desired.
+
+    Hemp naturally becomes softer with each wash while maintaining its strength
+    and durability. It's also naturally resistant to mold, mildew, and UV light.
+  tagline: "Pure Hemp, Perfect White"
+
+features:
+  - "Naturally soft white color"
+  - "Gets softer with washing"
+  - "UV resistant"
+  - "Naturally antimicrobial"
+  - "Breathable for summer wear"
+  - "Durable and long-lasting"
+
+benefits:
+  for_crafters:
+    - "Perfect for summer projects"
+    - "Great for baby items"
+    - "Easy to dye if desired"
+    - "Machine washable"
+  for_business:
+    - "Versatile color for many applications"
+    - "Growing hemp market demand"
+    - "Sustainable story for marketing"
+
+images:
+  hero:
+    gdrive_url: ""
+    local_file: "assets/images/products/hemp/white_hemp_yarn_hero.jpg"
+    alt: "White Himalayan Hemp Yarn"
+  gallery:
+    - gdrive_url: ""
+      local_file: "assets/images/products/hemp/white_hemp_yarn_texture.jpg"
+      alt: "White hemp yarn texture"
+    - gdrive_url: ""
+      local_file: "assets/images/products/hemp/white_hemp_yarn_swatch.jpg"
+      alt: "Knitted sample"
+  thumbnail:
+    gdrive_url: ""
+    local_file: "assets/images/products/hemp/white_hemp_yarn_thumb.jpg"
+    alt: "White Hemp Yarn thumbnail"
+
+website_url: "https://www.himalayanfibres.com/product-page/white-himalayan-hemp-yarn"
+
+inventory:
+  track_stock: true
+  min_order_qty: 1
+  bulk_order_qty: 50
+  lead_time_days: 7
+
+related_products:
+  - "thick_hemp_yarn"
+  - "natural_nettle_yarn"
+
+tags:
+  - "hemp"
+  - "white"
+  - "summer"
+  - "sustainable"
+  - "soft"

@@ -1,0 +1,115 @@
+# Burberry Series
+# Classic plaid-inspired yarn collection
+
+product:
+  id: "burberry_series"
+  name: "Burberry Series"
+  nickname: null
+  category: "collections"
+  subcategory: "series"
+  sku: "COL-BUR-001"
+  active: true
+
+pricing:
+  inr: 375
+  usd: 4.50
+  currency_symbol: "₹"
+  unit: "per 100gm skein"
+  wholesale_discount: 12
+
+specifications:
+  length: "200m/100gms"
+  composition: "Himalayan Wool & Nettle Blend"
+  weight_type: "DK/Light Worsted"
+  needle_size: "3.5-4.5mm"
+  gauge: "22 stitches = 10cm"
+  care:
+    - "Hand wash in cool water"
+    - "Lay flat to dry"
+    - "Steam iron if needed"
+
+colors:
+  - name: "Classic Camel"
+    hex: "#C19A6B"
+    available: true
+  - name: "Heritage Red"
+    hex: "#B22222"
+    available: true
+  - name: "Traditional Black"
+    hex: "#1C1C1C"
+    available: true
+  - name: "British Tan"
+    hex: "#964B00"
+    available: true
+
+description:
+  short: "Classic, timeless colors inspired by heritage patterns"
+  long: |
+    The Burberry Series features a sophisticated palette of classic colors
+    that work beautifully together for plaid and pattern work, or stunning
+    on their own. Inspired by timeless heritage aesthetics, this collection
+    is perfect for creating elegant, sophisticated pieces.
+
+    The wool-nettle blend provides warmth and structure, making it ideal
+    for tailored garments, structured accessories, and projects where a
+    classic, refined look is desired.
+  tagline: "Timeless Elegance, Mountain Heritage"
+
+collection_theme:
+  inspiration: "Classic heritage patterns and timeless style"
+  mood: "Sophisticated, elegant, classic"
+  season: "Autumn/Winter"
+  occasions:
+    - "Professional wear"
+    - "Classic accessories"
+    - "Gift-worthy projects"
+
+features:
+  - "Classic coordinating colors"
+  - "Perfect for colorwork and plaid"
+  - "Sophisticated palette"
+  - "Wool-nettle blend for structure"
+  - "Timeless appeal"
+
+project_ideas:
+  - "Plaid scarves and shawls"
+  - "Classic cardigans"
+  - "Heritage-style accessories"
+  - "Coordinated sets"
+
+images:
+  hero:
+    gdrive_url: ""
+    local_file: "assets/images/products/collections/burberry_hero.jpg"
+    alt: "Burberry Series - Himalayan Fibres"
+  gallery:
+    - gdrive_url: ""
+      local_file: "assets/images/products/collections/burberry_colors.jpg"
+      alt: "Burberry color palette"
+    - gdrive_url: ""
+      local_file: "assets/images/products/collections/burberry_project.jpg"
+      alt: "Sample plaid project"
+  thumbnail:
+    gdrive_url: ""
+    local_file: "assets/images/products/collections/burberry_thumb.jpg"
+    alt: "Burberry Series thumbnail"
+
+website_url: "https://www.himalayanfibres.com/product-page/burberry-series"
+
+inventory:
+  track_stock: true
+  min_order_qty: 1
+  bulk_order_qty: 25
+  lead_time_days: 10
+
+related_products:
+  - "seriry_series"
+  - "himalayan_woollen_yarn"
+  - "snow_white_series"
+
+tags:
+  - "collection"
+  - "classic"
+  - "heritage"
+  - "plaid"
+  - "sophisticated"

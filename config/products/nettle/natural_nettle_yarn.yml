@@ -1,0 +1,103 @@
+# Natural Stinging Nettle Yarn
+# Basic nettle yarn product
+
+product:
+  id: "natural_nettle_yarn"
+  name: "Natural Stinging Nettle Yarn"
+  nickname: null
+  category: "nettle"
+  subcategory: "yarn"
+  sku: "NET-YRN-NAT-001"
+  active: true
+
+pricing:
+  inr: 350
+  usd: 4.20
+  currency_symbol: "₹"
+  unit: "per 100gm skein"
+  wholesale_discount: 15  # percentage for bulk orders
+
+specifications:
+  length: "200m/100gms"
+  composition: "100% Himalayan Nettle Plant"
+  weight_type: "DK/Light Worsted"
+  needle_size: "3.5-4.5mm"
+  gauge: "22 stitches = 10cm"
+  care:
+    - "Hand wash in cool water"
+    - "Lay flat to dry"
+    - "Do not bleach"
+
+colors:
+  - name: "Natural Brown"
+    hex: "#8B7355"
+    available: true
+  - name: "Earthy Tan"
+    hex: "#D2B48C"
+    available: true
+  - name: "Forest Green"
+    hex: "#228B22"
+    available: false  # dyed variant
+
+description:
+  short: "Traditional nettle yarn with natural texture and earthy tones"
+  long: |
+    Our Natural Stinging Nettle Yarn is hand-processed from wild nettle plants
+    harvested in remote Himalayan villages. The fiber retains its natural color
+    and texture, making each skein unique. Perfect for sustainable fashion
+    projects and eco-conscious crafters.
+  tagline: "Pure Himalayan Nature in Every Strand"
+
+features:
+  - "100% natural plant fiber"
+  - "Wild-harvested from Himalayan nettle"
+  - "Hand-processed by local artisans"
+  - "Naturally antibacterial"
+  - "Gets softer with each wash"
+  - "Biodegradable and eco-friendly"
+
+benefits:
+  for_crafters:
+    - "Unique texture for distinctive projects"
+    - "Blends well with other natural fibers"
+    - "Suitable for knitting and weaving"
+  for_business:
+    - "Sustainable sourcing story"
+    - "Appeals to eco-conscious consumers"
+    - "Growing market demand"
+
+images:
+  hero:
+    gdrive_url: ""
+    local_file: "assets/images/products/nettle/natural_nettle_yarn_hero.jpg"
+    alt: "Natural Stinging Nettle Yarn - Himalayan Fibres"
+  gallery:
+    - gdrive_url: ""
+      local_file: "assets/images/products/nettle/natural_nettle_yarn_texture.jpg"
+      alt: "Yarn texture closeup"
+    - gdrive_url: ""
+      local_file: "assets/images/products/nettle/natural_nettle_yarn_colors.jpg"
+      alt: "Available color variations"
+  thumbnail:
+    gdrive_url: ""
+    local_file: "assets/images/products/nettle/natural_nettle_yarn_thumb.jpg"
+    alt: "Natural Nettle Yarn thumbnail"
+
+website_url: "https://www.himalayanfibres.com/product-page/natural-stinging-nettle-yarn"
+
+inventory:
+  track_stock: true
+  min_order_qty: 1
+  bulk_order_qty: 50
+  lead_time_days: 7
+
+related_products:
+  - "special_nettle_yarn"
+  - "nettle_plant_fibre"
+
+tags:
+  - "nettle"
+  - "natural"
+  - "sustainable"
+  - "plant-based"
+  - "handmade"

@@ -1,0 +1,59 @@
+# Company Information
+# Legal details, addresses, and contact information
+
+company:
+  legal_name: "Himalayan Fibres"
+  trade_name: "Himalayan Fibres"
+  registration_number: ""
+  gst_number: ""
+
+addresses:
+  headquarters:
+    line1: "Village Gunna, P.O. Kufri"
+    line2: "Tehsil Theog, District Shimla"
+    city: "Shimla"
+    state: "Himachal Pradesh"
+    country: "India"
+    postal_code: "171012"
+    formatted: "Village Gunna, P.O. Kufri, Tehsil Theog, District Shimla, Himachal Pradesh 171012, India"
+
+  # Add warehouse/office addresses as needed
+  warehouse: null
+
+contacts:
+  primary:
+    name: "Prashant Agarwal"
+    title: "Founder"
+    email: "info@himalayanfibres.com"
+    phone: "+91-9816030093"
+    whatsapp: "+919816030093"
+
+  sales:
+    email: "sales@himalayanfibres.com"
+    phone: "+91-9816030093"
+
+  support:
+    email: "info@himalayanfibres.com"
+    phone: "+91-9816030093"
+
+website:
+  main: "https://www.himalayanfibres.com"
+  shop: "https://www.himalayanfibres.com/shop"
+  contact: "https://www.himalayanfibres.com/contact"
+  about: "https://www.himalayanfibres.com/about"
+
+# Business details for B2B communications
+business:
+  type: "Manufacturer & Exporter"
+  established_year: 2018
+  employees: "75+ artisan partners"
+  villages_served: 75
+  certifications:
+    - "Fair Trade"
+    - "Organic Processing"
+  export_countries:
+    - "USA"
+    - "UK"
+    - "Germany"
+    - "Japan"
+    - "Australia"

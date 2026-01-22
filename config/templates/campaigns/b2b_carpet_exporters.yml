@@ -1,0 +1,134 @@
+# B2B Campaign - Carpet Exporters
+# Introduction email for potential B2B carpet manufacturing clients
+
+campaign:
+  id: "b2b_carpet_exporters"
+  name: "B2B Introduction - Carpet Exporters"
+  type: "acquisition"
+  segment: "potential_b2b"
+  status: "active"
+  created_date: "2024-01-15"
+  version: "1.0"
+
+email:
+  subject: "Premium Himalayan Fibers for {{company_name}}"
+  subject_variants:
+    - "Sustainable Natural Fibers for Your Carpet Manufacturing"
+    - "Partner with Himalayan Fibres - Premium Plant-Based Yarns"
+    - "{{contact_name}}, Discover Our Himalayan Nettle & Hemp Yarns"
+  preview_text: "Sustainable, high-quality fibers for your carpet manufacturing needs"
+  from_name: "Prashant Agarwal | Himalayan Fibres"
+  reply_to: "prashant@himalayanfibres.com"
+
+layout: "hero_with_cta"
+
+content:
+  hero:
+    image_ref: "branding.hero_banner"
+    alt: "Himalayan Fibres - Premium Natural Fibers"
+    fallback_color: "#232323"
+
+  greeting: "Dear {{contact_name}},"
+
+  introduction: |
+    I'm reaching out from Himalayan Fibres, a leading supplier of
+    sustainable natural fibers sourced directly from the Himalayas.
+
+    We specialize in premium nettle, hemp, and wool yarns that are
+    perfect for high-quality carpet manufacturing - especially for
+    export markets that value sustainability and craftsmanship.
+
+  body_sections:
+    - heading: "Why Himalayan Fibres?"
+      type: "bullet_list"
+      content:
+        - "Wild-grown fibers with zero pesticides or chemicals"
+        - "Direct sourcing from 75+ Himalayan villages"
+        - "Fair trade certified - supporting women artisans"
+        - "Consistent quality with traceability documentation"
+        - "Competitive pricing for bulk orders"
+
+    - heading: "Our Products for Carpet Manufacturing"
+      type: "product_showcase"
+      products:
+        - ref: "nettle.special_nettle_yarn"
+          highlight: "Known as 'Himalayan Silk' - exceptional lustre"
+        - ref: "hemp.thick_hemp_yarn"
+          highlight: "Extra durable for high-traffic carpets"
+        - ref: "wool.himalayan_woollen_yarn"
+          highlight: "Premium warmth and softness"
+
+    - heading: "US Tariff Advantage"
+      type: "text_block"
+      content: |
+        **Important for US exporters:** Our plant-based fibers (nettle & hemp)
+        are currently not subject to the same tariffs as synthetic alternatives,
+        making them an excellent choice for US-bound carpet exports.
+
+        We can provide all necessary documentation for customs and sustainability
+        certifications.
+
+  cta:
+    text: "Request Product Samples"
+    url: "https://himalayanfibres.com/b2b-samples"
+    style: "primary"
+    secondary:
+      text: "Download Our Catalog"
+      url: "https://himalayanfibres.com/catalog"
+      style: "secondary"
+
+  closing: |
+    I'd love to discuss how Himalayan Fibres can support your
+    sustainable carpet manufacturing needs. Would you be available
+    for a brief call this week?
+
+    Looking forward to exploring this opportunity together.
+
+  signature:
+    name: "Prashant Agarwal"
+    title: "Founder"
+    company: "Himalayan Fibres"
+    phone: "+91-9816030093"
+    include_photo: true
+    include_social: true
+
+personalization:
+  variables:
+    - name: "{{contact_name}}"
+      fallback: "there"
+      source: "contact.first_name"
+    - name: "{{company_name}}"
+      fallback: "your company"
+      source: "contact.company"
+    - name: "{{country}}"
+      fallback: ""
+      source: "contact.country"
+
+  conditional_content:
+    - condition: "country == 'USA' || country == 'United States'"
+      show_section: "US Tariff Advantage"
+    - condition: "country == 'Germany' || country == 'UK'"
+      add_content: |
+        We're also EU-compliant with all necessary certifications
+        for European import requirements.
+
+tracking:
+  utm_source: "email"
+  utm_medium: "b2b_campaign"
+  utm_campaign: "carpet_exporters_intro"
+
+ab_testing:
+  enabled: false
+  variants:
+    - id: "A"
+      subject: "Premium Himalayan Fibers for {{company_name}}"
+      weight: 50
+    - id: "B"
+      subject: "Sustainable Natural Fibers for Your Carpet Manufacturing"
+      weight: 50
+
+follow_up:
+  enabled: true
+  trigger: "no_open_after_days"
+  days: 5
+  follow_up_template: "b2b_carpet_exporters_followup"

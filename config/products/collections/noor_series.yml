@@ -1,0 +1,109 @@
+# Noor Series
+# Luminous yarn collection
+
+product:
+  id: "noor_series"
+  name: "Noor Series"
+  nickname: null
+  category: "collections"
+  subcategory: "series"
+  sku: "COL-NOR-001"
+  active: true
+
+pricing:
+  inr: 375
+  usd: 4.50
+  currency_symbol: "₹"
+  unit: "per 100gm skein"
+  wholesale_discount: 12
+
+specifications:
+  length: "200m/100gms"
+  composition: "Premium Himalayan Nettle"
+  weight_type: "DK/Light Worsted"
+  needle_size: "3.5-4.5mm"
+  gauge: "22 stitches = 10cm"
+  care:
+    - "Hand wash recommended"
+    - "Use mild detergent"
+    - "Lay flat to dry"
+
+colors:
+  - name: "Golden Light"
+    hex: "#FFD700"
+    available: true
+  - name: "Sunset Amber"
+    hex: "#FFBF00"
+    available: true
+  - name: "Warm Honey"
+    hex: "#EB9605"
+    available: true
+  - name: "Champagne"
+    hex: "#F7E7CE"
+    available: true
+
+description:
+  short: "Luminous golden tones that capture the Himalayan sunrise"
+  long: |
+    'Noor' means light, and this collection captures the radiant golden light
+    of a Himalayan sunrise. The warm, luminous colors in this series are
+    achieved through careful processing that enhances the natural golden
+    tones present in premium nettle fiber.
+
+    This collection is perfect for statement pieces, festive wear, and
+    projects where you want to add a touch of warmth and radiance. The
+    natural sheen of the nettle fiber makes these yarns truly glow.
+  tagline: "Light of the Mountains"
+
+collection_theme:
+  inspiration: "Himalayan sunrise and golden hour"
+  mood: "Radiant, warm, celebratory"
+  season: "All year (especially festive seasons)"
+  occasions:
+    - "Festivals (Diwali, Eid)"
+    - "Celebrations"
+    - "Statement pieces"
+
+features:
+  - "Luminous golden color palette"
+  - "Natural nettle sheen enhanced"
+  - "Perfect for festive occasions"
+  - "Creates radiant finished pieces"
+  - "Premium quality fiber"
+
+images:
+  hero:
+    gdrive_url: ""
+    local_file: "assets/images/products/collections/noor_hero.jpg"
+    alt: "Noor Series - Himalayan Fibres"
+  gallery:
+    - gdrive_url: ""
+      local_file: "assets/images/products/collections/noor_colors.jpg"
+      alt: "Noor color palette"
+    - gdrive_url: ""
+      local_file: "assets/images/products/collections/noor_project.jpg"
+      alt: "Sample project"
+  thumbnail:
+    gdrive_url: ""
+    local_file: "assets/images/products/collections/noor_thumb.jpg"
+    alt: "Noor Series thumbnail"
+
+website_url: "https://www.himalayanfibres.com/product-page/noor-series"
+
+inventory:
+  track_stock: true
+  min_order_qty: 1
+  bulk_order_qty: 25
+  lead_time_days: 10
+
+related_products:
+  - "snow_white_series"
+  - "seriry_series"
+  - "special_nettle_yarn"
+
+tags:
+  - "collection"
+  - "golden"
+  - "luminous"
+  - "festive"
+  - "premium"

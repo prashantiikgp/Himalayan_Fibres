@@ -1,0 +1,109 @@
+# Product Categories Definition
+# Master list of all product categories and their metadata
+
+categories:
+  nettle:
+    id: "nettle"
+    name: "Himalayan Nettle"
+    display_name: "Himalayan Stinging Nettle"
+    description: "Wild-grown nettle fibers from the Himalayan mountains, known for their exceptional strength and silky texture."
+    subcategories:
+      - yarn
+      - fibre
+    icon: "nettle_icon"
+    featured: true
+    sort_order: 1
+    seo:
+      title: "Himalayan Nettle Yarn & Fibre | Natural Plant-Based Textiles"
+      description: "Premium nettle yarn and raw fibre sourced from wild Himalayan nettle plants. Sustainable, strong, and naturally beautiful."
+      keywords: ["nettle yarn", "himalayan nettle", "plant fibre", "natural textiles"]
+
+  hemp:
+    id: "hemp"
+    name: "Himalayan Hemp"
+    display_name: "Himalayan Hemp"
+    description: "Eco-friendly hemp fibers cultivated in the pristine Himalayan region, perfect for sustainable textiles."
+    subcategories:
+      - yarn
+      - fibre
+    icon: "hemp_icon"
+    featured: true
+    sort_order: 2
+    seo:
+      title: "Himalayan Hemp Yarn | Sustainable Natural Fiber"
+      description: "High-quality hemp yarn from the Himalayas. Strong, durable, and eco-friendly for all your textile needs."
+      keywords: ["hemp yarn", "himalayan hemp", "sustainable fiber", "natural yarn"]
+
+  wool:
+    id: "wool"
+    name: "Himalayan Wool"
+    display_name: "Himalayan Woollen"
+    description: "Premium wool from Himalayan sheep, renowned for warmth, softness, and durability."
+    subcategories:
+      - yarn
+    icon: "wool_icon"
+    featured: true
+    sort_order: 3
+    seo:
+      title: "Himalayan Wool Yarn | Premium Natural Wool"
+      description: "Authentic Himalayan wool yarn, hand-spun for exceptional quality. Warm, soft, and sustainably sourced."
+      keywords: ["wool yarn", "himalayan wool", "natural wool", "hand-spun"]
+
+  collections:
+    id: "collections"
+    name: "Series Collections"
+    display_name: "Signature Collections"
+    description: "Curated yarn collections with unique color palettes and blends, perfect for special projects."
+    subcategories:
+      - series
+    icon: "collection_icon"
+    featured: true
+    sort_order: 4
+    seo:
+      title: "Himalayan Fibres Collections | Signature Yarn Series"
+      description: "Explore our signature yarn collections featuring unique blends and exclusive color palettes."
+      keywords: ["yarn collection", "signature series", "artisan yarn", "specialty yarn"]
+
+# Subcategory definitions
+subcategories:
+  yarn:
+    id: "yarn"
+    name: "Yarn"
+    description: "Ready-to-use spun yarn for knitting, weaving, and crafts"
+    icon: "yarn_icon"
+
+  fibre:
+    id: "fibre"
+    name: "Raw Fibre"
+    description: "Unprocessed plant fibre for spinning or industrial use"
+    icon: "fibre_icon"
+
+  series:
+    id: "series"
+    name: "Series"
+    description: "Curated collection with specific color palette"
+    icon: "series_icon"
+
+# Product attributes that can be filtered
+filterable_attributes:
+  - category
+  - subcategory
+  - price_range
+  - color
+  - weight_type
+  - composition
+
+# Price ranges for filtering
+price_ranges:
+  budget:
+    label: "Under ₹300"
+    min: 0
+    max: 299
+  mid:
+    label: "₹300 - ₹400"
+    min: 300
+    max: 400
+  premium:
+    label: "Above ₹400"
+    min: 401
+    max: null

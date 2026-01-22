@@ -1,0 +1,12 @@
+id,name,description,rules_json,is_active,created_at
+5e1992dd,All Existing Clients,Current customers with active business relationship,"{""customer_type"": [""existing_client""]}",True,2026-01-19T14:00:57.691539
+52ac8374,VIP Clients,High-value existing customers,"{""customer_type"": [""existing_client""], ""customer_subtype"": [""vip""]}",True,2026-01-19T14:00:57.692555
+455a8d57,All Potential B2B,"All potential B2B customers (exporters, manufacturers)","{""customer_type"": [""potential_b2b""]}",True,2026-01-19T14:00:57.694187
+3ec0ab03,Carpet Exporters - India,Indian carpet exporters,"{""customer_type"": [""potential_b2b""], ""customer_subtype"": [""carpet_exporter""], ""geography"": [""domestic_india""]}",True,2026-01-19T14:00:57.694599
+a11a3471,Carpet Exporters - International,International carpet exporters/importers,"{""customer_type"": [""potential_b2b""], ""customer_subtype"": [""carpet_exporter"", ""importer""], ""geography"": [""international""]}",True,2026-01-19T14:00:57.695523
+6bee9637,Handicraft Exporters,Handicraft exporters (all geographies),"{""customer_type"": [""potential_b2b""], ""customer_subtype"": [""handicraft_exporter""]}",True,2026-01-19T14:00:57.696199
+8a1943e5,All Yarn Stores,All yarn retail and wholesale stores,"{""customer_type"": [""yarn_store""]}",True,2026-01-19T14:00:57.697167
+fb7c3099,Wholesale Yarn Stores,Wholesale yarn distributors,"{""customer_type"": [""yarn_store""], ""customer_subtype"": [""wholesale_store""]}",True,2026-01-19T14:00:57.697900
+c3ef7e5b,Hot Leads,Contacts with recent engagement,"{""engagement_level"": [""hot""]}",True,2026-01-19T14:00:57.698453
+aa29b1a1,Cold Contacts - Re-engagement,Contacts with no recent engagement,"{""engagement_level"": [""cold""]}",True,2026-01-19T14:00:57.699076
+02fe3ced,New Contacts - Welcome,Recently added contacts,"{""engagement_level"": [""new""]}",True,2026-01-19T14:00:57.699829

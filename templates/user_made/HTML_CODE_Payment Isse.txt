@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Himalayan Fibers Email</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Amiri&display=swap');
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f2f2f2;
+      font-family: 'Amiri', serif;
+    }
+  </style>
+</head>
+<body>
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding: 40px 0;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 640px; background-color: #ffffff; border-radius: 10px; box-shadow: 0 0 18px rgba(0, 0, 0, 0.15); margin: 0 20px;">
+
+          <!-- Hero Image -->
+          <tr>
+            <td>
+              <img src="https://share1.cloudhq-mkt3.net/1ed21a03b9a9f5.png" alt="Hero Image" style="width: 100%; height: auto; display: block; border-top-left-radius: 10px; border-top-right-radius: 10px;" />
+            </td>
+          </tr>
+
+          <!-- Main Content -->
+          <tr>
+            <td style="padding: 30px;">
+              <p style="font-size: 16px; color: #333; margin-top: 0;">Hi <strong>Anna</strong>,</p>
+
+              <p style="font-size: 16px; color: #333;">
+                <p>Thank you for reaching out, and I’m really sorry you ran into trouble on the site. I’d love to get your order placed right away and also fix this for good.</p>
+              </p>
+
+              <p><strong>Could you please share:</strong></p>
+                <ol style="margin:0 0 16px 20px; padding:0;">
+                  <li style="margin-bottom:8px;">A quick <strong>screenshot of the error</strong> you saw (the message saying Visa isn’t supported).</li>
+                  <li>Which <strong>product(s)</strong> you wanted (name/collection, shade or color, and quantity/weight).</li>
+                </ol>
+
+              <p><strong>Fastest ways to order right now (your choice):</strong></p>
+                <ul style="margin:0 0 16px 20px; padding:0;">
+                  <li style="margin-bottom:8px;"><strong>Reply to this email</strong> with the items and your shipping city/country, and I’ll send a secure <em>invoice</em> right away.</li>
+                  <li>Or message me on <strong>WhatsApp</strong> at 
+                    <a href="https://wa.me/+ 918582952074" style="color:#0a7cff; text-decoration:none;">+91-8582952074</a> and I’ll place it for you in minutes.
+                  </li>
+                </ul>
+
+  		<p>I’m also checking the website forms and chat—thanks for flagging that. Your screenshot will help me escalate the payment error to our provider immediately.</p>
+  		<p>Appreciate your support for our yarns and community, Anna. I’ll look out for your reply and get this sorted quickly.</p>
+
+              <!-- CTA Button -->
+              <table cellpadding="0" cellspacing="0" width="100%" style="margin-top: 25px;">
+                <tr>
+                  <td align="center">
+                    <a href="https://himalayanfibres.com" style="background-color: #232323; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 5px; display: inline-block; font-size: 16px; font-weight: bold;">
+                      Explore Himalayan Fibers
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Social Media Links -->
+		<table cellpadding="0" cellspacing="0" width="100%" style="margin-top: 30px;">
+		  <tr>
+    			<td align="center">
+      				<a href="https://www.instagram.com/himalayan_fibres/" target="_blank" style="margin: 0 10px;">
+        				<img src="https://lh3.googleusercontent.com/d/1uxQVjWXNrn-Z1dmX_QDiS1_vKZcdNdGN" alt="Instagram" width="32" height="32" style="display:inline-block;" />
+      				</a>
+      			<a href="https://www.facebook.com/Himalayanfibres" target="_blank" style="margin: 0 10px;">
+        			<img src="https://lh3.googleusercontent.com/d/1lxQXqEY9e6sLTiHXkVe6huueh_Ix2ZC9" alt="Facebook" width="32" height="32" style="display:inline-block;" />
+      				</a>
+    			</td>
+  		 </tr>
+		</table>
+
+              <!-- Footer -->
+    <div style="background-color: #f5f5f5; padding: 10px 24px; font-size: 12px; color: #232323; text-align: center; font-family: 'Amiri', serif;">
+      <p>
+        <em>📍 Address:</em> 
+        <em>S.K. Complex, Khurje Wala Mohalla, Daulat Ganj, Lashkar, Gwalior 474001</em>
+      </p>
+      <p>
+        <em>📧 info@himalayanfibres.com | 📞 +91 85829532074</em>
+      </p>
+      <p style="margin: 0;">
+        <a href="https://www.himalayanfibres.com/privacy-policy" style="color: #232323; margin: 0 5px;">Privacy Policy</a> | 
+        <a href="https://www.himalayanfibres.com/terms-conditions" style="color: #232323; margin: 0 5px;">Terms &amp; Conditions</a> | 
+        <a href="https://www.himalayanfibres.com/refund-cancellation" style="color: #232323; margin: 0 5px;">Refund &amp; Cancellation</a>
+      </p>
+      <p style="font-size: 12px; font-style: italic; margin-top: 10px;">To unsubscribe, please 
+        <a href="mailto:info@himalayanfibres.com?subject=Unsubscribe" style="color: #555;">email us</a> 
+        <span class="Lm ng" data-ddnwab="PR_13_0" aria-invalid="grammar">with subject</span> line 
+        <strong>"Unsubscribe"</strong>.
+      </p>
+      <p style="margin-top: 10px;">© 2025 Himalayan Fibres. All rights reserved.</p>
+    </div>
+  </div>
+</div>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

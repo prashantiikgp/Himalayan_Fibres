@@ -1,0 +1,166 @@
+# Email Settings Configuration
+# SMTP, sending limits, and deliverability settings
+
+smtp:
+  host: "smtp.gmail.com"
+  port: 587
+  use_tls: true
+  # Credentials should be stored in environment variables:
+  # EMAIL_USERNAME, EMAIL_PASSWORD
+
+sender:
+  default:
+    email: "info@himalayanfibres.com"
+    name: "Himalayan Fibres"
+    reply_to: "info@himalayanfibres.com"
+
+  # Alternative sender profiles
+  profiles:
+    founder:
+      email: "prashant@himalayanfibres.com"
+      name: "Prashant Agarwal | Himalayan Fibres"
+      reply_to: "prashant@himalayanfibres.com"
+
+    sales:
+      email: "sales@himalayanfibres.com"
+      name: "Himalayan Fibres Sales"
+      reply_to: "sales@himalayanfibres.com"
+
+    newsletter:
+      email: "newsletter@himalayanfibres.com"
+      name: "Himalayan Fibres"
+      reply_to: "info@himalayanfibres.com"
+
+limits:
+  # Daily sending limits
+  daily_max: 500
+  daily_max_per_sender: 250
+
+  # Batch processing
+  batch_size: 50
+  delay_between_emails_sec: 2
+  delay_between_batches_sec: 60
+
+  # Rate limiting
+  max_per_minute: 30
+  max_per_hour: 200
+
+  # Bounce handling
+  max_bounce_rate_percent: 5
+  pause_on_bounce_rate: true
+
+deliverability:
+  # Image limits for spam avoidance
+  max_images_per_email: 5
+  recommended_text_to_image_ratio: "60:40"
+
+  # CSS properties to avoid (may cause rendering issues)
+  avoid_css:
+    - "box-shadow"
+    - "@import"
+    - "position: absolute"
+    - "position: fixed"
+    - "float"  # Use tables instead
+
+  # Required email headers
+  required_headers:
+    - "List-Unsubscribe"
+    - "Message-ID"
+    - "Date"
+    - "From"
+    - "To"
+    - "Subject"
+
+  # Recommended practices
+  best_practices:
+    - "Keep subject line under 50 characters"
+    - "Use alt text for all images"
+    - "Include plain text version"
+    - "Test in multiple email clients"
+    - "Check spam score before sending"
+
+  # Spam trigger words to avoid
+  spam_triggers:
+    - "FREE!!!"
+    - "Act now"
+    - "Limited time"
+    - "Click here"
+    - "Buy now"
+    - "No obligation"
+    - "Risk-free"
+
+tracking:
+  # Enable/disable tracking features
+  open_tracking: true
+  click_tracking: true
+  unsubscribe_tracking: true
+
+  # UTM parameters
+  default_utm:
+    utm_source: "email"
+    utm_medium: "campaign"
+
+  # Analytics integration
+  google_analytics:
+    enabled: true
+    property_id: ""  # Add your GA property ID
+
+templates:
+  # Default template settings
+  defaults:
+    max_width: "600px"
+    font_family: "Georgia, serif"
+    font_size: "16px"
+    line_height: "1.6"
+    background_color: "#f2f2f2"
+
+  # Footer requirements
+  footer:
+    include_company_address: true
+    include_unsubscribe_link: true
+    include_social_links: true
+    include_copyright: true
+
+unsubscribe:
+  # Unsubscribe page URL
+  url: "https://himalayanfibres.com/unsubscribe"
+
+  # One-click unsubscribe (RFC 8058)
+  one_click_enabled: true
+  list_unsubscribe_post: true
+
+  # Preference center
+  preference_center_url: "https://himalayanfibres.com/email-preferences"
+
+  # Grace period before removal (days)
+  processing_time_days: 2
+
+bounce_handling:
+  # Automatic bounce processing
+  enabled: true
+
+  # Soft bounce thresholds
+  soft_bounce_retry_count: 3
+  soft_bounce_retry_delay_hours: 24
+
+  # Hard bounce handling
+  hard_bounce_action: "unsubscribe"
+
+  # Invalid email handling
+  remove_invalid_emails: true
+
+testing:
+  # Test email addresses
+  test_recipients:
+    - "test@himalayanfibres.com"
+    - "prashant.test@gmail.com"
+
+  # A/B testing defaults
+  ab_test:
+    default_split: 50
+    min_sample_size: 100
+    test_duration_hours: 24
+
+  # Preview/sandbox mode
+  sandbox_mode: false
+  sandbox_recipient: "sandbox@himalayanfibres.com"

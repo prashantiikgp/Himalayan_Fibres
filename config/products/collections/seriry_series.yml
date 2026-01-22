@@ -1,0 +1,108 @@
+# Seriry Series
+# Earthy tones yarn collection
+
+product:
+  id: "seriry_series"
+  name: "Seriry Series"
+  nickname: null
+  category: "collections"
+  subcategory: "series"
+  sku: "COL-SER-001"
+  active: true
+
+pricing:
+  inr: 375
+  usd: 4.50
+  currency_symbol: "₹"
+  unit: "per 100gm skein"
+  wholesale_discount: 12
+
+specifications:
+  length: "200m/100gms"
+  composition: "Himalayan Nettle & Hemp Blend"
+  weight_type: "DK/Light Worsted"
+  needle_size: "3.5-4.5mm"
+  gauge: "22 stitches = 10cm"
+  care:
+    - "Hand wash in cool water"
+    - "Lay flat to dry"
+    - "Can be machine washed on gentle"
+
+colors:
+  - name: "Forest Earth"
+    hex: "#5D4037"
+    available: true
+  - name: "Moss Green"
+    hex: "#6B8E23"
+    available: true
+  - name: "Autumn Gold"
+    hex: "#DAA520"
+    available: true
+  - name: "Bark Brown"
+    hex: "#8B4513"
+    available: true
+
+description:
+  short: "Earthy, natural tones inspired by Himalayan forests"
+  long: |
+    The Seriry Series celebrates the rich, earthy colors of the Himalayan
+    forest floor. This collection features warm browns, mossy greens, and
+    golden tones that evoke the natural beauty of ancient woodlands.
+
+    The nettle-hemp blend creates a yarn with excellent durability and a
+    subtle natural sheen. Perfect for outdoor wear, accessories, and home
+    decor that brings nature indoors.
+  tagline: "Colors of the Forest"
+
+collection_theme:
+  inspiration: "Himalayan forest ecosystems"
+  mood: "Grounded, natural, warm"
+  season: "Autumn/Winter"
+  occasions:
+    - "Everyday wear"
+    - "Outdoor adventures"
+    - "Home decor"
+
+features:
+  - "Natural earth-tone palette"
+  - "Durable nettle-hemp blend"
+  - "Subtle natural luster"
+  - "Versatile for many projects"
+  - "Machine washable"
+
+images:
+  hero:
+    gdrive_url: ""
+    local_file: "assets/images/products/collections/seriry_hero.jpg"
+    alt: "Seriry Series - Himalayan Fibres"
+  gallery:
+    - gdrive_url: ""
+      local_file: "assets/images/products/collections/seriry_colors.jpg"
+      alt: "Seriry color palette"
+    - gdrive_url: ""
+      local_file: "assets/images/products/collections/seriry_project.jpg"
+      alt: "Sample project"
+  thumbnail:
+    gdrive_url: ""
+    local_file: "assets/images/products/collections/seriry_thumb.jpg"
+    alt: "Seriry Series thumbnail"
+
+website_url: "https://www.himalayanfibres.com/product-page/seriry-series"
+
+inventory:
+  track_stock: true
+  min_order_qty: 1
+  bulk_order_qty: 25
+  lead_time_days: 10
+
+related_products:
+  - "snow_white_series"
+  - "noor_series"
+  - "burberry_series"
+
+tags:
+  - "collection"
+  - "earthy"
+  - "natural"
+  - "forest"
+  - "autumn"

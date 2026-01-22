@@ -1,0 +1,166 @@
+# Banner Registry
+# Campaign and promotional banner images
+
+promotional_banners:
+  # Seasonal promotions
+  spring_sale:
+    gdrive_url: ""
+    local_file: "assets/images/banners/spring_sale.jpg"
+    description: "Spring sale promotional banner"
+    dimensions: "600x200"
+    alt: "Spring Sale - Up to 20% Off"
+    text_overlay:
+      headline: "Spring Sale"
+      subheadline: "Up to 20% Off All Yarns"
+      cta: "Shop Now"
+    active_dates:
+      start: "2024-03-01"
+      end: "2024-03-31"
+
+  summer_collection:
+    gdrive_url: ""
+    local_file: "assets/images/banners/summer_collection.jpg"
+    description: "Summer collection launch banner"
+    dimensions: "600x200"
+    alt: "Summer Collection - Light & Breathable"
+    text_overlay:
+      headline: "Summer Collection"
+      subheadline: "Light & Breathable Hemp Yarns"
+      cta: "Explore"
+    active_dates:
+      start: "2024-05-01"
+      end: "2024-08-31"
+
+  diwali_special:
+    gdrive_url: ""
+    local_file: "assets/images/banners/diwali_special.jpg"
+    description: "Diwali festival special banner"
+    dimensions: "600x200"
+    alt: "Diwali Special - Golden Collection"
+    text_overlay:
+      headline: "Diwali Special"
+      subheadline: "Celebrate with Our Noor Collection"
+      cta: "Shop Festive"
+    active_dates:
+      start: "2024-10-15"
+      end: "2024-11-15"
+
+  winter_warmth:
+    gdrive_url: ""
+    local_file: "assets/images/banners/winter_warmth.jpg"
+    description: "Winter collection banner"
+    dimensions: "600x200"
+    alt: "Winter Warmth - Wool Collection"
+    text_overlay:
+      headline: "Winter Warmth"
+      subheadline: "Premium Himalayan Wool"
+      cta: "Stay Cozy"
+    active_dates:
+      start: "2024-11-01"
+      end: "2025-02-28"
+
+category_banners:
+  nettle:
+    gdrive_url: ""
+    local_file: "assets/images/banners/category_nettle.jpg"
+    description: "Nettle category banner"
+    dimensions: "600x150"
+    alt: "Himalayan Nettle Collection"
+    text_overlay:
+      headline: "Nettle Collection"
+      subheadline: "The Silk of the Himalayas"
+
+  hemp:
+    gdrive_url: ""
+    local_file: "assets/images/banners/category_hemp.jpg"
+    description: "Hemp category banner"
+    dimensions: "600x150"
+    alt: "Himalayan Hemp Collection"
+    text_overlay:
+      headline: "Hemp Collection"
+      subheadline: "Sustainable & Strong"
+
+  wool:
+    gdrive_url: ""
+    local_file: "assets/images/banners/category_wool.jpg"
+    description: "Wool category banner"
+    dimensions: "600x150"
+    alt: "Himalayan Wool Collection"
+    text_overlay:
+      headline: "Wool Collection"
+      subheadline: "Mountain Warmth"
+
+  collections:
+    gdrive_url: ""
+    local_file: "assets/images/banners/category_collections.jpg"
+    description: "Collections category banner"
+    dimensions: "600x150"
+    alt: "Signature Collections"
+    text_overlay:
+      headline: "Signature Collections"
+      subheadline: "Curated Color Palettes"
+
+campaign_banners:
+  b2b_partnership:
+    gdrive_url: ""
+    local_file: "assets/images/banners/b2b_partnership.jpg"
+    description: "B2B partnership opportunity banner"
+    dimensions: "600x250"
+    alt: "Partner with Himalayan Fibres"
+    text_overlay:
+      headline: "Partner with Us"
+      subheadline: "Premium Fibers for Your Business"
+      cta: "Learn More"
+
+  wholesale_inquiry:
+    gdrive_url: ""
+    local_file: "assets/images/banners/wholesale_inquiry.jpg"
+    description: "Wholesale inquiry banner"
+    dimensions: "600x200"
+    alt: "Wholesale Pricing Available"
+    text_overlay:
+      headline: "Wholesale Pricing"
+      subheadline: "Bulk Orders Welcome"
+      cta: "Get Quote"
+
+  sustainability_story:
+    gdrive_url: ""
+    local_file: "assets/images/banners/sustainability_story.jpg"
+    description: "Sustainability story banner"
+    dimensions: "600x300"
+    alt: "Our Sustainability Journey"
+    text_overlay:
+      headline: "Our Sustainability Story"
+      subheadline: "From Mountain Villages to Your Hands"
+
+  artisan_spotlight:
+    gdrive_url: ""
+    local_file: "assets/images/banners/artisan_spotlight.jpg"
+    description: "Artisan spotlight banner"
+    dimensions: "600x250"
+    alt: "Meet Our Artisans"
+    text_overlay:
+      headline: "Meet Our Artisans"
+      subheadline: "The Hands Behind the Craft"
+
+email_headers:
+  default:
+    gdrive_url: ""
+    local_file: "assets/images/banners/email_header_default.jpg"
+    description: "Default email header"
+    dimensions: "600x100"
+    alt: "Himalayan Fibres"
+
+  newsletter:
+    gdrive_url: ""
+    local_file: "assets/images/banners/email_header_newsletter.jpg"
+    description: "Newsletter header"
+    dimensions: "600x120"
+    alt: "Himalayan Fibres Newsletter"
+
+  transactional:
+    gdrive_url: ""
+    local_file: "assets/images/banners/email_header_transactional.jpg"
+    description: "Transactional email header (simpler)"
+    dimensions: "600x80"
+    alt: "Himalayan Fibres"

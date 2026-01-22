@@ -1,0 +1,121 @@
+# Himalayan Woollen Yarn
+# Premium wool yarn from Himalayan sheep
+
+product:
+  id: "himalayan_woollen_yarn"
+  name: "Himalayan Woollen Yarn"
+  nickname: null
+  category: "wool"
+  subcategory: "yarn"
+  sku: "WOL-YRN-STD-001"
+  active: true
+
+pricing:
+  inr: 375
+  usd: 4.50
+  currency_symbol: "₹"
+  unit: "per 100gm skein"
+  wholesale_discount: 15
+
+specifications:
+  length: "180m/100gms"
+  composition: "100% Himalayan Sheep Wool"
+  weight_type: "Worsted"
+  needle_size: "4-5mm"
+  gauge: "20 stitches = 10cm"
+  care:
+    - "Hand wash in cool water"
+    - "Use wool-specific detergent"
+    - "Lay flat to dry"
+    - "Do not wring or twist"
+    - "Store with moth repellent"
+
+colors:
+  - name: "Natural Cream"
+    hex: "#F5F5DC"
+    available: true
+  - name: "Heather Grey"
+    hex: "#9E9E9E"
+    available: true
+  - name: "Charcoal"
+    hex: "#36454F"
+    available: true
+  - name: "Natural Brown"
+    hex: "#8B7355"
+    available: true
+
+description:
+  short: "Soft, warm wool from Himalayan sheep, hand-spun for exceptional quality"
+  long: |
+    Our Himalayan Woollen Yarn comes from sheep raised in the high-altitude
+    pastures of the Himalayas. The harsh mountain climate produces wool with
+    exceptional warmth and resilience, while traditional hand-spinning methods
+    create a yarn with beautiful texture and character.
+
+    Perfect for winter garments, accessories, and home textiles where warmth
+    and softness are paramount. The natural lanolin content helps repel water
+    and keeps the yarn soft.
+  tagline: "Mountain Warmth, Artisan Quality"
+
+features:
+  - "100% Himalayan sheep wool"
+  - "Hand-spun by local artisans"
+  - "Natural lanolin retained"
+  - "Exceptional warmth"
+  - "Naturally water-resistant"
+  - "Soft and comfortable"
+
+benefits:
+  for_crafters:
+    - "Perfect for winter projects"
+    - "Beautiful stitch definition"
+    - "Natural elasticity"
+    - "Warm and cozy results"
+  for_business:
+    - "Classic wool appeal"
+    - "Traditional craftsmanship story"
+    - "Premium quality positioning"
+
+suitable_projects:
+  - "Sweaters and cardigans"
+  - "Scarves and shawls"
+  - "Hats and mittens"
+  - "Blankets and throws"
+  - "Socks and slippers"
+
+images:
+  hero:
+    gdrive_url: ""
+    local_file: "assets/images/products/wool/himalayan_wool_hero.jpg"
+    alt: "Himalayan Woollen Yarn"
+  gallery:
+    - gdrive_url: ""
+      local_file: "assets/images/products/wool/himalayan_wool_texture.jpg"
+      alt: "Wool yarn texture"
+    - gdrive_url: ""
+      local_file: "assets/images/products/wool/himalayan_wool_colors.jpg"
+      alt: "Available colors"
+  thumbnail:
+    gdrive_url: ""
+    local_file: "assets/images/products/wool/himalayan_wool_thumb.jpg"
+    alt: "Himalayan Wool thumbnail"
+
+website_url: "https://www.himalayanfibres.com/product-page/himalayan-woollen-yarn"
+
+inventory:
+  track_stock: true
+  min_order_qty: 1
+  bulk_order_qty: 50
+  lead_time_days: 7
+
+related_products:
+  - "snow_white_series"
+  - "special_nettle_yarn"
+
+tags:
+  - "wool"
+  - "winter"
+  - "warm"
+  - "hand-spun"
+  - "traditional"
+  - "premium"

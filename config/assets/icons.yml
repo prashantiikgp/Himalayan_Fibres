@@ -1,0 +1,186 @@
+# Icon Registry
+# Social media icons, UI icons, and signature elements
+
+social_icons:
+  whatsapp:
+    gdrive_url: ""
+    local_file: "assets/images/icons/social/whatsapp.png"
+    description: "WhatsApp icon"
+    dimensions: "48x48"
+    alt: "WhatsApp"
+    color: "#25D366"
+
+  instagram:
+    gdrive_url: ""
+    local_file: "assets/images/icons/social/instagram.png"
+    description: "Instagram icon"
+    dimensions: "48x48"
+    alt: "Instagram"
+    color: "#E4405F"
+
+  facebook:
+    gdrive_url: ""
+    local_file: "assets/images/icons/social/facebook.png"
+    description: "Facebook icon"
+    dimensions: "48x48"
+    alt: "Facebook"
+    color: "#1877F2"
+
+  linkedin:
+    gdrive_url: ""
+    local_file: "assets/images/icons/social/linkedin.png"
+    description: "LinkedIn icon"
+    dimensions: "48x48"
+    alt: "LinkedIn"
+    color: "#0A66C2"
+
+  twitter:
+    gdrive_url: ""
+    local_file: "assets/images/icons/social/twitter.png"
+    description: "Twitter/X icon"
+    dimensions: "48x48"
+    alt: "Twitter"
+    color: "#1DA1F2"
+
+  pinterest:
+    gdrive_url: ""
+    local_file: "assets/images/icons/social/pinterest.png"
+    description: "Pinterest icon"
+    dimensions: "48x48"
+    alt: "Pinterest"
+    color: "#E60023"
+
+  youtube:
+    gdrive_url: ""
+    local_file: "assets/images/icons/social/youtube.png"
+    description: "YouTube icon"
+    dimensions: "48x48"
+    alt: "YouTube"
+    color: "#FF0000"
+
+signature_icons:
+  phone:
+    gdrive_url: ""
+    local_file: "assets/images/icons/signature/phone.png"
+    description: "Phone icon for email signature"
+    dimensions: "20x20"
+    alt: "Phone"
+
+  email:
+    gdrive_url: ""
+    local_file: "assets/images/icons/signature/email.png"
+    description: "Email icon for email signature"
+    dimensions: "20x20"
+    alt: "Email"
+
+  location:
+    gdrive_url: ""
+    local_file: "assets/images/icons/signature/location.png"
+    description: "Location/address icon"
+    dimensions: "20x20"
+    alt: "Location"
+
+  website:
+    gdrive_url: ""
+    local_file: "assets/images/icons/signature/website.png"
+    description: "Website/globe icon"
+    dimensions: "20x20"
+    alt: "Website"
+
+ui_icons:
+  # Feature icons for email content
+  leaf:
+    gdrive_url: ""
+    local_file: "assets/images/icons/ui/leaf.png"
+    description: "Leaf icon for sustainability"
+    dimensions: "40x40"
+    alt: "Sustainable"
+    color: "#4CAF50"
+
+  hands:
+    gdrive_url: ""
+    local_file: "assets/images/icons/ui/hands.png"
+    description: "Helping hands icon for fair trade"
+    dimensions: "40x40"
+    alt: "Fair Trade"
+    color: "#FF9800"
+
+  recycle:
+    gdrive_url: ""
+    local_file: "assets/images/icons/ui/recycle.png"
+    description: "Recycle icon for zero waste"
+    dimensions: "40x40"
+    alt: "Zero Waste"
+    color: "#2196F3"
+
+  heart:
+    gdrive_url: ""
+    local_file: "assets/images/icons/ui/heart.png"
+    description: "Heart icon for empowerment"
+    dimensions: "40x40"
+    alt: "Empowerment"
+    color: "#E91E63"
+
+  yarn:
+    gdrive_url: ""
+    local_file: "assets/images/icons/ui/yarn.png"
+    description: "Yarn ball icon"
+    dimensions: "40x40"
+    alt: "Yarn"
+    color: "#c38513"
+
+  star:
+    gdrive_url: ""
+    local_file: "assets/images/icons/ui/star.png"
+    description: "Star icon for premium/featured"
+    dimensions: "40x40"
+    alt: "Premium"
+    color: "#FFC107"
+
+  check:
+    gdrive_url: ""
+    local_file: "assets/images/icons/ui/check.png"
+    description: "Checkmark icon"
+    dimensions: "20x20"
+    alt: "Included"
+    color: "#4CAF50"
+
+  arrow_right:
+    gdrive_url: ""
+    local_file: "assets/images/icons/ui/arrow_right.png"
+    description: "Right arrow for CTAs"
+    dimensions: "20x20"
+    alt: "Go"
+    color: "#232323"
+
+  quote:
+    gdrive_url: ""
+    local_file: "assets/images/icons/ui/quote.png"
+    description: "Quote marks for testimonials"
+    dimensions: "30x30"
+    alt: "Quote"
+    color: "#c38513"
+
+# Icon sets for specific use cases
+icon_sets:
+  # Icons to use in feature lists
+  features:
+    - leaf
+    - hands
+    - recycle
+    - heart
+    - star
+
+  # Icons for social footer
+  social_order:
+    - whatsapp
+    - instagram
+    - facebook
+    - linkedin
+
+  # Icons for signature
+  signature_order:
+    - phone
+    - email
+    - website
+    - location

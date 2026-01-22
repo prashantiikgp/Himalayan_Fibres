@@ -1,0 +1,252 @@
+# Base Email Layout Definitions
+# Reusable layout templates for email campaigns
+
+layouts:
+  # Single column layout with hero image
+  hero_with_cta:
+    id: "hero_with_cta"
+    name: "Hero Image with CTA"
+    description: "Full-width hero image followed by content and call-to-action"
+    sections:
+      - header
+      - hero_image
+      - greeting
+      - introduction
+      - body_sections
+      - cta
+      - closing
+      - signature
+      - footer
+    settings:
+      max_width: "600px"
+      padding: "20px"
+      background: "{{brand.colors.background}}"
+
+  # Simple text-focused layout
+  simple_text:
+    id: "simple_text"
+    name: "Simple Text Email"
+    description: "Clean, text-focused layout for professional communications"
+    sections:
+      - header
+      - greeting
+      - body_content
+      - closing
+      - signature
+      - footer
+    settings:
+      max_width: "600px"
+      padding: "20px"
+      background: "#ffffff"
+
+  # Product showcase layout
+  product_showcase:
+    id: "product_showcase"
+    name: "Product Showcase"
+    description: "Feature multiple products with images and descriptions"
+    sections:
+      - header
+      - hero_image
+      - greeting
+      - introduction
+      - product_grid
+      - cta
+      - closing
+      - signature
+      - footer
+    settings:
+      max_width: "600px"
+      padding: "20px"
+      products_per_row: 2
+      background: "{{brand.colors.background}}"
+
+  # Newsletter layout
+  newsletter:
+    id: "newsletter"
+    name: "Newsletter"
+    description: "Multi-section newsletter with featured content and articles"
+    sections:
+      - header
+      - hero_image
+      - featured_content
+      - article_list
+      - product_spotlight
+      - social_section
+      - footer
+    settings:
+      max_width: "600px"
+      padding: "20px"
+      background: "#ffffff"
+
+  # Transactional layout
+  transactional:
+    id: "transactional"
+    name: "Transactional Email"
+    description: "Order confirmations, shipping updates, etc."
+    sections:
+      - header
+      - greeting
+      - order_details
+      - action_items
+      - support_info
+      - footer
+    settings:
+      max_width: "600px"
+      padding: "20px"
+      background: "#ffffff"
+
+# Section Templates
+section_templates:
+  header:
+    html: |
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: {{brand.colors.primary}};">
+        <tr>
+          <td align="center" style="padding: 20px;">
+            <img src="{{brand.logos.main.url}}" alt="{{brand.name}}" style="max-width: 180px; height: auto;">
+          </td>
+        </tr>
+      </table>
+
+  hero_image:
+    html: |
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td>
+            <img src="{{hero.image_url}}" alt="{{hero.alt}}" style="width: 100%; height: auto; display: block;">
+          </td>
+        </tr>
+      </table>
+
+  greeting:
+    html: |
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="padding: 30px 20px 10px 20px;">
+            <p style="font-family: {{brand.fonts.body.family}}; font-size: 16px; color: {{brand.colors.text}}; margin: 0;">
+              {{greeting}}
+            </p>
+          </td>
+        </tr>
+      </table>
+
+  body_content:
+    html: |
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="padding: 10px 20px;">
+            <div style="font-family: {{brand.fonts.body.family}}; font-size: 16px; line-height: 1.6; color: {{brand.colors.text}};">
+              {{content}}
+            </div>
+          </td>
+        </tr>
+      </table>
+
+  cta:
+    html: |
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td align="center" style="padding: 20px;">
+            <a href="{{cta.url}}" style="background-color: {{brand.colors.accent}}; color: #ffffff; padding: 14px 30px; text-decoration: none; border-radius: 4px; font-family: {{brand.fonts.body.family}}; font-size: 16px; font-weight: bold; display: inline-block;">
+              {{cta.text}}
+            </a>
+          </td>
+        </tr>
+      </table>
+
+  product_card:
+    html: |
+      <td width="50%" style="padding: 10px; vertical-align: top;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px;">
+          <tr>
+            <td>
+              <img src="{{product.image_url}}" alt="{{product.name}}" style="width: 100%; height: auto; border-radius: 8px 8px 0 0;">
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 15px;">
+              <h3 style="font-family: {{brand.fonts.heading.family}}; font-size: 16px; color: {{brand.colors.text}}; margin: 0 0 10px 0;">
+                {{product.name}}
+              </h3>
+              <p style="font-family: {{brand.fonts.body.family}}; font-size: 14px; color: {{brand.colors.text_light}}; margin: 0 0 10px 0;">
+                {{product.short_description}}
+              </p>
+              <p style="font-family: {{brand.fonts.body.family}}; font-size: 16px; color: {{brand.colors.accent}}; font-weight: bold; margin: 0;">
+                {{product.currency_symbol}}{{product.price}}
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+
+  signature:
+    html: |
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="padding: 20px; border-top: 1px solid #eeeeee;">
+            <table cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding-right: 15px;">
+                  <img src="{{signature.photo_url}}" alt="{{signature.name}}" style="width: 60px; height: 60px; border-radius: 50%;">
+                </td>
+                <td style="vertical-align: middle;">
+                  <p style="font-family: {{brand.fonts.body.family}}; font-size: 16px; font-weight: bold; color: {{brand.colors.text}}; margin: 0;">
+                    {{signature.name}}
+                  </p>
+                  <p style="font-family: {{brand.fonts.body.family}}; font-size: 14px; color: {{brand.colors.text_light}}; margin: 5px 0 0 0;">
+                    {{signature.title}}, {{brand.name}}
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+
+  footer:
+    html: |
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: {{brand.colors.background}};">
+        <tr>
+          <td align="center" style="padding: 30px 20px;">
+            <!-- Social Icons -->
+            <table cellpadding="0" cellspacing="0">
+              <tr>
+                {{#each social_icons}}
+                <td style="padding: 0 8px;">
+                  <a href="{{this.link}}">
+                    <img src="{{this.icon_url}}" alt="{{this.platform}}" style="width: 32px; height: 32px;">
+                  </a>
+                </td>
+                {{/each}}
+              </tr>
+            </table>
+
+            <!-- Company Info -->
+            <p style="font-family: {{brand.fonts.body.family}}; font-size: 12px; color: {{brand.colors.text_light}}; margin: 20px 0 10px 0;">
+              {{company.name}} | {{company.address}}
+            </p>
+
+            <!-- Unsubscribe -->
+            <p style="font-family: {{brand.fonts.body.family}}; font-size: 12px; color: {{brand.colors.text_light}}; margin: 0;">
+              <a href="{{unsubscribe_url}}" style="color: {{brand.colors.text_light}}; text-decoration: underline;">Unsubscribe</a>
+              |
+              <a href="{{preferences_url}}" style="color: {{brand.colors.text_light}}; text-decoration: underline;">Email Preferences</a>
+            </p>
+          </td>
+        </tr>
+      </table>
+
+# Responsive CSS (to be inlined)
+responsive_styles: |
+  @media only screen and (max-width: 600px) {
+    .container {
+      width: 100% !important;
+    }
+    .product-cell {
+      display: block !important;
+      width: 100% !important;
+    }
+    .stack-on-mobile {
+      display: block !important;
+      width: 100% !important;
+    }
+  }
