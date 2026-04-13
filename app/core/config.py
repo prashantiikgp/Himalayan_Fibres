@@ -13,6 +13,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
+        extra="ignore",
     )
 
     # Application
@@ -59,6 +60,16 @@ class Settings(BaseSettings):
 
     # Webhook
     webhook_base_url: str = "http://localhost:8000"
+
+    # WhatsApp Business API (Meta Cloud API)
+    wa_token: str | None = None
+    wa_phone_number_id: str | None = None
+    wa_waba_id: str | None = None
+    wa_app_secret: str | None = None
+    wa_verify_token: str | None = None
+    wa_api_version: str = "v21.0"
+    wa_graph_base: str = "https://graph.facebook.com"
+    wa_media_dir: str = "media/whatsapp"
 
     @property
     def smtp_from_email(self) -> str:

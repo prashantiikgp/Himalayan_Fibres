@@ -1,0 +1,36 @@
+page:
+  title: "WhatsApp Inbox"
+
+  column_1:
+    title: "Active Chats"
+    search_placeholder: "Search..."
+    empty_message: "No active WhatsApp conversations"
+
+  column_2:
+    system_events:
+      contact_added: "Contact added by you"
+      conversation_opened: "Conversation opened by you"
+      wa_api_connected: "New channel WhatsApp Cloud API added by you"
+    window_warning:
+      title: "WhatsApp's customer service window closed"
+      detail: "WhatsApp doesn't allow sending messages after 24 hours since the last Contact reply. To continue, send an approved Message Template."
+    message_input:
+      placeholder: "Type a message..."
+    wa_api_label: "WhatsApp Cloud API"
+
+  column_3:
+    sections:
+      - id: contact_mini
+        title: "Contact"
+        fields: [name, phone]
+      - id: activity
+        title: "Activity"
+        limit: 8
+      - id: templates
+        title: "Templates"
+        source: "wa_templates"
+        show_preview: true
+        send_button: "Send Template"
+      - id: edit
+        fields: [lifecycle_dropdown, tags_input]
+    empty_message: "Select a conversation to see tools"

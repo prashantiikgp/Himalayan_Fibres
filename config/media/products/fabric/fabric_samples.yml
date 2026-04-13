@@ -1,0 +1,47 @@
+# Fabric Samples — Woven Fabric Images
+# GDrive: 3. Product Images & Excel/Fabric Pic/Fabric Pic/
+
+gdrive_folder: "3. Product Images & Excel/Fabric Pic/Fabric Pic/"
+description: "Woven fabric swatches from different fiber blends — used for B2B textile buyer content"
+
+samples:
+  - id: "fabric_114_hemp_cotton"
+    filename: "Style 114_Hemp Cotton.jpg"
+    style: "Style 114"
+    gsm: 2307
+    blend: "Hemp Cotton"
+    description: "Hemp-cotton blend fabric swatch"
+    tags: ["fabric", "hemp cotton", "B2B", "swatch"]
+    best_for: ["B2B content", "textile buyers"]
+
+  - id: "fabric_114_hemp_cotton_2"
+    filename: "Style 114_Hemp Cotton 02.jpg"
+    style: "Style 114"
+    blend: "Hemp Cotton"
+    description: "Hemp-cotton blend — alternate angle"
+
+  - id: "fabric_115_hemp_silk"
+    filename: "Style 115 Hemp_Silk.jpg"
+    style: "Style 115"
+    gsm: 175
+    blend: "Hemp Silk"
+    description: "Hemp-silk blend fabric swatch"
+    tags: ["fabric", "hemp silk", "B2B", "luxury"]
+
+  - id: "fabric_115_hemp_silk_2"
+    filename: "Style 115 Hemp Silk 02.jpg"
+    style: "Style 115"
+    blend: "Hemp Silk"
+
+  - id: "fabric_118_nettle_silk"
+    filename: "Style 118 Nettle Silk.jpg"
+    style: "Style 118"
+    gsm: 156
+    blend: "Nettle Silk"
+    description: "Nettle-silk blend fabric swatch"
+    tags: ["fabric", "nettle silk", "B2B", "premium"]
+
+  - id: "fabric_118_hemp_silk"
+    filename: "Style 118 Hemp Silk 01.jpg"
+    style: "Style 118"
+    blend: "Hemp Silk"

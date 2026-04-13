@@ -1,0 +1,85 @@
+# Craft & Tips — Content Strategy
+# Working with natural Himalayan fibers — techniques and inspiration
+# Wix Category ID: 68e1377f-5e2b-48af-977a-c2dae1dc6cfe
+
+strategy:
+  purpose: "Help crafters work with our fibers. Reduce 'unknown fiber' hesitation. Drive repeat purchases by showing what's possible."
+  audience: "Hand-knitters, weavers, crocheters, textile artists, DIY crafters"
+  frequency: "1 post per month"
+  tone: "Friendly, practical, encouraging — like a skilled friend sharing tips"
+
+drafts:
+  # ──────────────────────────────────────────────────────────────────
+  # DRAFT 1: Beginner's Guide to Nettle Yarn
+  # ──────────────────────────────────────────────────────────────────
+  - id: "nettle_beginners"
+    title: "First Time with Nettle Yarn? Here's Everything You Need to Know"
+    slug: "beginners-guide-nettle-yarn"
+    status: "idea"
+    brief:
+      topic: "Practical guide for crafters trying nettle yarn for the first time — what to expect, how it differs from wool/cotton"
+      key_points:
+        - "How nettle yarn feels vs wool, cotton, silk — honest comparison"
+        - "Needle size recommendations (4-5mm for thick, 3.5-4.5mm for fine)"
+        - "Gauge expectations: 20-22 stitches per 10cm"
+        - "It softens with wear and washing — don't judge by first touch"
+        - "Best first projects: scarf, cowl, simple shawl"
+        - "Common mistakes to avoid"
+        - "Washing and care basics"
+      word_count: 800
+      product_refs: ["natural_nettle_yarn", "special_nettle_yarn"]
+    suggested_images:
+      cover: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/1. Himalayan Stinging Nettle Plant/Yarns/2. Natural Stinging Nettle [Fine]/1.jpg"
+      inline:
+        - path: "3. Product Images & Excel/Photo Collection Images/Photography trial 1/"
+          use_for: "Yarn close-up and texture shots"
+        - path: "3. Product Images & Excel/Photo Collection Images/Trial 2 - Sunlight/"
+          use_for: "Natural yarn in sunlight showing lustre"
+
+  # ──────────────────────────────────────────────────────────────────
+  # DRAFT 2: Care Guide for Natural Fibers
+  # ──────────────────────────────────────────────────────────────────
+  - id: "care_guide"
+    title: "How to Care for Your Natural Fiber Yarns — Washing, Drying & Storage"
+    slug: "natural-fiber-yarn-care-guide"
+    status: "idea"
+    brief:
+      topic: "Complete care guide for nettle, hemp, and wool yarns — keep them beautiful for years"
+      key_points:
+        - "Nettle: hand wash lukewarm, mild detergent, lay flat to dry"
+        - "Hemp: machine wash cold gentle — the easy one!"
+        - "Wool: hand wash cool, wool detergent, never wring"
+        - "All fibers: how to store (moth prevention for wool)"
+        - "Ironing tips by fiber type"
+        - "What to do if yarn pills or fuzzes"
+      word_count: 600
+      product_refs: ["special_nettle_yarn", "white_hemp_yarn", "himalayan_woollen_yarn"]
+    suggested_images:
+      cover: "3. Product Images & Excel/Photo Collection Images/Trial 2 - Sunlight/IMG_20241230_104539.jpg"
+      inline: []
+
+  # ──────────────────────────────────────────────────────────────────
+  # DRAFT 3: Nettle vs Hemp vs Wool — Which Fiber for Your Project?
+  # ──────────────────────────────────────────────────────────────────
+  - id: "fiber_comparison"
+    title: "Nettle vs Hemp vs Wool — Which Himalayan Fiber is Right for Your Project?"
+    slug: "nettle-vs-hemp-vs-wool-comparison"
+    status: "idea"
+    brief:
+      topic: "Practical comparison guide to help crafters choose the right fiber"
+      key_points:
+        - "Warmth: Wool > Nettle > Hemp"
+        - "Drape: Nettle (silk-like) > Hemp > Wool"
+        - "Durability: Hemp > Nettle > Wool"
+        - "Care ease: Hemp (machine wash) > Nettle > Wool"
+        - "Best for summer: Hemp and nettle (breathable)"
+        - "Best for winter: Wool and nettle-wool blends"
+        - "Best for luxury: Special nettle yarn (Himalayan Silk)"
+        - "Comparison table format"
+      word_count: 900
+      product_refs: ["special_nettle_yarn", "white_hemp_yarn", "himalayan_woollen_yarn"]
+    suggested_images:
+      cover: "3. Product Images & Excel/Photo Collection Images/Creative images/IMG_20241231_124328.jpg"
+      inline:
+        - path: "3. Product Images & Excel/1. Images_ Category Wise/3. Plant & Animal Mix/Creative Images &Videos/IMG_20240708_143535.jpg"
+          use_for: "Multiple fiber types side by side"

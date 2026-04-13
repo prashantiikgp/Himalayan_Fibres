@@ -1,0 +1,101 @@
+# Nettle Yarns — 7 Variants
+# GDrive: 3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/1. Himalayan Stinging Nettle Plant/Yarns/
+
+variants:
+  - variant_id: "himalayan_nettle_thick"
+    variant_name: "Himalayan Stinging Nettle Yarn [Thick]"
+    product_ref: "natural_nettle_yarn"
+    gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/1. Himalayan Stinging Nettle Plant/Yarns/1. Himalayan Stinging Nettle Yarn [Thick]/"
+    images: []
+    status: "needs_cataloging"
+
+  - variant_id: "natural_nettle_fine"
+    variant_name: "Natural Stinging Nettle [Fine]"
+    product_ref: "natural_nettle_yarn"
+    gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/1. Himalayan Stinging Nettle Plant/Yarns/2. Natural Stinging Nettle [Fine]/"
+    images: []
+    status: "needs_cataloging"
+
+  - variant_id: "special_nettle_thick"
+    variant_name: "Special Stinging Nettle [Thick] — Himalayan Silk"
+    product_ref: "special_nettle_yarn"
+    gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/1. Himalayan Stinging Nettle Plant/Yarns/3. Special Stinging Nettle [Thick]/"
+    images:
+      - id: "snt_1"
+        filename: "1.jpg"
+        description: "Special Nettle Yarn product shot 1"
+        tags: ["product", "special nettle"]
+        best_for: ["product page"]
+
+      - id: "snt_2_branded_skein"
+        filename: "2.jpg"
+        description: "Single skein on beige branded background with HF gold logo top-right. Natural beige/golden color, visible texture and lustre. Clean, professional e-commerce shot."
+        shot_type: "product — branded"
+        view: "full skein, side view"
+        quality: "excellent"
+        tags: ["product", "special nettle", "branded", "skein", "e-commerce"]
+        best_for: ["product page", "product guide blog", "instagram feed", "email hero"]
+
+      - id: "snt_3_closeup"
+        filename: "3.jpg"
+        description: "Close-up texture shot on beige branded background with HF logo. Shows silky lustre and fine spinning quality. Tighter crop focusing on yarn character."
+        shot_type: "product — detail"
+        view: "close-up texture"
+        quality: "excellent"
+        tags: ["product", "special nettle", "texture", "close-up", "detail"]
+        best_for: ["product detail", "craft tips", "instagram"]
+
+      - id: "snt_4_spiral"
+        filename: "4.jpg"
+        description: "Yarn coiled flat in spiral/rose shape on beige branded background with HF logo. Artistic top-down view. Individual strands radiating from center. Visually striking."
+        shot_type: "product — artistic"
+        view: "top-down spiral"
+        quality: "excellent"
+        tags: ["product", "special nettle", "artistic", "flat lay", "spiral"]
+        best_for: ["hero image", "instagram", "website banner", "email header"]
+
+      - id: "snt_hanging"
+        filename: "ERB Sepcial_1.webp"
+        description: "Full-length hank hanging against grey concrete wall. Shows drape and natural color."
+        shot_type: "product — full length"
+        format: "webp"
+        quality: "moderate"
+        tags: ["product", "special nettle", "hanging", "drape"]
+        best_for: ["blog inline", "behind the scenes"]
+
+      - id: "snt_branded_alt"
+        filename: "ERB Special_3.webp"
+        description: "NEEDS VIEWING"
+        format: "webp"
+        status: "needs_viewing"
+
+    subfolders: ["Raw Images", "Raw_2"]
+    has_videos: true
+    video_files: ["1.mp4", "2.mp4", "3.mp4", "4.mp4", "Product Card_800  800 px.mp4"]
+
+  - variant_id: "white_nettle_thick"
+    variant_name: "White Stinging Nettle [Thick]"
+    gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/1. Himalayan Stinging Nettle Plant/Yarns/4. White Stinging Nettle [Thick]/"
+    images: []
+    status: "needs_cataloging"
+
+  - variant_id: "turkish_red_nettle"
+    variant_name: "Turkish Red Stinging Nettle [Thick]"
+    gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/1. Himalayan Stinging Nettle Plant/Yarns/5. Tuirkish Red Stinging Nettle [Thick]/"
+    images: []
+    status: "needs_cataloging"
+    notes: "Dyed variant — red color from Turkish Red dye"
+
+  - variant_id: "onion_peel_nettle"
+    variant_name: "Onion Peel Stinging Nettle [Thick]"
+    gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/1. Himalayan Stinging Nettle Plant/Yarns/6. Onion Peel Stinging Nettle [Thick]/"
+    images: []
+    status: "needs_cataloging"
+    notes: "Natural dyed variant — onion peel produces warm golden/brown tones"
+
+  - variant_id: "indigo_blue_nettle"
+    variant_name: "Indigo Blue Stinging Nettle [Thick]"
+    gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/1. Himalayan Stinging Nettle Plant/Yarns/7. Indigo Blue Stinging Nettle [ Thick]/"
+    images: []
+    status: "needs_cataloging"
+    notes: "Natural dyed variant — indigo blue color"

@@ -1,0 +1,361 @@
+# From Wild Plant to Finished Yarn — The 12-Step Journey of Himalayan Nettle
+# Behind-the-scenes process deep-dive across harvest, extract, process, finish phases
+# Recreated from Wix draft post (2026-04-12 session)
+
+post:
+  id: "nettle_12_step_journey"
+  title: "From Wild Plant to Finished Yarn — The 12-Step Journey of Himalayan Nettle"
+  slug: "nettle-12-step-journey"
+  status: "draft"
+  category: "behind_the_scenes"
+  featured: false
+  tags:
+    - "nettle"
+    - "fiber processing"
+    - "handcraft"
+    - "sustainability"
+    - "behind the scenes"
+    - "yarn production"
+
+seo:
+  meta_title: "From Wild Plant to Finished Yarn — The 12-Step Journey of Himalayan Nettle"
+  meta_description: "Follow the complete 12-step journey of how a wild Himalayan nettle plant becomes a premium skein of yarn."
+  focus_keyword: "himalayan nettle yarn process"
+
+cover_image:
+  # --- DISPLAY ---
+  alt: "Wild stinging nettle plants growing in Meghalaya"
+  caption: null
+  layout:
+    style: "full_width"
+    alignment: "center"
+  # --- SOURCE ---
+  catalog_ref: "field_stories/meghalaya/nettle_sites.yml#meghalaya_nettle_closeup"
+  local_file: "/mnt/g/My Drive/1. Media & Marketing/4. Photos and Media/Meghalaya Nettle/IMG_20231021_121005.jpg"
+  filename: "IMG_20231021_121005.jpg"
+  description: "Nettle plant close-up in natural setting."
+  shot_type: null
+  quality: null
+  tags: ["nettle", "plant", "close-up"]
+  best_for: ["plant identification", "educational"]
+  # --- PUBLISH STATE ---
+  wix_media_id: "b6e546_b1fdb56c92c84481a77290351f77834b~mv2.jpg"
+
+brief:
+  topic: "Complete 12-step process from wild nettle harvesting through to finished skein, grouped into 4 phases"
+  key_points:
+    - "Phase 1 Harvest: identifying plants, cutting stalks, stripping bark"
+    - "Phase 2 Extract: retting and fiber extraction (manual or ERB)"
+    - "Phase 3 Process: washing, drying, degumming, carding/combing"
+    - "Phase 4 Finish: spinning, dyeing, skeining and quality check"
+    - "Total timeline: 2 weeks to 2 months depending on grade"
+    - "Girardinia diversifolia grows at 1,500-3,000m elevations"
+  tone: "educational, process-driven"
+  target_audience: "textile buyers, craft enthusiasts, sustainability researchers"
+  minutes_to_read: 4
+
+content:
+  - type: paragraph
+    text: |
+      A skein of Himalayan nettle yarn is one of the most remarkable
+      natural textiles in the world — strong as linen, soft as silk when
+      processed well, naturally antibacterial, and entirely sustainable.
+      But how does a wild stinging plant growing on a remote Himalayan
+      slope become that beautiful, finished yarn?
+
+  - type: paragraph
+    text: |
+      The answer is a 12-step journey that blends centuries-old handcraft
+      traditions with modern innovation. Each step requires skill,
+      patience, and deep knowledge of the plant and the land. Here is the
+      complete process, from forest floor to finished skein.
+
+  - type: heading
+    level: 2
+    text: "Phase 1: Harvest (Steps 1–3)"
+
+  - type: heading
+    level: 3
+    text: "Step 1: Identifying and Selecting Plants"
+
+  - type: paragraph
+    text: |
+      The journey begins in the wild. Himalayan stinging nettle (Girardinia
+      diversifolia) grows naturally at elevations between 1,500 and 3,000
+      meters across Nepal, Uttarakhand, and Northeast India. Our
+      experienced foragers — most of them women who have been harvesting
+      nettle since childhood — trek into the forests and hillsides to
+      identify mature plants. They look for thick stalks with
+      well-developed bark, typically harvested between October and December
+      after the monsoon season when the fibers are strongest.
+
+  - type: heading
+    level: 3
+    text: "Step 2: Harvesting the Stalks"
+
+  - type: paragraph
+    text: |
+      Harvesting nettle is not for the faint-hearted. The plant's leaves
+      and stems are covered in stinging hairs that cause intense irritation
+      on contact. Artisans wear minimal protective gear — often just their
+      experienced hands and traditional techniques — as they cut the
+      stalks at the base using sickles. The stalks are bundled and carried
+      back to the village, often over rugged mountain trails that can take
+      hours to traverse.
+
+  - type: heading
+    level: 3
+    text: "Step 3: Bark Stripping"
+
+  - type: paragraph
+    text: |
+      Once back in the village, the outer bark is carefully stripped from
+      the stalks by hand. This is where the usable fiber lives — in the
+      bast layer just beneath the outer skin. Artisans use a combination of
+      fingernails, simple tools, and decades of muscle memory to peel long
+      ribbons of bark from each stalk. The inner woody core is set aside
+      for composting or fuel. A skilled artisan can strip several dozen
+      stalks per hour, yielding thin, ribbon-like strips of raw bark.
+
+  - type: image
+    # --- DISPLAY ---
+    alt: "Woman artisan stripping nettle bark on a green hillside in traditional red dress"
+    caption: null
+    layout:
+      style: "content"
+      alignment: "center"
+    # --- SOURCE ---
+    catalog_ref: "field_stories/nepal/bishal_farm.yml#bishal_woman_stripping"
+    local_file: "/mnt/g/My Drive/1. Media & Marketing/4. Photos and Media/Bishal Farm Images/Farmer Images/1678866670639.jpeg"
+    filename: "1678866670639.jpeg"
+    description: "Woman artisan stripping nettle bark on hillside. Red dress, white headband, green stalks. Another woman behind her. Lush mountain greenery."
+    shot_type: "action"
+    quality: "high — professional, emotional"
+    tags: ["artisan", "women", "bark stripping", "traditional", "hillside"]
+    best_for: ["blog hero", "sustainability", "women empowerment", "instagram"]
+    # --- PUBLISH STATE ---
+    wix_media_id: "b6e546_39856c7142a04c07b29367fe1e353007~mv2.jpeg"
+
+  - type: heading
+    level: 2
+    text: "Phase 2: Extract (Steps 4–5)"
+
+  - type: heading
+    level: 3
+    text: "Step 4: Retting"
+
+  - type: paragraph
+    text: |
+      The stripped bark is soaked in water for several days in a process
+      called retting. This controlled microbial decomposition breaks down
+      the pectin and gummy substances that bind the fiber to the
+      non-fibrous plant material. Artisans monitor the process carefully —
+      too little retting leaves the fiber coarse and difficult to work
+      with; too much weakens it. The water used is typically from mountain
+      streams, and the retted waste is biodegradable.
+
+  - type: heading
+    level: 3
+    text: "Step 5: Fiber Extraction"
+
+  - type: paragraph
+    text: |
+      After retting, the softened bark is either beaten and scraped by
+      hand to separate the fibers, or processed through our ERB
+      decorticator machines. The traditional manual method yields about one
+      to two kilograms of raw fiber per day per artisan. The ERB
+      decorticator increases this to five to ten kilograms per day while
+      maintaining fiber quality. Either way, the result is long, silky
+      strands of raw nettle fiber — pale green to golden in color,
+      remarkably strong, and ready for the next stage.
+
+  - type: image
+    # --- DISPLAY ---
+    alt: "ERB decorticator machine being operated by a farmer in a Himalayan mountain clearing"
+    caption: null
+    layout:
+      style: "content"
+      alignment: "center"
+    # --- SOURCE ---
+    catalog_ref: "machines/erb_decorticator.yml#erb_machine_operating"
+    local_file: "/mnt/g/My Drive/1. Media & Marketing/4. Photos and Media/Bishal Farm Images/Team & Machine Videos/Machine Pic.png"
+    filename: "Machine Pic.png"
+    description: "ERB decorticator being operated in the field. Red machine on wheeled cart, farmer feeding nettle stalks. Dried fiber on frame behind. Mountain clearing."
+    shot_type: "action"
+    format: "png"
+    quality: "excellent — machine in real use, great storytelling"
+    tags: ["ERB", "decorticator", "machine", "farmer", "field operation", "technology"]
+    best_for: ["technology blog hero", "innovation content", "ERB decorticator post"]
+    # --- PUBLISH STATE ---
+    wix_media_id: "b6e546_bc1f9ffa09ff48c2a42d3c9337a5cdc3~mv2.png"
+
+  - type: heading
+    level: 2
+    text: "Phase 3: Process (Steps 6–9)"
+
+  - type: heading
+    level: 3
+    text: "Step 6: Washing"
+
+  - type: paragraph
+    text: |
+      The extracted fibers are thoroughly washed in clean mountain water to
+      remove residual plant matter, retting byproducts, and any remaining
+      stinging compounds. Multiple rinses ensure the fiber is clean, soft,
+      and safe to handle with bare hands. At this point, the sting is
+      completely gone.
+
+  - type: heading
+    level: 3
+    text: "Step 7: Drying"
+
+  - type: paragraph
+    text: |
+      Washed fibers are spread out on rocks, bamboo racks, or rooftops to
+      dry in the mountain sun and breeze. Drying typically takes two to
+      three days depending on weather conditions. Proper drying is
+      essential — fibers that retain moisture can develop mold, while
+      over-drying makes them brittle. Experienced artisans know exactly
+      when the fiber has reached the perfect moisture content by touch
+      alone.
+
+  - type: image
+    # --- DISPLAY ---
+    alt: "Pile of dried golden nettle fiber bundles ready for processing"
+    caption: null
+    layout:
+      style: "content"
+      alignment: "center"
+    # --- SOURCE (needs_cataloging: fill these in manually) ---
+    catalog_ref: null                 # TODO point to catalogue entry once created
+    local_file: null                  # TODO fill full /mnt/g/My Drive/... path
+    filename: null
+    description: "Pile of dried golden nettle fiber bundles ready for processing"
+    shot_type: null
+    quality: null
+    tags: []
+    best_for: []
+    status: "needs_cataloging"
+    # --- PUBLISH STATE ---
+    wix_media_id: "b6e546_ecfe58bee7bf4990b168865d3db9558f~mv2.jpg"
+
+  - type: heading
+    level: 3
+    text: "Step 8: Degumming"
+
+  - type: paragraph
+    text: |
+      For finer yarn grades, the dried fiber undergoes an additional
+      degumming process. The fiber is simmered in an alkaline solution —
+      traditionally wood ash water, or in modern processing, a mild soda
+      ash bath — to dissolve remaining lignin and pectin. This softens the
+      fiber dramatically, transforming it from a coarse, rope-like texture
+      to something approaching the hand-feel of silk. The degummed fiber
+      is rinsed again and dried.
+
+  - type: heading
+    level: 3
+    text: "Step 9: Carding and Combing"
+
+  - type: paragraph
+    text: |
+      The clean, dry fibers are carded — brushed and aligned using hand
+      carders or drum carders — to create a uniform roving. Carding
+      untangles the fibers, removes any remaining short or broken strands,
+      and aligns them in parallel for smooth, even spinning. For premium
+      yarns, the fiber is also combed to remove shorter fibers and create
+      an even more refined, lustrous preparation.
+
+  - type: heading
+    level: 2
+    text: "Phase 4: Finish (Steps 10–12)"
+
+  - type: heading
+    level: 3
+    text: "Step 10: Spinning"
+
+  - type: paragraph
+    text: |
+      This is where the magic happens. The prepared roving is spun into
+      yarn using traditional drop spindles, charkhas (spinning wheels), or
+      in some cases, small-scale spinning machines. Most of our nettle
+      yarn is handspun — each artisan develops their own rhythm and
+      tension, giving handspun yarn its characteristic warmth and slight
+      irregularity that machine-spun yarns simply cannot replicate.
+      Spinning is the most skilled stage of the entire process, and our
+      best spinners can produce remarkably fine, consistent yarn.
+
+  - type: image
+    # --- DISPLAY ---
+    alt: "Elderly Himalayan woman artisan smiling warmly while hand-spinning nettle fiber, red headscarf and traditional jewelry, mountains behind"
+    caption: null
+    layout:
+      style: "content"
+      alignment: "center"
+    # --- SOURCE ---
+    catalog_ref: "field_stories/nepal/bishal_farm.yml#bishal_elder_spinning"
+    local_file: "/mnt/g/My Drive/1. Media & Marketing/4. Photos and Media/Bishal Farm Images/Farmer Images/1678866670700.jpeg"
+    filename: "1678866670700.jpeg"
+    description: "Elderly woman on stone wall, smiling warmly, red headscarf, traditional jewelry, holding spindle. Himalayan mountains behind. Joyful, magazine-worthy portrait."
+    shot_type: "portrait"
+    quality: "excellent — best artisan portrait"
+    tags: ["artisan", "women", "spinning", "portrait", "smiling", "mountains"]
+    best_for: ["blog hero", "about us", "instagram", "women empowerment", "cover image"]
+    # --- PUBLISH STATE ---
+    wix_media_id: "b6e546_3a849abfccc04708fa7d7fddad4c2e9~mv2.jpeg"
+
+  - type: heading
+    level: 3
+    text: "Step 11: Dyeing"
+
+  - type: paragraph
+    text: |
+      Spun yarn can be left in its natural color — a beautiful
+      golden-to-cream shade — or dyed using natural or low-impact dyes.
+      Traditional botanical dyes include walnut husks (brown), turmeric
+      (yellow), indigo (blue), and madder root (red). The yarn is
+      simmered in dye baths, often with natural mordants like alum to fix
+      the color. Each dye bath is slightly different, giving naturally
+      dyed yarn beautiful tonal variations.
+
+  - type: heading
+    level: 3
+    text: "Step 12: Skeining and Quality Check"
+
+  - type: paragraph
+    text: |
+      The finished yarn is wound into skeins using a niddy-noddy or swift,
+      weighed, and subjected to a final quality check. Each skein is
+      inspected for consistency, strength, color evenness, and overall
+      hand-feel. Skeins that meet our standards are labeled, photographed,
+      and prepared for shipping. Those that fall short are set aside for
+      reworking or downgraded to a different product grade.
+
+  - type: heading
+    level: 2
+    text: "The Full Circle"
+
+  - type: paragraph
+    text: |
+      From a wild stinging plant on a remote Himalayan hillside to a
+      finished skein of premium yarn in your hands — this 12-step journey
+      takes anywhere from two weeks to two months depending on weather,
+      volume, and the specific yarn grade being produced. Every step is
+      performed with care, with skill, and with deep respect for the
+      plant, the land, and the traditions that make it all possible.
+
+  - type: paragraph
+    text: |
+      When you hold a skein of Himalayan nettle yarn, you are holding the
+      work of many hands, the knowledge of many generations, and the
+      spirit of some of the most resilient communities on Earth. That is
+      what makes it truly extraordinary.
+
+author:
+  name: "Prashant Agrawal"
+  role: "Founder"
+
+# ---- PUBLISHING STATUS (auto-filled) ----
+wix_post_id: "4d56336c-64d2-4c9f-a465-574c1af1b82d"
+wix_status: "draft"
+# Media IDs are now inlined per-image under each content block's `wix_media_id` field.

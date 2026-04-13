@@ -1,0 +1,40 @@
+page:
+  title: "Templates"
+
+  channels:
+    - id: email
+      label: "Email"
+    - id: whatsapp
+      label: "WhatsApp"
+    - id: media
+      label: "Media"
+
+  email_table:
+    title: "Email Templates"
+    columns:
+      - field: name
+        label: "Name"
+      - field: slug
+        label: "Slug"
+      - field: category
+        label: "Type"
+      - field: subject_template
+        label: "Subject"
+
+  wa_table:
+    title: "WhatsApp Templates (Meta-Approved)"
+    columns:
+      - field: display_name
+        label: "Name"
+      - field: name
+        label: "Template ID"
+      - field: category
+        label: "Category"
+      - field: use_case
+        label: "Use Case"
+      - field: variable_count
+        label: "Vars"
+
+  test_send:
+    label: "Test Send"
+    email_placeholder: "test@example.com"

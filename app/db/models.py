@@ -106,10 +106,19 @@ class EmailType(enum.Enum):
     CAMPAIGN = "campaign"
 
 
+class WhatsAppConsentStatus(enum.Enum):
+    """WhatsApp-specific consent status."""
+
+    UNKNOWN = "unknown"
+    OPTED_IN = "opted_in"
+    OPTED_OUT = "opted_out"
+
+
 class WebhookSource(enum.Enum):
     """Source of webhook events."""
 
     WIX = "wix"
+    WHATSAPP = "whatsapp"
     MANUAL = "manual"
 
 
@@ -144,6 +153,15 @@ class Contact(Base):
     consent_source: Mapped[str | None] = mapped_column(String(100))  # e.g., "excel_import", "wix_checkout"
     consent_timestamp: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
+    # WhatsApp identity
+    wa_id: Mapped[str | None] = mapped_column(String(64), unique=True, index=True)
+    wa_consent_status: Mapped[WhatsAppConsentStatus] = mapped_column(
+        Enum(WhatsAppConsentStatus), default=WhatsAppConsentStatus.UNKNOWN
+    )
+    wa_profile_name: Mapped[str | None] = mapped_column(String(255))
+    last_wa_inbound_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_wa_outbound_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
     # Engagement tracking
     last_email_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_email_opened_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
@@ -165,6 +183,7 @@ class Contact(Base):
     email_sends: Mapped[list["EmailSend"]] = relationship(back_populates="contact")
     orders: Mapped[list["Order"]] = relationship(back_populates="contact")
     abandoned_carts: Mapped[list["AbandonedCart"]] = relationship(back_populates="contact")
+    wa_chat: Mapped["WAChat | None"] = relationship(back_populates="contact")  # type: ignore[name-defined]  # noqa: F821
 
     __table_args__ = (
         Index("ix_contacts_consent_status", "consent_status"),

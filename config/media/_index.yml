@@ -1,0 +1,58 @@
+# Media Catalog — Master Index
+# Single source of truth for all image assets across all channels.
+# Mirrors the actual Google Drive structure + Himalayan Fibres product hierarchy.
+#
+# Usage:
+#   1. Need an image? → Find the right category file, search by tags or best_for
+#   2. New images added to Drive? → Add entry to the right file
+#   3. Already uploaded to Wix? → Check wix_media_id field on the image
+#   4. What size for Instagram? → Check _channel_specs.yml
+#
+# All image paths are relative to this base:
+gdrive_base: "/mnt/g/My Drive/1. Media & Marketing"
+
+catalog:
+  products:
+    plant_fibre:
+      nettle:
+        yarns: "products/plant_fibre/nettle/yarns.yml"
+        fibres: "products/plant_fibre/nettle/fibres.yml"
+      hemp:
+        yarns: "products/plant_fibre/hemp/yarns.yml"
+        fibres: "products/plant_fibre/hemp/fibres.yml"
+    animal_fibre: "products/animal_fibre/tibetan_wool.yml"
+    blended_collections:
+      burberry: "products/blended_collections/burberry.yml"
+      noor: "products/blended_collections/noor.yml"
+      seriry: "products/blended_collections/seriry.yml"
+      snow_white: "products/blended_collections/snow_white.yml"
+    fabric: "products/fabric/fabric_samples.yml"
+    creative: "products/creative_styled/styled_shots.yml"
+
+  field_stories:
+    nepal:
+      gorkha: "field_stories/nepal/gorkha.yml"
+      pokhara_annapurna: "field_stories/nepal/pokhara_annapurna.yml"
+      tanahu: "field_stories/nepal/tanahu.yml"
+      bishal_farm: "field_stories/nepal/bishal_farm.yml"
+    uttarakhand:
+      almora: "field_stories/uttarakhand/almora.yml"
+      bageshwar: "field_stories/uttarakhand/bageshwar.yml"
+      rishikesh: "field_stories/uttarakhand/rishikesh.yml"
+    meghalaya: "field_stories/meghalaya/nettle_sites.yml"
+
+  machines:
+    erb: "machines/erb_decorticator.yml"
+    gaurav: "machines/gaurav_decorticator.yml"
+    other: "machines/other_machines.yml"
+
+  processing: "processing/stages.yml"
+
+  people:
+    artisans_farmers: "people/artisans_farmers.yml"
+    team: "people/team.yml"
+
+  brand: "brand/assets.yml"
+
+  reels:
+    instagram: "reels.yml"            # Instagram Reels — original + AI-generated video catalog

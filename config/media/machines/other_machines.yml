@@ -1,0 +1,13 @@
+# Other Machines
+
+machines:
+  - id: "jute_softening"
+    gdrive_folder: "4. Photos and Media/Jute Softening Machine/"
+    description: "Jute softening machine images/videos"
+    status: "needs_cataloging"
+
+  - id: "india_fiber_opener"
+    gdrive_folder: "4. Photos and Media/1. Farm Videos/India Processing/"
+    description: "India processing videos — fiber opener machine, harvesting"
+    video_files: ["Fibre Opener.mp4", "Harvesting Plants.mp4"]
+    status: "needs_cataloging"

@@ -1,0 +1,20 @@
+# Rishikesh — Uttarakhand Field Story
+
+location: "Rishikesh, Uttarakhand"
+gdrive_folder: "4. Photos and Media/1. Farm Videos/Rishikesh Hemp Farm/"
+story: "Hemp farm visits near Rishikesh — exploring Himalayan hemp cultivation"
+
+images:
+  - id: "rishikesh_team"
+    filename: "1670924853438.jpg"
+    description: "Group of 5 men at hemp farm. NOTE: Image is upside-down — needs 180-degree rotation."
+    quality: "moderate — needs rotation fix"
+    tags: ["team", "hemp farm", "rishikesh"]
+    best_for: ["hemp sourcing story"]
+
+  - id: "rishikesh_2"
+    filename: "1670924853449.jpg"
+    status: "needs_viewing"
+
+has_videos: true
+video_files: ["VID_20220902_155315.mp4", "VID_20220902_155317.mp4", "VID_20220902_155328.mp4", "VID_20220902_161811.mp4", "VID_20220902_161850.mp4"]

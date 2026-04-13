@@ -1,0 +1,119 @@
+# Collection Stories — Content Strategy
+# On-ground collection journeys, farmer partnerships, founding story
+# Wix Category ID: 392d35f0-bfa5-4766-8945-6ca27e536303
+
+strategy:
+  purpose: "Show the real, on-ground work — collection expeditions, farmer partnerships, fiber masters, and the origin story of Himalayan Fibres"
+  audience: "Everyone — builds trust, shows authenticity"
+  frequency: "1-2 posts per month (can cover different seasons/regions)"
+  tone: "Personal, narrative, inspiring — first-person where possible"
+
+# ──────────────────────────────────────────────────────────────────
+# DRAFT 1: The Founding Story
+# ──────────────────────────────────────────────────────────────────
+drafts:
+  - id: "founding_story"
+    title: "How a Walk Through the Himalayas Started Himalayan Fibres"
+    slug: "how-himalayan-fibres-started"
+    status: "idea"
+    brief:
+      topic: "The origin story — how Prashant discovered nettle/hemp potential in Himalayan villages and started the company in 2018"
+      key_points:
+        - "First encounter with wild nettle and hemp in Himalayan villages"
+        - "Seeing the gap: traditional knowledge + wild plants = untapped value"
+        - "Decision to build sustainable livelihoods, not just a business"
+        - "Early challenges: processing, quality, supply chain"
+        - "First customers, first products, first impact"
+      word_count: 1000
+      product_refs: ["special_nettle_yarn", "nettle_plant_fibre"]
+    suggested_images:
+      cover: "4. Photos and Media/Gorkha Trail/Team Nepal.jpeg"
+      inline:
+        - path: "4. Photos and Media/Nepal Working Photos/1657867031381.jpg"
+          use_for: "Early village work with artisans"
+        - path: "4. Photos and Media/Bishal Farm Images/Team & Machine Videos/Team Image.jpeg"
+          use_for: "Team on the ground"
+        - path: "4. Photos and Media/1. Farm Videos/Almora Visit/1670925762622.jpg"
+          use_for: "Village visit in Uttarakhand"
+
+  # ──────────────────────────────────────────────────────────────────
+  # DRAFT 2: Gorkha Trail Collection
+  # ──────────────────────────────────────────────────────────────────
+  - id: "gorkha_collection"
+    title: "The Gorkha Trail — Collecting Wild Nettle in Nepal's Mountains"
+    slug: "gorkha-trail-nettle-collection"
+    status: "idea"
+    brief:
+      topic: "A story of a specific collection expedition to the Gorkha region of Nepal — the trail, the farmers, the harvest"
+      key_points:
+        - "Journey to the Gorkha region — terrain, altitude, remoteness"
+        - "Meeting local farmer communities who know nettle plants"
+        - "How wild nettle is identified, harvested, and initially processed on site"
+        - "Fiber masters teaching mechanical extraction to farmers"
+        - "Impact: turning a wild weed into income for remote families"
+      word_count: 800
+      product_refs: ["nettle_plant_fibre"]
+    suggested_images:
+      cover: "4. Photos and Media/Gorkha Trail/Team Nettle Cricle.jpeg"
+      inline:
+        - path: "4. Photos and Media/Nepal Working Photos/1657867031365.jpg"
+          use_for: "Artisans on mountain terrain"
+        - path: "4. Photos and Media/Nepal Working Photos/1657867031396.jpg"
+          use_for: "Working with nettle bundles"
+        - path: "4. Photos and Media/1. Farm Videos/Nepal Plantation & Collection/Gorkha _ FARM Campaign/Visit 1st/"
+          use_for: "Farm visit photos"
+
+  # ──────────────────────────────────────────────────────────────────
+  # DRAFT 3: Pokhara Annapurna Bark Collection
+  # ──────────────────────────────────────────────────────────────────
+  - id: "pokhara_annapurna"
+    title: "Annapurna Collection Story — Wild Nettle from the Roof of the World"
+    slug: "annapurna-nettle-collection-story"
+    status: "idea"
+    brief:
+      topic: "The Pokhara Annapurna bark collection expedition — one of the most remote sourcing journeys"
+      key_points:
+        - "Location: Annapurna region near Pokhara, Nepal"
+        - "High-altitude collection — nettle grows wild above 2000m"
+        - "Local communities as partners, not just suppliers"
+        - "Bark stripping and drying process at altitude"
+        - "Quality: how altitude affects fiber quality"
+      word_count: 800
+      product_refs: ["special_nettle_yarn"]
+    suggested_images:
+      cover: "4. Photos and Media/1. Farm Videos/Nettle Collection/Pokhra Anapurna Bark Collection/1670926124066.jpg"
+      inline:
+        - path: "4. Photos and Media/1. Farm Videos/Nettle Collection/Pokhra Anapurna Bark Collection/1670926124101.jpg"
+          use_for: "Bark collection process"
+        - path: "4. Photos and Media/1. Farm Videos/Nettle Collection/Pokhra Anapurna Bark Collection/1670926124191.jpg"
+          use_for: "Mountain landscape with team"
+        - path: "4. Photos and Media/Meghalaya Nettle/Nettle Pic 1 .jpg"
+          use_for: "Wild nettle plant close-up"
+
+  # ──────────────────────────────────────────────────────────────────
+  # DRAFT 4: Fiber Masters — Empowering Farmers
+  # ──────────────────────────────────────────────────────────────────
+  - id: "fiber_masters"
+    title: "Fiber Masters — How We Help Himalayan Farmers Earn More from Wild Plants"
+    slug: "fiber-masters-farmer-empowerment"
+    status: "idea"
+    brief:
+      topic: "The fiber masters program — deploying trained experts who teach farmers mechanical extraction to increase their revenue"
+      key_points:
+        - "What is a fiber master: trained experts in nettle/hemp extraction"
+        - "Deployed to remote villages with ERB decorticator technology"
+        - "Teaching farmers to move from raw bark selling to fiber extraction"
+        - "Revenue increase: farmers earn 3-5x more with processed fiber vs raw bark"
+        - "Bishal Farm as a case study"
+        - "Sustainable employment through sustainable work"
+      word_count: 1000
+      product_refs: ["nettle_plant_fibre", "natural_nettle_yarn"]
+    suggested_images:
+      cover: "4. Photos and Media/Bishal Farm Images/Team & Machine Videos/Introducing ERB Tech to Farmer.jpeg"
+      inline:
+        - path: "4. Photos and Media/Bishal Farm Images/Team & Machine Videos/Machine Pic.png"
+          use_for: "ERB decorticator in the field"
+        - path: "4. Photos and Media/Bishal Farm Images/Farmer Images/1678866670639.jpeg"
+          use_for: "Farmer working with fiber"
+        - path: "4. Photos and Media/Bishal Farm Images/Manual Extraction/IMG20210101102034.jpg"
+          use_for: "Manual vs mechanical extraction comparison"

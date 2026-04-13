@@ -1,0 +1,24 @@
+# Hemp Fibres — 3 Processing Stages
+# GDrive: 3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/2. Himalayan Hemp Plant/1. Fibres/
+
+stages:
+  - stage_id: "hemp_raw"
+    stage_name: "Himalayan Hemp Fibres [Raw]"
+    gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/2. Himalayan Hemp Plant/1. Fibres/1. Himalayan Hemp Fibres [Raw]/"
+    description: "Raw hemp fibre — unprocessed bark strips straight from the plant"
+    status: "needs_cataloging"
+    tags: ["fibre", "hemp", "raw"]
+
+  - stage_id: "hemp_degummed"
+    stage_name: "Himalayan Hemp Fibres [Degummed]"
+    gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/2. Himalayan Hemp Plant/1. Fibres/2. Himalayan Hemp Fibres [Degummed]/"
+    description: "Hemp fibre after degumming — gums and pectin removed, cleaner and softer"
+    status: "needs_cataloging"
+    tags: ["fibre", "hemp", "degummed"]
+
+  - stage_id: "hemp_cottonised"
+    stage_name: "Himalayan Hemp Fibres [Cottonized]"
+    gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/2. Himalayan Hemp Plant/1. Fibres/3. Himalayan Hemp Fibres [Cottonized]/"
+    description: "Hemp fibre fully cottonised — soft, cotton-like, ready for fine spinning"
+    status: "needs_cataloging"
+    tags: ["fibre", "hemp", "cottonised", "soft"]

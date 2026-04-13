@@ -1,0 +1,25 @@
+# Almora — Uttarakhand Field Story
+
+location: "Almora, Uttarakhand"
+gdrive_folder: "4. Photos and Media/1. Farm Videos/Almora Visit/"
+story: "Village visits in Almora district — inspecting wild nettle growth, meeting local communities"
+
+images:
+  - id: "almora_examining_nettle"
+    filename: "1670925762622.jpg"
+    description: "Man examining wild nettle plant in dense green forest. Holds leaf/branch, looking closely. Very green lush Uttarakhand forest. NOTE: Image rotated sideways — needs 90-degree fix."
+    shot_type: "action portrait"
+    quality: "good — needs rotation fix"
+    tags: ["field visit", "almora", "nettle plant", "research", "uttarakhand"]
+    best_for: ["sourcing story", "wild harvesting blog"]
+
+  - id: "almora_2"
+    filename: "1670925762633.jpg"
+    status: "needs_viewing"
+  - id: "almora_3"
+    filename: "1670925762661.jpg"
+    status: "needs_viewing"
+
+total_images: 8
+has_videos: true
+video_files: ["VID_20210924_115719.mp4"]

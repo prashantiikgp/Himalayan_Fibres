@@ -1,0 +1,42 @@
+# Tibetan Wool — Product Images
+# GDrive: 3. Product Images & Excel/1. Images_ Category Wise/2. Animal Fibre/1. Tibetan Wool/
+
+product_ref: "himalayan_woollen_yarn"
+gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/2. Animal Fibre/1. Tibetan Wool/"
+
+images:
+  - id: "tw_1_hanging"
+    filename: "1.jpg"
+    description: "Tibetan Wool hank hanging against grey wall with HF logo watermark. Creamy white, soft fluffy texture. Shows drape and softness."
+    shot_type: "product — branded"
+    quality: "good"
+    tags: ["product", "tibetan wool", "white", "soft", "hanging"]
+    best_for: ["product page", "wool guide blog", "winter content"]
+
+  - id: "tw_2_hanging_branded"
+    filename: "2.jpg"
+    description: "Tibetan Wool hank hanging against grey concrete wall with HF gold logo watermark top-right. Creamy white color, showing full length and drape. Slightly different angle from tw_1."
+    shot_type: "product — branded"
+    quality: "good — clean branded shot"
+    tags: ["product", "tibetan wool", "white", "hanging", "branded"]
+    best_for: ["product page", "email", "website"]
+
+  - id: "tw_4_spiral_branded"
+    filename: "4.jpg"
+    description: "Tibetan Wool coiled in flat spiral/rose shape on beige branded background with HF logo. Pure white, fine spinning visible. Artistic top-down shot — matches Special Nettle spiral style."
+    shot_type: "product — artistic"
+    quality: "excellent — visually striking, e-commerce ready"
+    tags: ["product", "tibetan wool", "spiral", "artistic", "white", "branded"]
+    best_for: ["hero image", "instagram feed", "website banner", "product page"]
+
+  - id: "tw_5_closeup_branded"
+    filename: "5.jpg"
+    description: "Close-up of Tibetan Wool showing fiber detail on beige branded background with HF logo. Soft, fluffy white strands visible. Shows the wool's softness and character."
+    shot_type: "product — detail"
+    quality: "good — shows texture"
+    tags: ["product", "tibetan wool", "close-up", "texture", "white"]
+    best_for: ["product detail", "craft tips", "quality showcase"]
+
+subfolders: ["RAaw 2", "Raw"]
+has_videos: true
+video_files: ["Product Card_800  800 px (1).mp4", "Product Card_800  800 px.mp4"]

@@ -1,0 +1,46 @@
+# Story Page Template
+# For brand narrative pages: About Us, Our Story, Meet Our Artisans, etc.
+# These publish as featured blog posts and can be linked from site navigation.
+#
+# Usage: Same as blog posts — fill brief, Claude generates, you review, Claude publishes.
+
+post:
+  id: ""                              # e.g. "our_story", "about_us"
+  title: ""
+  slug: ""                            # e.g. "our-story"
+  status: "draft"                     # draft | ready | published
+  category: "storytelling"            # stories default to "storytelling" category
+  featured: true                      # stories are pinned/featured
+  tags: []
+
+seo:
+  meta_title: ""
+  meta_description: ""
+  focus_keyword: ""
+
+cover_image:
+  local_file: ""
+  alt: ""
+
+# ---- INPUT SECTION ----
+brief:
+  topic: ""
+  key_points: []
+  tone: ""
+  target_audience: ""
+  word_count: 1200                    # stories are typically longer
+  product_refs: []
+
+# ---- CONTENT SECTION (Claude generates, you review) ----
+content: []
+
+images: []
+
+author:
+  name: "Prashant Agrawal"
+  role: "Founder"
+
+# ---- AFTER PUBLISHING ----
+# wix_post_id: ""
+# wix_post_url: ""
+# published_date: ""

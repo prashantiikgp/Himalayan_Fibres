@@ -1,0 +1,90 @@
+# Sustainability — Content Strategy
+# Environmental impact, ethical practices, community development
+# Wix Category ID: 0f247a0e-0e80-4edd-b5ac-b3ae530e25c8
+
+strategy:
+  purpose: "Build credibility around sustainability claims with specific data, stories, and comparisons. Appeal to eco-conscious buyers."
+  audience: "Eco-conscious consumers, ethical fashion brands, sustainability-focused B2B buyers"
+  frequency: "1 post per month"
+  tone: "Factual, passionate, transparent — show real impact with numbers"
+
+drafts:
+  # ──────────────────────────────────────────────────────────────────
+  # DRAFT 1: Wild Harvesting vs Farming
+  # ──────────────────────────────────────────────────────────────────
+  - id: "wild_harvesting"
+    title: "Why We Don't Farm Our Fibers — The Power of Wild Harvesting"
+    slug: "wild-harvesting-vs-farming-himalayan-fibers"
+    status: "idea"
+    brief:
+      topic: "What wild harvesting means, why it's more sustainable than farming, and how it shapes our products"
+      key_points:
+        - "Nettle and hemp grow wild in the Himalayas — no cultivation needed"
+        - "Zero inputs: no pesticides, no fertilizers, no irrigation, no land clearing"
+        - "Plants regenerate naturally — harvesting doesn't deplete the population"
+        - "Wild plants produce stronger, more resilient fibers than cultivated ones"
+        - "Comparison with cotton farming: water usage, chemical inputs, land use"
+        - "How wild harvesting creates income without environmental cost"
+      word_count: 800
+      product_refs: ["nettle_plant_fibre"]
+    suggested_images:
+      cover: "4. Photos and Media/Meghalaya Nettle/Nettle Pic 1 .jpg"
+      inline:
+        - path: "4. Photos and Media/Meghalaya Nettle/IMG_20231019_113242.jpg"
+          use_for: "Wild nettle plant in natural habitat"
+        - path: "4. Photos and Media/Nepal Working Photos/1657867031411.jpg"
+          use_for: "Farmers with wild-harvested nettle bundles"
+
+  # ──────────────────────────────────────────────────────────────────
+  # DRAFT 2: Women Empowerment
+  # ──────────────────────────────────────────────────────────────────
+  - id: "women_empowerment"
+    title: "200+ Women, 75+ Villages — How Fiber Processing Creates Independent Incomes"
+    slug: "women-empowerment-himalayan-artisans"
+    status: "idea"
+    brief:
+      topic: "The women artisans behind Himalayan Fibres — their work, their impact, their stories"
+      key_points:
+        - "80%+ of artisan partners are women"
+        - "Many had no independent income before joining"
+        - "Skills: harvesting, fiber extraction, spinning, dyeing"
+        - "Fair wages — direct payment, no middlemen"
+        - "Traditional knowledge preservation across generations"
+        - "Community-level impact: education, healthcare, independence"
+      word_count: 900
+      product_refs: []
+    suggested_images:
+      cover: "4. Photos and Media/Nepal Working Photos/1657867031381.jpg"
+      inline:
+        - path: "4. Photos and Media/Bishal Farm Images/Farmer Images/1678866670652.jpeg"
+          use_for: "Women artisan at work"
+        - path: "4. Photos and Media/Bishal Farm Images/Farmer Images/1678866670700.jpeg"
+          use_for: "Group of women processing fiber"
+        - path: "4. Photos and Media/Nepal Working Photos/1657867031428.jpg"
+          use_for: "Village processing scene"
+
+  # ──────────────────────────────────────────────────────────────────
+  # DRAFT 3: Zero Waste Processing
+  # ──────────────────────────────────────────────────────────────────
+  - id: "zero_waste"
+    title: "From Plant to Product with Zero Waste — Our Processing Philosophy"
+    slug: "zero-waste-fiber-processing"
+    status: "idea"
+    brief:
+      topic: "How every part of the plant is used and nothing goes to waste"
+      key_points:
+        - "Outer bark → fiber extraction"
+        - "Inner pith → natural compost returned to soil"
+        - "Processing water → no chemicals, safe for land"
+        - "Fiber scraps → blending into coarser yarns"
+        - "Packaging → biodegradable materials"
+        - "Energy: hand-processing = minimal energy vs industrial textile mills"
+      word_count: 700
+      product_refs: ["nettle_plant_fibre"]
+    suggested_images:
+      cover: "4. Photos and Media/1. Farm Videos/Nepal Processing/After Drying.jpg"
+      inline:
+        - path: "4. Photos and Media/1. Farm Videos/Nepal Processing/Drying of Fibre.jpg"
+          use_for: "Fiber drying process"
+        - path: "4. Photos and Media/1. Farm Videos/Nepal Processing/Image2.jpg"
+          use_for: "Processing steps"

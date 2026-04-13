@@ -1,0 +1,35 @@
+# Team — Company Photos
+# Cross-references field_stories for location context
+
+description: "HF team photos across various field visits. For full context, see the field_stories/ files."
+
+highlights:
+  - id: "gorkha_team_nepal"
+    source: "field_stories/nepal/gorkha.yml"
+    description: "Four team members in green forest on Gorkha trail"
+    quality: "good"
+    best_for: ["about us", "our story", "team page"]
+    wix_media_id: "b6e546_ffa4873bc97b4c0ba48a53b947d5ec2e~mv2.jpeg"
+
+  - id: "gorkha_nettle_circle"
+    source: "field_stories/nepal/gorkha.yml"
+    description: "Team with local farmers examining nettle harvest"
+    quality: "good"
+    best_for: ["collection stories", "partnership content"]
+    wix_media_id: "b6e546_2fe5c238dd8345f385d0d2be3dca2be4~mv2.jpeg"
+
+  - id: "bishal_erb_intro"
+    source: "field_stories/nepal/bishal_farm.yml"
+    description: "Team + farmers with ERB machine — technology transfer moment"
+    quality: "high"
+    best_for: ["technology story", "fiber masters"]
+
+  - id: "almora_field"
+    source: "field_stories/uttarakhand/almora.yml"
+    description: "Man examining wild nettle in Uttarakhand forest"
+    best_for: ["sourcing story"]
+
+  - id: "rishikesh_hemp_team"
+    source: "field_stories/uttarakhand/rishikesh.yml"
+    description: "Team at Rishikesh hemp farm"
+    best_for: ["hemp sourcing"]

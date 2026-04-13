@@ -1,0 +1,52 @@
+# Blog Categories
+# Synced with Wix Blog — wix_id values are live on himalayanfibres.com
+# Each category has a _strategy.yml in its folder with draft post ideas
+
+categories:
+  - id: "collection_stories"
+    name: "Collection Stories"
+    description: "On-ground collection journeys, farmer partnerships, and the founding story"
+    slug: "collection-stories"
+    wix_id: "392d35f0-bfa5-4766-8945-6ca27e536303"
+    folder: "collection_stories"
+    drafts: 4
+
+  - id: "product_guides"
+    name: "Product Guides"
+    description: "Deep dives into our fibers, yarns, and collections"
+    slug: "product-guides"
+    wix_id: "e1aa185b-51d8-4bcb-9e26-ed4e1b4493d5"
+    folder: "product_guides"
+    drafts: 4
+
+  - id: "sustainability"
+    name: "Sustainability"
+    description: "Environmental impact, ethical practices, and community development"
+    slug: "sustainability"
+    wix_id: "0f247a0e-0e80-4edd-b5ac-b3ae530e25c8"
+    folder: "sustainability"
+    drafts: 3
+
+  - id: "craft_tips"
+    name: "Craft & Tips"
+    description: "Working with natural Himalayan fibers - techniques and inspiration"
+    slug: "craft-tips"
+    wix_id: "68e1377f-5e2b-48af-977a-c2dae1dc6cfe"
+    folder: "craft_tips"
+    drafts: 3
+
+  - id: "behind_the_scenes"
+    name: "Behind the Scenes"
+    description: "Village life, production process, and the people behind our fibers"
+    slug: "behind-the-scenes"
+    wix_id: "d2e363e8-c2cb-41d5-a5cd-aa474f579d2e"
+    folder: "behind_the_scenes"
+    drafts: 3
+
+  - id: "news_updates"
+    name: "News & Updates"
+    description: "Company news, trade shows, new products, and announcements"
+    slug: "news"
+    wix_id: "5baa7dfc-eeb4-4940-8418-d0a099218c08"
+    folder: "news_updates"
+    drafts: 3

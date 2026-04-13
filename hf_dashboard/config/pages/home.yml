@@ -1,0 +1,61 @@
+page:
+  title: "Dashboard"
+  auto_load: true
+
+  status_bar:
+    items:
+      - id: email
+        label: "Email (Gmail API)"
+        check: "GMAIL_REFRESH_TOKEN"
+      - id: whatsapp
+        label: "WhatsApp API"
+        check: "WA_TOKEN"
+    setup_url: "https://huggingface.co/spaces/Prashantiitkgp08/himalayan-fibers-dashboard/settings"
+
+  kpi_rows:
+    - cards:
+        - id: emails_today
+          label: "Emails Today"
+          format: "{value} / 500"
+        - id: wa_today
+          label: "WA Today"
+          format: "{value} / 1000"
+        - id: total_contacts
+          label: "Contacts"
+        - id: wa_24h_window
+          label: "24h Window"
+
+    - cards:
+        - id: opted_in
+          label: "Opted In"
+        - id: pending
+          label: "Pending"
+        - id: email_campaigns
+          label: "Email Campaigns"
+        - id: wa_campaigns
+          label: "WA Campaigns"
+
+  sections:
+    lifecycle:
+      title: "Lifecycle Breakdown"
+
+    activity:
+      title: "Recent Activity"
+      limit: 20
+      icons:
+        email_sent: "\u2709"
+        wa_sent: "\U0001F4AC"
+        wa_received: "\U0001F4E9"
+        contact_added: "\U0001F4CB"
+        campaign_sent: "\U0001F680"
+
+    getting_started:
+      title: "Getting Started"
+      steps:
+        - "Contacts \u2192 add/import contacts"
+        - "Campaigns \u2192 pick template \u2192 send"
+        - "Inbox \u2192 view/reply conversations"
+        - "Flows \u2192 automate sequences"
+
+    system:
+      title: "System"

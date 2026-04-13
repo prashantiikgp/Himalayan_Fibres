@@ -1,0 +1,41 @@
+# Snow White Series — Collection Images
+# GDrive: 3. Product Images & Excel/1. Images_ Category Wise/3. Plant & Animal Mix/4. Snow White/
+
+product_ref: "snow_white_series"
+gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/3. Plant & Animal Mix/4. Snow White/"
+
+images:
+  - id: "sw_top_hanging"
+    filename: "Top Image.jpg"
+    description: "Snow White yarn hanging full-length against brown/tan concrete wall. Pristine white, fine spinning, excellent drape. The whitest yarn in the collection."
+    shot_type: "product — full length"
+    quality: "good"
+    tags: ["product", "snow white", "white", "hanging", "drape"]
+    best_for: ["collection showcase", "product page", "wedding content"]
+
+  - id: "sw_closeup"
+    filename: "Image1.jpg"
+    description: "Extreme close-up of Snow White strands. White/cream with slight natural variation. Shows nettle-wool blend character at fiber level."
+    shot_type: "product — macro"
+    quality: "good"
+    tags: ["product", "snow white", "close-up", "texture", "macro"]
+    best_for: ["craft tips", "product detail", "quality showcase"]
+
+  - id: "sw_strands_macro"
+    filename: "Image 3.jpg"
+    description: "Extreme macro of Snow White yarn strands hanging. Individual white/cream fibers visible, showing the soft fuzzy character of the nettle-wool blend. Concrete wall partially visible on left."
+    shot_type: "product — macro"
+    quality: "good — same view as Image1 but slightly wider, shows more strands"
+    tags: ["product", "snow white", "macro", "strands", "texture"]
+    best_for: ["product detail", "texture showcase", "instagram detail"]
+
+  - id: "sw_texture_fill"
+    filename: "iamge9.jpg"
+    description: "Full-frame texture fill of Snow White yarn. White/cream strands with slight golden highlights filling entire image. No background visible — pure texture. Slightly less white than Image1, shows natural color variation."
+    shot_type: "product — texture"
+    quality: "good — pure texture shot"
+    tags: ["product", "snow white", "texture", "full frame", "pattern"]
+    best_for: ["instagram feed", "background texture", "website pattern"]
+
+has_videos: true
+video_files: ["video1.mp4", "video2.mp4", "cideo4.mp4"]

@@ -1,0 +1,217 @@
+# WhatsApp Template Registry
+# Maps template names to their usage context, variable schemas, and descriptions.
+# Templates must be pre-approved by Meta — this file describes HOW to use them.
+
+templates:
+  hello_world:
+    display_name: "Hello World (Test)"
+    description: "Default Meta test template for verifying API connectivity."
+    category: "UTILITY"
+    language: "en_US"
+    use_case: "testing"
+    variables: []
+    notes: "No variables. Use for health checks and API verification."
+
+  welcome_message:
+    display_name: "Welcome Message"
+    description: "Welcome new contacts with brand introduction and product overview."
+    category: "MARKETING"
+    language: "en"
+    use_case: "onboarding"
+    has_header_image: true
+    variables:
+      - name: "customer_name"
+        type: "text"
+        description: "Contact's name or company name"
+        required: true
+        example: "Prashant Ji"
+        max_length: 60
+    buttons:
+      - type: "URL"
+        text: "Visit website"
+        url: "https://www.himalayanfibres.com/"
+
+  order_confirmation:
+    display_name: "Order Confirmation"
+    description: "Confirm order placement with product and amount details."
+    category: "MARKETING"
+    language: "en"
+    use_case: "transactional"
+    variables:
+      - name: "customer_name"
+        type: "text"
+        description: "Customer name"
+        required: true
+        example: "Rajesh Kumar"
+        max_length: 60
+      - name: "order_id"
+        type: "text"
+        description: "Order reference number"
+        required: true
+        example: "HF-2026-0042"
+        max_length: 30
+      - name: "product_names"
+        type: "text"
+        description: "Comma-separated list of ordered products"
+        required: true
+        example: "Natural Nettle Yarn, Hemp Blend"
+        max_length: 200
+      - name: "amount"
+        type: "text"
+        description: "Total order amount in INR"
+        required: true
+        example: "12,500"
+        max_length: 20
+    buttons:
+      - type: "URL"
+        text: "Visit website"
+        url: "https://www.himalayanfibres.com/"
+
+  payment_confirmation:
+    display_name: "Payment Confirmation"
+    description: "Acknowledge payment receipt and notify order processing."
+    category: "UTILITY"
+    language: "en"
+    use_case: "transactional"
+    variables:
+      - name: "customer_name"
+        type: "text"
+        description: "Customer name"
+        required: true
+        example: "Rajesh Kumar"
+        max_length: 60
+      - name: "amount"
+        type: "text"
+        description: "Payment amount in INR"
+        required: true
+        example: "12,500"
+        max_length: 20
+      - name: "order_id"
+        type: "text"
+        description: "Order reference number"
+        required: true
+        example: "HF-2026-0042"
+        max_length: 30
+    buttons:
+      - type: "ORDER_DETAILS"
+        text: "Review and Pay"
+
+  order_tracking:
+    display_name: "Order Tracking"
+    description: "Share shipping tracking details with customer."
+    category: "UTILITY"
+    language: "en"
+    use_case: "transactional"
+    variables:
+      - name: "customer_name"
+        type: "text"
+        description: "Customer name"
+        required: true
+        example: "Rajesh Kumar"
+        max_length: 60
+      - name: "order_id"
+        type: "text"
+        description: "Order reference number"
+        required: true
+        example: "HF-2026-0042"
+        max_length: 30
+      - name: "tracking_id"
+        type: "text"
+        description: "Courier tracking ID"
+        required: true
+        example: "DL123456789IN"
+        max_length: 50
+      - name: "tracking_link"
+        type: "text"
+        description: "Tracking URL"
+        required: true
+        example: "https://track.delhivery.com/DL123456789IN"
+        max_length: 500
+
+  order_delivered:
+    display_name: "Order Delivered"
+    description: "Notify customer of successful delivery and request feedback."
+    category: "UTILITY"
+    language: "en"
+    use_case: "transactional"
+    variables:
+      - name: "1"
+        type: "text"
+        description: "Customer name"
+        required: true
+        example: "Rajesh Kumar"
+        max_length: 60
+      - name: "2"
+        type: "text"
+        description: "Order reference number"
+        required: true
+        example: "HF-2026-0042"
+        max_length: 30
+    buttons:
+      - type: "ORDER_DETAILS"
+        text: "Review and Pay"
+
+  thank_you_note:
+    display_name: "Thank You Note"
+    description: "Post-purchase thank you message to build loyalty."
+    category: "MARKETING"
+    language: "en"
+    use_case: "retention"
+    variables:
+      - name: "1"
+        type: "text"
+        description: "Customer name or greeting"
+        required: true
+        example: "Rajesh Ji"
+        max_length: 60
+
+  snow_white:
+    display_name: "Snow White Yarn Showcase"
+    description: "Product showcase for Snow White premium yarn sample."
+    category: "MARKETING"
+    language: "en"
+    use_case: "product_showcase"
+    has_header_image: true
+    variables: []
+    notes: "No variables. Hardcoded showcase with image header."
+    buttons:
+      - type: "URL"
+        text: "Visit website"
+        url: "https://www.himalayanfibres.com/"
+
+  interactive_whatsap_buttons_new:
+    display_name: "Interactive Catalog Button"
+    description: "Simple greeting with catalog browse button."
+    category: "MARKETING"
+    language: "en"
+    use_case: "catalog"
+    variables: []
+    buttons:
+      - type: "CATALOG"
+        text: "View catalog"
+
+# Use-case groupings for quick reference
+use_cases:
+  testing:
+    templates: ["hello_world"]
+    description: "API testing and health checks"
+
+  onboarding:
+    templates: ["welcome_message"]
+    description: "New contact welcome flow"
+
+  transactional:
+    templates: ["order_confirmation", "payment_confirmation", "order_tracking", "order_delivered"]
+    description: "Order lifecycle notifications"
+
+  retention:
+    templates: ["thank_you_note"]
+    description: "Customer retention and loyalty"
+
+  product_showcase:
+    templates: ["snow_white"]
+    description: "Product showcase and samples"
+
+  catalog:
+    templates: ["interactive_whatsap_buttons_new"]
+    description: "Product catalog browsing"

@@ -1,0 +1,57 @@
+# ERB Decorticator — Machine Images
+# Proprietary fiber extraction technology
+
+gdrive_folders:
+  bishal_deployment: "4. Photos and Media/Bishal Farm Images/Team & Machine Videos/"
+  erb_trials: "4. Photos and Media/ERB Decorticator/"
+
+description: "ERB decorticator — portable, field-deployable machine for mechanical nettle and hemp fiber extraction. Replaces slow manual extraction. 5-10x faster processing."
+
+images:
+  - id: "erb_machine_operating"
+    folder: "bishal_deployment"
+    filename: "Machine Pic.png"
+    description: "ERB decorticator being operated in the field. Red machine on wheeled cart, farmer feeding nettle stalks. Dried fiber on frame behind. Mountain clearing."
+    shot_type: "action"
+    format: "png"
+    quality: "excellent — machine in real use, great storytelling"
+    tags: ["ERB", "decorticator", "machine", "farmer", "field operation", "technology"]
+    best_for: ["technology blog hero", "innovation content", "ERB decorticator post"]
+    wix_media_id: "b6e546_bc1f9ffa09ff48c2a42d3c9337a5cdc3~mv2.png"
+
+  - id: "erb_intro_to_farmers"
+    folder: "bishal_deployment"
+    filename: "Introducing ERB Tech to Farmer.jpeg"
+    description: "Group of 7 — team + farmers — next to red ERB machine in clearing. Document handover moment. Technology transfer scene."
+    shot_type: "group"
+    quality: "high"
+    tags: ["ERB", "technology transfer", "team", "farmers", "partnership"]
+    best_for: ["fiber masters blog", "technology story", "collection stories"]
+
+  - id: "erb_raw_bark_output"
+    folder: "erb_trials"
+    filename: "IMG-20221031-WA0009.jpg"
+    description: "Close-up of freshly extracted bark strips hanging in sunlight. Green and brown strips of nettle bark at various stages of separation. Shows the raw output of the bark stripping process — what comes off the plant before fiber extraction. Forest setting."
+    shot_type: "material — close-up"
+    quality: "good — informational, shows process output"
+    tags: ["ERB", "bark strips", "raw output", "extraction", "process"]
+    best_for: ["processing blog", "technology comparison", "behind the scenes"]
+
+  - id: "erb_team_handover"
+    folder: "erb_trials"
+    filename: "IMG-20221105-WA0002.jpg"
+    description: "Group of 6 team members and farmers gathered around the red ERB decorticator machine in a forest clearing. One person handing something to another. Everyone smiling. Similar to bishal_erb_intro but slightly different group composition."
+    shot_type: "group"
+    quality: "good — authentic team moment"
+    tags: ["ERB", "team", "farmers", "handover", "partnership", "group"]
+    best_for: ["technology story", "team content", "partnership blog"]
+
+  - id: "erb_decortication_trial"
+    folder: "erb_trials"
+    filename: "Decortication Trial 1/"
+    description: "Subfolder with decortication trial images"
+    status: "needs_cataloging"
+
+video_content:
+  bishal_videos: ["Farmer Working With ERB Tech.mp4"]
+  erb_videos: ["ERB Technology v1.mp4", "ERB Technology v2.mp4", "Himalayan Hemp Decortication Machine Video.mp4", "Himalayan Hemp Decortication Machine Video (1).mp4", "Himalayan Nettle Decortication Machine Krishna Bhai.mp4", "Himalayan Nettle Decortication Machine.mp4"]

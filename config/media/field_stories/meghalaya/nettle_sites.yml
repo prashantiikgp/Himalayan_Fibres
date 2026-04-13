@@ -1,0 +1,59 @@
+# Meghalaya — Nettle Sites
+# Wild nettle patches, village paths, plant close-ups
+
+location: "Meghalaya"
+gdrive_folder: "4. Photos and Media/Meghalaya Nettle/"
+story: "Wild nettle documentation in Meghalaya — photographing natural nettle patches and local collection sites"
+
+images:
+  - id: "meghalaya_nettle_bush"
+    filename: "Nettle Pic 1 .jpg"
+    description: "Wild nettle plant — needs detailed viewing."
+    tags: ["wild nettle", "plant", "meghalaya"]
+    best_for: ["sustainability", "wild harvesting blog"]
+
+  - id: "meghalaya_dense_nettle"
+    filename: "Nettle Pic 2.jpg"
+    description: "Dense growth of wild nettle plants. Tall stalks with serrated leaves filling the frame. Shows how nettle grows wild and abundant. Forest edge habitat."
+    shot_type: "plant — wide"
+    quality: "good — shows abundance"
+    tags: ["wild nettle", "dense growth", "natural", "wild"]
+    best_for: ["wild harvesting blog", "sustainability", "what is nettle"]
+
+  - id: "meghalaya_nettle_3"
+    filename: "Nettle Pic 3.jpg"
+    status: "needs_viewing"
+
+  - id: "meghalaya_village_path"
+    filename: "IMG_20231019_113245.jpg"
+    description: "Mountain village path with bamboo fence/structure. Narrow dirt road through green forest. Shows remote terrain where nettle is collected."
+    shot_type: "landscape"
+    quality: "good — shows remoteness"
+    tags: ["landscape", "village", "path", "remote"]
+    best_for: ["collection stories", "setting the scene"]
+
+  - id: "meghalaya_nettle_closeup"
+    filename: "IMG_20231021_121005.jpg"
+    description: "Nettle plant close-up in natural setting."
+    tags: ["nettle", "plant", "close-up"]
+    best_for: ["plant identification", "educational"]
+    wix_media_id: "b6e546_b1fdb56c92c84481a77290351f77834b~mv2.jpg"
+
+  - id: "meghalaya_drying_site"
+    filename: "IMG-20231213-WA0021.jpg"
+    description: "Fiber drying/processing site in Meghalaya. Large bundle of dried nettle fiber hanging on a wooden frame with the red ERB machine visible behind. Blue tarp cover nearby. Pine trees and clear sky. Outdoor field processing setup."
+    shot_type: "process + landscape"
+    quality: "good — shows field processing infrastructure"
+    tags: ["meghalaya", "drying", "field processing", "ERB machine", "setup"]
+    best_for: ["behind the scenes", "processing blog", "field stories"]
+
+  - id: "meghalaya_bark_curtain"
+    filename: "IMG-20231213-WA0026.jpg"
+    description: "Thick curtain of nettle bark strips hanging to dry on wooden poles. Dark brown bark fills most of the frame, with blue tarp and trees visible behind. Shows the volume of bark collected from a single expedition."
+    shot_type: "process"
+    quality: "good — shows scale of collection"
+    tags: ["meghalaya", "bark drying", "volume", "collection", "curtain"]
+    best_for: ["collection stories", "processing blog", "scale demonstration"]
+
+has_videos: true
+video_files: ["VID-20231213-WA0022.mp4", "VID-20231213-WA0023.mp4", "VID-20231213-WA0024.mp4", "VID-20231213-WA0025.mp4", "video_20231017_130155.mp4"]

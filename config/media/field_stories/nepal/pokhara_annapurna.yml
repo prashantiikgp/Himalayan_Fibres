@@ -1,0 +1,34 @@
+# Pokhara / Annapurna — Nepal Field Story
+# High-altitude bark collection expedition near Pokhara
+
+location: "Pokhara, Annapurna Region, Nepal"
+gdrive_folder: "4. Photos and Media/1. Farm Videos/Nettle Collection/Pokhra Anapurna Bark Collection/"
+story: "Bark collection expedition in the Annapurna region — one of the most remote sourcing journeys, collecting wild nettle bark at high altitude"
+
+images:
+  - id: "annapurna_bark_drying_landscape"
+    filename: "1670926124066.jpg"
+    description: "Nettle bark strips hanging to dry on wooden frame outdoors. Mountains and trees visible under clear blue sky. Beautiful landscape + process combo."
+    shot_type: "process + landscape"
+    quality: "high"
+    tags: ["bark drying", "pokhara", "annapurna", "landscape", "mountains", "process"]
+    best_for: ["collection stories hero", "blog cover", "behind the scenes", "instagram"]
+
+  - id: "annapurna_2"
+    filename: "1670926124081.jpg"
+    status: "needs_viewing"
+
+  - id: "annapurna_3"
+    filename: "1670926124101.jpg"
+    status: "needs_viewing"
+
+  - id: "annapurna_6"
+    filename: "1670926124191.jpg"
+    status: "needs_viewing"
+
+total_images: 15
+notes: "15 photos from the expedition — all need individual viewing and cataloging"
+
+# Related subfolder with more collection story content
+pokra_collection_story: "4. Photos and Media/1. Farm Videos/Nettle Collection/Pokra Collection Story/"
+pokra_subfolders: ["Gorkkha Collection", "Images", "Study", "Videos"]

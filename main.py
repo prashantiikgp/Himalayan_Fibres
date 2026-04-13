@@ -43,7 +43,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
+# Include routers — Email
 from app.api.routes import webhooks, contacts, templates, campaigns, segments, content
 
 app.include_router(webhooks.router, prefix="/api/v1")
@@ -52,6 +52,13 @@ app.include_router(templates.router, prefix="/api/v1")
 app.include_router(campaigns.router, prefix="/api/v1")
 app.include_router(segments.router, prefix="/api/v1")
 app.include_router(content.router, prefix="/api/v1")
+
+# Include routers — WhatsApp
+from app.whatsapp.routes import router as wa_router
+from app.whatsapp.webhook import router as wa_webhook_router
+
+app.include_router(wa_router, prefix="/api/v1")
+app.include_router(wa_webhook_router)  # No prefix — Meta requires /webhook/whatsapp
 
 
 @app.get("/")

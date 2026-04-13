@@ -106,6 +106,17 @@ class ConfigManager:
         # Load all templates
         self._cache['templates'] = self._load_all_templates()
 
+        # WhatsApp configs (schema-validated via Pydantic — see app.whatsapp.config)
+        self._cache['whatsapp_settings'] = self._load_yaml(
+            self.config_path / 'whatsapp' / 'settings.yml'
+        )
+        self._cache['whatsapp_templates'] = self._load_yaml(
+            self.config_path / 'whatsapp' / 'templates.yml'
+        )
+        self._cache['whatsapp_messages'] = self._load_yaml(
+            self.config_path / 'whatsapp' / 'messages.yml'
+        )
+
     def _load_all_products(self) -> Dict[str, Dict[str, Any]]:
         """Load all product YAML files organized by category."""
         products = {}
@@ -330,6 +341,20 @@ class ConfigManager:
     def get_engagement_rules(self) -> Dict[str, Any]:
         """Get engagement rules configuration."""
         return self._cache.get('engagement_rules', {})
+
+    # ========== WhatsApp Methods ==========
+
+    def get_whatsapp_settings(self) -> Dict[str, Any]:
+        """Get raw WhatsApp settings. For typed access, use app.whatsapp.config.wa_config."""
+        return self._cache.get('whatsapp_settings', {})
+
+    def get_whatsapp_templates(self) -> Dict[str, Any]:
+        """Get WhatsApp template registry. For typed access, use app.whatsapp.config.wa_config."""
+        return self._cache.get('whatsapp_templates', {}).get('templates', {})
+
+    def get_whatsapp_quick_replies(self) -> Dict[str, Any]:
+        """Get WhatsApp quick reply presets."""
+        return self._cache.get('whatsapp_messages', {}).get('quick_replies', {})
 
     # ========== Validation Methods ==========
 

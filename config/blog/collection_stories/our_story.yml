@@ -1,0 +1,251 @@
+# Our Story — Himalayan Fibres
+# Brand narrative page: founding story, mission, what we do
+# Status: draft — review content, then tell Claude to publish
+
+post:
+  id: "our_story"
+  title: "Our Story — How Himalayan Fibres is Weaving Change from the Mountains to the World"
+  slug: "our-story"
+  status: "draft"
+  category: "storytelling"
+  featured: true
+  tags:
+    - "about us"
+    - "himalayan fibres"
+    - "founder story"
+    - "sustainability"
+    - "artisans"
+
+seo:
+  meta_title: "Our Story | Himalayan Fibres — Nature's Finest Fibers, Crafted with Care"
+  meta_description: "Founded in 2018, Himalayan Fibres brings sustainable, handcrafted natural fibers from remote Himalayan villages to the world. Discover how we support 75+ villages and 200+ artisans."
+  focus_keyword: "himalayan fibres story"
+
+cover_image:
+  # --- DISPLAY ---
+  alt: "The Himalayan Fibres team on a nettle sourcing trail in Nepal"
+  caption: null
+  layout:
+    style: "full_width"
+    alignment: "center"
+  # --- SOURCE ---
+  catalog_ref: "field_stories/nepal/gorkha.yml#gorkha_team_nepal"
+  local_file: "/mnt/g/My Drive/1. Media & Marketing/4. Photos and Media/Gorkha Trail/Team Nepal.jpeg"
+  filename: "Team Nepal.jpeg"
+  description: "Four HF team members standing in lush green forest on the Gorkha trail. Casual field trip photo, green forest backdrop."
+  shot_type: "group portrait"
+  quality: "good"
+  tags: ["team", "gorkha", "nepal", "forest", "field visit"]
+  best_for: ["about us hero", "our story", "team page"]
+  # --- PUBLISH STATE ---
+  wix_media_id: "b6e546_ffa4873bc97b4c0ba48a53b947d5ec2e~mv2.jpeg"
+  # NOTE: The live Wix draft currently has cover set to b6e546_8ae7d1a40f444750b508f17b3319a1c9~mv2.jpg
+  # (village_gathering). Republishing this file will reset the cover to Team Nepal.jpeg above.
+
+brief:
+  topic: "The founding story, mission, vision, and impact of Himalayan Fibres"
+  key_points:
+    - "Founded in 2018 by Prashant Agrawal"
+    - "Mission: sustainable livelihoods through natural Himalayan fibers"
+    - "Products: nettle yarn (Himalayan Silk), hemp yarn, Tibetan wool, blended collections"
+    - "75+ villages supported across Uttarakhand, Nepal, and Meghalaya"
+    - "200+ women artisans earning independent incomes"
+    - "Wild-harvested plants, zero pesticides, zero waste processing"
+    - "ERB proprietary decorticator technology for fiber processing"
+    - "From raw fiber to finished yarn, every step is handcrafted"
+  tone: "warm, inspiring, personal"
+  target_audience: "eco-conscious consumers, craft enthusiasts, B2B textile buyers"
+  word_count: 1200
+  product_refs:
+    - "special_nettle_yarn"
+    - "nettle_plant_fibre"
+    - "white_hemp_yarn"
+
+content:
+  - type: heading
+    level: 2
+    text: "From a Vision in the Mountains"
+
+  - type: paragraph
+    text: |
+      In 2018, what began as a deep fascination with the untapped potential of
+      Himalayan plant fibers became Himalayan Fibres — a company built on the
+      belief that the world's finest natural fibers grow wild in one of the
+      most remote and beautiful landscapes on earth.
+
+      Walking through the villages of Uttarakhand and Nepal, our founder
+      Prashant Agrawal saw two things side by side: communities rich in
+      traditional knowledge of fiber processing, and wild-growing nettle and
+      hemp plants that nobody was turning into value. The gap between these
+      two realities became our mission.
+
+  - type: image
+    # --- DISPLAY ---
+    alt: "Artisans processing nettle fibers in a Nepal village"
+    caption: null
+    layout:
+      style: "content"
+      alignment: "center"
+    # --- SOURCE ---
+    catalog_ref: "people/artisans_farmers.yml#village_gathering"
+    local_file: "/mnt/g/My Drive/1. Media & Marketing/4. Photos and Media/Nepal Working Photos/1657867031381.jpg"
+    filename: "1657867031381.jpg"
+    description: "Large group of village women with nettle bundles. Colorful traditional clothing."
+    shot_type: null
+    quality: "good — authentic community"
+    tags: ["community", "women", "village", "gathering"]
+    best_for: ["community stories", "women empowerment"]
+    # --- PUBLISH STATE ---
+    wix_media_id: "b6e546_8ae7d1a40f444750b508f17b3319a1c9~mv2.jpg"
+
+  - type: heading
+    level: 2
+    text: "What We Do"
+
+  - type: paragraph
+    text: |
+      Himalayan Fibres transforms wild-harvested plant fibers from the
+      Himalayan ecosystem into premium yarns and textiles. We work with
+      Himalayan Stinging Nettle, Hemp, and Tibetan Wool — fibers that grow
+      naturally without pesticides, fertilizers, or irrigation.
+
+      Our product range spans from raw plant fibers for spinners and
+      manufacturers, to hand-spun yarns in natural and dyed colors, to
+      curated collections like our Snow White Series that blend nettle's
+      silky sheen with wool's warmth.
+
+  - type: list
+    style: bullet
+    items:
+      - "Himalayan Stinging Nettle Yarn — nicknamed 'Himalayan Silk' for its stunning lustre"
+      - "Himalayan Hemp Yarn — soft, durable, and gets better with every wash"
+      - "Himalayan Woollen Yarn — hand-spun from high-altitude sheep with exceptional warmth"
+      - "Curated Collections — Snow White, Burberry, Noor, and Seriry series"
+
+  - type: image
+    # --- DISPLAY ---
+    alt: "Himalayan Fibres team with nettle harvest in the Gorkha region"
+    caption: null
+    layout:
+      style: "content"
+      alignment: "center"
+    # --- SOURCE ---
+    catalog_ref: "field_stories/nepal/gorkha.yml#gorkha_nettle_circle"
+    local_file: "/mnt/g/My Drive/1. Media & Marketing/4. Photos and Media/Gorkha Trail/Team Nettle Cricle.jpeg"
+    filename: "Team Nettle Cricle.jpeg"
+    description: "Team with local farmers in a circle around nettle harvest. Mixed group examining collected nettle stalks."
+    shot_type: "group action"
+    quality: "good"
+    tags: ["team", "farmers", "nettle harvest", "community", "partnership"]
+    best_for: ["collection stories hero", "partnership content", "blog"]
+    # --- PUBLISH STATE ---
+    wix_media_id: "b6e546_2fe5c238dd8345f385d0d2be3dca2be4~mv2.jpeg"
+
+  - type: heading
+    level: 2
+    text: "The People Behind Our Fibers"
+
+  - type: paragraph
+    text: |
+      Every skein of Himalayan Fibres yarn passes through the hands of our
+      artisan partners — over 200 women across 75+ villages in Uttarakhand,
+      Nepal, and Meghalaya. These artisans are not just our workforce; they
+      are the heart of what we do.
+
+      Many of these women had few income opportunities before joining our
+      network. Today, they earn fair wages for skilled work — harvesting wild
+      nettle, extracting fiber by hand, spinning, and dyeing using traditional
+      techniques passed down through generations. Their expertise is
+      irreplaceable, and we are committed to ensuring it is valued and
+      sustained.
+
+  - type: quote
+    text: "Every skein of yarn carries the story of the Himalayas — the hands that crafted it, the mountains where it grew, and the communities it sustains."
+
+  - type: heading
+    level: 2
+    text: "Sustainability Is Not a Label — It Is How We Operate"
+
+  - type: paragraph
+    text: |
+      Sustainability at Himalayan Fibres is not a marketing claim. It is the
+      only way we know how to work.
+
+      Our raw materials grow wild in the Himalayan mountains — no farming, no
+      pesticides, no artificial fertilizers. The nettle and hemp plants
+      regenerate naturally, making them among the most renewable fiber sources
+      on earth.
+
+  - type: image
+    # --- DISPLAY ---
+    alt: "Special Stinging Nettle Yarn — Himalayan Silk"
+    caption: null
+    layout:
+      style: "content"
+      alignment: "center"
+    # --- SOURCE ---
+    catalog_ref: "products/plant_fibre/nettle/yarns.yml#snt_hanging"
+    local_file: "/mnt/g/My Drive/1. Media & Marketing/3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/1. Himalayan Stinging Nettle Plant/Yarns/3. Special Stinging Nettle [Thick]/ERB Sepcial_1.webp"
+    filename: "ERB Sepcial_1.webp"
+    description: "Full-length hank hanging against grey concrete wall. Shows drape and natural color."
+    shot_type: "product — full length"
+    format: "webp"
+    quality: "moderate"
+    tags: ["product", "special nettle", "hanging", "drape"]
+    best_for: ["blog inline", "behind the scenes"]
+    # --- PUBLISH STATE ---
+    wix_media_id: null                 # not yet uploaded to Wix
+    status: "needs_upload"
+
+  - type: list
+    style: bullet
+    items:
+      - "100% wild-harvested plant fibers — zero pesticides or fertilizers"
+      - "Hand-processed using traditional methods — minimal energy consumption"
+      - "Zero-waste philosophy — plant remnants return to the soil as natural compost"
+      - "Fair trade partnerships — 100% of value stays in local communities"
+      - "Biodegradable packaging for all shipments"
+
+  - type: heading
+    level: 2
+    text: "Innovation Rooted in Tradition"
+
+  - type: paragraph
+    text: |
+      While we honour traditional fiber processing techniques, we also invest
+      in innovation. Our proprietary ERB decorticator technology allows us to
+      process nettle and hemp fibers more efficiently while maintaining the
+      quality and integrity that hand-processing delivers.
+
+      This combination of traditional knowledge and modern technology enables
+      us to produce our signature Special Stinging Nettle Yarn — nicknamed
+      'Himalayan Silk' — with its distinctive silky lustre and soft drape
+      that rivals traditional silk at a fraction of the environmental cost.
+
+  - type: heading
+    level: 2
+    text: "Looking Ahead"
+
+  - type: paragraph
+    text: |
+      Our journey is just beginning. We are expanding our artisan network,
+      developing new fiber blends, and bringing Himalayan fibers to crafters,
+      designers, and textile businesses around the world.
+
+      Whether you are a hand-knitter looking for a yarn with a story, a
+      fashion designer seeking sustainable luxury materials, or a business
+      wanting to offer eco-friendly products — we invite you to be part of
+      the Himalayan Fibres story.
+
+  - type: paragraph
+    text: |
+      Nature's Finest Fibers, Crafted with Care.
+
+author:
+  name: "Prashant Agrawal"
+  role: "Founder"
+
+# ---- PUBLISHING STATUS (auto-filled) ----
+wix_post_id: "f57f87f6-e2e6-4092-b008-6dbc8e91890c"
+wix_status: "draft"
+# Media IDs are now inlined per-image under each content block's `wix_media_id` field.

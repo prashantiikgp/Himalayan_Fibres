@@ -1,0 +1,63 @@
+# Creative & Styled Product Photography
+# Professional shots, sunlight trials, artistic compositions
+
+collections:
+  # ── Creative Images (Dec 2024) ──────────────────────────────
+  - collection_id: "creative_dec2024"
+    gdrive_folder: "3. Product Images & Excel/Photo Collection Images/Creative images/"
+    total_files: 15
+    images:
+      - id: "fiber_three_stages"
+        filename: "IMG_20241231_124328.jpg"
+        description: "Three bundles of fiber at different processing stages side by side on white background. Left: raw dark bark, Center: processed lighter fiber, Right: fully cottonised soft fiber. Excellent educational comparison."
+        shot_type: "comparison"
+        quality: "excellent"
+        tags: ["fiber stages", "comparison", "raw", "processed", "cottonised", "educational"]
+        best_for: ["product guide", "behind the scenes", "processing blog", "instagram educational", "email"]
+
+      - id: "creative_fiber_ball_white"
+        filename: "IMG_20241231_124422.jpg"
+        description: "Small ball of light-colored processed fiber/yarn on white background. Loose, fluffy texture. Simple composition — fiber floating in negative space. Shows the softness of processed nettle."
+        shot_type: "product — minimal"
+        quality: "moderate — simple composition, lots of white space"
+        tags: ["fiber", "yarn ball", "minimal", "white space", "processed"]
+        best_for: ["instagram", "email inline", "background accent"]
+
+  # ── Photography Trial 1 (Dec 2024) ─────────────────────────
+  - collection_id: "trial_1_dec2024"
+    gdrive_folder: "3. Product Images & Excel/Photo Collection Images/Photography trial 1/"
+    total_files: 14
+    description: "Indoor product photography — yarn close-ups and texture shots"
+    status: "needs_cataloging"
+
+  # ── Trial 2 — Sunlight (Dec 2024) ──────────────────────────
+  - collection_id: "trial_2_sunlight"
+    gdrive_folder: "3. Product Images & Excel/Photo Collection Images/Trial 2 - Sunlight/"
+    total_files: 10
+    description: "Natural sunlight yarn photography — shows lustre and true color"
+    images:
+      - id: "sunlight_skein"
+        filename: "IMG_20241230_104539.jpg"
+        description: "Nettle yarn skein on white background in natural sunlight. Clean product shot showing true color and fiber definition."
+        shot_type: "product"
+        quality: "high"
+        tags: ["product", "sunlight", "clean", "natural light"]
+        best_for: ["product page", "craft tips", "email"]
+
+    has_videos: true
+    video_files: ["video_20241230_111515.mp4"]
+
+  # ── Plant & Animal Mix Creative ─────────────────────────────
+  - collection_id: "mix_creative"
+    gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/3. Plant & Animal Mix/Creative Images &Videos/"
+    total_files: 10
+    description: "Creative shots of blended collection yarns (Jul 2024)"
+    status: "needs_cataloging"
+
+  # ── Nettle Creative Videos & Images ─────────────────────────
+  - collection_id: "nettle_creative"
+    gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/Creative Video's & Images/"
+    total_files: 10
+    description: "Creative videos and images of nettle fibre products (Jul 2024)"
+    status: "needs_cataloging"
+    has_videos: true

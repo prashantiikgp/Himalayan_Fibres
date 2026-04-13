@@ -1,0 +1,60 @@
+# Blog Post Template
+# Usage:
+#   1. Copy this file: cp _template.yml my_post_id.yml
+#   2. Fill in the post metadata and brief section below
+#   3. Tell Claude: "Generate content for config/blog/posts/my_post_id.yml"
+#   4. Review the generated content, make edits
+#   5. Tell Claude: "Publish config/blog/posts/my_post_id.yml"
+
+post:
+  id: ""                              # unique slug identifier (e.g. "nettle_fiber_guide")
+  title: ""                           # post title shown on blog
+  slug: ""                            # URL slug (e.g. "nettle-fiber-guide")
+  status: "draft"                     # draft | ready | published
+  category: ""                        # storytelling | product_guides | sustainability | craft_tips | behind_the_scenes | news
+  featured: false
+  tags: []                            # e.g. ["nettle", "sustainability", "artisans"]
+
+seo:
+  meta_title: ""                      # blank = auto-generated from title
+  meta_description: ""                # blank = auto-generated from first paragraph
+  focus_keyword: ""                   # primary SEO keyword
+
+cover_image:
+  local_file: ""                      # full path e.g. "/mnt/g/My Drive/1. Media & Marketing/..."
+  alt: ""                             # descriptive alt text for accessibility + SEO
+
+# ---- INPUT SECTION (fill this, Claude generates content from it) ----
+brief:
+  topic: ""                           # what the post is about
+  key_points: []                      # bullet points of facts/messages to include
+  tone: ""                            # blank = uses default from brand_kit (warm, professional, sustainable-focused)
+  target_audience: ""                 # who is this for? (e.g. "eco-conscious crafters", "B2B textile buyers")
+  word_count: 800                     # approximate target
+  product_refs: []                    # product IDs to auto-pull data from (e.g. ["special_nettle_yarn"])
+
+# ---- CONTENT SECTION (Claude generates, you review) ----
+# Content block types:
+#   heading:           level (2 or 3) + text
+#   paragraph:         text (supports multi-line with |)
+#   image:             local_file + alt
+#   list:              style (bullet|numbered) + items
+#   quote:             text
+#   product_highlight: product_id (auto-pulls from config/products/)
+content: []
+
+# ---- INLINE IMAGES (optional — for images within the article body) ----
+# insert_after = index of content block after which to place the image
+images: []
+#  - local_file: ""
+#    alt: ""
+#    insert_after: 1
+
+author:
+  name: "Prashant Agrawal"
+  role: "Founder"
+
+# ---- AFTER PUBLISHING (auto-filled by Claude) ----
+# wix_post_id: ""
+# wix_post_url: ""
+# published_date: ""

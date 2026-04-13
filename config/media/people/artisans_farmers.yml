@@ -1,0 +1,88 @@
+# Artisans & Farmers — People Images
+# Cross-references field_stories for location context
+
+description: "Curated list of the best artisan and farmer portraits/action shots across all locations. For the full set per location, see field_stories/ files."
+
+highlights:
+  - id: "bishal_elder_spinning"
+    source: "field_stories/nepal/bishal_farm.yml"
+    description: "Elderly woman spinning on stone wall, smiling, red headscarf, mountains behind"
+    quality: "excellent — BEST artisan portrait"
+    tags: ["artisan", "women", "spinning", "portrait", "smiling"]
+    best_for: ["instagram", "blog hero", "about us", "women empowerment"]
+
+  - id: "bishal_woman_stripping"
+    source: "field_stories/nepal/bishal_farm.yml"
+    description: "Woman stripping nettle bark on hillside in red dress"
+    quality: "high"
+    tags: ["artisan", "women", "bark stripping", "action"]
+    best_for: ["sustainability", "blog hero", "instagram"]
+
+  - id: "bishal_woman_carrying"
+    source: "field_stories/nepal/bishal_farm.yml"
+    description: "Woman carrying nettle through dense forest"
+    quality: "high — atmospheric"
+    tags: ["artisan", "women", "harvest", "forest"]
+    best_for: ["behind the scenes", "collection stories"]
+
+  - id: "bishal_woman_sitting_fiber"
+    source: "field_stories/nepal/bishal_farm.yml"
+    description: "Woman sitting with green nettle stalks in lap. Red dress, beaded necklace. Moody light."
+    quality: "high — cinematic"
+    tags: ["artisan", "women", "portrait", "contemplative"]
+    best_for: ["instagram", "blog inline", "storytelling"]
+
+  - id: "bishal_woman_hanging_fiber"
+    source: "field_stories/nepal/bishal_farm.yml"
+    description: "Woman hanging extracted fiber to dry, arm extended, mountains behind"
+    quality: "high — process + person"
+    tags: ["artisan", "women", "fiber drying", "action"]
+    best_for: ["processing blog", "behind the scenes", "instagram"]
+
+  - id: "bishal_woman_beating_fiber"
+    source: "field_stories/nepal/bishal_farm.yml"
+    description: "Woman beating/softening fiber on stone patio. Dust rising. Mountains behind."
+    quality: "excellent — BEST action shot, dynamic"
+    tags: ["artisan", "women", "fiber beating", "dust", "action"]
+    best_for: ["behind the scenes hero", "processing blog", "instagram"]
+
+  - id: "bishal_woman_carrying_bundles"
+    source: "field_stories/nepal/bishal_farm.yml"
+    description: "Woman carrying fiber bundles past stone house. Backlit, atmospheric."
+    quality: "high — backlit"
+    tags: ["artisan", "women", "carrying", "village"]
+    best_for: ["behind the scenes", "collection stories"]
+
+  - id: "bishal_manual_extraction"
+    source: "field_stories/nepal/bishal_farm.yml"
+    description: "Elder man demonstrating manual fiber extraction on winter hillside"
+    quality: "good"
+    tags: ["farmer", "manual extraction", "traditional"]
+    best_for: ["technology comparison", "processing guide"]
+
+  - id: "village_gathering"
+    source: "people/team.yml → see nepal working photos"
+    path: "4. Photos and Media/Nepal Working Photos/1657867031381.jpg"
+    description: "Large group of village women with nettle bundles. Colorful traditional clothing."
+    quality: "good — authentic community"
+    tags: ["community", "women", "village", "gathering"]
+    best_for: ["community stories", "women empowerment"]
+    wix_media_id: "b6e546_8ae7d1a40f444750b508f17b3319a1c9~mv2.jpg"
+
+# Nepal Working Photos — 15 images at:
+# 4. Photos and Media/Nepal Working Photos/
+# Files: 1657867031334.jpg through 1657867089699.jpg
+# Status: Most need individual viewing and cataloging
+nepal_working_photos:
+  gdrive_folder: "4. Photos and Media/Nepal Working Photos/"
+  total_images: 15
+  status: "partially_cataloged"
+  cataloged:
+    - filename: "1657867031381.jpg"
+      description: "Village gathering — cataloged above"
+    - filename: "1657867031365.jpg"
+      description: "Artisans on mountain terrain"
+    - filename: "1657867031442.jpg"
+      description: "Artisans processing fiber"
+    - filename: "1657867031457.jpg"
+      description: "Outdoor processing scene"

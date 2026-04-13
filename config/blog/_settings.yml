@@ -1,0 +1,47 @@
+# Blog Publishing Settings
+# Global defaults for blog posts and media uploads
+
+blog:
+  wix_site_id: "580a6298-44ff-47b2-80ce-f3ec82e62db7"
+  site_url: "https://www.himalayanfibres.com"
+  member_id: "b6e54616-c45d-455d-b844-7c3fc0426196"
+
+  default_author:
+    name: "Prashant Agrawal"
+    role: "Founder"
+
+  default_tone: "warm, professional, sustainable-focused"
+
+media:
+  gdrive_base_path: "/mnt/g/My Drive/1. Media & Marketing"
+  gdrive_windows_path: "G:\\My Drive\\1. Media & Marketing"
+  wix_upload_folder: "blog"
+  supported_formats:
+    - ".jpg"
+    - ".jpeg"
+    - ".png"
+    - ".webp"
+
+publishing:
+  default_status: "draft"
+  auto_seo: true
+
+# Shorthand path aliases for common image folders
+image_paths:
+  products: "3. Product Images & Excel/1. Images_ Category Wise"
+  photos: "4. Photos and Media"
+  brand: "5. Digital Brand Kit Marketing"
+  photo_collection: "3. Product Images & Excel/Photo Collection Images"
+  creative: "3. Product Images & Excel/Photo Collection Images/Creative images"
+  nettle_yarn: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/1. Himalayan Stinging Nettle Plant/Yarns"
+  hemp_yarn: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/2. Himalayan Hemp Plant/2. Yarns"
+  nettle_fibre: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/1. Himalayan Stinging Nettle Plant/Fibres"
+  hemp_fibre: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/2. Himalayan Hemp Plant/1. Fibres"
+  tibetan_wool: "3. Product Images & Excel/1. Images_ Category Wise/2. Animal Fibre/1. Tibetan Wool"
+  snow_white: "3. Product Images & Excel/1. Images_ Category Wise/3. Plant & Animal Mix/4. Snow White"
+  burberry: "3. Product Images & Excel/1. Images_ Category Wise/3. Plant & Animal Mix/1. Burberry Series"
+  nepal_photos: "4. Photos and Media/Nepal Working Photos"
+  bishal_farm: "4. Photos and Media/Bishal Farm Images/Farmer Images"
+  meghalaya: "4. Photos and Media/Meghalaya Nettle"
+  gorkha: "4. Photos and Media/Gorkha Trail"
+  logos: "5. Digital Brand Kit Marketing/Logo Images"

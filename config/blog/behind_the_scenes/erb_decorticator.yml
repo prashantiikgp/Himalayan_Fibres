@@ -1,0 +1,325 @@
+# ERB Decorticator — The Machine That Changed Fiber Processing in the Himalayas
+# Behind-the-scenes post on the ERB fiber extraction machine
+# Recreated from Wix draft post (2026-04-12 session)
+
+post:
+  id: "erb_decorticator"
+  title: "ERB Decorticator — The Machine That Changed Fiber Processing in the Himalayas"
+  slug: "erb-decorticator-fiber-processing"
+  status: "draft"
+  category: "behind_the_scenes"
+  featured: false
+  tags:
+    - "erb decorticator"
+    - "fiber processing"
+    - "nettle"
+    - "hemp"
+    - "technology"
+    - "innovation"
+
+seo:
+  meta_title: "ERB Decorticator — The Machine That Changed Fiber Processing in the Himalayas"
+  meta_description: "How the ERB decorticator revolutionized nettle and hemp fiber processing — making extraction 5-10x faster while preserving quality."
+  focus_keyword: "erb decorticator"
+
+cover_image:
+  # --- DISPLAY (what readers see) ---
+  alt: "ERB decorticator machine being operated by a farmer in a Himalayan mountain clearing"
+  caption: null                         # optional — shown beneath the image
+  layout:
+    style: "full_width"                 # full_width | content | small
+    alignment: "center"
+  # --- SOURCE (all fields editable inline — catalog_ref is just a back-pointer) ---
+  catalog_ref: "machines/erb_decorticator.yml#erb_machine_operating"
+  local_file: "/mnt/g/My Drive/1. Media & Marketing/4. Photos and Media/Bishal Farm Images/Team & Machine Videos/Machine Pic.png"
+  filename: "Machine Pic.png"
+  description: "ERB decorticator being operated in the field. Red machine on wheeled cart, farmer feeding nettle stalks. Dried fiber on frame behind. Mountain clearing."
+  shot_type: "action"
+  format: "png"
+  quality: "excellent — machine in real use, great storytelling"
+  tags: ["ERB", "decorticator", "machine", "farmer", "field operation", "technology"]
+  best_for: ["technology blog hero", "innovation content", "ERB decorticator post"]
+  # --- PUBLISH STATE (auto-filled) ---
+  wix_media_id: "b6e546_bc1f9ffa09ff48c2a42d3c9337a5cdc3~mv2.png"
+
+brief:
+  topic: "How the ERB decorticator transformed nettle and hemp fiber extraction across Himalayan communities"
+  key_points:
+    - "Manual extraction yields 1-2 kg/day; ERB yields 5-10 kg/day"
+    - "Compact, portable, built for off-grid mountain villages"
+    - "Preserves fiber quality while reducing physical strain"
+    - "Deployed in Gorkha district Nepal and Uttarakhand hills"
+    - "Augments artisan work rather than replacing it"
+    - "Farmer incomes from fiber increased 3-5x"
+  tone: "informative, impact-driven"
+  target_audience: "B2B buyers, sustainability advocates, textile industry"
+  minutes_to_read: 4
+
+content:
+  - type: paragraph
+    text: |
+      For centuries, extracting fiber from Himalayan nettle and hemp plants
+      has been one of the most physically demanding tasks in mountain
+      agriculture. The process of stripping bark, beating stalks, and
+      separating fibers by hand is slow, painful, and exhausting. A single
+      artisan working a full day might produce just one to two kilograms of
+      raw fiber.
+
+  - type: paragraph
+    text: |
+      That bottleneck limited everything downstream: how much yarn
+      communities could produce, how much income artisans could earn, and
+      how much demand we could meet from buyers seeking sustainable natural
+      fibers. We knew there had to be a better way — one that preserved the
+      quality and character of handcrafted fiber while dramatically improving
+      the speed and comfort of extraction.
+
+  - type: paragraph
+    text: "The answer was the ERB decorticator."
+
+  - type: heading
+    level: 2
+    text: "The Problem: Manual Extraction Is a Bottleneck"
+
+  - type: paragraph
+    text: |
+      To understand why the ERB decorticator matters, you need to understand
+      the traditional fiber extraction process. After nettle stalks are
+      harvested and the bark is stripped by hand, artisans must separate the
+      usable bast fibers from the woody core and the gummy plant substances
+      that bind everything together.
+
+  - type: paragraph
+    text: |
+      Traditionally, this means hours of beating retted bark against stones,
+      scraping with crude tools, and pulling fibers apart strand by strand.
+      The work is rough on the hands — nettle's residual stinging compounds
+      cause irritation even after retting — and the repetitive motions take
+      a toll on the body over time. Many artisans, especially older women,
+      develop chronic pain in their hands and shoulders from years of manual
+      extraction.
+
+  - type: image
+    # --- DISPLAY ---
+    alt: "Woman artisan stripping nettle bark on a green hillside in traditional red dress"
+    caption: null                       # optional — e.g. "Stripping nettle bark by hand — the step before the ERB takes over."
+    layout:
+      style: "content"                  # full_width | content | small
+      alignment: "center"
+    # --- SOURCE (edit inline) ---
+    catalog_ref: "field_stories/nepal/bishal_farm.yml#bishal_woman_stripping"
+    local_file: "/mnt/g/My Drive/1. Media & Marketing/4. Photos and Media/Bishal Farm Images/Farmer Images/1678866670639.jpeg"
+    filename: "1678866670639.jpeg"
+    description: "Woman artisan stripping nettle bark on hillside. Red dress, white headband, green stalks. Another woman behind her. Lush mountain greenery."
+    shot_type: "action"
+    quality: "high — professional, emotional"
+    tags: ["artisan", "women", "bark stripping", "traditional", "hillside"]
+    best_for: ["blog hero", "sustainability", "women empowerment", "instagram"]
+    # --- PUBLISH STATE ---
+    wix_media_id: "b6e546_39856c7142a04c07b29367fe1e353007~mv2.jpeg"
+
+  - type: paragraph
+    text: |
+      The result is that fiber extraction has always been the single biggest
+      constraint on production volume. Even when demand for nettle yarn
+      increased, communities could not scale up because the extraction step
+      was simply too slow and too labor-intensive.
+
+  - type: heading
+    level: 2
+    text: "The Solution: ERB Decorticator"
+
+  - type: paragraph
+    text: |
+      The ERB (Eco Resource Bank) decorticator is a compact, portable fiber
+      extraction machine specifically designed for processing bast fibers
+      like nettle and hemp in remote, off-grid locations. Unlike industrial
+      decorticators used in large-scale agriculture, the ERB is built to be
+      transported to mountain villages by hand or mule, operated by farmers
+      with minimal training, and powered by small generators or even manual
+      cranking in some models.
+
+  - type: paragraph
+    text: |
+      The machine works by feeding retted bark strips through a series of
+      rollers and beaters that mechanically separate the bast fiber from the
+      woody core and residual plant matter. What takes an artisan an entire
+      day to produce by hand, the ERB can accomplish in one to two hours —
+      with consistent quality and significantly less physical strain on the
+      operator.
+
+  - type: heading
+    level: 2
+    text: "How It Works"
+
+  - type: paragraph
+    text: |
+      The ERB decorticator operates on a straightforward principle. Retted
+      and partially dried bark strips are fed into the machine's intake.
+      Inside, a rotating drum fitted with blunt blades breaks apart the bark,
+      separating fiber from the woody shive. The fiber emerges from one side,
+      clean and ready for the next processing step, while the broken woody
+      material drops out below and can be composted or used as mulch.
+
+  - type: paragraph
+    text: |
+      The key engineering challenge was calibrating the machine's
+      aggressiveness. Too harsh, and the fibers are damaged — broken,
+      shortened, or weakened. Too gentle, and the separation is incomplete.
+      The ERB strikes the right balance, producing fiber that matches or
+      exceeds the quality of hand-extracted material, with consistent length
+      and minimal breakage.
+
+  # ---- VIDEO BLOCK ----
+  # Same pattern as images: all metadata is inline and editable.
+  # Swap the video by editing `local_file` (or `url` for YouTube/Vimeo).
+  - type: video
+    # --- DISPLAY ---
+    alt: "ERB decorticator in operation"
+    caption: "The ERB decorticator in operation — processing retted nettle bark at 5–10× the speed of manual extraction."
+    layout:
+      style: "full_width"                 # full_width | content
+      alignment: "center"
+      autoplay: false
+      loop: false
+      muted: false
+      show_controls: true
+    # --- SOURCE (edit inline) ---
+    upload_type: "wix_upload"             # wix_upload | youtube | vimeo
+    url: null                             # set if upload_type is youtube/vimeo (e.g. "https://www.youtube.com/watch?v=...")
+    catalog_ref: null                     # TODO e.g. "machines/erb_decorticator.yml#erb_technology_v1" once video catalogue is upgraded
+    local_file: "/mnt/g/My Drive/1. Media & Marketing/4. Photos and Media/ERB Decorticator/ERB Technology v1.mp4"
+    filename: "ERB Technology v1.mp4"
+    description: "ERB decorticator in action — feeding retted bark, fiber separating from woody core"
+    shot_type: "action"
+    quality: "good"
+    tags: ["ERB", "decorticator", "machine", "action", "technology"]
+    best_for: ["ERB post", "technology story", "innovation content"]
+    duration_seconds: null                # optional
+    # --- THUMBNAIL (optional — overrides Wix's auto-generated poster frame) ---
+    thumbnail:
+      catalog_ref: "machines/erb_decorticator.yml#erb_machine_operating"
+      local_file: "/mnt/g/My Drive/1. Media & Marketing/4. Photos and Media/Bishal Farm Images/Team & Machine Videos/Machine Pic.png"
+      alt: "ERB decorticator machine still frame"
+    # --- PUBLISH STATE (auto-filled) ---
+    wix_video_id: null
+    status: "needs_upload"                # needs_upload | uploaded | published
+
+  - type: heading
+    level: 2
+    text: "Impact on Farming Communities"
+
+  - type: paragraph
+    text: |
+      The numbers tell a compelling story. With the ERB decorticator,
+      extraction throughput increases five to ten times compared to manual
+      methods. A farmer who previously produced one to two kilograms of
+      fiber per day can now produce five to ten kilograms with less physical
+      effort.
+
+  - type: paragraph
+    text: |
+      This translates directly into higher incomes. More fiber per day means
+      more yarn per season, more product to sell, and better livelihoods for
+      families. In communities where we have deployed ERB units, we have
+      seen:
+
+  - type: list
+    style: bullet
+    items:
+      - "Farmer incomes from fiber processing increasing by three to five times"
+      - "Fiber quality becoming more consistent, reducing rejections and waste"
+      - "Younger community members becoming more interested in fiber work, seeing it as viable income rather than drudgery"
+      - "Reduced physical strain, especially for older artisans who can now participate without chronic pain"
+
+  - type: heading
+    level: 2
+    text: "Technology That Augments Tradition"
+
+  - type: paragraph
+    text: |
+      A question we hear often is: does the machine replace artisans? The
+      answer is an emphatic no. The ERB decorticator handles only one stage
+      of the 12-step fiber processing journey — the most physically
+      demanding and least skill-intensive stage. Everything else — the
+      careful harvesting, the expert bark stripping, the artful spinning,
+      the traditional dyeing — remains entirely in the hands of our artisans.
+
+  - type: paragraph
+    text: |
+      In fact, by removing the extraction bottleneck, the ERB creates more
+      work for spinners and dyers, not less. More raw fiber flowing through
+      the system means more demand for the high-skill stages where artisan
+      expertise is irreplaceable. The machine does the heavy lifting; the
+      artisans do the fine work. It is a partnership, not a replacement.
+
+  - type: heading
+    level: 2
+    text: "Deployed Across Nepal and Uttarakhand"
+
+  - type: paragraph
+    text: |
+      Himalayan Fibres has deployed ERB decorticator units in remote
+      communities across the Gorkha district of Nepal and the hill regions
+      of Uttarakhand in India. Each unit serves a cluster of villages, with
+      farmers bringing their retted bark to a central processing point. The
+      machines are maintained by trained local operators, creating
+      additional skilled employment in these communities.
+
+  - type: paragraph
+    text: |
+      We are actively planning additional deployments in Meghalaya and other
+      Northeast Indian states where wild nettle grows abundantly but fiber
+      processing has been limited by the same extraction bottleneck. Our
+      goal is to make the ERB decorticator available to every community in
+      our network, ensuring that geography and physical limitation are no
+      longer barriers to participating in the sustainable fiber economy.
+
+  - type: image
+    # --- DISPLAY ---
+    alt: "Pile of dried golden nettle fiber bundles ready for processing"
+    caption: null                             # optional — e.g. "Dried, extracted fiber ready for the next stage."
+    layout:
+      style: "content"
+      alignment: "center"
+    # --- SOURCE (needs_cataloging: fill these in manually) ---
+    catalog_ref: null                         # TODO point to a catalogue entry once created
+    local_file: null                          # TODO fill full /mnt/g/My Drive/... path
+    filename: null
+    description: "Pile of dried golden nettle fiber bundles ready for processing"
+    shot_type: null                           # e.g. "material — close-up"
+    quality: null
+    tags: []
+    best_for: []
+    status: "needs_cataloging"                # publisher warns until resolved
+    # --- PUBLISH STATE ---
+    wix_media_id: "b6e546_ecfe58bee7bf4990b168865d3db9558f~mv2.jpg"
+
+  - type: heading
+    level: 2
+    text: "The Bigger Picture"
+
+  - type: paragraph
+    text: |
+      The ERB decorticator represents something larger than a single piece
+      of equipment. It represents our philosophy at Himalayan Fibres: that
+      the best innovations are those that serve people and tradition, not
+      replace them. Technology should make ancient crafts more viable in the
+      modern economy, not obsolete.
+
+  - type: paragraph
+    text: |
+      When a farmer in a remote Gorkha village can earn a fair income from
+      nettle fiber because a simple machine removed the hardest part of the
+      work, that is innovation doing what it should do. That is progress we
+      can be proud of.
+
+author:
+  name: "Prashant Agrawal"
+  role: "Founder"
+
+# ---- PUBLISHING STATUS (auto-filled) ----
+wix_post_id: "5a4c7ea3-cd68-4701-bbc8-26b40a501457"
+wix_status: "draft"
+# Media IDs are now inlined per-image under each content block's `wix_media_id` field.
+# The publisher reads media_ref → looks up catalog → uploads local file if wix_media_id is null.

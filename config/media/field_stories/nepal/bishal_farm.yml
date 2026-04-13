@@ -1,0 +1,192 @@
+# Bishal Farm — Nepal Field Story
+# Artisans, farmers, ERB machine deployment, manual extraction
+# One of the richest image sources — professional quality artisan photography
+
+location: "Bishal Farm, Nepal"
+story: "Key farmer partnership site — where ERB technology was deployed, women artisans trained, and fiber masters program piloted"
+
+sublocations:
+  farmer_images:
+    gdrive_folder: "4. Photos and Media/Bishal Farm Images/Farmer Images/"
+    total_images: 15
+    description: "Professional-quality photos of women artisans and farmers at work"
+    images:
+      - id: "bishal_woman_stripping"
+        filename: "1678866670639.jpeg"
+        description: "Woman artisan stripping nettle bark on hillside. Red dress, white headband, green stalks. Another woman behind her. Lush mountain greenery."
+        shot_type: "action"
+        quality: "high — professional, emotional"
+        tags: ["artisan", "women", "bark stripping", "traditional", "hillside"]
+        best_for: ["blog hero", "sustainability", "women empowerment", "instagram"]
+
+      - id: "bishal_elder_spinning"
+        filename: "1678866670700.jpeg"
+        description: "Elderly woman on stone wall, smiling warmly, red headscarf, traditional jewelry, holding spindle. Himalayan mountains behind. Joyful, magazine-worthy portrait."
+        shot_type: "portrait"
+        quality: "excellent — best artisan portrait"
+        tags: ["artisan", "women", "spinning", "portrait", "smiling", "mountains"]
+        best_for: ["blog hero", "about us", "instagram", "women empowerment", "cover image"]
+
+      - id: "bishal_woman_carrying"
+        filename: "1678866670724.jpeg"
+        description: "Woman carrying nettle through dense forest. Bundle over shoulder, pushing through vegetation. Dark, moody forest atmosphere."
+        shot_type: "action"
+        quality: "high — atmospheric"
+        tags: ["artisan", "women", "harvest", "forest", "carrying"]
+        best_for: ["blog inline", "behind the scenes", "collection stories"]
+
+      - id: "bishal_woman_sitting_fiber"
+        filename: "1678866670652.jpeg"
+        description: "Woman artisan sitting, holding bundle of green nettle stalks in her lap. Red dress, beaded necklace. Other women working behind on hillside. Moody atmospheric light."
+        shot_type: "portrait"
+        quality: "high — cinematic, contemplative"
+        tags: ["artisan", "women", "sitting", "nettle stalks", "portrait"]
+        best_for: ["instagram", "blog inline", "women empowerment"]
+
+      - id: "bishal_woman_hanging_fiber"
+        filename: "1678866670664.jpeg"
+        description: "Woman hanging extracted nettle fiber to dry. Stretches long dark fiber strands over a line with arm extended. Mountains behind. Beautiful action shot showing drying process."
+        shot_type: "action"
+        quality: "high — great composition, process + person"
+        tags: ["artisan", "women", "fiber drying", "hanging", "mountains"]
+        best_for: ["processing blog", "behind the scenes", "instagram", "blog hero"]
+
+      - id: "bishal_woman_beating_fiber"
+        filename: "1678866670676.jpeg"
+        description: "Woman crouched on stone patio beating/softening dried fiber with a stick. Dust rising from impact. Mountains and green valley behind. Traditional fiber softening technique."
+        shot_type: "action"
+        quality: "excellent — dynamic, dust visible, storytelling"
+        tags: ["artisan", "women", "fiber beating", "traditional", "dust", "mountains"]
+        best_for: ["behind the scenes hero", "processing blog", "instagram"]
+
+      - id: "bishal_woman_carrying_bundles"
+        filename: "1678866670688.jpeg"
+        description: "Woman in red wrap carrying large dried fiber bundles over both shoulders, walking past stone-roofed house. Backlit, dust/smoke in air. Physical labor of fiber transport."
+        shot_type: "action"
+        quality: "high — backlit, atmospheric"
+        tags: ["artisan", "women", "carrying", "fiber bundles", "village"]
+        best_for: ["behind the scenes", "collection stories", "instagram"]
+
+  manual_extraction:
+    gdrive_folder: "4. Photos and Media/Bishal Farm Images/Manual Extraction/"
+    images:
+      - id: "bishal_manual_extraction"
+        filename: "IMG20210101102034.jpg"
+        description: "Elderly man on cleared hillside in winter, holding freshly extracted fiber strands in both hands. Misty mountain backdrop. Shows manual extraction technique."
+        shot_type: "action"
+        quality: "good — authentic, informational"
+        tags: ["farmer", "manual extraction", "fiber", "winter", "traditional"]
+        best_for: ["behind the scenes", "processing guide", "technology comparison"]
+    has_videos: true
+
+  # Editorial / stock reference images kept alongside Bishal Farm photos for easy access.
+  # These are NOT shot at Bishal Farm — mostly licensed stock (Unsplash) + internal reference
+  # frames used for emotional / story-driven content when we don't yet have our own coverage.
+  # Always credit appropriately when publishing.
+  good_reference_images:
+    gdrive_folder: "4. Photos and Media/Bishal Farm Images/Farmer Images/Good Images/"
+    note: "Editorial reference images. Safe for blog/email usage with credit where required."
+    images:
+      - id: "good_le_tan_portrait"
+        filename: "le-tan-KtIZRvS23po-unsplash.jpg"
+        credit: "Le Tan / Unsplash"
+        description: "Close portrait of a Himalayan hill woman in orange checkered headscarf and silver earring, blue traditional embroidered dress. Gentle, strong, quiet smile. Mountain haze behind a wire fence."
+        shot_type: "portrait"
+        quality: "excellent — editorial hero"
+        tags: ["portrait", "woman", "smile", "strength", "headscarf", "editorial", "unsplash"]
+        best_for: ["blog hero", "women empowerment", "emotional story", "about us"]
+        used_in: ["config/blog/behind_the_scenes/day_in_life_artisan.yml"]
+
+      - id: "good_village_aerial"
+        filename: "Village.jpg"
+        description: "Aerial view of a Himalayan village in terraced hillsides. Stone houses with dark roofs, a creek, dense green forest, and cultivated fields. Shows remoteness and scale."
+        shot_type: "landscape — aerial"
+        quality: "high"
+        tags: ["village", "landscape", "terraced fields", "remote", "himalayan"]
+        best_for: ["setting the scene", "collection stories", "behind the scenes hero"]
+        used_in: ["config/blog/behind_the_scenes/day_in_life_artisan.yml"]
+
+      - id: "good_house_2"
+        filename: "House _2.jpg"
+        description: "Traditional stone-built Himalayan houses with slate roofs. Woman in red and child visible near the steps. Stacked firewood. Lush greenery in foreground."
+        shot_type: "architecture + person"
+        quality: "high"
+        tags: ["house", "stone architecture", "traditional", "village", "woman"]
+        best_for: ["behind the scenes", "village life", "architecture story"]
+
+      - id: "good_house_1_stairway"
+        filename: "House_1_on the stairway.jpg"
+        description: "Elder woman in pink/red traditional dress sitting on a stone stairway of an orange mud-brick house. Contemplative pose, beautiful natural light. Stairs built from stacked uneven stone slabs."
+        shot_type: "portrait + architecture"
+        quality: "excellent — editorial"
+        tags: ["elder", "woman", "stairway", "home", "contemplative", "village"]
+        best_for: ["blog inline", "resilience story", "elder portrait"]
+        used_in: ["config/blog/behind_the_scenes/day_in_life_artisan.yml"]
+
+      - id: "good_sushanta_warm_houses"
+        filename: "sushanta-rokka-4x6Qn0CHXDQ-unsplash.jpg"
+        credit: "Sushanta Rokka / Unsplash"
+        description: "Warm-lit orange-yellow houses nestled in dense forest, shot through foliage in warm evening light. Cinematic village atmosphere."
+        shot_type: "landscape — atmospheric"
+        quality: "excellent"
+        tags: ["village", "atmosphere", "evening", "warmth", "unsplash"]
+        best_for: ["blog hero", "atmospheric opening", "emotional story"]
+
+      - id: "good_abhishek_ghosh"
+        filename: "abhishek-ghosh-CvCmLxAWwYo-unsplash.jpg"
+        credit: "Abhishek Ghosh / Unsplash"
+        status: "needs_viewing"
+
+      - id: "good_aman_chaturvedi"
+        filename: "aman-chaturvedi-K84VkqSa3nQ-unsplash.jpg"
+        credit: "Aman Chaturvedi / Unsplash"
+        status: "needs_viewing"
+
+      - id: "good_hans_jurgen_mager"
+        filename: "hans-jurgen-mager-Q0cEJqdn1Ls-unsplash.jpg"
+        credit: "Hans-Jurgen Mager / Unsplash"
+        status: "needs_viewing"
+
+      - id: "good_istockphoto_village"
+        filename: "istockphoto-1555713545-1024x1024.jpg"
+        credit: "iStockPhoto (licensed — check licence before commercial use)"
+        status: "needs_viewing"
+
+      - id: "good_just_capturing"
+        filename: "just-capturing-it-1jYu08pSXFY-unsplash.jpg"
+        credit: "Just Capturing It / Unsplash"
+        status: "needs_viewing"
+
+      - id: "good_wietse_jongsma"
+        filename: "wietse-jongsma-0E0LHBwnMZI-unsplash.jpg"
+        credit: "Wietse Jongsma / Unsplash"
+        status: "needs_viewing"
+
+  team_and_machine:
+    gdrive_folder: "4. Photos and Media/Bishal Farm Images/Team & Machine Videos/"
+    images:
+      - id: "bishal_erb_intro"
+        filename: "Introducing ERB Tech to Farmer.jpeg"
+        description: "Group of 7 — team + farmers — standing next to red ERB decorticator in green clearing. Someone handing over document. Shows technology transfer moment."
+        shot_type: "group"
+        quality: "high — great storytelling"
+        tags: ["team", "farmers", "ERB", "technology transfer", "partnership"]
+        best_for: ["technology story", "fiber masters blog hero", "collection stories"]
+
+      - id: "bishal_machine_action"
+        filename: "Machine Pic.png"
+        description: "ERB decorticator being operated in the field. Red machine on wheeled cart, farmer feeding nettle stalks. Dried fiber hanging on frame behind. Mountain clearing."
+        shot_type: "action"
+        format: "png"
+        quality: "excellent — machine in real use"
+        tags: ["ERB", "decorticator", "machine", "farmer", "field operation"]
+        best_for: ["technology blog hero", "ERB post", "innovation content"]
+        wix_media_id: "b6e546_bc1f9ffa09ff48c2a42d3c9337a5cdc3~mv2.png"
+
+      - id: "bishal_team"
+        filename: "Team Image.jpeg"
+        description: "Four team members in forest — same as Gorkha Team Nepal photo."
+        tags: ["team", "portrait"]
+        notes: "Duplicate of gorkha_team_nepal"
+    has_videos: true
+    video_files: ["Farmer Working With ERB Tech.mp4", "VID_20220601_180409.mp4"]

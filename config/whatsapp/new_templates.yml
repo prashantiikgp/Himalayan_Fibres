@@ -1,0 +1,122 @@
+# =============================================================
+# WhatsApp Template Definitions
+# =============================================================
+# Add new templates here. Run the submit script to send them
+# to Meta for approval.
+#
+# Template structure:
+#   name: unique_template_name (lowercase, underscores only)
+#   category: MARKETING | UTILITY | AUTHENTICATION
+#   language: en | en_US | hi (language code)
+#   components:
+#     - header (optional): TEXT or IMAGE
+#     - body (required): Main message text. Use {{1}}, {{2}} for variables
+#     - footer (optional): Small text at bottom
+#     - buttons (optional): URL or QUICK_REPLY buttons
+#
+# Variables: Use {{1}}, {{2}}, {{3}} etc. in order
+# Example values are required for Meta review
+# =============================================================
+
+templates:
+
+  # -- Example 1: B2B Introduction --
+  b2b_fiber_intro:
+    category: MARKETING
+    language: en
+    header:
+      type: TEXT
+      text: "Premium Natural Fibers for {{1}}"
+      example: ["Your Business"]
+    body:
+      text: >
+        Hello {{1}},
+
+        I'm reaching out from Himalayan Fibres. We supply premium natural fibers
+        sourced directly from the Himalayas:
+
+        - Himalayan Stinging Nettle Yarn
+        - Hemp Yarn
+        - Tibetan Wool Blends
+        - Yak Fiber
+
+        All our fibers are sustainably sourced and meet EU/US compliance standards.
+        Would you like to receive samples?
+      example: ["Prashant"]
+    footer:
+      text: "Himalayan Fibres | himalayanfibres.com"
+    buttons:
+      - type: URL
+        text: "Visit Website"
+        url: "https://www.himalayanfibres.com/"
+      - type: QUICK_REPLY
+        text: "Send Samples"
+
+  # -- Example 2: Follow Up --
+  followup_interest:
+    category: MARKETING
+    language: en
+    body:
+      text: >
+        Hi {{1}},
+
+        Just following up on our previous conversation about Himalayan fibers.
+
+        We recently launched new product lines that might interest {{2}}:
+        - Organic Nettle Yarn (new batch)
+        - Blended Hemp-Wool Yarn
+
+        Would you like to discuss pricing or receive samples?
+      example: ["Prashant", "your company"]
+    footer:
+      text: "Himalayan Fibres"
+    buttons:
+      - type: QUICK_REPLY
+        text: "Yes, interested"
+      - type: QUICK_REPLY
+        text: "Not now"
+
+  # -- Example 3: Sample Shipped --
+  sample_shipped:
+    category: UTILITY
+    language: en
+    body:
+      text: >
+        Hi {{1}},
+
+        Great news! Your fiber samples have been shipped.
+
+        Tracking ID: {{2}}
+        Expected delivery: {{3}}
+
+        Please let us know once you receive them. We'd love to hear your feedback!
+      example: ["Prashant", "DL123456789IN", "3-5 business days"]
+    footer:
+      text: "Himalayan Fibres"
+
+  # -- Example 4: Price List --
+  price_list_share:
+    category: MARKETING
+    language: en
+    body:
+      text: >
+        Hi {{1}},
+
+        Here's our latest price list as requested:
+
+        - Nettle Yarn: ₹850-1200/kg
+        - Hemp Yarn: ₹650-900/kg
+        - Wool Blend: ₹500-750/kg
+        - Yak Fiber: ₹1500-2200/kg
+
+        Prices vary by quantity and processing. Minimum order: 50kg per fiber type.
+
+        Shall I prepare a custom quote for you?
+      example: ["Prashant"]
+    footer:
+      text: "Himalayan Fibres | Prices valid for 30 days"
+    buttons:
+      - type: QUICK_REPLY
+        text: "Get Quote"
+      - type: QUICK_REPLY
+        text: "Not Now"

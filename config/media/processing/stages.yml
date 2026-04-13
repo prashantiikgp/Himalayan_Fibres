@@ -1,0 +1,53 @@
+# Processing Journey — Stage-by-Stage Images
+# Images showing the fiber transformation process
+
+gdrive_folder: "4. Photos and Media/1. Farm Videos/Nepal Processing/"
+
+stages:
+  - stage: "drying"
+    step_number: 7
+    images:
+      - id: "drying_rack_nepal"
+        filename: "Drying of Fibre.jpg"
+        description: "Nettle fiber bundles hanging on bamboo drying rack. Golden-brown fiber draped over horizontal bamboo poles outdoors. Mountains and blue sky behind. Traditional sun-drying."
+        shot_type: "process"
+        quality: "high — great composition"
+        tags: ["drying", "bamboo rack", "traditional", "nepal", "mountains"]
+        best_for: ["12-step journey", "behind the scenes", "processing guide"]
+
+  - stage: "post_drying"
+    step_number: 8
+    images:
+      - id: "fiber_after_drying"
+        filename: "After Drying.jpg"
+        description: "Large pile of dried nettle fiber bundles on ground. Soft golden-brown color. Ready for next processing stage. Close-up showing volume."
+        shot_type: "process"
+        quality: "good"
+        tags: ["dried fiber", "pile", "golden", "bulk"]
+        best_for: ["processing guide", "behind the scenes"]
+
+  - stage: "raw_bulk"
+    images:
+      - id: "raw_fiber_bulk"
+        filename: "Image2.jpg"
+        description: "Close-up of bulk raw nettle fiber — large loose pile with various lengths and textures. Some darker, some lighter strands. Storage/processing area."
+        shot_type: "material"
+        quality: "moderate"
+        tags: ["raw fiber", "bulk", "storage"]
+        best_for: ["B2B content", "raw materials guide"]
+
+      - id: "processing_img3"
+        filename: "Image 3.jpg"
+        status: "needs_viewing"
+
+  - stage: "village_processing"
+    images:
+      - id: "nepal_processing_wa1"
+        filename: "WhatsApp Image 2021-06-08 at 5.56.36 PM.jpeg"
+        status: "needs_viewing"
+      - id: "nepal_processing_wa2"
+        filename: "WhatsApp Image 2021-07-14 at 7.53.50 PM.jpeg"
+        status: "needs_viewing"
+
+# Also cross-reference the fiber stages comparison from creative shots
+related: "products/creative_styled/styled_shots.yml → fiber_three_stages"

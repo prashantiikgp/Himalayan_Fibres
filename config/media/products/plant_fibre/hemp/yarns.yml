@@ -1,0 +1,23 @@
+# Hemp Yarns — 3 Variants
+# GDrive: 3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/2. Himalayan Hemp Plant/2. Yarns/
+
+variants:
+  - variant_id: "natural_hemp_thick"
+    variant_name: "Natural Hemp Yarn [Thick]"
+    product_ref: "thick_hemp_yarn"
+    gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/2. Himalayan Hemp Plant/2. Yarns/1. Natural Hemp Yarn [Thick]/"
+    status: "needs_cataloging"
+    tags: ["product", "hemp", "natural", "thick"]
+
+  - variant_id: "soft_hemp_thick"
+    variant_name: "Soft Hemp Yarn [Thick]"
+    gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/2. Himalayan Hemp Plant/2. Yarns/2. Soft Hemp Yarn [Thick]/"
+    status: "needs_cataloging"
+    tags: ["product", "hemp", "soft"]
+
+  - variant_id: "white_hemp_thick"
+    variant_name: "White Hemp Yarn [Thick]"
+    product_ref: "white_hemp_yarn"
+    gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/2. Himalayan Hemp Plant/2. Yarns/3. White Hemp Yarn [Thick]/"
+    status: "needs_cataloging"
+    tags: ["product", "hemp", "white"]

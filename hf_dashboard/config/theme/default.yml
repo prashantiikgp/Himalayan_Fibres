@@ -1,0 +1,156 @@
+# Himalayan Fibers Dashboard — Indigo dark theme.
+# Single source of truth for colors, typography, and component styles.
+# Used by ThemeEngine to produce Gradio themes and HTML inline styles.
+
+theme:
+  name: "Himalayan Fibers Dark"
+
+  # -- Color palette --
+  colors:
+    primary:
+      base: "#6366f1"
+      dark: "#4338ca"
+      hover: "#4f46e5"
+      light: "#818cf8"
+      subtle: "rgba(99,102,241,.12)"
+      hue:
+        c50: "#eef2ff"
+        c100: "#e0e7ff"
+        c200: "#c7d2fe"
+        c300: "#a5b4fc"
+        c400: "#818cf8"
+        c500: "#6366f1"
+        c600: "#4f46e5"
+        c700: "#4338ca"
+        c800: "#3730a3"
+        c900: "#312e81"
+        c950: "#1e1b4b"
+
+    secondary:
+      base: "#f59e0b"
+      dark: "#d97706"
+      hue:
+        c50: "#fffbeb"
+        c100: "#fef3c7"
+        c200: "#fde68a"
+        c300: "#fcd34d"
+        c400: "#fbbf24"
+        c500: "#f59e0b"
+        c600: "#d97706"
+        c700: "#b45309"
+        c800: "#92400e"
+        c900: "#78350f"
+        c950: "#451a03"
+
+    neutral:
+      hue:
+        c50: "#f8fafc"
+        c100: "#f1f5f9"
+        c200: "#e2e8f0"
+        c300: "#cbd5e1"
+        c400: "#94a3b8"
+        c500: "#64748b"
+        c600: "#475569"
+        c700: "#334155"
+        c800: "#1e293b"
+        c900: "#0f172a"
+        c950: "#020617"
+
+    semantic:
+      success: "#22c55e"
+      warning: "#f59e0b"
+      error: "#ef4444"
+      info: "#6366f1"
+
+    text:
+      primary: "#e7eaf3"
+      subtle: "#94a3b8"
+      muted: "#64748b"
+      label: "#c5cbda"
+
+    surface:
+      canvas_start: "#0b1022"
+      canvas_end: "#0e132b"
+      canvas_gradient: "linear-gradient(135deg, #0b1022, #0e132b)"
+      block_bg: "rgba(15,23,42,.55)"
+      card_bg: "#1e293b"
+      card_bg_gradient: "linear-gradient(135deg, #1e293b, #0f172a)"
+      input_bg: "rgba(15,23,42,.40)"
+
+    border:
+      default: "rgba(255,255,255,.08)"
+      input: "rgba(255,255,255,.10)"
+      grid: "#1e293b"
+      grid_zero: "#334155"
+
+    table:
+      border: "rgba(255,255,255,.06)"
+      even_row: "rgba(255,255,255,.03)"
+      row_focus: "rgba(99,102,241,.12)"
+
+    extended:
+      primary_tint: "rgba(99,102,241,.06)"
+      primary_tint_strong: "rgba(99,102,241,.12)"
+      overlay_subtle: "rgba(255,255,255,.03)"
+      overlay_light: "rgba(255,255,255,.07)"
+      overlay_medium: "rgba(255,255,255,.10)"
+      overlay_strong: "rgba(255,255,255,.15)"
+      info_text: "#a5b4fc"
+      accent_purple: "#c4b5fd"
+
+  # -- Spacing tokens --
+  spacing:
+    cell_sm: "6px 8px"
+    cell_lg: "6px 10px"
+    card: "12px 16px"
+    card_compact: "10px 14px"
+    section_margin: "16px 0 8px"
+    badge_sm: "2px 8px"
+    badge_lg: "4px 12px"
+
+  # -- Font-size scale --
+  font_sizes:
+    xxs: "9px"
+    xs: "10px"
+    sm: "11px"
+    base: "12px"
+    md: "13px"
+    lg: "16px"
+    xl: "20px"
+    kpi: "24px"
+
+  # -- Border-radius scale --
+  radii:
+    sm: "4px"
+    md: "6px"
+    lg: "8px"
+    pill: "10px"
+    card: "8px"
+    bubble: "12px"
+
+  # -- Typography --
+  typography:
+    font_family:
+      - "ui-sans-serif"
+      - "system-ui"
+      - "-apple-system"
+      - "Inter"
+      - "Roboto"
+      - "sans-serif"
+
+  # -- Component styles --
+  components:
+    block:
+      shadow: "0 1px 2px rgba(0,0,0,.40)"
+      radius: "10px"
+    input:
+      radius: "8px"
+    button:
+      primary_shadow: "0 1px 0 rgba(255,255,255,.06) inset, 0 1px 2px rgba(0,0,0,.40)"
+      cancel_bg: "rgba(179,32,32,.25)"
+      cancel_text: "#ff6b6b"
+    kpi_card:
+      border_radius: "12px"
+      padding: "16px 20px"
+      value_size: "28px"
+      label_size: "12px"

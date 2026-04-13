@@ -1,0 +1,120 @@
+# Product Guides — Content Strategy
+# Deep dives into fibers, yarns, and collections
+# Wix Category ID: e1aa185b-51d8-4bcb-9e26-ed4e1b4493d5
+
+strategy:
+  purpose: "Educate buyers about what makes each product unique — fiber properties, uses, comparisons. Drive purchase decisions."
+  audience: "Crafters, textile designers, B2B buyers evaluating fiber options"
+  frequency: "1-2 posts per month"
+  tone: "Educational, detailed, authoritative — with brand warmth"
+
+# ──────────────────────────────────────────────────────────────────
+# DRAFT 1: The Himalayan Silk — Special Nettle Yarn
+# ──────────────────────────────────────────────────────────────────
+drafts:
+  - id: "himalayan_silk_guide"
+    title: "Himalayan Silk — The Complete Guide to Our Special Stinging Nettle Yarn"
+    slug: "himalayan-silk-special-nettle-yarn-guide"
+    status: "idea"
+    brief:
+      topic: "Deep dive into the signature product — what makes it special, how it's made, how to use it"
+      key_points:
+        - "Why it's called 'Himalayan Silk': lustre, drape, softness"
+        - "250m per 100gm — 25% more than standard nettle yarn"
+        - "Proprietary processing that preserves natural sheen"
+        - "Color options: Rich Walnut, Deep Earthy Brown, Natural Beige, Golden Amber"
+        - "Best for: luxury garments, shawls, high-end textiles"
+        - "Care instructions and tips"
+        - "Price comparison: silk-like quality at fraction of silk cost"
+      word_count: 1000
+      product_refs: ["special_nettle_yarn"]
+    suggested_images:
+      cover: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/1. Himalayan Stinging Nettle Plant/Yarns/3. Special Stinging Nettle [Thick]/2.jpg"
+      inline:
+        - path: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/1. Himalayan Stinging Nettle Plant/Yarns/3. Special Stinging Nettle [Thick]/3.jpg"
+          use_for: "Yarn texture close-up"
+        - path: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/1. Himalayan Stinging Nettle Plant/Yarns/3. Special Stinging Nettle [Thick]/4.jpg"
+          use_for: "Color variations"
+        - path: "3. Product Images & Excel/Photo Collection Images/Creative images/IMG_20241231_124328.jpg"
+          use_for: "Fiber stages: raw, processed, cottonised comparison"
+
+  # ──────────────────────────────────────────────────────────────────
+  # DRAFT 2: Hemp Yarn Guide
+  # ──────────────────────────────────────────────────────────────────
+  - id: "hemp_yarn_guide"
+    title: "Why Hemp Yarn Gets Better with Every Wash — A Complete Guide"
+    slug: "himalayan-hemp-yarn-complete-guide"
+    status: "idea"
+    brief:
+      topic: "Everything about Himalayan hemp yarn — properties, advantages, uses, care"
+      key_points:
+        - "Hemp yarn softens with each wash (unlike most natural fibers)"
+        - "Naturally UV resistant and antimicrobial"
+        - "3 variants: Natural thick, soft, and white hemp yarn"
+        - "Machine washable — easiest natural fiber to care for"
+        - "Ideal for summer garments, baby items, home textiles"
+        - "Hemp farm in Rishikesh — sourcing story"
+        - "Sustainability: hemp grows fast, needs no irrigation"
+      word_count: 900
+      product_refs: ["white_hemp_yarn", "thick_hemp_yarn"]
+    suggested_images:
+      cover: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/2. Himalayan Hemp Plant/2. Yarns/3. White Hemp Yarn [Thick]/"
+      inline:
+        - path: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/2. Himalayan Hemp Plant/1. Fibres/"
+          use_for: "Hemp fiber stages (raw, degummed, cottonised)"
+        - path: "4. Photos and Media/1. Farm Videos/Rishikesh Hemp Farm/1670924853438.jpg"
+          use_for: "Rishikesh hemp farm sourcing"
+
+  # ──────────────────────────────────────────────────────────────────
+  # DRAFT 3: Collections Showcase
+  # ──────────────────────────────────────────────────────────────────
+  - id: "collections_showcase"
+    title: "Our Signature Collections — Snow White, Burberry, Noor & Seriry"
+    slug: "himalayan-fibres-yarn-collections"
+    status: "idea"
+    brief:
+      topic: "Showcase all 4 curated collections — what makes each unique, the blending philosophy"
+      key_points:
+        - "Snow White: nettle + wool blend, inspired by Himalayan snow peaks, perfect for weddings & baby items"
+        - "Burberry: premium textured blend with distinctive pattern options"
+        - "Noor Series: elegant collection with refined finish"
+        - "Seriry Series: nettle 80% + wool 20% blend for strength + softness"
+        - "Why blending matters: combining best properties of multiple fibers"
+        - "How to choose between collections"
+      word_count: 1200
+      product_refs: ["snow_white_series", "burberry_series", "noor_series", "seriry_series"]
+    suggested_images:
+      cover: "3. Product Images & Excel/1. Images_ Category Wise/3. Plant & Animal Mix/4. Snow White/Top Image.jpg"
+      inline:
+        - path: "3. Product Images & Excel/1. Images_ Category Wise/3. Plant & Animal Mix/1. Burberry Series/Burberry Series.webp"
+          use_for: "Burberry collection hero"
+        - path: "3. Product Images & Excel/1. Images_ Category Wise/3. Plant & Animal Mix/2. Noor Series/1000216653.webp"
+          use_for: "Noor series texture"
+        - path: "3. Product Images & Excel/1. Images_ Category Wise/3. Plant & Animal Mix/4. Snow White/Image1.jpg"
+          use_for: "Snow White detail shot"
+
+  # ──────────────────────────────────────────────────────────────────
+  # DRAFT 4: Raw Fibers for Spinners & Manufacturers
+  # ──────────────────────────────────────────────────────────────────
+  - id: "raw_fibers_guide"
+    title: "Himalayan Raw Fibers — A Guide for Spinners & Textile Manufacturers"
+    slug: "raw-fibers-spinners-manufacturers-guide"
+    status: "idea"
+    brief:
+      topic: "Guide for B2B buyers and hand spinners — raw fiber grades, applications, blending options"
+      key_points:
+        - "Standard vs Premium grade fibers — what's the difference"
+        - "Nettle fibre: 60-120mm fiber length, high tensile strength"
+        - "Hemp fibre: raw, degummed, cottonised — three processing stages"
+        - "Applications: hand spinning, industrial yarn, paper making, composites"
+        - "Blending with wool, cotton, or silk — ratios and results"
+        - "Bulk ordering: MOQ, lead times, documentation for traceability"
+      word_count: 1000
+      product_refs: ["nettle_plant_fibre"]
+    suggested_images:
+      cover: "3. Product Images & Excel/Photo Collection Images/Creative images/IMG_20241231_124328.jpg"
+      inline:
+        - path: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/1. Himalayan Stinging Nettle Plant/Fibres/1. Himalayan Nettle Fibre (Deummged)/"
+          use_for: "Degummed nettle fibre close-up"
+        - path: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/2. Himalayan Hemp Plant/1. Fibres/"
+          use_for: "Hemp fibre processing stages"

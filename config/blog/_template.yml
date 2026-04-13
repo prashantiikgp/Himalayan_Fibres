@@ -1,0 +1,79 @@
+# Blog Post Template (Universal)
+# ================================
+# Usage:
+#   1. Copy this file to the right category folder (e.g. behind_the_scenes/my_post.yml)
+#   2. Fill in post metadata + brief section
+#   3. For images: use media catalog IDs from config/media/ — Claude auto-resolves paths + uploads
+#   4. Tell Claude: "Generate and publish config/blog/behind_the_scenes/my_post.yml"
+#
+# Image selection:
+#   Option A: Pick specific images by catalog ID (see config/media/ files for IDs)
+#   Option B: Set image_tags and Claude auto-selects the best matches from the catalog
+
+post:
+  id: ""                                  # unique ID e.g. "nettle_fiber_guide"
+  title: ""
+  slug: ""                                # URL slug e.g. "nettle-fiber-guide"
+  status: "draft"                         # draft | ready | published
+  category: ""                            # collection_stories | product_guides | sustainability | craft_tips | behind_the_scenes | news_updates
+  featured: false
+  tags: []
+
+seo:
+  meta_title: ""                          # blank = auto from title
+  meta_description: ""                    # blank = auto from first paragraph
+  focus_keyword: ""
+
+# ── IMAGES (reference media catalog IDs) ──────────────────────
+# Look up IDs in config/media/ files — each image has a unique id like "elder_spinning"
+#
+# cover_image: the big banner at top of the post
+# inline_images: embedded in the article body, placed between content sections
+#
+# For each image, provide:
+#   ref: media catalog ID (from config/media/*.yml)
+#   after_section: which heading/section to place it after (by index or name)
+#   caption: optional caption shown below the image
+#
+# If you don't know which images to use, set auto_select_tags and Claude picks from catalog.
+
+cover_image:
+  ref: ""                                 # e.g. "village_gathering" or "erb_machine_operating"
+  # OR auto-select by tags:
+  # auto_tags: ["landscape", "community"]
+
+inline_images:
+  - ref: ""                               # e.g. "elder_spinning"
+    after_section: 1                      # place after content section index 1
+    caption: ""                           # optional
+  - ref: ""
+    after_section: 3
+    caption: ""
+  - ref: ""
+    after_section: 5
+    caption: ""
+  - ref: ""
+    after_section: 7
+    caption: ""
+  # Add more as needed (aim for 4-5 per post)
+
+# ── BRIEF (you fill this, Claude generates content) ───────────
+brief:
+  topic: ""
+  key_points: []
+  tone: ""                                # blank = default from brand_kit
+  target_audience: ""
+  word_count: 800
+  product_refs: []                        # product IDs from config/products/
+
+# ── CONTENT (Claude generates, you review) ────────────────────
+content: []
+
+author:
+  name: "Prashant Agrawal"
+  role: "Founder"
+
+# ── AFTER PUBLISHING (auto-filled) ────────────────────────────
+# wix_post_id: ""
+# wix_post_url: ""
+# published_date: ""

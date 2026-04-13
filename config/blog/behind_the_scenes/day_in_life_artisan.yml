@@ -1,0 +1,243 @@
+# The Smile of the Mountain Women — Behind-the-scenes blog
+# A short, reflective story about the women behind Himalayan Fibres:
+# the climb, the struggle, and the smile that holds both.
+#
+# NOTE: This file was originally drafted as "A Day in the Life of a Himalayan
+# Fiber Artisan" (Kamala composite narrative). It has been restructured around
+# a new hero image and a tighter, more emotional story. Filename kept for now;
+# rename to `smile_of_mountain_women.yml` if desired.
+
+post:
+  id: "smile_of_mountain_women"
+  title: "The Smile of the Mountain Women"
+  subtitle: "The quiet strength behind every skein of Himalayan Fibre"
+  slug: "smile-of-mountain-women"
+  status: "draft"
+  category: "behind_the_scenes"
+  featured: true
+  tags:
+    - "artisans"
+    - "women"
+    - "village life"
+    - "resilience"
+    - "himalayan fibres"
+    - "emotional storytelling"
+
+seo:
+  meta_title: "The Smile of the Mountain Women | Himalayan Fibres"
+  meta_description: "A short story about resilience, struggle, and the quiet dignity of the women who make Himalayan Fibres possible."
+  focus_keyword: "himalayan women artisans"
+
+cover_image:
+  # --- DISPLAY ---
+  alt: "A Himalayan woman with a quiet smile, orange checkered headscarf, blue traditional embroidered dress"
+  caption: null
+  layout:
+    style: "full_width"
+    alignment: "center"
+  # --- SOURCE ---
+  catalog_ref: "field_stories/nepal/bishal_farm.yml#good_le_tan_portrait"
+  local_file: "/mnt/g/My Drive/1. Media & Marketing/4. Photos and Media/Bishal Farm Images/Farmer Images/Good Images/le-tan-KtIZRvS23po-unsplash.jpg"
+  filename: "le-tan-KtIZRvS23po-unsplash.jpg"
+  credit: "Le Tan / Unsplash"
+  description: "Close portrait of a Himalayan hill woman in orange checkered headscarf and silver earring, blue traditional embroidered dress. Gentle, strong, quiet smile. Mountain haze behind a wire fence."
+  shot_type: "portrait"
+  quality: "excellent — editorial hero"
+  tags: ["portrait", "woman", "smile", "strength", "headscarf", "editorial", "unsplash"]
+  best_for: ["blog hero", "women empowerment", "emotional story", "about us"]
+  # --- PUBLISH STATE ---
+  wix_media_id: null
+  status: "needs_upload"
+
+brief:
+  topic: "A short, emotional blog about the quiet resilience of the women artisans who make Himalayan Fibres possible"
+  key_points:
+    - "A single hero portrait carries the whole story"
+    - "Show where she lives, what the work costs, and what the smile holds"
+    - "Tone: honest, reflective, quiet — not celebratory, not pitying"
+    - "Short form: ~500 words, 3 images + 1 reel"
+    - "Closing line connects the skein back to her dignity"
+  tone: "warm, quiet, reflective, honest"
+  target_audience: "eco-conscious consumers, craft enthusiasts, readers who value human-centred stories"
+  minutes_to_read: 3
+
+content:
+  - type: section_banner
+    # --- DISPLAY ---
+    overlay_text: "The Smile of the Mountain Women"
+    overlay_alignment: "center"
+    padding: { top: 80, bottom: 80 }
+    layout:
+      style: "full_width"
+      scaling: "cover"
+      position: "center"
+      opacity: 75
+    # --- SOURCE (backdrop) ---
+    backdrop:
+      catalog_ref: "field_stories/nepal/bishal_farm.yml#good_le_tan_portrait"
+      local_file: "/mnt/g/My Drive/1. Media & Marketing/4. Photos and Media/Bishal Farm Images/Farmer Images/Good Images/le-tan-KtIZRvS23po-unsplash.jpg"
+      filename: "le-tan-KtIZRvS23po-unsplash.jpg"
+      credit: "Le Tan / Unsplash"
+      alt: "A Himalayan woman with a quiet smile, orange checkered headscarf, blue traditional embroidered dress"
+      description: "Close portrait of a Himalayan hill woman — orange checkered headscarf, silver earring, blue embroidered traditional dress. Gentle, strong, quietly smiling."
+      shot_type: "portrait"
+      quality: "excellent — editorial hero"
+      tags: ["portrait", "woman", "smile", "strength", "headscarf", "editorial", "unsplash"]
+      best_for: ["blog hero", "women empowerment", "emotional story"]
+    # --- PUBLISH STATE ---
+    wix_media_id: null
+    status: "needs_upload"
+
+  - type: paragraph
+    text: |
+      You notice the smile first.
+
+      It is quiet. It is not for the camera. It is the kind of smile a
+      person wears when the day has already been long, when the hands have
+      already ached, and when the mountain has already been climbed twice —
+      once up for the nettle, once down with the bundle.
+
+  - type: paragraph
+    text: |
+      This is a short story about that smile. And about what it holds.
+
+  - type: heading
+    level: 2
+    text: "Where She Lives"
+
+  - type: image
+    # --- DISPLAY ---
+    alt: "A Himalayan village of stone houses on terraced hillsides, surrounded by dense green forest"
+    caption: "A Himalayan village — stone houses, terraced fields, and the nettle growing wild on the slopes above."
+    layout:
+      style: "content"
+      alignment: "center"
+    # --- SOURCE ---
+    catalog_ref: "field_stories/nepal/bishal_farm.yml#good_village_aerial"
+    local_file: "/mnt/g/My Drive/1. Media & Marketing/4. Photos and Media/Bishal Farm Images/Farmer Images/Good Images/Village.jpg"
+    filename: "Village.jpg"
+    description: "Aerial view of a Himalayan village in terraced hillsides. Stone houses with dark roofs, a creek, dense green forest, and cultivated fields."
+    shot_type: "landscape — aerial"
+    quality: "high"
+    tags: ["village", "landscape", "terraced fields", "remote", "himalayan"]
+    best_for: ["setting the scene", "collection stories", "behind the scenes hero"]
+    # --- PUBLISH STATE ---
+    wix_media_id: null
+    status: "needs_upload"
+
+  - type: paragraph
+    text: |
+      Her home is high. An hour's walk from the nearest road, three hours
+      from the nearest shop, and a full day from the nearest hospital. The
+      village sits in a pocket of terraced fields carved into the hillside
+      generations ago. Electricity comes and goes. The monsoon closes the
+      trails for weeks at a time. In winter, the wind cuts through stone
+      walls.
+
+      This is not a hardship she chose. It is the place she was born into,
+      the place her mother worked, and the place her daughter will one day
+      decide whether to stay.
+
+  - type: heading
+    level: 2
+    text: "What the Smile Holds"
+
+  - type: image
+    # --- DISPLAY ---
+    alt: "Elder woman in traditional red dress sitting on a stone stairway of an orange mud-brick village home"
+    caption: "An elder resting on the stone stairway of her family home — built the same way for generations."
+    layout:
+      style: "content"
+      alignment: "center"
+    # --- SOURCE ---
+    catalog_ref: "field_stories/nepal/bishal_farm.yml#good_house_1_stairway"
+    local_file: "/mnt/g/My Drive/1. Media & Marketing/4. Photos and Media/Bishal Farm Images/Farmer Images/Good Images/House_1_on the stairway.jpg"
+    filename: "House_1_on the stairway.jpg"
+    description: "Elder woman in pink/red traditional dress sitting on a stone stairway of an orange mud-brick house. Contemplative pose, beautiful natural light. Stairs built from stacked uneven stone slabs."
+    shot_type: "portrait + architecture"
+    quality: "excellent — editorial"
+    tags: ["elder", "woman", "stairway", "home", "contemplative", "village"]
+    best_for: ["blog inline", "resilience story", "elder portrait"]
+    # --- PUBLISH STATE ---
+    wix_media_id: null
+    status: "needs_upload"
+
+  - type: paragraph
+    text: |
+      Her hands are rough. Nettle stings even after retting, and the
+      repetition of stripping, beating, and spinning for thirty years has
+      left its mark. She has pain in her shoulders she does not mention.
+      She has worries about her children she does not share. She has seen
+      neighbours leave the village for the city and come back with less
+      than they took.
+
+      Her income from fiber work is small by any outside standard — a few
+      thousand rupees a month, sometimes less. But in a village like hers,
+      that money is what pays for school books, for a sack of rice in a
+      lean month, for a bus ticket when a grandchild is sick. It is not a
+      supplement. It is the margin between staying and leaving.
+
+  - type: heading
+    level: 2
+    text: "And Yet"
+
+  - type: video
+    # --- DISPLAY ---
+    alt: "Women of the Himalayan mountains offering a namaste — a quiet greeting of gratitude and welcome"
+    caption: "Namaste — the greeting of the mountain women. A small gesture that carries their gratitude, their pride, and their welcome."
+    layout:
+      style: "full_width"
+      alignment: "center"
+      autoplay: true                      # autoplay on scroll — muted
+      loop: true
+      muted: true
+      show_controls: true
+    # --- SOURCE ---
+    upload_type: "wix_upload"
+    url: null
+    catalog_ref: "reels.yml#replicate_svw1b6sznhrme0cqx719zgv2p8"
+    local_file: "/mnt/g/My Drive/1. Media & Marketing/7. Instagram Reels/replicate-prediction-svw1b6sznhrme0cqx719zgv2p8.mp4"
+    filename: "replicate-prediction-svw1b6sznhrme0cqx719zgv2p8.mp4"
+    description: "AI-generated reel — women of the Himalayan mountains offering a namaste. A quiet gesture of greeting, gratitude, and welcome."
+    shot_type: "reel — portrait / gesture"
+    quality: "good"
+    tags: ["reel", "ai-generated", "replicate", "women", "namaste", "greeting", "gratitude"]
+    best_for: ["blog inline", "instagram reel", "emotional storytelling"]
+    duration_seconds: null
+    # --- THUMBNAIL ---
+    thumbnail:
+      catalog_ref: "field_stories/nepal/bishal_farm.yml#good_le_tan_portrait"
+      local_file: "/mnt/g/My Drive/1. Media & Marketing/4. Photos and Media/Bishal Farm Images/Farmer Images/Good Images/le-tan-KtIZRvS23po-unsplash.jpg"
+      alt: "Himalayan woman with a quiet smile"
+    # --- PUBLISH STATE ---
+    wix_video_id: null
+    status: "needs_upload"
+
+  - type: paragraph
+    text: |
+      And yet, when the work is done — when the bundle is tied, when the
+      spindle is put down for the afternoon — she smiles.
+
+      Not because any of it is easy. Because she is still here. Because her
+      craft is still alive. Because the skein she just finished is going
+      somewhere far away, to be held by someone who will never know her
+      name, and the money for it will come back to this village, to this
+      house, to this stairway.
+
+  - type: quote
+    text: "Every skein of Himalayan nettle yarn carries a smile like that. When you hold it, you hold her day."
+
+  - type: paragraph
+    text: |
+      That is what a simple skein really costs. And that is what it is
+      really worth.
+
+author:
+  name: "Prashant Agrawal"
+  role: "Founder"
+
+# ---- PUBLISHING STATUS (auto-filled) ----
+wix_post_id: "32d7fdc1-5f2b-4d5f-b366-8a84cdd8f345"   # was "A Day in the Life..." — publishing will rename the post
+wix_status: "draft"
+# Media IDs are now inlined per-image under each content block's `wix_media_id` field.
+# All images + the reel in this post are `status: needs_upload` — first publish will upload them to Wix.

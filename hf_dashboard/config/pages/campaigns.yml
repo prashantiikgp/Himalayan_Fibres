@@ -1,0 +1,30 @@
+page:
+  title: "Campaigns"
+
+  steps:
+    - label: "1. Pick Template"
+      type: dropdown
+      source: "email_templates"
+    - label: "2. Send To"
+      type: dropdown
+      source: "segments"
+    - label: "3. Subject Line"
+      type: text
+      placeholder: "e.g. Premium Himalayan Fibers for {{company_name}}"
+
+  actions:
+    send: "Send Emails"
+    test: "Send Test to Me"
+    test_placeholder: "your@email.com"
+
+  history:
+    title: "Past Sends"
+    columns:
+      - field: name
+        label: "Name"
+      - field: status
+        label: "Status"
+      - field: total_sent
+        label: "Sent"
+      - field: sent_at
+        label: "Date"

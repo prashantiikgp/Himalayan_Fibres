@@ -1,0 +1,18 @@
+# Tanahu — Nepal Field Story
+# Plantation visits
+
+location: "Tanahu, Nepal"
+gdrive_folder: "4. Photos and Media/1. Farm Videos/Nepal Plantation & Collection/Tanhu _ Plantation/"
+story: "Plantation visits in the Tanahu district — exploring nettle/hemp cultivation potential"
+
+images:
+  - id: "tanahu_1"
+    filename: "1657793954400.jpg"
+    status: "needs_viewing"
+
+  - id: "tanahu_2"
+    filename: "1657793954411.jpg"
+    status: "needs_viewing"
+
+has_videos: true
+video_files: ["VID_20220603_070814.mp4", "VID_20220609_164059.mp4"]

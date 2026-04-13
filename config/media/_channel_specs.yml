@@ -1,0 +1,85 @@
+# Channel Specifications — Image sizing and format rules per platform
+# Reference this when preparing images for a specific channel.
+
+instagram:
+  feed:
+    width: 1080
+    height: 1080
+    aspect: "1:1"
+    format: "jpg"
+    max_size_mb: 8
+    notes: "Square crop, center-weighted composition"
+  story:
+    width: 1080
+    height: 1920
+    aspect: "9:16"
+    format: "jpg"
+    notes: "Vertical, leave space for text overlay"
+  reel_cover:
+    width: 1080
+    height: 1920
+    aspect: "9:16"
+    format: "jpg"
+  carousel:
+    width: 1080
+    height: 1080
+    aspect: "1:1"
+    format: "jpg"
+    max_slides: 10
+
+email:
+  hero_banner:
+    width: 600
+    height: 300
+    format: "jpg"
+    max_size_kb: 200
+    notes: "Must render in all email clients"
+  inline:
+    width: 560
+    height: "auto"
+    format: "jpg"
+    max_size_kb: 150
+  product_card:
+    width: 280
+    height: 280
+    format: "jpg"
+
+whatsapp:
+  template_header:
+    width: 800
+    height: 418
+    aspect: "1.91:1"
+    format: "jpg"
+    max_size_kb: 500
+    notes: "Meta requirement for template header images"
+  catalog:
+    width: 600
+    height: 600
+    aspect: "1:1"
+    format: "jpg"
+  message_image:
+    max_size_mb: 5
+    format: "jpg"
+
+blog:
+  cover:
+    width: 1200
+    height: 800
+    format: "jpg"
+    notes: "Wix blog hero — displays full-width"
+  inline:
+    width: 900
+    height: "auto"
+    format: "jpg"
+    notes: "Centered in post body, max content width"
+
+website:
+  page_banner:
+    width: 1920
+    height: 600
+    format: "jpg"
+  product_gallery:
+    width: 800
+    height: 800
+    aspect: "1:1"
+    format: "jpg"

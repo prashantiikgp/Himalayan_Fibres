@@ -1,0 +1,35 @@
+# Noor Series — Collection Images
+# GDrive: 3. Product Images & Excel/1. Images_ Category Wise/3. Plant & Animal Mix/2. Noor Series/
+
+product_ref: "noor_series"
+gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/3. Plant & Animal Mix/2. Noor Series/"
+
+images:
+  - id: "noor_skein"
+    filename: "1000216653.webp"
+    description: "Thick skein/hank with visible wool-blend texture. Natural beige, close-up showing heft and body. White background."
+    shot_type: "product"
+    format: "webp"
+    quality: "good"
+    tags: ["product", "noor", "skein", "blend"]
+    best_for: ["collection showcase", "product page"]
+
+  - id: "noor_raw_fiber_ball"
+    filename: "1000216675.webp"
+    description: "Loose ball of raw/unspun Noor fiber on white background. Natural beige/tan, fluffy and unstructured. Shows the raw material before spinning. Top-down view."
+    shot_type: "material"
+    format: "webp"
+    quality: "good — informational, shows raw state"
+    tags: ["product", "noor", "raw fiber", "unspun", "material"]
+    best_for: ["processing comparison", "B2B content", "behind the scenes"]
+
+  - id: "noor_yarn_with_fiber"
+    filename: "1000216687.webp"
+    description: "Noor Series finished yarn skein sitting on top of raw loose fiber. Shows before-and-after — raw fluffy fiber transforms into structured twisted yarn. White background."
+    shot_type: "comparison"
+    format: "webp"
+    quality: "good — educational, shows transformation"
+    tags: ["product", "noor", "comparison", "raw to yarn", "transformation"]
+    best_for: ["product guide", "behind the scenes", "processing blog", "instagram educational"]
+
+subfolders: ["Raw"]

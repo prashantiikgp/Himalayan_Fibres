@@ -1,0 +1,45 @@
+# Brand Assets — Logos, Colors, Fonts, Icons
+
+gdrive_folder: "5. Digital Brand Kit Marketing/"
+
+logos:
+  - id: "logo_gold_white_bg"
+    path: "5. Digital Brand Kit Marketing/Logo Images/Logo_FFFFF.png"
+    description: "Full Himalayan Fibres logo on white background. Gold/amber (#c38513). Yarn ball illustration + 'Handcrafted Yarns' + 'HIMALAYAN FIBRES' text."
+    format: "png"
+    background: "white"
+    quality: "excellent — high-res"
+    tags: ["logo", "gold", "white background", "primary"]
+    best_for: ["website", "email headers", "documents", "social media", "watermark"]
+
+  - id: "logo_combined"
+    path: "5. Digital Brand Kit Marketing/Logo Images/Himalayan Fibres_SS&Amiri.png"
+    description: "Combined logo — Himalayan Fibres with SS&Amiri branding"
+    format: "png"
+    status: "needs_viewing"
+    tags: ["logo", "variant", "partnership"]
+
+color_palettes:
+  folder: "5. Digital Brand Kit Marketing/Color Palletes/"
+  primary: "#232323"
+  accent: "#c38513"
+  secondary: "#5D4037"
+  reference: "config/brand/brand_kit.yml"
+
+fonts:
+  folder: "5. Digital Brand Kit Marketing/Fonts/"
+  heading: "Georgia, serif"
+  body: "Georgia, serif"
+  reference: "config/brand/brand_kit.yml"
+
+icons:
+  folder: "5. Digital Brand Kit Marketing/Icons/"
+  status: "needs_cataloging"
+
+campaign_resources:
+  - path: "5. Digital Brand Kit Marketing/Campaign SetUp Guide/"
+    description: "Campaign setup guide folder"
+  - path: "5. Digital Brand Kit Marketing/Campaign Strategy & Settings.gdoc"
+    description: "Google Doc with campaign strategy"
+  - path: "5. Digital Brand Kit Marketing/Google Ad & Key Word Prompt.gdoc"
+    description: "Google Ads keyword research"

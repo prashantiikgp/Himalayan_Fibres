@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Himalayan Fibers</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #8B4513;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #8B4513;
+        }
+        h1 {
+            color: #2C3E50;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .order-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #8B4513;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .order-box p {
+            margin: 5px 0;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #8B4513;
+            color: #ffffff !important;
+            padding: 14px 28px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .cta-button:hover {
+            background-color: #6B3410;
+        }
+        .features {
+            margin: 30px 0;
+        }
+        .feature {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .feature:last-child {
+            border-bottom: none;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #666;
+        }
+        .social-links a {
+            margin: 0 10px;
+            color: #8B4513;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Himalayan Fibers</div>
+            <p style="color: #666; margin-top: 5px;">Premium Natural Textiles</p>
+        </div>
+
+        <h1>Thank You for Your Order, {{first_name}}!</h1>
+
+        <p>We're thrilled to welcome you to the Himalayan Fibers family. Your order has been received and is being processed with care.</p>
+
+        <div class="order-box">
+            <p><strong>Order Number:</strong> {{order_id}}</p>
+            <p><strong>Order Total:</strong> {{order_total}}</p>
+            <p><strong>Status:</strong> Processing</p>
+        </div>
+
+        <p>Our team is now preparing your items. You'll receive a shipping confirmation email with tracking details once your order is on its way.</p>
+
+        <div style="text-align: center;">
+            <a href="{{track_order_url}}" class="cta-button">Track Your Order</a>
+        </div>
+
+        <div class="features">
+            <h3>Why You'll Love Our Products</h3>
+            <div class="feature">
+                <strong>🏔️ Authentic Himalayan Origin</strong>
+                <p>Sourced directly from the Himalayan region with verified provenance.</p>
+            </div>
+            <div class="feature">
+                <strong>♻️ Sustainable & Ethical</strong>
+                <p>Supporting local communities and environmentally responsible practices.</p>
+            </div>
+            <div class="feature">
+                <strong>✨ Premium Quality</strong>
+                <p>Hand-selected fibers processed to the highest standards.</p>
+            </div>
+        </div>
+
+        <p>If you have any questions about your order, feel free to reply to this email or contact us at <a href="mailto:info@himalayanfibre.com">info@himalayanfibre.com</a>.</p>
+
+        <p>Thank you for choosing Himalayan Fibers!</p>
+
+        <p>Warm regards,<br>
+        <strong>The Himalayan Fibers Team</strong></p>
+
+        <div class="footer">
+            <div class="social-links">
+                <a href="#">Instagram</a> |
+                <a href="#">Facebook</a> |
+                <a href="#">LinkedIn</a>
+            </div>
+            <p style="margin-top: 15px;">
+                Himalayan Fibers<br>
+                info@himalayanfibre.com<br>
+                <a href="https://himalayanfibre.com">www.himalayanfibre.com</a>
+            </p>
+            <p style="margin-top: 15px;">
+                <a href="{{unsubscribe_url}}" style="color: #999;">Unsubscribe</a> |
+                <a href="{{preferences_url}}" style="color: #999;">Email Preferences</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

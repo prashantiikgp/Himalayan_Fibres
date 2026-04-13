@@ -1,0 +1,76 @@
+# News & Updates — Content Strategy
+# Company news, new products, milestones, trade shows
+# Wix Category ID: 5baa7dfc-eeb4-4940-8418-d0a099218c08
+
+strategy:
+  purpose: "Keep audience informed about company milestones, new products, and industry presence. Show momentum and growth."
+  audience: "Existing customers, B2B partners, industry followers"
+  frequency: "As needed — when there's actual news"
+  tone: "Professional, concise, forward-looking"
+
+drafts:
+  # ──────────────────────────────────────────────────────────────────
+  # DRAFT 1: New Collection Launch
+  # ──────────────────────────────────────────────────────────────────
+  - id: "collection_launch"
+    title: "Introducing [Collection Name] — Our Newest Yarn Collection"
+    slug: "new-collection-launch"
+    status: "template"
+    brief:
+      topic: "Announcement template for new yarn collection launches"
+      key_points:
+        - "What's new: collection name, fiber composition, colors"
+        - "What inspired the collection"
+        - "Key specifications: weight, length, needle size"
+        - "Who it's for: target crafter/designer profile"
+        - "How to order: website link, wholesale inquiries"
+        - "Launch pricing or introductory offer"
+      word_count: 500
+    suggested_images:
+      cover: "Use hero product shot from relevant collection folder"
+      inline:
+        - use_for: "Product gallery — 3-4 color/angle shots"
+        - use_for: "Texture close-up"
+
+  # ──────────────────────────────────────────────────────────────────
+  # DRAFT 2: Milestone Announcement
+  # ──────────────────────────────────────────────────────────────────
+  - id: "milestone"
+    title: "Himalayan Fibres Reaches [Milestone] — Thank You"
+    slug: "milestone-announcement"
+    status: "template"
+    brief:
+      topic: "Template for milestones: X villages, X artisans, X countries shipped to, etc."
+      key_points:
+        - "The milestone: what was achieved"
+        - "The journey: how we got here"
+        - "Impact: what this means for artisan communities"
+        - "What's next: upcoming goals"
+        - "Thank you: to customers, partners, artisans"
+      word_count: 400
+    suggested_images:
+      cover: "Use team photo or community photo"
+      inline:
+        - use_for: "Impact visuals — before/after, numbers graphic"
+
+  # ──────────────────────────────────────────────────────────────────
+  # DRAFT 3: Trade Show / Event Recap
+  # ──────────────────────────────────────────────────────────────────
+  - id: "trade_show"
+    title: "[Event Name] Recap — Himalayan Fibres at [Location]"
+    slug: "event-recap"
+    status: "template"
+    brief:
+      topic: "Template for trade show and event participation recaps"
+      key_points:
+        - "Which event and where"
+        - "What we showcased"
+        - "Key connections and feedback"
+        - "Photos from the booth/event"
+        - "What we learned or announced"
+      word_count: 400
+    suggested_images:
+      cover: "Event/booth photos"
+      inline:
+        - use_for: "Product display at event"
+        - use_for: "Team at event"

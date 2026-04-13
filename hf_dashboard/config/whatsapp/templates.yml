@@ -1,0 +1,306 @@
+# WhatsApp Template Registry
+# Maps template names to their usage context, variable schemas, and descriptions.
+# Templates must be pre-approved by Meta — this file describes HOW to use them.
+#
+# NOTE on body_text:
+# The body_text field is for PREVIEW PURPOSES ONLY. When a message is sent,
+# Meta serves the actual approved template content from its servers — our API
+# call only specifies the template name and variable values. So even if the
+# preview text below drifts slightly from Meta's approved version, the delivered
+# message is always the one Meta approved. Keep body_text roughly matching the
+# approved content so previews stay useful.
+
+templates:
+  hello_world:
+    display_name: "Hello World (Test)"
+    description: "Default Meta test template for verifying API connectivity."
+    category: "UTILITY"
+    language: "en_US"
+    use_case: "testing"
+    variables: []
+    body_text: |
+      Hello World
+    notes: "No variables. Use for health checks and API verification."
+
+  welcome_message:
+    display_name: "Welcome Message"
+    description: "Welcome new contacts with brand introduction and product overview."
+    category: "MARKETING"
+    language: "en"
+    use_case: "onboarding"
+    has_header_image: true
+    # Preview image — update to match the Meta-approved header asset.
+    header_image_url: "https://www.himalayanfibres.com/assets/banner-welcome.jpg"
+    variables:
+      - name: "customer_name"
+        type: "text"
+        description: "Contact's name or company name"
+        required: true
+        example: "Prashant Ji"
+        max_length: 60
+    body_text: |
+      Hi {{customer_name}}! 🙏
+
+      Welcome to Himalayan Fibres — a Himalayan-origin fibre company
+      producing premium Nettle, Hemp, Wool & Blended yarns crafted
+      sustainably in the foothills of the Himalayas.
+
+      We'd love to share our collection with you. Tap below to
+      explore our products and get in touch.
+    buttons:
+      - type: "URL"
+        text: "Visit website"
+        url: "https://www.himalayanfibres.com/"
+
+  order_confirmation:
+    display_name: "Order Confirmation"
+    description: "Confirm order placement with product and amount details."
+    category: "UTILITY"
+    language: "en"
+    use_case: "transactional"
+    variables:
+      - name: "customer_name"
+        type: "text"
+        description: "Customer name"
+        required: true
+        example: "Rajesh Kumar"
+        max_length: 60
+      - name: "order_id"
+        type: "text"
+        description: "Order reference number"
+        required: true
+        example: "HF-2026-0042"
+        max_length: 30
+      - name: "product_names"
+        type: "text"
+        description: "Comma-separated list of ordered products"
+        required: true
+        example: "Natural Nettle Yarn, Hemp Blend"
+        max_length: 200
+      - name: "amount"
+        type: "text"
+        description: "Total order amount in INR"
+        required: true
+        example: "12,500"
+        max_length: 20
+    body_text: |
+      Hi {{customer_name}},
+
+      Thank you for your order with Himalayan Fibres! 🌿
+
+      Order ID: {{order_id}}
+      Products: {{product_names}}
+      Total Amount: ₹{{amount}}
+
+      We'll process your order shortly and share tracking details
+      once it ships. If you have any questions, just reply to this
+      message.
+    buttons:
+      - type: "URL"
+        text: "Visit website"
+        url: "https://www.himalayanfibres.com/"
+
+  payment_confirmation:
+    display_name: "Payment Confirmation"
+    description: "Acknowledge payment receipt and notify order processing."
+    category: "UTILITY"
+    language: "en"
+    use_case: "transactional"
+    variables:
+      - name: "customer_name"
+        type: "text"
+        description: "Customer name"
+        required: true
+        example: "Rajesh Kumar"
+        max_length: 60
+      - name: "amount"
+        type: "text"
+        description: "Payment amount in INR"
+        required: true
+        example: "12,500"
+        max_length: 20
+      - name: "order_id"
+        type: "text"
+        description: "Order reference number"
+        required: true
+        example: "HF-2026-0042"
+        max_length: 30
+    body_text: |
+      Hi {{customer_name}},
+
+      We've received your payment of ₹{{amount}} for order
+      {{order_id}}. ✅
+
+      Your order is now being prepared and will be dispatched
+      soon. You'll receive tracking details once it's on the way.
+
+      Thank you for choosing Himalayan Fibres.
+    buttons:
+      - type: "ORDER_DETAILS"
+        text: "Review and Pay"
+
+  order_tracking:
+    display_name: "Order Tracking"
+    description: "Share shipping tracking details with customer."
+    category: "UTILITY"
+    language: "en"
+    use_case: "transactional"
+    variables:
+      - name: "customer_name"
+        type: "text"
+        description: "Customer name"
+        required: true
+        example: "Rajesh Kumar"
+        max_length: 60
+      - name: "order_id"
+        type: "text"
+        description: "Order reference number"
+        required: true
+        example: "HF-2026-0042"
+        max_length: 30
+      - name: "tracking_id"
+        type: "text"
+        description: "Courier tracking ID"
+        required: true
+        example: "DL123456789IN"
+        max_length: 50
+      - name: "tracking_link"
+        type: "text"
+        description: "Tracking URL"
+        required: true
+        example: "https://track.delhivery.com/DL123456789IN"
+        max_length: 500
+    body_text: |
+      Hi {{customer_name}},
+
+      Your Himalayan Fibres order {{order_id}} has been shipped! 📦
+
+      Tracking ID: {{tracking_id}}
+      Track here: {{tracking_link}}
+
+      Expected delivery in 3–5 business days.
+
+  order_delivered:
+    display_name: "Order Delivered"
+    description: "Notify customer of successful delivery and request feedback."
+    category: "UTILITY"
+    language: "en"
+    use_case: "transactional"
+    variables:
+      - name: "1"
+        type: "text"
+        description: "Customer name"
+        required: true
+        example: "Rajesh Kumar"
+        max_length: 60
+      - name: "2"
+        type: "text"
+        description: "Order reference number"
+        required: true
+        example: "HF-2026-0042"
+        max_length: 30
+    body_text: |
+      Hi {{1}},
+
+      Aapka order #{{2}} successfully deliver ho gaya hai.
+
+      Humein ummeed hai ki aapko Himalayan Fibres ke yarns
+      (Nettle, Hemp, Woollen & Blends) pasand aaye honge.
+
+      Need help? Reply here.
+    buttons:
+      - type: "ORDER_DETAILS"
+        text: "Review and Pay"
+
+  thank_you_note:
+    display_name: "Thank You Note"
+    description: "Post-purchase thank you message to build loyalty."
+    category: "MARKETING"
+    language: "en"
+    use_case: "retention"
+    variables:
+      - name: "1"
+        type: "text"
+        description: "Customer name or greeting"
+        required: true
+        example: "Rajesh Ji"
+        max_length: 60
+    body_text: |
+      Hi {{1}}, 🙏
+
+      Thank you for being part of the Himalayan Fibres family.
+      Your trust in our yarns means the world to us — and to the
+      artisans and farmers in the Himalayas who make them possible.
+
+      If you loved what you received, please share your feedback
+      or tag us on social media. We'd love to hear from you.
+
+  snow_white:
+    display_name: "Snow White Yarn Showcase"
+    description: "Product showcase for Snow White premium yarn sample."
+    category: "MARKETING"
+    language: "en"
+    use_case: "product_showcase"
+    has_header_image: true
+    # Preview image — update to match the Meta-approved header asset.
+    header_image_url: "https://www.himalayanfibres.com/assets/snow-white-yarn.jpg"
+    variables: []
+    body_text: |
+      Introducing Snow White — our premium natural-white yarn. ✨
+
+      Spun from the finest Himalayan wool, Snow White is perfect
+      for luxury knitwear, handloom projects, and contemporary
+      textile designs. 100% natural, undyed, and sustainably
+      sourced from high-altitude farms.
+
+      Want a sample? Tap below to explore.
+    notes: "No variables. Hardcoded showcase with image header."
+    buttons:
+      - type: "URL"
+        text: "Visit website"
+        url: "https://www.himalayanfibres.com/"
+
+  interactive_whatsap_buttons_new:
+    display_name: "Interactive Catalog Button"
+    description: "Simple greeting with catalog browse button."
+    category: "MARKETING"
+    language: "en"
+    use_case: "catalog"
+    variables: []
+    body_text: |
+      Hi there! 👋
+
+      Explore our full range of Himalayan Fibres yarns — Nettle,
+      Hemp, Wool, and Blends — crafted sustainably in the
+      Himalayas.
+
+      Tap the button below to browse our catalog.
+    buttons:
+      - type: "CATALOG"
+        text: "View catalog"
+
+# Use-case groupings for quick reference
+use_cases:
+  testing:
+    templates: ["hello_world"]
+    description: "API testing and health checks"
+
+  onboarding:
+    templates: ["welcome_message"]
+    description: "New contact welcome flow"
+
+  transactional:
+    templates: ["order_confirmation", "payment_confirmation", "order_tracking", "order_delivered"]
+    description: "Order lifecycle notifications"
+
+  retention:
+    templates: ["thank_you_note"]
+    description: "Customer retention and loyalty"
+
+  product_showcase:
+    templates: ["snow_white"]
+    description: "Product showcase and samples"
+
+  catalog:
+    templates: ["interactive_whatsap_buttons_new"]
+    description: "Product catalog browsing"

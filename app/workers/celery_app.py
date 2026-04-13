@@ -9,7 +9,7 @@ celery_app = Celery(
     "himalayan_fibers",
     broker=settings.celery_broker_url,
     backend=settings.celery_result_backend,
-    include=["app.workers.tasks"],
+    include=["app.workers.tasks", "app.whatsapp.tasks"],
 )
 
 # Celery configuration
@@ -28,6 +28,11 @@ celery_app.conf.update(
         "app.workers.tasks.send_shipping_update_email": {"queue": "emails"},
         "app.workers.tasks.send_campaign": {"queue": "campaigns"},
         "app.workers.tasks.generate_content": {"queue": "content"},
+        # WhatsApp tasks
+        "app.whatsapp.tasks.send_wa_text_message": {"queue": "whatsapp"},
+        "app.whatsapp.tasks.send_wa_template_message": {"queue": "whatsapp"},
+        "app.whatsapp.tasks.sync_wa_templates": {"queue": "whatsapp"},
+        "app.whatsapp.tasks.download_wa_media": {"queue": "whatsapp"},
     },
 
     # Rate limiting
@@ -35,6 +40,9 @@ celery_app.conf.update(
         "app.workers.tasks.send_welcome_email": {"rate_limit": "20/m"},
         "app.workers.tasks.send_cart_abandoned_email": {"rate_limit": "20/m"},
         "app.workers.tasks.send_campaign": {"rate_limit": "1/m"},
+        # WhatsApp rate limits
+        "app.whatsapp.tasks.send_wa_text_message": {"rate_limit": "80/s"},
+        "app.whatsapp.tasks.send_wa_template_message": {"rate_limit": "80/s"},
     },
 
     # Retry settings
@@ -53,6 +61,11 @@ celery_app.conf.update(
         "cleanup-old-webhook-events": {
             "task": "app.workers.tasks.cleanup_old_webhook_events",
             "schedule": 86400.0,  # Every 24 hours
+        },
+        # WhatsApp template sync (every hour)
+        "sync-whatsapp-templates": {
+            "task": "app.whatsapp.tasks.sync_wa_templates",
+            "schedule": 3600.0,
         },
     },
 )

@@ -1,0 +1,22 @@
+# Nettle Fibres — Processing Stages
+# GDrive: 3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/1. Himalayan Stinging Nettle Plant/Fibres/
+
+stages:
+  - stage_id: "nettle_degummed"
+    stage_name: "Himalayan Nettle Fibre (Degummed)"
+    product_ref: "nettle_plant_fibre"
+    gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/1. Himalayan Stinging Nettle Plant/Fibres/1. Himalayan Nettle Fibre (Deummged)/"
+    description: "Nettle fibre after degumming — pectin removed, softer and more workable than raw"
+    product_images: ["1.jpg", "2.jpg", "3.jpg", "4.jpg"]
+    subfolders: ["Creative Images", "Raw Images", "Raw_2"]
+    status: "needs_cataloging"
+    tags: ["fibre", "degummed", "nettle", "B2B"]
+    best_for: ["raw fibers guide", "B2B content", "processing blog"]
+
+  - stage_id: "nettle_cottonised"
+    stage_name: "Himalayan Stinging Nettle (Cottonised)"
+    gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/1. Himalayan Stinging Nettle Plant/Fibres/2. Himalayan Stinging Nettle (Cottonised)/"
+    description: "Nettle fibre fully cottonised — soft cotton-like texture, ready for fine spinning"
+    status: "needs_cataloging"
+    tags: ["fibre", "cottonised", "nettle", "soft", "premium"]
+    best_for: ["quality showcase", "B2B", "processing stages"]

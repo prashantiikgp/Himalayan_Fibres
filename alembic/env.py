@@ -8,6 +8,7 @@ from alembic import context
 from app.core.config import settings
 from app.db.session import Base
 from app.db.models import *  # noqa: Import all models
+from app.whatsapp.models import *  # noqa: Import WhatsApp models
 
 config = context.config
 

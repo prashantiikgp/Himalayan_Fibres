@@ -1,0 +1,42 @@
+sidebar:
+  collapsible: false
+  default_collapsed: false
+
+  nav_items:
+    - id: home
+      label: "Home"
+      icon: "\U0001F3E0"
+
+    - id: contacts
+      label: "Contacts"
+      icon: "\U0001F4CB"
+
+    - id: wa_inbox
+      label: "WhatsApp"
+      icon: "\U0001F4AC"
+      separator_before: true
+
+    - id: email_inbox
+      label: "Email"
+      icon: "\U00002709"
+
+    - id: broadcasts
+      label: "WhatsApp Broadcasts"
+      icon: "\U0001F4E2"
+      separator_before: true
+
+    - id: broadcast_history
+      label: "History"
+      icon: "\U0001F4DC"
+
+    - id: email_campaigns
+      label: "Email Broadcasts"
+      icon: "\U0001F4E7"
+
+    - id: flows
+      label: "Flows"
+      icon: "\U0001F504"
+
+    - id: templates_media
+      label: "Templates"
+      icon: "\U0001F4C4"

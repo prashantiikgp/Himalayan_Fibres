@@ -1,0 +1,190 @@
+"""Sync WhatsApp Cloud API client.
+
+Ported from app/whatsapp/service.py — async httpx → sync httpx.
+"""
+
+from __future__ import annotations
+
+import mimetypes
+import pathlib
+from typing import Any
+
+import httpx
+
+from services.config import get_settings
+
+
+class WhatsAppSender:
+    """Sync client for the Meta WhatsApp Cloud API."""
+
+    def __init__(self):
+        settings = get_settings()
+        self.token = settings.wa_token
+        self.phone_number_id = settings.wa_phone_number_id
+        self.waba_id = settings.wa_waba_id
+        self.api_version = "v21.0"
+        self.graph_base = "https://graph.facebook.com"
+        self._timeout = 30
+
+    @property
+    def _messages_url(self) -> str:
+        return f"{self.graph_base}/{self.api_version}/{self.phone_number_id}/messages"
+
+    def _headers(self, json_ct: bool = True) -> dict[str, str]:
+        if not self.token:
+            raise RuntimeError("WA_TOKEN not set")
+        h = {"Authorization": f"Bearer {self.token}"}
+        if json_ct:
+            h["Content-Type"] = "application/json"
+        return h
+
+    @staticmethod
+    def _extract_message_id(data: dict) -> str | None:
+        return (data.get("messages") or [{}])[0].get("id")
+
+    def send_text(self, to_phone: str, text: str) -> tuple[bool, str | None, str | None]:
+        """Send a plain text message (24h window only)."""
+        if not self.phone_number_id:
+            return False, None, "WA_PHONE_NUMBER_ID not set"
+        payload = {
+            "messaging_product": "whatsapp",
+            "to": to_phone,
+            "type": "text",
+            "text": {"body": text},
+        }
+        try:
+            r = httpx.post(self._messages_url, headers=self._headers(), json=payload, timeout=self._timeout)
+            if r.status_code // 100 == 2:
+                return True, self._extract_message_id(r.json()), None
+            return False, None, f"{r.status_code}: {r.text}"
+        except Exception as e:
+            return False, None, str(e)
+
+    def send_template(
+        self,
+        to_phone: str,
+        template_name: str,
+        lang: str = "en_US",
+        variables: "list[str] | list[tuple[str, str]] | None" = None,
+    ) -> tuple[bool, str | None, str | None]:
+        """Send a pre-approved template message (works outside 24h window).
+
+        variables accepts either:
+          - list[str]             — positional format ({{1}}, {{2}}…)
+          - list[(name, value)]   — named format (e.g. {{customer_name}})
+
+        Named vs positional is auto-detected: if any variable name is
+        non-digit, the named-parameter payload is built.
+        """
+        if not self.phone_number_id:
+            return False, None, "WA_PHONE_NUMBER_ID not set"
+
+        components = []
+        if variables:
+            # Normalise to list of (name, value) tuples
+            pairs: list[tuple[str, str]] = []
+            for v in variables:
+                if isinstance(v, tuple):
+                    pairs.append((str(v[0]), str(v[1])))
+                else:
+                    pairs.append(("", str(v)))
+
+            use_named = any(name and not name.isdigit() for name, _ in pairs)
+            if use_named:
+                body_params = [
+                    {"type": "text", "parameter_name": name, "text": value}
+                    for name, value in pairs
+                ]
+            else:
+                body_params = [{"type": "text", "text": value} for _, value in pairs]
+
+            components.append({"type": "body", "parameters": body_params})
+        payload = {
+            "messaging_product": "whatsapp",
+            "to": to_phone,
+            "type": "template",
+            "template": {
+                "name": template_name,
+                "language": {"code": lang},
+                "components": components,
+            },
+        }
+        try:
+            r = httpx.post(self._messages_url, headers=self._headers(), json=payload, timeout=self._timeout)
+            if r.status_code // 100 == 2:
+                return True, self._extract_message_id(r.json()), None
+            return False, None, f"{r.status_code}: {r.text}"
+        except Exception as e:
+            return False, None, str(e)
+
+    def send_media(self, to_phone: str, media_id: str, media_type: str = "image",
+                   caption: str | None = None) -> tuple[bool, str | None, str | None]:
+        """Send a media message."""
+        if not self.phone_number_id:
+            return False, None, "WA_PHONE_NUMBER_ID not set"
+        payload: dict[str, Any] = {
+            "messaging_product": "whatsapp",
+            "to": to_phone,
+            "type": media_type,
+            media_type: {"id": media_id},
+        }
+        if caption and media_type in {"image", "document", "video"}:
+            payload[media_type]["caption"] = caption
+        try:
+            r = httpx.post(self._messages_url, headers=self._headers(), json=payload, timeout=self._timeout)
+            if r.status_code // 100 == 2:
+                return True, self._extract_message_id(r.json()), None
+            return False, None, f"{r.status_code}: {r.text}"
+        except Exception as e:
+            return False, None, str(e)
+
+    def upload_media(self, filepath: str) -> tuple[bool, str | None, str | None]:
+        """Upload a file to WhatsApp and return the media_id."""
+        if not self.phone_number_id:
+            return False, None, "WA_PHONE_NUMBER_ID not set"
+        url = f"{self.graph_base}/{self.api_version}/{self.phone_number_id}/media"
+        mime, _ = mimetypes.guess_type(filepath)
+        mime = mime or "application/octet-stream"
+        try:
+            with open(filepath, "rb") as f:
+                files = {"file": (pathlib.Path(filepath).name, f, mime)}
+                data = {"messaging_product": "whatsapp"}
+                r = httpx.post(url, headers=self._headers(json_ct=False), files=files, data=data, timeout=60)
+            if r.status_code // 100 == 2:
+                return True, r.json().get("id"), None
+            return False, None, f"{r.status_code}: {r.text}"
+        except Exception as e:
+            return False, None, str(e)
+
+    def verify_connection(self) -> dict:
+        """Verify WhatsApp API connectivity."""
+        if not self.phone_number_id:
+            return {"ok": False, "error": "WA_PHONE_NUMBER_ID not set"}
+        url = f"{self.graph_base}/{self.api_version}/{self.phone_number_id}"
+        try:
+            r = httpx.get(url, headers=self._headers(), timeout=self._timeout)
+            if r.status_code // 100 == 2:
+                data = r.json()
+                return {
+                    "ok": True,
+                    "verified_name": data.get("verified_name"),
+                    "display_phone_number": data.get("display_phone_number"),
+                    "quality_rating": data.get("quality_rating"),
+                }
+            return {"ok": False, "error": f"{r.status_code}: {r.text}"}
+        except Exception as e:
+            return {"ok": False, "error": str(e)}
+
+    def list_templates(self) -> tuple[bool, list[dict] | None, str | None]:
+        """List all message templates for the WABA."""
+        if not self.waba_id:
+            return False, None, "WA_WABA_ID not set"
+        url = f"{self.graph_base}/{self.api_version}/{self.waba_id}/message_templates"
+        params = {"fields": "name,language,status,category,quality_score,components", "limit": 100}
+        try:
+            r = httpx.get(url, headers=self._headers(), params=params, timeout=self._timeout)
+            if r.status_code // 100 == 2:
+                return True, r.json().get("data", []), None
+            return False, None, f"{r.status_code}: {r.text}"
+        except Exception as e:
+            return False, None, str(e)

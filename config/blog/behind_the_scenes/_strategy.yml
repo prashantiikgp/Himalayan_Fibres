@@ -1,0 +1,101 @@
+# Behind the Scenes — Content Strategy
+# Village life, production process, technology, team stories
+# Wix Category ID: d2e363e8-c2cb-41d5-a5cd-aa474f579d2e
+
+strategy:
+  purpose: "Show what happens between collection and delivery — the process, the technology, the people. Build transparency."
+  audience: "Curious buyers, B2B partners evaluating supply chain, textile enthusiasts"
+  frequency: "1 post per month"
+  tone: "Documentary, detailed, transparent — show the real process"
+
+drafts:
+  # ──────────────────────────────────────────────────────────────────
+  # DRAFT 1: From Wild Plant to Yarn — The Full Journey
+  # ──────────────────────────────────────────────────────────────────
+  - id: "plant_to_yarn"
+    title: "From Wild Plant to Finished Yarn — The 12-Step Journey of Himalayan Nettle"
+    slug: "wild-plant-to-yarn-nettle-journey"
+    status: "idea"
+    brief:
+      topic: "Step-by-step visual guide of how a wild nettle plant becomes a skein of yarn"
+      key_points:
+        - "Step 1: Identifying mature wild nettle plants (2000m+ altitude)"
+        - "Step 2: Harvesting stalks by hand"
+        - "Step 3: Bark stripping (separating outer bark from inner pith)"
+        - "Step 4: Retting (soaking to soften)"
+        - "Step 5: Fiber extraction (manual or ERB decorticator)"
+        - "Step 6: Washing and cleaning"
+        - "Step 7: Drying"
+        - "Step 8: Degumming / cottonising"
+        - "Step 9: Carding and combing"
+        - "Step 10: Spinning into yarn"
+        - "Step 11: Dyeing (natural or color-fast dyes)"
+        - "Step 12: Skeining and quality check"
+      word_count: 1200
+      product_refs: ["nettle_plant_fibre", "special_nettle_yarn", "natural_nettle_yarn"]
+    suggested_images:
+      cover: "4. Photos and Media/Meghalaya Nettle/IMG_20231021_121005.jpg"
+      inline:
+        - path: "4. Photos and Media/1. Farm Videos/Nepal Processing/Drying of Fibre.jpg"
+          use_for: "Fiber drying stage"
+        - path: "4. Photos and Media/1. Farm Videos/Nepal Processing/After Drying.jpg"
+          use_for: "After drying — ready for next step"
+        - path: "3. Product Images & Excel/1. Images_ Category Wise/1. Plant Fibre/1. Himalayan Stinging Nettle Plant/Fibres/1. Himalayan Nettle Fibre (Deummged)/"
+          use_for: "Degummed fiber result"
+        - path: "3. Product Images & Excel/Photo Collection Images/Creative images/IMG_20241231_124328.jpg"
+          use_for: "Three stages: raw bark, processed fiber, finished yarn"
+
+  # ──────────────────────────────────────────────────────────────────
+  # DRAFT 2: ERB Decorticator Technology
+  # ──────────────────────────────────────────────────────────────────
+  - id: "erb_decorticator"
+    title: "ERB Decorticator — The Machine That Changed Fiber Processing in the Himalayas"
+    slug: "erb-decorticator-fiber-processing-technology"
+    status: "idea"
+    brief:
+      topic: "Our proprietary decorticator technology — how it works, why it matters, the impact on farmers"
+      key_points:
+        - "Problem: manual extraction is slow, painful, and low-yield"
+        - "Solution: ERB decorticator — portable, field-deployable machine"
+        - "How it works: mechanical separation of bark from fiber"
+        - "Impact: 5-10x faster processing, higher fiber quality"
+        - "Farmer revenue increase: processed fiber vs raw bark"
+        - "Deployed across Nepal and Uttarakhand"
+        - "Balance: technology augments tradition, doesn't replace it"
+      word_count: 800
+      product_refs: []
+    suggested_images:
+      cover: "4. Photos and Media/Bishal Farm Images/Team & Machine Videos/Machine Pic.png"
+      inline:
+        - path: "4. Photos and Media/Bishal Farm Images/Team & Machine Videos/Introducing ERB Tech to Farmer.jpeg"
+          use_for: "Introducing machine to farmer community"
+        - path: "4. Photos and Media/ERB Decorticator/IMG-20221031-WA0009.jpg"
+          use_for: "Machine in operation"
+        - path: "4. Photos and Media/ERB Decorticator/IMG-20221105-WA0002.jpg"
+          use_for: "Output: clean fiber from decorticator"
+
+  # ──────────────────────────────────────────────────────────────────
+  # DRAFT 3: A Day in the Life of a Fiber Artisan
+  # ──────────────────────────────────────────────────────────────────
+  - id: "artisan_day"
+    title: "A Day in the Life of a Himalayan Fiber Artisan"
+    slug: "day-in-life-himalayan-fiber-artisan"
+    status: "idea"
+    brief:
+      topic: "Follow a typical day of one of our artisan partners — the rhythm of fiber work in a Himalayan village"
+      key_points:
+        - "Morning: collecting or sorting dried fiber"
+        - "Mid-day: spinning and processing"
+        - "Afternoon: quality checking, bundling"
+        - "Community aspect: women work together, share knowledge"
+        - "Seasonal rhythm: collection season vs processing season"
+        - "What the income means for their family"
+      word_count: 800
+      product_refs: []
+    suggested_images:
+      cover: "4. Photos and Media/Nepal Working Photos/1657867031442.jpg"
+      inline:
+        - path: "4. Photos and Media/Bishal Farm Images/Farmer Images/1678866670664.jpeg"
+          use_for: "Artisan at work"
+        - path: "4. Photos and Media/Nepal Working Photos/1657867031457.jpg"
+          use_for: "Village processing scene"

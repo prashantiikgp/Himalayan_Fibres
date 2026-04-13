@@ -1,0 +1,46 @@
+# Burberry Series — Collection Images
+# GDrive: 3. Product Images & Excel/1. Images_ Category Wise/3. Plant & Animal Mix/1. Burberry Series/
+
+product_ref: "burberry_series"
+gdrive_folder: "3. Product Images & Excel/1. Images_ Category Wise/3. Plant & Animal Mix/1. Burberry Series/"
+
+images:
+  - id: "burberry_ball_dark"
+    filename: "Burberry Series.webp"
+    description: "Yarn wound into ball/cake on dark grey background. Natural beige/tan, slightly fuzzy texture. Clean, elegant dark background presentation."
+    shot_type: "product"
+    format: "webp"
+    quality: "high"
+    tags: ["product", "burberry", "yarn ball", "dark background"]
+    best_for: ["collection showcase", "product page", "instagram"]
+
+  - id: "burberry_ball_dark_2"
+    filename: "IMG_20241231_091225.webp"
+    description: "Burberry Series yarn ball on dark grey background — same style as main shot, slightly different angle. Natural beige color, fuzzy texture, top-down view."
+    shot_type: "product"
+    format: "webp"
+    quality: "high"
+    tags: ["product", "burberry", "yarn ball", "dark background", "top-down"]
+    best_for: ["product page alternate", "instagram carousel"]
+
+  - id: "burberry_ball_dark_3"
+    filename: "IMG_20241231_091229.webp"
+    description: "Burberry Series yarn ball on dark grey background — third angle. Similar composition, shows slightly more texture and fuzz detail."
+    shot_type: "product"
+    format: "webp"
+    quality: "high"
+    tags: ["product", "burberry", "yarn ball", "dark background"]
+    best_for: ["product page alternate", "detail view"]
+
+  - id: "burberry_closeup"
+    filename: "IMG_20241231_091237.webp"
+    description: "Burberry Series yarn ball close-up on dark grey background. Tighter crop showing individual strand texture and fuzz. Natural beige/tan color."
+    shot_type: "product — detail"
+    format: "webp"
+    quality: "high — shows texture"
+    tags: ["product", "burberry", "close-up", "texture", "detail"]
+    best_for: ["craft tips", "product detail", "instagram"]
+
+subfolders: ["Raw"]
+total_images: 14
+notes: "Remaining ~10 images in folder need cataloging (various angles + raw subfolder)"

@@ -1,0 +1,22 @@
+# Instagram Reels — Video Catalog
+# All reels live in: {gdrive_base}/7. Instagram Reels/
+# Reference these from blog videos, email campaigns, and social posts via:
+#   catalog_ref: "reels.yml#<reel_id>"
+
+gdrive_folder: "7. Instagram Reels/"
+note: |
+  Mix of original field shots and AI-generated (replicate) reels. When using
+  externally, tag AI-generated content appropriately. Always verify the reel
+  is visually on-brand before publication.
+
+reels:
+  - id: "replicate_svw1b6sznhrme0cqx719zgv2p8"
+    filename: "replicate-prediction-svw1b6sznhrme0cqx719zgv2p8.mp4"
+    generator: "replicate"
+    description: "AI-generated reel — women of the Himalayan mountains offering a namaste. A quiet gesture of greeting, gratitude, and welcome."
+    shot_type: "reel — portrait / gesture"
+    duration_seconds: null
+    tags: ["reel", "ai-generated", "replicate", "women", "namaste", "greeting", "gratitude", "emotional"]
+    best_for: ["blog inline", "instagram reel", "emotional storytelling", "about us", "women empowerment"]
+    status: "ready"
+    used_in: ["config/blog/behind_the_scenes/day_in_life_artisan.yml"]

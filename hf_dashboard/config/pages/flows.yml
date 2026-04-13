@@ -1,0 +1,34 @@
+page:
+  title: "Flows"
+
+  filters:
+    - id: flow
+      label: "Flow"
+      source: "flows"
+    - id: channel
+      label: "Channel"
+      options: ["All", "Email", "WhatsApp"]
+
+  start_flow:
+    title: "Start Flow"
+    fields:
+      - id: segment
+        label: "Segment"
+        source: "segments"
+      - id: start_date
+        label: "Start Date"
+        type: date
+
+  flow_runs:
+    title: "Flow Runs"
+    columns:
+      - field: flow_name
+        label: "Flow"
+      - field: status
+        label: "Status"
+      - field: step
+        label: "Step"
+      - field: total_sent
+        label: "Sent"
+      - field: next_step_at
+        label: "Next"
