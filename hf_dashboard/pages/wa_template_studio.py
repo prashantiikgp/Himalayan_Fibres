@@ -37,6 +37,64 @@ _CATEGORY_CHOICES = ["MARKETING", "UTILITY", "AUTHENTICATION"]
 _LANGUAGE_CHOICES = ["en", "en_US", "en_GB", "hi", "hi_IN"]
 _HEADER_FORMAT_CHOICES = ["NONE", "TEXT", "IMAGE", "DOCUMENT"]
 
+# Per Meta's WhatsApp template rules a single template can carry at most
+# 3 buttons in total, and the types can't mix freely:
+#   - up to 2 URL buttons + 1 PHONE_NUMBER button, OR
+#   - up to 3 QUICK_REPLY buttons.
+# We present 3 slots in the UI; each slot has a Type dropdown and is
+# skipped when Type == "NONE" or Text is empty. Mixing validation is
+# deferred to Meta — bad combinations come back as REJECTED.
+_BUTTON_TYPE_CHOICES = [
+    ("None", "NONE"),
+    ("URL", "URL"),
+    ("Quick Reply", "QUICK_REPLY"),
+    ("Call", "PHONE_NUMBER"),
+]
+
+
+def _buttons_from_rows(
+    t1, txt1, u1, t2, txt2, u2, t3, txt3, u3,
+) -> list[dict]:
+    """Fold 3 (type, text, url) rows into a Meta-format buttons list.
+
+    Rows with type=NONE or empty text are skipped so the user can leave
+    blank slots. URL and PHONE_NUMBER types read the third field as
+    'url' and 'phone_number' respectively; QUICK_REPLY ignores it.
+    """
+    rows = [(t1, txt1, u1), (t2, txt2, u2), (t3, txt3, u3)]
+    out: list[dict] = []
+    for btype, text, url in rows:
+        btype = (btype or "NONE").upper()
+        text = (text or "").strip()
+        if btype == "NONE" or not text:
+            continue
+        entry: dict = {"type": btype, "text": text}
+        if btype == "URL":
+            entry["url"] = (url or "").strip()
+        elif btype == "PHONE_NUMBER":
+            entry["phone_number"] = (url or "").strip()
+        out.append(entry)
+    return out
+
+
+def _rows_from_buttons(buttons: list[dict]) -> tuple:
+    """Unpack a Meta-format buttons list into 9 field values for the UI.
+
+    Returns (t1, txt1, u1, t2, txt2, u2, t3, txt3, u3). Extra buttons
+    past slot 3 are silently dropped — Meta only allows 3 anyway.
+    """
+    slots = [("NONE", "", ""), ("NONE", "", ""), ("NONE", "", "")]
+    for i, b in enumerate((buttons or [])[:3]):
+        btype = (b.get("type") or "NONE").upper()
+        text = b.get("text") or ""
+        url = b.get("url") or b.get("phone_number") or ""
+        slots[i] = (btype, text, url)
+    return (
+        slots[0][0], slots[0][1], slots[0][2],
+        slots[1][0], slots[1][1], slots[1][2],
+        slots[2][0], slots[2][1], slots[2][2],
+    )
+
 
 def _list_templates(db, *, drafts: bool, status: str | None = None):
     """Return WATemplate rows filtered by draft/status."""
@@ -156,6 +214,7 @@ def _blank_form_state() -> dict:
         "body_text": "",
         "footer_text": "",
         "buttons_json": "[]",
+        "button_rows": ("NONE", "", "", "NONE", "", "", "NONE", "", ""),
     }
 
 
@@ -231,6 +290,7 @@ def _load_row_into_form(template_id: int) -> dict:
             "body_text": body,
             "footer_text": footer,
             "buttons_json": json.dumps(buttons, indent=2),
+            "button_rows": _rows_from_buttons(buttons),
             "is_draft": bool(t.is_draft),
             "status": t.status or "",
         }
@@ -784,12 +844,38 @@ def build(ctx):
                 placeholder="Hello {{1}}, welcome to Himalayan Fibres.",
             )
             footer_input = gr.Textbox(label="Footer (optional)", max_lines=1)
-            buttons_input = gr.Textbox(
-                label="Buttons (JSON list)",
-                lines=3,
-                value="[]",
-                placeholder='[{"type": "URL", "text": "Visit site", "url": "https://..."}]',
+
+            # Buttons — 3 structured slots. A hidden `buttons_input` textbox
+            # holds the JSON representation as the single source of truth
+            # for downstream handlers (preview, save, submit). The 9 visible
+            # row fields feed into it via a shared sync function.
+            gr.HTML(
+                '<div style="font-size:11px; font-weight:600; color:#c7d2fe; '
+                'margin:8px 0 4px 0; text-transform:uppercase; letter-spacing:0.4px;">'
+                'Buttons (max 3)</div>'
             )
+            with gr.Row():
+                btn1_type = gr.Dropdown(
+                    label="Type", choices=_BUTTON_TYPE_CHOICES, value="NONE",
+                    scale=2, container=True, min_width=110,
+                )
+                btn1_text = gr.Textbox(label="Text", max_lines=1, scale=3)
+                btn1_url = gr.Textbox(label="URL / Phone", max_lines=1, scale=4, visible=False)
+            with gr.Row():
+                btn2_type = gr.Dropdown(
+                    label="Type", choices=_BUTTON_TYPE_CHOICES, value="NONE",
+                    scale=2, container=True, min_width=110,
+                )
+                btn2_text = gr.Textbox(label="Text", max_lines=1, scale=3)
+                btn2_url = gr.Textbox(label="URL / Phone", max_lines=1, scale=4, visible=False)
+            with gr.Row():
+                btn3_type = gr.Dropdown(
+                    label="Type", choices=_BUTTON_TYPE_CHOICES, value="NONE",
+                    scale=2, container=True, min_width=110,
+                )
+                btn3_text = gr.Textbox(label="Text", max_lines=1, scale=3)
+                btn3_url = gr.Textbox(label="URL / Phone", max_lines=1, scale=4, visible=False)
+            buttons_input = gr.Textbox(value="[]", visible=False)
 
             with gr.Row():
                 save_btn = gr.Button("💾 Save", variant="secondary")
@@ -817,6 +903,33 @@ def build(ctx):
         outputs=[header_text_input, header_asset_url_input, header_upload],
     )
 
+    # -- Button-row plumbing --
+    # Type dropdown toggles the URL/Phone field visibility (only URL +
+    # PHONE_NUMBER use that field; QUICK_REPLY ignores it).
+    def _on_button_type(btype):
+        return gr.update(visible=btype in ("URL", "PHONE_NUMBER"))
+
+    btn1_type.change(fn=_on_button_type, inputs=[btn1_type], outputs=[btn1_url])
+    btn2_type.change(fn=_on_button_type, inputs=[btn2_type], outputs=[btn2_url])
+    btn3_type.change(fn=_on_button_type, inputs=[btn3_type], outputs=[btn3_url])
+
+    # Any row field change re-derives the hidden buttons_input JSON. That
+    # change event in turn re-renders the phone preview via the preview
+    # wiring below, so buttons appear in the mockup live.
+    button_row_inputs = [
+        btn1_type, btn1_text, btn1_url,
+        btn2_type, btn2_text, btn2_url,
+        btn3_type, btn3_text, btn3_url,
+    ]
+
+    def _sync_buttons_hidden(*row_values):
+        return json.dumps(_buttons_from_rows(*row_values))
+
+    for inp in button_row_inputs:
+        inp.change(
+            fn=_sync_buttons_hidden, inputs=button_row_inputs, outputs=[buttons_input],
+        )
+
     # -- Live preview on any field change --
     preview_inputs = [
         name_input, category_input, language_input, header_format_input,
@@ -836,9 +949,11 @@ def build(ctx):
     # -- New draft: reset form --
     def _new_draft():
         s = _blank_form_state()
+        rows = s["button_rows"]
         return (
             None, s["name"], s["category"], s["language"], s["header_format"],
             s["header_text"], s["header_asset_url"], s["body_text"], s["footer_text"],
+            rows[0], rows[1], rows[2], rows[3], rows[4], rows[5], rows[6], rows[7], rows[8],
             s["buttons_json"], "", "",
         )
 
@@ -847,7 +962,11 @@ def build(ctx):
         outputs=[
             template_id_state, name_input, category_input, language_input,
             header_format_input, header_text_input, header_asset_url_input,
-            body_input, footer_input, buttons_input, action_result, approved_banner,
+            body_input, footer_input,
+            btn1_type, btn1_text, btn1_url,
+            btn2_type, btn2_text, btn2_url,
+            btn3_type, btn3_text, btn3_url,
+            buttons_input, action_result, approved_banner,
         ],
     ).then(
         fn=_render_preview, inputs=preview_inputs, outputs=[preview_html],
@@ -856,23 +975,33 @@ def build(ctx):
     # -- Row selection: load form + approved-banner --
     def _select_row(template_id):
         if not template_id:
+            blank = _blank_form_state()
+            rows = blank["button_rows"]
             return (
-                None, "", "MARKETING", "en_US", "NONE", "", "", "", "", "[]", "",
+                None, "", "MARKETING", "en_US", "NONE", "", "", "", "",
+                rows[0], rows[1], rows[2], rows[3], rows[4], rows[5], rows[6], rows[7], rows[8],
+                "[]", "",
             )
         s = _load_row_into_form(template_id)
         banner = _approved_banner_html(
             not s.get("is_draft", True), s.get("name", ""), s.get("language", "en_US"),
         )
+        rows = s["button_rows"]
         return (
             s["id"], s["name"], s["category"], s["language"], s["header_format"],
             s["header_text"], s["header_asset_url"], s["body_text"], s["footer_text"],
+            rows[0], rows[1], rows[2], rows[3], rows[4], rows[5], rows[6], rows[7], rows[8],
             s["buttons_json"], banner,
         )
 
     form_outputs = [
         template_id_state, name_input, category_input, language_input,
         header_format_input, header_text_input, header_asset_url_input,
-        body_input, footer_input, buttons_input, approved_banner,
+        body_input, footer_input,
+        btn1_type, btn1_text, btn1_url,
+        btn2_type, btn2_text, btn2_url,
+        btn3_type, btn3_text, btn3_url,
+        buttons_input, approved_banner,
     ]
     template_radio.change(
         fn=_select_row, inputs=[template_radio], outputs=form_outputs,
