@@ -30,6 +30,9 @@ ENV/
 env/
 .venv/
 
+# Node
+node_modules/
+
 # IDE
 .idea/
 .vscode/
@@ -66,6 +69,8 @@ output/
 # Credentials (sensitive files)
 google_credentials.json
 *credentials*.json
+gmail_token.json
+*token*.json
 *.pem
 *.key
 
