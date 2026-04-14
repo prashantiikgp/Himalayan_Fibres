@@ -987,10 +987,25 @@ def build(ctx) -> dict:
         from services.models import Contact
         db = get_db()
         try:
-            data = [{"email": c.email, "first_name": c.first_name, "last_name": c.last_name,
-                     "company": c.company, "phone": c.phone, "country": c.country,
-                     "lifecycle": c.lifecycle, "consent_status": c.consent_status,
-                     "wa_id": c.wa_id or ""} for c in db.query(Contact).all()]
+            # Plan D Phase 1.2: select only the 9 columns the CSV uses,
+            # not the full 38-col Contact row. Was pulling ~3-5 MB per
+            # click (notes, address, response_notes, tags JSON, etc.
+            # all came over the wire and were discarded).
+            rows = db.query(
+                Contact.email, Contact.first_name, Contact.last_name,
+                Contact.company, Contact.phone, Contact.country,
+                Contact.lifecycle, Contact.consent_status, Contact.wa_id,
+            ).all()
+            data = [
+                {
+                    "email": r.email, "first_name": r.first_name,
+                    "last_name": r.last_name, "company": r.company,
+                    "phone": r.phone, "country": r.country,
+                    "lifecycle": r.lifecycle, "consent_status": r.consent_status,
+                    "wa_id": r.wa_id or "",
+                }
+                for r in rows
+            ]
             tmp = tempfile.NamedTemporaryFile(suffix=".csv", delete=False, mode="w")
             pd.DataFrame(data).to_csv(tmp.name, index=False)
             return gr.update(value=tmp.name, visible=True)

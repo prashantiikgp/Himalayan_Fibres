@@ -317,7 +317,7 @@ def build(ctx):
                 f'<div class="conv-section-title">{col1_cfg.get("title", "Active Chats")}</div>'
             )
             search_box = gr.Textbox(
-                placeholder=col1_cfg.get("search_placeholder", "Search active..."),
+                placeholder=col1_cfg.get("search_placeholder", "Search active… (press Enter)"),
                 label="", container=False,
             )
             conversation_radio = gr.Radio(
@@ -329,7 +329,7 @@ def build(ctx):
                 f'<div class="conv-section-title">{new_conv_cfg.get("title", "Start New Conversation")}</div>'
             )
             new_conv_search = gr.Textbox(
-                placeholder=new_conv_cfg.get("search_placeholder", "Search contact..."),
+                placeholder=new_conv_cfg.get("search_placeholder", "Search contact… (press Enter)"),
                 label="", container=False,
             )
             new_conv_radio = gr.Radio(
@@ -439,7 +439,9 @@ def build(ctx):
         finally:
             db.close()
 
-    search_box.change(fn=_search, inputs=[search_box], outputs=[conversation_radio])
+    # Plan D Phase 1.4: search fires on Enter key (.submit), not per
+    # keystroke (.change), so we don't burn a DB query per character.
+    search_box.submit(fn=_search, inputs=[search_box], outputs=[conversation_radio])
 
     def _search_new(text):
         from services.database import get_db
@@ -450,7 +452,8 @@ def build(ctx):
         finally:
             db.close()
 
-    new_conv_search.change(fn=_search_new, inputs=[new_conv_search], outputs=[new_conv_radio])
+    # Plan D Phase 1.4: submit on Enter instead of firing per keystroke.
+    new_conv_search.submit(fn=_search_new, inputs=[new_conv_search], outputs=[new_conv_radio])
 
     tpl_dropdown.change(fn=render_wa_template_preview, inputs=[tpl_dropdown], outputs=[tpl_preview])
 
