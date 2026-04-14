@@ -35,3 +35,31 @@ class TtlCacheFile(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     ttl_cache: TtlCacheDefinition
+
+
+class EgressRowWidthsDefinition(BaseModel):
+    """Per-table row-width estimates consumed by scripts/egress_report.py.
+
+    `extra="allow"` here because new tables show up frequently and the
+    report script should tolerate a stale YAML (missing table → fall
+    back to `_default_bytes_per_row` and flag it). Strictness would
+    make the diagnostic tool brittle.
+    """
+    model_config = ConfigDict(extra="allow")
+
+    # A handful of known-hot tables are declared explicitly so typos in
+    # the YAML for those keys still fail loud. Everything else comes in
+    # as `extra` attributes and can be accessed via `model_dump()`.
+    contacts: int = Field(500, ge=1)
+    wa_chats: int = Field(180, ge=1)
+    wa_messages: int = Field(300, ge=1)
+    wa_templates: int = Field(1200, ge=1)
+    segments: int = Field(180, ge=1)
+    email_sends: int = Field(220, ge=1)
+    email_templates: int = Field(5000, ge=1)
+
+
+class EgressRowWidthsFile(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    row_widths: EgressRowWidthsDefinition

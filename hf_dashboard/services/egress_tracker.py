@@ -64,6 +64,10 @@ _installed = False
 # grouping is what we need here.
 _LITERAL_RE = re.compile(r"'(?:[^']|'')*'|\b\d+\b")
 _WS_RE = re.compile(r"\s+")
+# First FROM clause in the (un-truncated) statement gives us the
+# primary table. Matched before we truncate the fingerprint so long
+# SELECTs with hundreds of column aliases still get classified.
+_FROM_RE = re.compile(r"FROM\s+([a-zA-Z_][a-zA-Z0-9_]*)", re.IGNORECASE)
 
 
 def _fingerprint(statement: str) -> str:
@@ -71,6 +75,28 @@ def _fingerprint(statement: str) -> str:
     s = _WS_RE.sub(" ", statement or "").strip()
     s = _LITERAL_RE.sub("?", s)
     return s[:240]
+
+
+def _extract_table(statement: str) -> str:
+    """Return the first FROM-clause table name, or '?' if none found.
+
+    Runs against the full statement (not the truncated fingerprint) so
+    wide SELECTs with many column aliases still classify correctly.
+    pg_catalog reflection queries return things like `pg_catalog.pg_class`
+    — we strip the schema prefix so they group under `pg_class`.
+    """
+    m = _FROM_RE.search(statement or "")
+    if not m:
+        return "?"
+    name = m.group(1).lower()
+    # pg_catalog queries sometimes look like `FROM pg_catalog.pg_class`
+    # — the regex matches `pg_catalog`. Skip it and take the next FROM.
+    if name == "pg_catalog":
+        for m2 in _FROM_RE.finditer(statement or ""):
+            candidate = m2.group(1).lower()
+            if candidate != "pg_catalog":
+                return candidate
+    return name
 
 
 def _log_dir() -> Path:
@@ -146,6 +172,7 @@ def install_egress_tracker(engine: Engine) -> None:
             return
 
         fp = _fingerprint(statement)
+        table = _extract_table(statement)
         now_iso = datetime.now(timezone.utc).isoformat(timespec="seconds")
         with _LOCK:
             entry = _COUNTERS.get(fp)
@@ -155,6 +182,7 @@ def install_egress_tracker(engine: Engine) -> None:
                     "rows": 0,
                     "first_seen": now_iso,
                     "last_seen": now_iso,
+                    "table": table,
                     "sample": statement[:400],
                 }
                 _COUNTERS[fp] = entry

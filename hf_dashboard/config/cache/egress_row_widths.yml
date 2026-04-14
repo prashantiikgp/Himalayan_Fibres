@@ -1,0 +1,37 @@
+# Estimated average bytes per row for each table, used by
+# `scripts/egress_report.py` to turn row counts (from the egress
+# tracker's /_egress/snapshot endpoint) into byte estimates.
+#
+# These numbers are ballpark only. They exist so the tracker's row
+# counts can be weighted — a query that returns 10 `contacts` rows
+# is much more expensive than a query that returns 10 `wa_chats` rows
+# even though the row count is identical.
+#
+# **How to update when you have real data:**
+#   1. Pick a representative SELECT for the table from the tracker log
+#   2. Run it manually against Supabase in the SQL editor
+#   3. Look at the "returned" byte count in the query stats
+#   4. Divide by the row count to get average bytes/row
+#   5. Update the number here + commit
+#
+# If a table is missing from this map, the report script falls back
+# to `_default_bytes_per_row` and flags the table with a "?" so you
+# know to add it.
+
+row_widths:
+  contacts: 500              # 38 cols, wide: notes, tags JSON, address, response_notes
+  wa_chats: 180              # narrow, mostly IDs + timestamps + preview string
+  wa_messages: 300           # text/media refs, error detail
+  wa_message_status_events: 120
+  wa_templates: 1200         # components JSON can be sizable, plus metadata
+  segments: 180              # rule dict JSON
+  email_sends: 220           # contact_email + subject + timestamps
+  email_templates: 5000      # html_content is big
+  campaigns: 320
+  flows: 520                 # steps JSON
+  flow_runs: 240             # context dict JSON
+  product_media: 250         # filepath + public_url
+  contact_interactions: 240
+  contact_notes: 320
+  broadcasts: 300
+  email_links: 180

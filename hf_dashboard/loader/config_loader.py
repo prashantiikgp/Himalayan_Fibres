@@ -12,7 +12,7 @@ from pathlib import Path
 
 import yaml
 
-from engines.cache_schemas import TtlCacheFile
+from engines.cache_schemas import EgressRowWidthsFile, TtlCacheFile
 from engines.theme_schemas import (
     DashboardConfig,
     LayoutFile,
@@ -43,6 +43,7 @@ class ConfigLoader:
         self._layout: LayoutFile | None = None
         self._wa_media_guidelines: MediaGuidelinesFile | None = None
         self._ttl_cache: TtlCacheFile | None = None
+        self._egress_row_widths: EgressRowWidthsFile | None = None
 
     def load_theme(self) -> ThemeConfig:
         if self._theme is None:
@@ -97,6 +98,14 @@ class ConfigLoader:
                 len(self._ttl_cache.ttl_cache.model_fields),
             )
         return self._ttl_cache
+
+    def load_egress_row_widths(self) -> EgressRowWidthsFile:
+        if self._egress_row_widths is None:
+            path = self._config_dir / "cache" / "egress_row_widths.yml"
+            data = _load_yaml(path)
+            self._egress_row_widths = EgressRowWidthsFile(**data)
+            log.info("Loaded egress row-width estimates")
+        return self._egress_row_widths
 
 
 @lru_cache(maxsize=1)
