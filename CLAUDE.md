@@ -1,51 +1,74 @@
 # Himalayan Fibers — Claude session guide
 
-## Deployment (READ THIS FIRST)
+## Deployment (READ THIS FIRST — do not improvise, do not use git push)
 
-The dashboard is deployed to a **Hugging Face Space**. The Space is a git repo
-and is configured in this repo as a git remote called `hf`.
+The dashboard is deployed to a **Hugging Face Space** via the
+`huggingface_hub` Python SDK, **not** via git push. This is important —
+past sessions have tried `git push` and broken because the HF Space is
+not a git mirror of this repo:
 
-```
-git remote -v
-# hf      https://huggingface.co/spaces/prashantiitkgp08/himalayan-fibers-dashboard
-# origin  https://github.com/prashantiikgp/Himalayan_Fibres.git
-```
+- **HF Space layout is FLAT** — files live at the Space root (`app.py`,
+  `services/`, `pages/`, `engines/`, etc.). There is NO `hf_dashboard/`
+  wrapper folder on HF.
+- **Local layout has the wrapper** — everything that runs on HF lives
+  under `hf_dashboard/` so we can also have `app/`, `config/`,
+  `scripts/`, etc. at the repo root.
+- **Every HF commit is an upload, not a push.** If you inspect
+  `git log` on the HF Space, every commit message is `Upload ... with
+  huggingface_hub` or similar. That is the deploy mechanism.
 
-**To deploy any change:**
+**The ONE supported deploy command:**
 
 ```bash
-./scripts/deploy_hf.sh
+python scripts/deploy_hf.py
 ```
 
-That's the entire workflow. The script pushes `main` to `hf`; HF detects the
-push, rebuilds the Docker image (`hf_dashboard/Dockerfile`), and restarts the
-Space. Wait for the Space to show **Running** before verifying.
+This uses `HfApi.upload_folder` to copy the contents of `hf_dashboard/`
+to the Space root in a single commit, skipping caches, local SQLite
+DBs, local media uploads, and `.env` files. After it returns, HF
+rebuilds the Docker image (`hf_dashboard/Dockerfile`) automatically.
+Wait for the Space to show **Running** before verifying.
+
+Options:
+```bash
+python scripts/deploy_hf.py --dry-run                  # list files, don't upload
+python scripts/deploy_hf.py -m "Custom commit message" # override auto message
+```
 
 - **Live URL:** https://prashantiitkgp08-himalayan-fibers-dashboard.hf.space/
 - **Build logs / Space settings:** https://huggingface.co/spaces/prashantiitkgp08/himalayan-fibers-dashboard
-- **No auth on the Space** — `APP_PASSWORD` is unset, so Playwright verification
-  can hit the live URL directly with no login step.
+- **No auth on the Space** — `APP_PASSWORD` is unset, so Playwright
+  verification can hit the live URL directly with no login step.
 
-### Auth for pushes
+### Auth for uploads
 
-HF Space git pushes require an **HF access token** (write scope) as the git
-password. The recommended setup is one-time:
+`scripts/deploy_hf.py` looks for the HF write token in this order:
 
-```bash
-git config --global credential.helper store
-./scripts/deploy_hf.sh   # enter username=prashantiitkgp08 and the HF token once
-```
+1. `HF_TOKEN` environment variable
+2. `HF_TOKEN` in the repo-root `.env`
+3. Whatever `huggingface-cli login` cached (usually `~/.cache/huggingface/token`)
 
-After that, credentials live in `~/.git-credentials` and every future push is
-non-interactive.
+Get a write token at https://huggingface.co/settings/tokens. One-time
+setup: either `export HF_TOKEN=...` in your shell profile, or run
+`huggingface-cli login` once and paste the token there. After that,
+every future deploy is non-interactive.
+
+### Git is still useful — but only for version history
+
+The repo has `origin → github.com/prashantiikgp/Himalayan_Fibres`. Use
+regular `git commit` locally to version your changes. Push to `origin`
+if you want a GitHub backup. **Do NOT add an `hf` remote and do NOT
+`git push` to HF** — those past attempts failed because HF's history is
+unrelated and its layout is different. The Python upload script is the
+only correct path.
 
 ### Verification workflow (post-deploy)
 
-Per user preference (2026-04-14): **never run the app locally.** The flow is
-always:
+Per user preference (2026-04-14): **never run the app locally.** The
+flow is always:
 
-1. Commit the change
-2. `./scripts/deploy_hf.sh`
+1. Commit the change locally (`git commit`)
+2. `python scripts/deploy_hf.py`
 3. Wait for the Space to report **Running**
 4. Drive the live URL with the Playwright MCP tools (headless) to verify
 5. Only hand off once checks pass
