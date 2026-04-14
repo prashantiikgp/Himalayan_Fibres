@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from engines.theme_schemas import ThemeConfig
+from engines.theme_schemas import LayoutFile, ThemeConfig
 
 
 @dataclass(frozen=True)
@@ -50,6 +50,19 @@ class ResolvedFonts:
 @dataclass(frozen=True)
 class ResolvedRadii:
     SM: str; MD: str; LG: str; PILL: str; CARD: str; BUBBLE: str
+
+
+@dataclass(frozen=True)
+class ResolvedPanelLayout:
+    """Structural CSS tokens for full-height dashboard panels."""
+
+    MIN_HEIGHT_EXPR: str
+    BORDER_RADIUS: str
+    PADDING: str
+    BACKGROUND: str
+    BORDER: str
+    CHAT_BACKGROUND: str
+    CHAT_BORDER: str
 
 
 def resolve_colors(config: ThemeConfig) -> ResolvedColors:
@@ -102,6 +115,19 @@ def resolve_radii(config: ThemeConfig) -> ResolvedRadii:
     return ResolvedRadii(
         SM=r.sm, MD=r.md, LG=r.lg,
         PILL=r.pill, CARD=r.card, BUBBLE=r.bubble,
+    )
+
+
+def resolve_panel_layout(layout: LayoutFile) -> ResolvedPanelLayout:
+    p = layout.layout.panels
+    return ResolvedPanelLayout(
+        MIN_HEIGHT_EXPR=p.min_height_expr,
+        BORDER_RADIUS=p.border_radius,
+        PADDING=p.padding,
+        BACKGROUND=p.background,
+        BORDER=p.border,
+        CHAT_BACKGROUND=p.chat_background,
+        CHAT_BORDER=p.chat_border,
     )
 
 

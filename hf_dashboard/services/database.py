@@ -32,6 +32,71 @@ _SessionLocal = None
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 
+def _preflight_postgres(db_url: str) -> None:
+    """Raw TCP reachability + DNS check for the Postgres host.
+
+    Runs BEFORE SQLAlchemy opens a connection so the failure message is clear
+    and fast (10s instead of psycopg2's default ~60s). Logs a loud, actionable
+    diagnostic if the host is unreachable, then raises with the same message.
+    """
+    import socket
+    from urllib.parse import urlparse
+
+    p = urlparse(db_url)
+    host = p.hostname or "?"
+    port = p.port or 5432
+    user = p.username or "?"
+    log.info("DB preflight: host=%s port=%s user=%s", host, port, user)
+
+    # 1. DNS resolution
+    try:
+        infos = socket.getaddrinfo(host, port, proto=socket.IPPROTO_TCP)
+        resolved = sorted({i[4][0] for i in infos})
+        log.info("DB preflight: DNS %s -> %s", host, ", ".join(resolved))
+    except socket.gaierror as e:
+        msg = (
+            f"DB UNREACHABLE: DNS lookup failed for host={host}. "
+            f"Check DATABASE_URL spelling. Error: {e}"
+        )
+        log.error("\n" + "=" * 72 + "\n" + msg + "\n" + "=" * 72)
+        raise RuntimeError(msg) from e
+
+    # 2. TCP connect on each resolved address, 10s timeout each
+    last_err = None
+    for ip in resolved:
+        try:
+            with socket.create_connection((ip, port), timeout=10) as s:
+                log.info("DB preflight: TCP %s:%s OK", ip, port)
+                return  # reachable
+        except (socket.timeout, OSError) as e:
+            last_err = e
+            log.warning("DB preflight: TCP %s:%s failed (%s)", ip, port, e)
+
+    # All IPs failed — emit a loud diagnostic
+    hint = ""
+    if port == 5432:
+        hint = (
+            "\nHINT: You are using port 5432 (session/direct). Supabase free-tier "
+            "projects are blocked from direct IPv4 — use the TRANSACTION POOLER on "
+            "port 6543 instead. In Supabase → Project Settings → Database → "
+            "Connection string → 'Transaction pooler', copy the URI and update the "
+            "DATABASE_URL secret in HF Space → Settings → Variables & Secrets."
+        )
+    elif port == 6543:
+        hint = (
+            "\nHINT: Port 6543 is the transaction pooler. The host is resolving but "
+            "TCP is blocked. Check Supabase → Database → Network Restrictions "
+            "(set to 'Allow all' if restricted), and verify no IP allowlist is "
+            "excluding HF Spaces egress."
+        )
+    msg = (
+        f"DB UNREACHABLE: TCP connect to {host}:{port} timed out on all "
+        f"resolved IPs ({', '.join(resolved)}). Last error: {last_err}.{hint}"
+    )
+    log.error("\n" + "=" * 72 + "\n" + msg + "\n" + "=" * 72)
+    raise RuntimeError(msg)
+
+
 def get_engine():
     """Lazy-create the SQLAlchemy engine.
 
@@ -43,14 +108,16 @@ def get_engine():
     if _engine is None:
         settings = get_settings()
         if settings.database_url:
+            log.info("DB engine: Postgres (%s)", _mask_db_url(settings.database_url))
+            _preflight_postgres(settings.database_url)
             _engine = create_engine(
                 settings.database_url,
                 pool_pre_ping=True,
                 pool_size=5,
                 max_overflow=5,
                 echo=False,
+                connect_args={"connect_timeout": 10},
             )
-            log.info("DB engine: Postgres (%s)", _mask_db_url(settings.database_url))
         else:
             db_path = Path(settings.sqlite_path)
             db_path.parent.mkdir(parents=True, exist_ok=True)

@@ -31,32 +31,38 @@ page:
     columns:
       - field: name
         label: "Name"
-        width: "14%"
+        width: "13%"
       - field: company
         label: "Company"
-        width: "12%"
+        width: "11%"
       - field: channels
         label: "Channel"
-        width: "7%"
+        width: "6%"
       - field: lifecycle
         label: "Lifecycle"
-        width: "9%"
+        width: "8%"
       - field: segments
         label: "Segments"
-        width: "12%"
+        width: "10%"
       - field: email
         label: "Email"
-        width: "17%"
+        width: "14%"
         font: "monospace"
       - field: phone
         label: "Phone"
-        width: "10%"
+        width: "9%"
+      - field: city
+        label: "City"
+        width: "7%"
+      - field: country
+        label: "Country"
+        width: "7%"
       - field: tags
         label: "Tags"
-        width: "13%"
+        width: "10%"
       - field: actions
         label: ""
-        width: "6%"
+        width: "5%"
 
   add_contact:
     title: "Add New Contact"

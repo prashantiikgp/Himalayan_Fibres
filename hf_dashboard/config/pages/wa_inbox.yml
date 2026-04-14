@@ -3,8 +3,12 @@ page:
 
   column_1:
     title: "Active Chats"
-    search_placeholder: "Search..."
+    search_placeholder: "Search active..."
     empty_message: "No active WhatsApp conversations"
+    new_conversation:
+      title: "Start New Conversation"
+      search_placeholder: "Search contact by name or company..."
+      empty_hint: "Type 2+ characters to search all WhatsApp-capable contacts"
 
   column_2:
     system_events:
@@ -14,6 +18,9 @@ page:
     window_warning:
       title: "WhatsApp's customer service window closed"
       detail: "WhatsApp doesn't allow sending messages after 24 hours since the last Contact reply. To continue, send an approved Message Template."
+    new_conversation_warning:
+      title: "No conversation yet"
+      detail: "Sending a template will open a 24-hour service window and incur a WhatsApp conversation fee (category-dependent). Use the Select Template panel on the right."
     message_input:
       placeholder: "Type a message..."
     wa_api_label: "WhatsApp Cloud API"

@@ -271,7 +271,11 @@ async def list_templates(
     status_filter: str | None = Query(None, alias="status"),
 ) -> list[WATemplateResponse]:
     """List synced WhatsApp message templates."""
-    q = select(WATemplate).order_by(WATemplate.name)
+    q = (
+        select(WATemplate)
+        .where(WATemplate.is_draft.is_(False))
+        .order_by(WATemplate.name)
+    )
     if status_filter:
         q = q.where(WATemplate.status == status_filter.upper())
     result = await db.execute(q)
@@ -324,6 +328,8 @@ async def sync_templates(db: DBSession) -> WATemplateSyncResult:
             existing.quality_score = tpl.get("quality_score")
             existing.components = tpl.get("components", [])
             existing.last_synced_at = now
+            existing.is_draft = False
+            existing.rejection_reason = tpl.get("rejected_reason") or ""
             updated += 1
         else:
             new_template = WATemplate(
@@ -334,6 +340,8 @@ async def sync_templates(db: DBSession) -> WATemplateSyncResult:
                 quality_score=tpl.get("quality_score"),
                 components=tpl.get("components", []),
                 last_synced_at=now,
+                is_draft=False,
+                rejection_reason=tpl.get("rejected_reason") or "",
             )
             db.add(new_template)
             created += 1

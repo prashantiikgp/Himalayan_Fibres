@@ -55,32 +55,13 @@ def _resolve_page_module(page_id: str) -> Any:
     return None
 
 
-_HF_BRIDGE_JS = """() => {
-  window.hf_editContact = function(cid) {
-    var box = document.querySelector('#hf-edit-contact-id textarea, #hf-edit-contact-id input');
-    if (!box) { console.warn('hf-edit bridge: id box missing'); return; }
-    var proto = box.tagName === 'INPUT' ? HTMLInputElement.prototype : HTMLTextAreaElement.prototype;
-    var setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
-    setter.call(box, cid);
-    box.dispatchEvent(new Event('input', { bubbles: true }));
-    setTimeout(function() {
-      var trig = document.querySelector('#hf-edit-trigger-btn button') ||
-                 document.querySelector('button#hf-edit-trigger-btn');
-      if (trig) trig.click();
-      else console.warn('hf-edit bridge: trigger button missing');
-    }, 80);
-  };
-  return [];
-}"""
-
-
 def build_app_with_sidebar(title: str = "Himalayan Fibers") -> gr.Blocks:
     """Build the full Gradio app with sidebar navigation.
 
     Returns a gr.Blocks instance ready for mounting on FastAPI.
+    Theme + CSS are passed to mount_gradio_app in app.py — Gradio 6 ignores
+    them when set on the Blocks instance directly.
     """
-    from shared.theme import build_theme
-
     loader = get_config_loader()
     sidebar_config = loader.load_sidebar()
     dashboard_config = loader.load_dashboard()
@@ -89,13 +70,7 @@ def build_app_with_sidebar(title: str = "Himalayan Fibers") -> gr.Blocks:
     default_page = dashboard_config.dashboard.default_page
     subtitle = dashboard_config.dashboard.subtitle
 
-    gradio_theme = build_theme()
-
     with gr.Blocks(title=title) as app:
-        # Set theme and CSS on the Blocks object (Gradio 6.x)
-        app.theme = gradio_theme
-        app.css = DASHBOARD_CSS
-
         # -- Auth gate --
         from services.config import get_settings
         settings = get_settings()
@@ -220,14 +195,6 @@ def build_app_with_sidebar(title: str = "Himalayan Fibers") -> gr.Blocks:
                 inputs=[password_input],
                 outputs=[auth_group, dashboard_group, main_layout, login_error],
             )
-
-        # -- Install the JS bridge used by per-row Edit buttons on the
-        #    contacts page. Runs once on Blocks load, before any row is
-        #    clicked. window.hf_editContact is then available globally.
-        try:
-            app.load(fn=None, inputs=None, outputs=None, js=_HF_BRIDGE_JS)
-        except Exception:
-            log.warning("Could not wire JS bridge load handler")
 
         # -- Auto-load default page data on startup --
         if default_page in page_wirings:

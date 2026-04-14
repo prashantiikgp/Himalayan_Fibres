@@ -1,10 +1,17 @@
 """Global CSS overrides for the Gradio dashboard.
 
-Injected via gr.Blocks(css=DASHBOARD_CSS). Uses !important to override
-Gradio's default styling and enforce the dark theme.
+Passed to `mount_gradio_app(css=DASHBOARD_CSS)` in app.py. Uses !important
+to override Gradio's default styling and enforce the dark theme.
+
+Panel layout tokens (.conv-list-panel / .chat-panel / .tools-panel) are
+pulled from config/theme/layout.yml via the ThemeEngine so they live in a
+schema-validated config, not as Python literals. The engine fails loud at
+module-import time if the YAML is malformed.
 """
 
-DASHBOARD_CSS = """
+from engines.theme_engine import get_theme_engine
+
+_STATIC_CSS = """
 /* -- Remove Gradio footer -- */
 footer { display: none !important; }
 
@@ -409,28 +416,101 @@ html, body { scroll-behavior: auto !important; overflow-anchor: none !important;
     gap: 8px !important;
 }
 
-/* -- Center chat panel -- */
-.chat-panel {
-    background: rgba(15,23,42,.35) !important;
-    border: 1px solid rgba(255,255,255,.08) !important;
-    border-radius: 10px !important;
-    padding: 0 !important;
-    min-height: calc(100vh - 160px) !important;
+/* Chat messages grow to fill vertical space */
+.chat-panel .chat-messages-slot {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
 }
 
-/* -- Tools panel sections -- */
-.tools-panel {
-    background: rgba(15,23,42,.50) !important;
-    border: 1px solid rgba(255,255,255,.06) !important;
-    border-radius: 10px !important;
-    padding: 10px !important;
+/* Pin send row to the bottom of the chat panel */
+.chat-panel .chat-send-row {
+    margin-top: auto !important;
+    flex: 0 0 auto !important;
+    padding: 8px 10px !important;
+    gap: 6px !important;
+    background: rgba(15,23,42,.55) !important;
+    border-top: 1px solid rgba(255,255,255,.08) !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+}
+.chat-panel .chat-send-row > * { margin: 0 !important; }
+.chat-panel .chat-send-row .chat-send-input textarea,
+.chat-panel .chat-send-row .chat-send-input input {
+    min-height: 36px !important;
+    height: 36px !important;
+    padding: 6px 10px !important;
+    resize: none !important;
+}
+.chat-panel .chat-send-row .chat-send-btn button {
+    height: 36px !important;
+    min-width: 72px !important;
+    padding: 0 14px !important;
+}
+.chat-panel .chat-send-result {
+    flex: 0 0 auto !important;
+    padding: 0 10px 6px 10px !important;
 }
 
-/* -- Conversation list panel -- */
-.conv-list-panel {
-    background: rgba(15,23,42,.50) !important;
-    border: 1px solid rgba(255,255,255,.06) !important;
-    border-radius: 10px !important;
-    padding: 10px !important;
+/* Active Chats radio shares vertical space with Start New section below. */
+.conv-list-panel .wa-conv-radio,
+.conv-list-panel .wa-new-conv-radio {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+}
+
+/* Small section titles + dividers inside the conv list */
+.conv-list-panel .conv-section-title {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    color: #64748b !important;
+    margin: 4px 0 6px 2px !important;
+}
+.conv-list-panel .conv-section-divider {
+    height: 1px !important;
+    background: rgba(255,255,255,.06) !important;
+    margin: 10px 0 !important;
+    flex: 0 0 auto !important;
+}
+.conv-list-panel .conv-section-hint {
+    font-size: 9px !important;
+    color: #64748b !important;
+    font-style: italic !important;
+    margin: 4px 2px 0 2px !important;
 }
 """
+
+
+def _build_panel_css() -> str:
+    """Render the three full-height sibling panels from layout.yml tokens.
+
+    Kept as a function so schema changes fail loudly at import time and so
+    tests can drive a mock engine if needed.
+    """
+    layout = get_theme_engine().panel_layout
+    return (
+        "\n/* -- Full-height sibling panels (layout.yml) -- */\n"
+        ".conv-list-panel, .tools-panel {\n"
+        f"    background: {layout.BACKGROUND} !important;\n"
+        f"    border: {layout.BORDER} !important;\n"
+        f"    border-radius: {layout.BORDER_RADIUS} !important;\n"
+        f"    padding: {layout.PADDING} !important;\n"
+        f"    min-height: {layout.MIN_HEIGHT_EXPR} !important;\n"
+        "    display: flex !important;\n"
+        "    flex-direction: column !important;\n"
+        "    overflow-y: auto !important;\n"
+        "}\n"
+        ".chat-panel {\n"
+        f"    background: {layout.CHAT_BACKGROUND} !important;\n"
+        f"    border: {layout.CHAT_BORDER} !important;\n"
+        f"    border-radius: {layout.BORDER_RADIUS} !important;\n"
+        "    padding: 0 !important;\n"
+        f"    min-height: {layout.MIN_HEIGHT_EXPR} !important;\n"
+        "    display: flex !important;\n"
+        "    flex-direction: column !important;\n"
+        "}\n"
+    )
+
+
+DASHBOARD_CSS = _STATIC_CSS + _build_panel_css()

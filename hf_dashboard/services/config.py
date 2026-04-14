@@ -48,6 +48,11 @@ class DashboardSettings:
         # Media
         self.media_path = os.getenv("MEDIA_PATH", str(Path(__file__).parent.parent / "media"))
 
+        # Public base URL — external URL that Meta's CDN can reach to pull
+        # template header assets. Must be HTTPS in production. On HF Spaces
+        # this is the Space URL; on localhost dev, point at an ngrok tunnel.
+        self.public_base_url = os.getenv("PUBLIC_BASE_URL", "http://localhost:7860").rstrip("/")
+
 
 _settings = None
 

@@ -241,6 +241,18 @@ class WATemplate(Base):
     last_synced_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=_utcnow)
 
+    is_draft = Column(Boolean, nullable=False, default=False)
+    body_text = Column(Text, nullable=False, default="")
+    header_format = Column(String(20), nullable=True)
+    header_asset_url = Column(String(512), nullable=True)
+    header_text = Column(String(60), nullable=True)
+    footer_text = Column(String(60), nullable=True)
+    buttons = Column(JSONType, nullable=False, default=list)
+    variables = Column(JSONType, nullable=False, default=list)
+    rejection_reason = Column(Text, nullable=False, default="")
+    submitted_at = Column(DateTime, nullable=True)
+    meta_template_id = Column(String(64), nullable=True)
+
 
 # -- Broadcast --
 
@@ -272,6 +284,9 @@ class ProductMedia(Base):
     caption = Column(Text, default="")
     wa_media_id = Column(String(128), nullable=True)
     uploaded_at = Column(DateTime, default=_utcnow)
+
+    kind = Column(String(32), nullable=False, default="product")
+    public_url = Column(String(512), nullable=True)
 
 
 # -- ContactInteraction --

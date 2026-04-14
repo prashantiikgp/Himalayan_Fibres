@@ -1,8 +1,8 @@
-"""Theme YAML Pydantic schemas — config/theme/default.yml."""
+"""Theme YAML Pydantic schemas — config/theme/default.yml + layout.yml."""
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 # -- Color schemas --
@@ -169,3 +169,32 @@ class DashboardDefinition(BaseModel):
 
 class DashboardConfig(BaseModel):
     dashboard: DashboardDefinition
+
+
+# -- Layout schemas (config/theme/layout.yml) --
+# Strict: extra = "forbid" so typos in YAML keys fail at load time instead of
+# silently becoming no-ops. Matches the "engines need proper schema so we
+# don't leak information" rule.
+
+class PanelLayoutTokens(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    min_height_expr: str = "calc(100vh - 160px)"
+    border_radius: str = "10px"
+    padding: str = "10px"
+    background: str = "rgba(15,23,42,.50)"
+    border: str = "1px solid rgba(255,255,255,.06)"
+    chat_background: str = "rgba(15,23,42,.35)"
+    chat_border: str = "1px solid rgba(255,255,255,.08)"
+
+
+class LayoutDefinition(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    panels: PanelLayoutTokens = Field(default_factory=PanelLayoutTokens)
+
+
+class LayoutFile(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layout: LayoutDefinition

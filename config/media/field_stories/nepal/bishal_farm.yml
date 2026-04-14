@@ -53,11 +53,15 @@ sublocations:
 
       - id: "bishal_woman_beating_fiber"
         filename: "1678866670676.jpeg"
+        subfolder: "Low graphics"                  # actual location — only 320x240 version found
         description: "Woman crouched on stone patio beating/softening dried fiber with a stick. Dust rising from impact. Mountains and green valley behind. Traditional fiber softening technique."
         shot_type: "action"
-        quality: "excellent — dynamic, dust visible, storytelling"
+        quality: "low-res 320x240 only — needs higher-res source"
         tags: ["artisan", "women", "fiber beating", "traditional", "dust", "mountains"]
         best_for: ["behind the scenes hero", "processing blog", "instagram"]
+        used_in: ["config/blog/behind_the_scenes/day_in_life_artisan.yml"]
+        wix_media_id: "b6e546_12748d25ac8e438a8ff58142a58bac9b~mv2.jpeg"
+        wix_filename: "hf-smile-woman-beating-fiber.jpeg"
 
       - id: "bishal_woman_carrying_bundles"
         filename: "1678866670688.jpeg"
@@ -96,6 +100,8 @@ sublocations:
         tags: ["portrait", "woman", "smile", "strength", "headscarf", "editorial", "unsplash"]
         best_for: ["blog hero", "women empowerment", "emotional story", "about us"]
         used_in: ["config/blog/behind_the_scenes/day_in_life_artisan.yml"]
+        wix_media_id: "b6e546_e91f0da21ad3478bb4548c56e70e1455~mv2.jpg"
+        wix_filename: "hf-smile-hero-le-tan.jpg"
 
       - id: "good_village_aerial"
         filename: "Village.jpg"
@@ -105,6 +111,8 @@ sublocations:
         tags: ["village", "landscape", "terraced fields", "remote", "himalayan"]
         best_for: ["setting the scene", "collection stories", "behind the scenes hero"]
         used_in: ["config/blog/behind_the_scenes/day_in_life_artisan.yml"]
+        wix_media_id: "b6e546_2f2ac0d6fa2c41b5add530ac9e3263a5~mv2.jpg"
+        wix_filename: "hf-smile-village-aerial.jpg"
 
       - id: "good_house_2"
         filename: "House _2.jpg"
@@ -122,6 +130,8 @@ sublocations:
         tags: ["elder", "woman", "stairway", "home", "contemplative", "village"]
         best_for: ["blog inline", "resilience story", "elder portrait"]
         used_in: ["config/blog/behind_the_scenes/day_in_life_artisan.yml"]
+        wix_media_id: "b6e546_86ecfa07018d4b4a8fc68dc2dc854c87~mv2.jpg"
+        wix_filename: "hf-smile-house-stairway.jpg"
 
       - id: "good_sushanta_warm_houses"
         filename: "sushanta-rokka-4x6Qn0CHXDQ-unsplash.jpg"
@@ -155,7 +165,14 @@ sublocations:
       - id: "good_just_capturing"
         filename: "just-capturing-it-1jYu08pSXFY-unsplash.jpg"
         credit: "Just Capturing It / Unsplash"
-        status: "needs_viewing"
+        description: "Himalayan woman walking a dirt mountain path carrying a large bundle of dried stalks on her back/shoulders. Pink traditional skirt, green top, cloth head cushion. Terraced fields and mountains in the distance, pine trees on hillside."
+        shot_type: "action — environmental"
+        quality: "excellent — editorial, dramatic, tells the work story"
+        tags: ["woman", "carrying", "bundle", "harvest", "mountain path", "unsplash", "work"]
+        best_for: ["blog hero", "work story", "behind the scenes", "harvest content"]
+        used_in: ["config/blog/behind_the_scenes/day_in_life_artisan.yml"]
+        wix_media_id: "b6e546_f179883f9d8348228cd31330d541171e~mv2.jpg"
+        wix_filename: "hf-smile-woman-carrying-bundle.jpg"
 
       - id: "good_wietse_jongsma"
         filename: "wietse-jongsma-0E0LHBwnMZI-unsplash.jpg"

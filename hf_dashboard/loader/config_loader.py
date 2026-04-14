@@ -13,10 +13,12 @@ from pathlib import Path
 import yaml
 
 from engines.theme_schemas import (
-    ThemeConfig,
-    SidebarFile,
     DashboardConfig,
+    LayoutFile,
+    SidebarFile,
+    ThemeConfig,
 )
+from engines.wa_schemas import MediaGuidelinesFile
 
 log = logging.getLogger(__name__)
 
@@ -37,6 +39,8 @@ class ConfigLoader:
         self._theme: ThemeConfig | None = None
         self._sidebar: SidebarFile | None = None
         self._dashboard: DashboardConfig | None = None
+        self._layout: LayoutFile | None = None
+        self._wa_media_guidelines: MediaGuidelinesFile | None = None
 
     def load_theme(self) -> ThemeConfig:
         if self._theme is None:
@@ -45,6 +49,17 @@ class ConfigLoader:
             self._theme = ThemeConfig(**data)
             log.info("Loaded theme: %s", self._theme.theme.name)
         return self._theme
+
+    def load_layout(self) -> LayoutFile:
+        if self._layout is None:
+            path = self._config_dir / "theme" / "layout.yml"
+            data = _load_yaml(path)
+            self._layout = LayoutFile(**data)
+            log.info(
+                "Loaded layout: panels min_height=%s",
+                self._layout.layout.panels.min_height_expr,
+            )
+        return self._layout
 
     def load_sidebar(self) -> SidebarFile:
         if self._sidebar is None:
@@ -61,6 +76,14 @@ class ConfigLoader:
             self._dashboard = DashboardConfig(**data)
             log.info("Loaded dashboard config: %s", self._dashboard.dashboard.title)
         return self._dashboard
+
+    def load_wa_media_guidelines(self) -> MediaGuidelinesFile:
+        if self._wa_media_guidelines is None:
+            path = self._config_dir / "whatsapp" / "media_guidelines.yml"
+            data = _load_yaml(path)
+            self._wa_media_guidelines = MediaGuidelinesFile(**data)
+            log.info("Loaded WA media guidelines")
+        return self._wa_media_guidelines
 
 
 @lru_cache(maxsize=1)

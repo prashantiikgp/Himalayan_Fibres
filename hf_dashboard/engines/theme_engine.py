@@ -13,24 +13,26 @@ from functools import lru_cache
 
 import gradio as gr
 
-from engines.theme_schemas import ThemeConfig
+from engines.theme_schemas import LayoutFile, ThemeConfig
 from engines.theme_resolver import (
-    ResolvedColors, ResolvedSpacing, ResolvedFonts, ResolvedRadii,
-    resolve_colors, resolve_spacing, resolve_fonts, resolve_radii,
-    resolve_kpi_style,
+    ResolvedColors, ResolvedFonts, ResolvedPanelLayout, ResolvedRadii, ResolvedSpacing,
+    resolve_colors, resolve_fonts, resolve_kpi_style, resolve_panel_layout,
+    resolve_radii, resolve_spacing,
 )
 
 
 class ThemeEngine:
     """Converts validated ThemeConfig into runtime objects."""
 
-    def __init__(self, config: ThemeConfig):
+    def __init__(self, config: ThemeConfig, layout: LayoutFile | None = None):
         self._config = config
         self._cfg = config.theme
+        self._layout_file = layout
         self._colors: ResolvedColors | None = None
         self._spacing: ResolvedSpacing | None = None
         self._fonts: ResolvedFonts | None = None
         self._radii: ResolvedRadii | None = None
+        self._panel_layout: ResolvedPanelLayout | None = None
         self._kpi_style: dict | None = None
         self._gradio_theme: gr.themes.Base | None = None
 
@@ -63,6 +65,22 @@ class ThemeEngine:
         if self._kpi_style is None:
             self._kpi_style = resolve_kpi_style(self._config)
         return self._kpi_style
+
+    @property
+    def panel_layout(self) -> ResolvedPanelLayout:
+        """Structural CSS tokens for full-height sibling panels.
+
+        Falls back to schema defaults if layout.yml is absent — defaults live
+        on PanelLayoutTokens so the dashboard still boots on a fresh install
+        that hasn't shipped layout.yml yet.
+        """
+        if self._panel_layout is None:
+            if self._layout_file is None:
+                from engines.theme_schemas import LayoutDefinition
+                from engines.theme_schemas import LayoutFile as _LF
+                self._layout_file = _LF(layout=LayoutDefinition())
+            self._panel_layout = resolve_panel_layout(self._layout_file)
+        return self._panel_layout
 
     @property
     def gradio_theme(self) -> gr.themes.Base:
@@ -144,8 +162,9 @@ class ThemeEngine:
 
 @lru_cache(maxsize=1)
 def get_theme_engine() -> ThemeEngine:
-    """Singleton ThemeEngine, loading theme.yml on first call."""
+    """Singleton ThemeEngine, loading theme.yml + layout.yml on first call."""
     from loader.config_loader import get_config_loader
     loader = get_config_loader()
     config = loader.load_theme()
-    return ThemeEngine(config)
+    layout = loader.load_layout()
+    return ThemeEngine(config, layout=layout)

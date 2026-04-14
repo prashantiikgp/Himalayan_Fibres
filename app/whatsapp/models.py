@@ -167,6 +167,20 @@ class WATemplate(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
+    is_draft: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default="false", default=False
+    )
+    body_text: Mapped[str] = mapped_column(Text, nullable=False, server_default="", default="")
+    header_format: Mapped[str | None] = mapped_column(String(20))
+    header_asset_url: Mapped[str | None] = mapped_column(String(512))
+    header_text: Mapped[str | None] = mapped_column(String(60))
+    footer_text: Mapped[str | None] = mapped_column(String(60))
+    buttons: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, nullable=False, default=list, server_default="[]")
+    variables: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list, server_default="[]")
+    rejection_reason: Mapped[str] = mapped_column(Text, nullable=False, server_default="", default="")
+    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    meta_template_id: Mapped[str | None] = mapped_column(String(64))
+
     # Relationships
     messages: Mapped[list["WAMessage"]] = relationship(back_populates="template")
 

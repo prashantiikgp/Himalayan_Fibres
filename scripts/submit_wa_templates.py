@@ -20,6 +20,9 @@ import httpx
 import yaml
 from dotenv import load_dotenv
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "hf_dashboard"))
+from services.wa_template_builder import build_components as _build_components  # noqa: E402
+
 # Load environment
 load_dotenv(Path(__file__).parent.parent / ".env")
 
@@ -40,46 +43,6 @@ def _load_templates() -> dict:
     with open(TEMPLATES_FILE, encoding="utf-8") as f:
         data = yaml.safe_load(f)
     return data.get("templates", {})
-
-
-def _build_components(template: dict) -> list[dict]:
-    """Convert YAML template definition to Meta API components format."""
-    components = []
-
-    # Header
-    if "header" in template:
-        h = template["header"]
-        comp = {"type": "HEADER", "format": h.get("type", "TEXT").upper()}
-        if comp["format"] == "TEXT":
-            comp["text"] = h["text"]
-            if "example" in h:
-                comp["example"] = {"header_text": h["example"]}
-        components.append(comp)
-
-    # Body (required)
-    if "body" in template:
-        b = template["body"]
-        comp = {"type": "BODY", "text": b["text"].strip()}
-        if "example" in b:
-            comp["example"] = {"body_text": [b["example"]]}
-        components.append(comp)
-
-    # Footer
-    if "footer" in template:
-        components.append({"type": "FOOTER", "text": template["footer"]["text"]})
-
-    # Buttons
-    if "buttons" in template:
-        buttons = []
-        for btn in template["buttons"]:
-            if btn["type"].upper() == "URL":
-                buttons.append({"type": "URL", "text": btn["text"], "url": btn["url"]})
-            elif btn["type"].upper() == "QUICK_REPLY":
-                buttons.append({"type": "QUICK_REPLY", "text": btn["text"]})
-        if buttons:
-            components.append({"type": "BUTTONS", "buttons": buttons})
-
-    return components
 
 
 def submit_template(name: str, template: dict) -> dict:

@@ -1,0 +1,24 @@
+media_guidelines:
+  header_image:
+    formats: [JPG, PNG]
+    max_size_mb: 5
+    recommended: "1200x628 px (WhatsApp crops to 1.91:1)"
+    tips:
+      - "Use product-on-white or lifestyle shots, not text screenshots"
+      - "Keep key content in the center — edges may be cropped"
+      - "Avoid heavy text overlays (Meta may reject)"
+
+  header_video:
+    formats: [MP4, 3GPP]
+    max_size_mb: 16
+    recommended: "1280x720 px, under 15 seconds"
+    tips:
+      - "First frame is used as the thumbnail — pick a strong opening shot"
+
+  header_document:
+    formats: [PDF]
+    max_size_mb: 100
+    recommended: "PDF only, short descriptive filename"
+    tips:
+      - "Filename is visible to the recipient — keep it short and meaningful"
+      - "PDFs over 20 MB will hurt delivery speed on slow connections"

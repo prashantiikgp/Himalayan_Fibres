@@ -46,8 +46,9 @@ cover_image:
   tags: ["portrait", "woman", "smile", "strength", "headscarf", "editorial", "unsplash"]
   best_for: ["blog hero", "women empowerment", "emotional story", "about us"]
   # --- PUBLISH STATE ---
-  wix_media_id: null
-  status: "needs_upload"
+  wix_media_id: "b6e546_e91f0da21ad3478bb4548c56e70e1455~mv2.jpg"
+  wix_filename: "hf-smile-hero-le-tan.jpg"
+  status: "uploaded"
 
 brief:
   topic: "A short, emotional blog about the quiet resilience of the women artisans who make Himalayan Fibres possible"
@@ -85,8 +86,8 @@ content:
       tags: ["portrait", "woman", "smile", "strength", "headscarf", "editorial", "unsplash"]
       best_for: ["blog hero", "women empowerment", "emotional story"]
     # --- PUBLISH STATE ---
-    wix_media_id: null
-    status: "needs_upload"
+    wix_media_id: "b6e546_e91f0da21ad3478bb4548c56e70e1455~mv2.jpg"
+    status: "uploaded"
 
   - type: paragraph
     text: |
@@ -99,48 +100,12 @@ content:
 
   - type: paragraph
     text: |
-      This is a short story about that smile. And about what it holds.
+      This is a short story about that smile — her face, her home, her
+      village, and her work. And the quiet dignity that binds them all.
 
   - type: heading
     level: 2
-    text: "Where She Lives"
-
-  - type: image
-    # --- DISPLAY ---
-    alt: "A Himalayan village of stone houses on terraced hillsides, surrounded by dense green forest"
-    caption: "A Himalayan village — stone houses, terraced fields, and the nettle growing wild on the slopes above."
-    layout:
-      style: "content"
-      alignment: "center"
-    # --- SOURCE ---
-    catalog_ref: "field_stories/nepal/bishal_farm.yml#good_village_aerial"
-    local_file: "/mnt/g/My Drive/1. Media & Marketing/4. Photos and Media/Bishal Farm Images/Farmer Images/Good Images/Village.jpg"
-    filename: "Village.jpg"
-    description: "Aerial view of a Himalayan village in terraced hillsides. Stone houses with dark roofs, a creek, dense green forest, and cultivated fields."
-    shot_type: "landscape — aerial"
-    quality: "high"
-    tags: ["village", "landscape", "terraced fields", "remote", "himalayan"]
-    best_for: ["setting the scene", "collection stories", "behind the scenes hero"]
-    # --- PUBLISH STATE ---
-    wix_media_id: null
-    status: "needs_upload"
-
-  - type: paragraph
-    text: |
-      Her home is high. An hour's walk from the nearest road, three hours
-      from the nearest shop, and a full day from the nearest hospital. The
-      village sits in a pocket of terraced fields carved into the hillside
-      generations ago. Electricity comes and goes. The monsoon closes the
-      trails for weeks at a time. In winter, the wind cuts through stone
-      walls.
-
-      This is not a hardship she chose. It is the place she was born into,
-      the place her mother worked, and the place her daughter will one day
-      decide whether to stay.
-
-  - type: heading
-    level: 2
-    text: "What the Smile Holds"
+    text: "Her Home"
 
   - type: image
     # --- DISPLAY ---
@@ -159,23 +124,123 @@ content:
     tags: ["elder", "woman", "stairway", "home", "contemplative", "village"]
     best_for: ["blog inline", "resilience story", "elder portrait"]
     # --- PUBLISH STATE ---
-    wix_media_id: null
-    status: "needs_upload"
+    wix_media_id: "b6e546_86ecfa07018d4b4a8fc68dc2dc854c87~mv2.jpg"
+    status: "uploaded"
 
   - type: paragraph
     text: |
-      Her hands are rough. Nettle stings even after retting, and the
-      repetition of stripping, beating, and spinning for thirty years has
-      left its mark. She has pain in her shoulders she does not mention.
-      She has worries about her children she does not share. She has seen
-      neighbours leave the village for the city and come back with less
-      than they took.
+      Home is a stone house with a slate roof. The walls have stood for
+      generations, repaired every few years with the same mud, the same
+      stones, the same hands. The stairway in front is a stack of uneven
+      slabs, worn smooth by bare feet.
 
-      Her income from fiber work is small by any outside standard — a few
-      thousand rupees a month, sometimes less. But in a village like hers,
-      that money is what pays for school books, for a sack of rice in a
-      lean month, for a bus ticket when a grandchild is sick. It is not a
-      supplement. It is the margin between staying and leaving.
+      In the morning she lights the fire. In the evening she sits on this
+      step and watches the mist settle into the valley. Between those two
+      moments is her day.
+
+  - type: heading
+    level: 2
+    text: "Her Village"
+
+  - type: image
+    # --- DISPLAY ---
+    alt: "A Himalayan village of stone houses on terraced hillsides, surrounded by dense green forest"
+    caption: "A Himalayan village — stone houses, terraced fields, and the nettle growing wild on the slopes above."
+    layout:
+      style: "content"
+      alignment: "center"
+    # --- SOURCE ---
+    catalog_ref: "field_stories/nepal/bishal_farm.yml#good_village_aerial"
+    local_file: "/mnt/g/My Drive/1. Media & Marketing/4. Photos and Media/Bishal Farm Images/Farmer Images/Good Images/Village.jpg"
+    filename: "Village.jpg"
+    description: "Aerial view of a Himalayan village in terraced hillsides. Stone houses with dark roofs, a creek, dense green forest, and cultivated fields."
+    shot_type: "landscape — aerial"
+    quality: "high"
+    tags: ["village", "landscape", "terraced fields", "remote", "himalayan"]
+    best_for: ["setting the scene", "collection stories", "behind the scenes hero"]
+    # --- PUBLISH STATE ---
+    wix_media_id: "b6e546_2f2ac0d6fa2c41b5add530ac9e3263a5~mv2.jpg"
+    status: "uploaded"
+
+  - type: paragraph
+    text: |
+      Her village is high. An hour's walk from the nearest road, three
+      hours from the nearest shop, and a full day from the nearest
+      hospital. A pocket of terraced fields carved into the hillside
+      generations ago. Electricity comes and goes. The monsoon closes the
+      trails for weeks at a time. In winter, the wind cuts through the
+      stone walls.
+
+      Neighbours here are more than neighbours. They harvest together for
+      safety and companionship, strip bark in groups, sing while they
+      work. Isolation is a fact of geography, not of spirit.
+
+  - type: heading
+    level: 2
+    text: "Her Work"
+
+  - type: image
+    # --- DISPLAY ---
+    alt: "A Himalayan woman walking a mountain path with a large bundle of dried stalks on her back, pink traditional skirt, terraced fields and mountains behind"
+    caption: "Once down with the bundle — the walk home after the harvest."
+    layout:
+      style: "content"
+      alignment: "center"
+    # --- SOURCE ---
+    catalog_ref: "field_stories/nepal/bishal_farm.yml#good_just_capturing"
+    local_file: "/mnt/g/My Drive/1. Media & Marketing/4. Photos and Media/Bishal Farm Images/Farmer Images/Good Images/just-capturing-it-1jYu08pSXFY-unsplash.jpg"
+    filename: "just-capturing-it-1jYu08pSXFY-unsplash.jpg"
+    credit: "Just Capturing It / Unsplash"
+    description: "Himalayan woman walking a dirt mountain path carrying a large bundle of dried stalks on her back/shoulders. Pink traditional skirt, green top, cloth head cushion. Terraced fields and mountains in the distance, pine trees on hillside."
+    shot_type: "action — environmental"
+    quality: "excellent — editorial, dramatic, tells the work story"
+    tags: ["woman", "carrying", "bundle", "harvest", "mountain path", "unsplash", "work"]
+    best_for: ["blog hero", "work story", "behind the scenes", "harvest content"]
+    # --- PUBLISH STATE ---
+    wix_media_id: "b6e546_f179883f9d8348228cd31330d541171e~mv2.jpg"
+    wix_filename: "hf-smile-woman-carrying-bundle.jpg"
+    status: "uploaded"
+
+  - type: image
+    # --- DISPLAY ---
+    alt: "Woman artisan crouched on a stone patio beating dried nettle fiber, dust rising in the mountain air"
+    caption: "Softening dried nettle fiber on the patio — the rhythmic beating that opens the fibers, dust rising in the mountain light."
+    layout:
+      style: "content"
+      alignment: "center"
+    # --- SOURCE ---
+    catalog_ref: "field_stories/nepal/bishal_farm.yml#bishal_woman_beating_fiber"
+    local_file: "/mnt/g/My Drive/1. Media & Marketing/4. Photos and Media/Bishal Farm Images/Farmer Images/Low graphics/1678866670676.jpeg"
+    filename: "1678866670676.jpeg"
+    description: "Woman crouched on stone patio beating/softening dried fiber with a stick. Dust rising from impact. Mountains and green valley behind. Traditional fiber softening technique."
+    shot_type: "action"
+    quality: "low-res 320x240 (from Low graphics subfolder — needs better source)"
+    tags: ["artisan", "women", "fiber beating", "traditional", "dust", "mountains"]
+    best_for: ["behind the scenes hero", "processing blog", "instagram"]
+    # --- PUBLISH STATE ---
+    wix_media_id: "b6e546_12748d25ac8e438a8ff58142a58bac9b~mv2.jpeg"
+    status: "uploaded"
+    # NOTE: Only 320x240 version available in 'Low graphics' subfolder. Replace with a
+    # higher-res source when available — current image will look soft on the blog.
+
+  - type: paragraph
+    text: |
+      Her work is nettle. Wild stinging nettle, harvested from the slopes
+      above the village, stripped by hand, retted in stone pools, beaten
+      soft on the patio, and spun on a wheel that has been in her family
+      for as long as she can remember.
+
+      Her hands are rough. Nettle stings even after retting, and thirty
+      years of repetition have left their mark. She has pain in her
+      shoulders she does not mention. She has worries about her children
+      she does not share. She has seen neighbours leave the village for
+      the city and come back with less than they took.
+
+      The money she earns is small by any outside standard — a few
+      thousand rupees a month, sometimes less. But in a village like
+      hers, that money pays for school books, for a sack of rice in a
+      lean month, for a bus ticket when a grandchild is sick. It is not
+      a supplement. It is the margin between staying and leaving.
 
   - type: heading
     level: 2
@@ -216,21 +281,52 @@ content:
   - type: paragraph
     text: |
       And yet, when the work is done — when the bundle is tied, when the
-      spindle is put down for the afternoon — she smiles.
+      spindle is put down for the afternoon — she folds her palms together
+      and offers a simple namaste.
 
-      Not because any of it is easy. Because she is still here. Because her
-      craft is still alive. Because the skein she just finished is going
-      somewhere far away, to be held by someone who will never know her
-      name, and the money for it will come back to this village, to this
-      house, to this stairway.
+      It is not rehearsed. It is the way she greets a neighbour, a
+      stranger, a buyer she will never meet. A gesture that says, in the
+      language of the mountains: *I see you. I am still here. And I am
+      grateful.*
+
+  - type: paragraph
+    text: |
+      She is still here because her craft is still alive. Because the
+      skein she just finished is going somewhere far away, to be held by
+      someone who will never know her name — and because the money for it
+      will come back to this village, to this house, to this stairway.
 
   - type: quote
-    text: "Every skein of Himalayan nettle yarn carries a smile like that. When you hold it, you hold her day."
+    text: "Every skein of Himalayan nettle yarn carries that gesture. When you hold it, you hold her day — her climb, her craft, and her quiet namaste."
 
   - type: paragraph
     text: |
       That is what a simple skein really costs. And that is what it is
       really worth.
+
+  # ---- CREDITS ----
+  - type: credits
+    style: "footer"                       # footer | sidebar | inline — rendered as a small italic line at the end of the post
+    items:
+      - role: "Hero portrait"
+        name: "Le Tan"
+        source: "Unsplash"
+        url: "https://unsplash.com/@letan"
+        file: "le-tan-KtIZRvS23po-unsplash.jpg"
+      - role: "Village & home photography"
+        name: "Himalayan Fibres team"
+        source: "internal"
+      - role: "Reel"
+        name: "Himalayan Fibres (AI-assisted, Replicate)"
+        source: "internal"
+    items_append:
+      - role: "Woman carrying bundle"
+        name: "Just Capturing It"
+        source: "Unsplash"
+        url: "https://unsplash.com/@justcapturingit"
+        file: "just-capturing-it-1jYu08pSXFY-unsplash.jpg"
+    render_as: |
+      Hero portrait by Le Tan on Unsplash. Woman carrying bundle by Just Capturing It on Unsplash. Village and home photography by the Himalayan Fibres team. Reel produced by Himalayan Fibres (AI-assisted).
 
 author:
   name: "Prashant Agrawal"

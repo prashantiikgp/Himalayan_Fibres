@@ -236,6 +236,8 @@ async def _sync_wa_templates(task):
                     existing.quality_score = tpl.get("quality_score")
                     existing.components = tpl.get("components", [])
                     existing.last_synced_at = now
+                    existing.is_draft = False
+                    existing.rejection_reason = tpl.get("rejected_reason") or ""
                     updated += 1
                 else:
                     new = WATemplate(
@@ -246,6 +248,8 @@ async def _sync_wa_templates(task):
                         quality_score=tpl.get("quality_score"),
                         components=tpl.get("components", []),
                         last_synced_at=now,
+                        is_draft=False,
+                        rejection_reason=tpl.get("rejected_reason") or "",
                     )
                     db.add(new)
                     created += 1

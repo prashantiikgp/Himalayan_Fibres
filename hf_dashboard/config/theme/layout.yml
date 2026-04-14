@@ -1,0 +1,22 @@
+# Panel layout tokens — structural CSS for full-height dashboard panels.
+#
+# Consumed by: engines/theme_engine.py -> ThemeEngine.layout property
+#              shared/theme_css.py       -> interpolates into DASHBOARD_CSS
+#
+# Rules are validated against engines.theme_schemas.LayoutFile on load.
+# Unknown keys or typos raise at startup, not at runtime.
+
+layout:
+
+  # Full-height scrolling panels shared across pages (WA Inbox, Email Inbox,
+  # future template studio). All three sibling panels must use the same
+  # min_height_expr so they line up visually.
+  panels:
+    min_height_expr: "calc(100vh - 160px)"
+    border_radius: "10px"
+    padding: "10px"
+    background: "rgba(15,23,42,.50)"
+    border: "1px solid rgba(255,255,255,.06)"
+    # Slightly darker tint for the center chat panel to read as "focus"
+    chat_background: "rgba(15,23,42,.35)"
+    chat_border: "1px solid rgba(255,255,255,.08)"

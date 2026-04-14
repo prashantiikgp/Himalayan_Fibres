@@ -33,6 +33,7 @@ except ImportError:
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from engines.navigation_engine import build_app_with_sidebar
 from services.database import ensure_db_ready
@@ -47,6 +48,13 @@ ensure_db_ready()
 
 # -- FastAPI app --
 fastapi_app = FastAPI(title="Himalayan Fibers Dashboard")
+
+# -- Static media mount (WA template header assets must be publicly reachable
+#    by Meta's CDN at template-submission time). Files land under
+#    ${MEDIA_PATH}/wa_headers/ via services.media_store.save_upload.
+_media_root = Path(get_settings().media_path)
+_media_root.mkdir(parents=True, exist_ok=True)
+fastapi_app.mount("/media", StaticFiles(directory=str(_media_root)), name="media")
 
 
 @fastapi_app.get("/webhook/whatsapp")

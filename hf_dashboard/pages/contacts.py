@@ -91,8 +91,8 @@ def _build_table(db, segment="All", lifecycle="All", country="All", channel="All
     if search:
         term = f"%{search}%"
         q = q.filter(
-            (Contact.email.like(term)) | (Contact.first_name.like(term)) |
-            (Contact.last_name.like(term)) | (Contact.company.like(term))
+            Contact.email.ilike(term) | Contact.first_name.ilike(term) |
+            Contact.last_name.ilike(term) | Contact.company.ilike(term)
         )
 
     # Tag filter — ANY match. Tags stored as JSON in SQLite so we evaluate
@@ -213,7 +213,8 @@ def _build_table(db, segment="All", lifecycle="All", country="All", channel="All
                 cells += (
                     f'<td style="{table_cell()}; text-align:center;">'
                     f'<button type="button" class="hf-row-edit-btn" '
-                    f'onclick="hf_editContact(\'{contact.id}\')" '
+                    f'onclick="window.__hfPendingEditCid=\'{contact.id}\';'
+                    f'document.querySelector(\'#hf-edit-trigger-btn button\').click();" '
                     f'title="Edit {contact.first_name or contact.id}">✎ Edit</button>'
                     f'</td>'
                 )
@@ -238,9 +239,11 @@ def _build_table(db, segment="All", lifecycle="All", country="All", channel="All
     )
     page_text = f"Page {page + 1} of {total_pages}"
 
-    # Note: the JS bridge (`window.hf_editContact`) is injected via
-    # gr.Blocks(head=...) in navigation_engine.py so it survives table
-    # re-renders and runs before any row button is clicked.
+    # The row button parks contact.id on window.__hfPendingEditCid, then
+    # programmatically clicks the hidden trigger button. The trigger's js=
+    # callback pulls the value off window and returns it as the Python
+    # handler's input — sidesteps Gradio 6 Svelte-state sync issues with
+    # hidden-textbox bridges.
     table_html = (
         f'<table style="{table_container()}">'
         f'<colgroup>{col_widths}</colgroup>'
@@ -460,14 +463,11 @@ def build(ctx) -> dict:
         gr.HTML(value=_build_legend())
         legend_close = gr.Button("Close", size="sm")
 
-    # -- Hidden JS bridge: receives contact id from the row Edit button --
-    # visible=True so the element is in the DOM for JS to find; CSS (.hf-bridge-hidden)
-    # removes it from visual flow. visible=False would strip it from the DOM entirely.
-    edit_contact_id = gr.Textbox(
-        value="", show_label=False, container=False,
-        elem_id="hf-edit-contact-id",
-        elem_classes=["hf-bridge-hidden"],
-    )
+    # -- Editing-contact state (survives between drawer-open and save) --
+    # gr.State is Python-side only: no DOM, no Svelte-store sync issues.
+    # Populated by the trigger-button js= callback which reads
+    # window.__hfPendingEditCid. Consumed by _save_edit and _add_note.
+    edit_cid_state = gr.State("")
     edit_trigger_btn = gr.Button(
         "trigger", elem_id="hf-edit-trigger-btn",
         elem_classes=["hf-bridge-hidden"],
@@ -569,14 +569,14 @@ def build(ctx) -> dict:
         from services.database import get_db
         from services.models import Contact, ContactNote
         if not contact_id:
-            return (gr.update(elem_classes=_MODAL_CLOSED["edit"]),) + (gr.update(),) * 14
+            return ("", gr.update(elem_classes=_MODAL_CLOSED["edit"])) + (gr.update(),) * 15
         db = get_db()
         try:
             t0 = time.time()
             c = db.query(Contact).filter(Contact.id == contact_id).first()
             _log.warning("drawer load contact: %.2fs", time.time() - t0)
             if not c:
-                return (gr.update(elem_classes=_MODAL_CLOSED["edit"]),) + (gr.update(),) * 14
+                return ("", gr.update(elem_classes=_MODAL_CLOSED["edit"])) + (gr.update(),) * 15
 
             t0 = time.time()
             all_segs = get_all_active_segments(db)
@@ -626,6 +626,7 @@ def build(ctx) -> dict:
 
             email_val = c.email if c.email and "placeholder" not in c.email else ""
             return (
+                contact_id,                                             # edit_cid_state
                 gr.update(elem_classes=_MODAL_OPEN["edit"]),            # edit_panel
                 title,                                                  # edit_title_html
                 gr.update(value=c.first_name or ""),                    # edit_first
@@ -647,7 +648,7 @@ def build(ctx) -> dict:
             db.close()
 
     _edit_drawer_outputs = [
-        edit_panel, edit_title_html,
+        edit_cid_state, edit_panel, edit_title_html,
         edit_first, edit_last, edit_phone, edit_email, edit_company,
         edit_country_dd, edit_lifecycle_dd, edit_consent_dd,
         edit_tags_ms, edit_matched_segments,
@@ -655,7 +656,9 @@ def build(ctx) -> dict:
     ]
     edit_trigger_btn.click(
         fn=_open_edit_drawer,
-        inputs=[edit_contact_id],
+        inputs=None,
+        js="() => { const cid = window.__hfPendingEditCid || ''; "
+           "window.__hfPendingEditCid = ''; return [cid]; }",
         outputs=_edit_drawer_outputs,
     )
 
@@ -691,7 +694,7 @@ def build(ctx) -> dict:
 
     add_note_btn.click(
         fn=_add_note,
-        inputs=[edit_contact_id, new_note_input],
+        inputs=[edit_cid_state, new_note_input],
         outputs=[edit_notes_html, new_note_input, edit_activity_html],
     )
 
@@ -908,7 +911,7 @@ def build(ctx) -> dict:
     edit_save_btn.click(
         fn=_save_edit,
         inputs=[
-            edit_contact_id, edit_first, edit_last, edit_phone, edit_email, edit_company,
+            edit_cid_state, edit_first, edit_last, edit_phone, edit_email, edit_company,
             edit_country_dd, edit_lifecycle_dd, edit_consent_dd, edit_tags_ms, edit_notes,
             search, segment_filter, lifecycle_filter, country_filter, channel_filter, tag_filter,
         ],
