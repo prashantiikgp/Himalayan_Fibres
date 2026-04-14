@@ -129,6 +129,12 @@ def badge(bg: str, fg: str = "#fff") -> str:
     )
 
 
+# Back-compat alias — components/badges.py and styled_table.py both import
+# this name. Keeping it as an alias of badge() until those callers are
+# updated (same signature, same output).
+badge_pill = badge
+
+
 def channel_badge_email() -> str:
     c = _c("channel_badge")
     return (
