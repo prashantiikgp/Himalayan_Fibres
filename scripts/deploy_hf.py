@@ -85,9 +85,18 @@ def _load_token() -> str:
         except ImportError:
             pass
 
-    # Fall back to whatever huggingface_hub has cached
+    # Fall back to whatever huggingface_hub has cached. huggingface_hub >=1.0
+    # exposes `get_token()` at the top level; older releases had it on
+    # HfFolder. Try both so the script works across versions.
     try:
-        from huggingface_hub import HfFolder
+        from huggingface_hub import get_token as _hf_get_token
+        cached = _hf_get_token()
+        if cached:
+            return cached
+    except ImportError:
+        pass
+    try:
+        from huggingface_hub import HfFolder  # type: ignore[attr-defined]
         cached = HfFolder.get_token()
         if cached:
             return cached

@@ -286,11 +286,13 @@ def build(ctx) -> dict:
                 label="Template",
                 choices=[],
                 interactive=True,
+                allow_custom_value=True,
             )
             segment_dropdown = gr.Dropdown(
                 label="Audience (Segment)",
                 choices=[],
                 interactive=True,
+                allow_custom_value=True,
             )
             subject_input = gr.Textbox(
                 label="Subject",
@@ -312,6 +314,7 @@ def build(ctx) -> dict:
                     label="Recipient",
                     choices=[],
                     interactive=True,
+                    allow_custom_value=True,
                 )
                 invoice_file = gr.File(
                     label="Invoice PDF",
@@ -353,17 +356,26 @@ def build(ctx) -> dict:
 
         if not template_slug:
             return "", _render_preview_html("")
-        db = get_db()
         try:
-            tpl = (
-                db.query(EmailTemplate)
-                .filter(EmailTemplate.slug == template_slug)
-                .first()
+            db = get_db()
+            try:
+                tpl = (
+                    db.query(EmailTemplate)
+                    .filter(EmailTemplate.slug == template_slug)
+                    .first()
+                )
+                subject = tpl.subject_template if tpl else ""
+            finally:
+                db.close()
+            return subject, _render_preview_html(template_slug)
+        except Exception as e:
+            log.exception("_on_template_change failed for slug=%s", template_slug)
+            err_html = (
+                f'<div style="color:#ef4444;padding:20px;font-family:monospace;'
+                f'font-size:11px;white-space:pre-wrap;">'
+                f"{type(e).__name__}: {e}</div>"
             )
-            subject = tpl.subject_template if tpl else ""
-        finally:
-            db.close()
-        return subject, _render_preview_html(template_slug)
+            return "", err_html
 
     template_dropdown.change(
         fn=_on_template_change,
