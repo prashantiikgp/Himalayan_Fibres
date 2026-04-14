@@ -103,6 +103,45 @@ def _blank_form_state() -> dict:
     }
 
 
+def _extract_from_components(components: list[dict]) -> dict:
+    """Extract editor-form fields from the Meta-native components array.
+
+    Synced templates store their content in `components` (the Meta API
+    shape), not in the flat `body_text` / `header_*` / `footer_text` /
+    `buttons` columns. When the user loads a synced row into the editor
+    we reconstruct those flat fields so the form and the phone preview
+    have something to display.
+    """
+    out = {
+        "header_format": "NONE",
+        "header_text": "",
+        "header_asset_url": "",
+        "body_text": "",
+        "footer_text": "",
+        "buttons": [],
+    }
+    for comp in components or []:
+        ctype = (comp.get("type") or "").upper()
+        if ctype == "HEADER":
+            fmt = (comp.get("format") or "").upper()
+            if fmt == "TEXT":
+                out["header_format"] = "TEXT"
+                out["header_text"] = comp.get("text", "")
+            elif fmt in ("IMAGE", "VIDEO", "DOCUMENT"):
+                out["header_format"] = fmt
+                example = comp.get("example") or {}
+                handles = example.get("header_handle") or []
+                if handles:
+                    out["header_asset_url"] = handles[0]
+        elif ctype == "BODY":
+            out["body_text"] = comp.get("text", "")
+        elif ctype == "FOOTER":
+            out["footer_text"] = comp.get("text", "")
+        elif ctype == "BUTTONS":
+            out["buttons"] = comp.get("buttons") or []
+    return out
+
+
 def _load_row_into_form(template_id: int) -> dict:
     from services.database import get_db
     from services.models import WATemplate
@@ -112,17 +151,30 @@ def _load_row_into_form(template_id: int) -> dict:
         t = db.query(WATemplate).filter(WATemplate.id == template_id).one_or_none()
         if t is None:
             return _blank_form_state()
+
+        # Drafts (is_draft=True) store content in the flat columns; synced
+        # Meta rows store it in `components`. Prefer flat columns when set,
+        # fall back to parsing components otherwise.
+        extracted = _extract_from_components(t.components or [])
+
+        body = t.body_text or extracted["body_text"]
+        header_fmt = t.header_format or extracted["header_format"]
+        header_text = t.header_text or extracted["header_text"]
+        header_url = t.header_asset_url or extracted["header_asset_url"]
+        footer = t.footer_text or extracted["footer_text"]
+        buttons = t.buttons or extracted["buttons"]
+
         return {
             "id": t.id,
             "name": t.name or "",
             "category": t.category or "MARKETING",
             "language": t.language or "en_US",
-            "header_format": (t.header_format or "NONE"),
-            "header_text": t.header_text or "",
-            "header_asset_url": t.header_asset_url or "",
-            "body_text": t.body_text or "",
-            "footer_text": t.footer_text or "",
-            "buttons_json": json.dumps(t.buttons or [], indent=2),
+            "header_format": header_fmt or "NONE",
+            "header_text": header_text,
+            "header_asset_url": header_url,
+            "body_text": body,
+            "footer_text": footer,
+            "buttons_json": json.dumps(buttons, indent=2),
         }
     finally:
         db.close()
