@@ -1,25 +1,17 @@
-"""Email Broadcast page — pick template, pick audience, (optionally) attach
-per-recipient invoices, send.
+"""Email Broadcast page — compose and send templated emails.
 
-Flow
-----
+Two send modes:
 
-1. Founder picks a template (dropdown of active rows in ``email_templates``).
-2. Founder picks a segment (dropdown of active rows in ``segments``).
-3. Right-side iframe previews the rendered HTML with dummy per-recipient vars.
-4. Optional: founder opens the "📎 Invoice attachments" accordion, picks a
-   recipient from a dropdown, drops a PDF, clicks Attach. The PDF uploads
-   to Supabase Storage (bucket ``email-invoices``) and an EmailAttachment
-   row is created linked to a draft Campaign.
-5. Click Send Now → the draft Campaign flips to ``sending``, each recipient
-   is resolved, variables are built via ``build_send_variables`` (shared
-   config + contact + invoice_url from attachment if any), template is
-   rendered with Jinja2, email is sent via Gmail API, EmailSend row is
-   recorded, campaign totals updated.
+- **Broadcast** — pick a template + segment, optionally attach per-recipient
+  invoices, send to everyone in the segment.
+- **Individual** — search an existing contact by name/company OR inject an
+  arbitrary email directly, optionally attach one invoice, send to just
+  that one person.
 
-Lazy draft campaign creation: the Campaign row is only created on first
-successful attach OR on Send — not on page load — so opening the page
-doesn't leak empty draft rows.
+Preview supports a Desktop / Mobile toggle that renders the template inside
+a real ``<iframe srcdoc>`` so the templates' own ``<meta viewport>`` +
+``max-width:640px`` tables take effect and the founder sees an accurate
+phone preview before sending.
 """
 
 from __future__ import annotations
@@ -44,32 +36,23 @@ _RECIPIENT_VALUE_SEP = "||"
 
 
 def _format_recipient(contact) -> str:
-    """Render a single contact as a dropdown choice label+value.
-
-    We embed the contact id into the value using a separator so the handler
-    can reliably look up the Contact regardless of how Gradio renders the
-    visible label.
-    """
     first = (contact.first_name or "").strip()
     last = (contact.last_name or "").strip()
     name = (first + " " + last).strip() or contact.email or contact.id
-    return f"{name} <{contact.email or '—'}>{_RECIPIENT_VALUE_SEP}{contact.id}"
+    company = (contact.company or "").strip()
+    label = f"{name} <{contact.email or '—'}>"
+    if company:
+        label = f"{name} · {company} <{contact.email or '—'}>"
+    return f"{label}{_RECIPIENT_VALUE_SEP}{contact.id}"
 
 
 def _parse_recipient_value(value: str) -> str | None:
-    """Extract the contact id from a recipient dropdown value."""
     if not value or _RECIPIENT_VALUE_SEP not in value:
         return None
     return value.rsplit(_RECIPIENT_VALUE_SEP, 1)[-1] or None
 
 
 def _resolve_segment_contacts(db, segment_id: str | None) -> list:
-    """Return contacts for a segment, filtered to those with emails.
-
-    Matches the existing email_campaigns.py flow: fall back to
-    ``all opted-in / pending`` when the sentinel ``all_opted_in`` is
-    passed, otherwise look up segment contacts via ``flows_engine``.
-    """
     from services.models import Contact
 
     if not segment_id or segment_id == "all_opted_in":
@@ -94,8 +77,55 @@ def _resolve_segment_contacts(db, segment_id: str | None) -> list:
     return [c for c in contacts if c.email and "placeholder" not in (c.email or "")]
 
 
+def _search_contacts(db, query: str, limit: int = 20) -> list:
+    """Search opted-in/pending contacts by name / company / email."""
+    from sqlalchemy import or_
+
+    from services.models import Contact
+
+    q = (query or "").strip()
+    base = db.query(Contact).filter(
+        Contact.consent_status.in_(["opted_in", "pending"]),
+        Contact.email.isnot(None),
+    )
+    if q:
+        like = f"%{q}%"
+        base = base.filter(
+            or_(
+                Contact.first_name.ilike(like),
+                Contact.last_name.ilike(like),
+                Contact.company.ilike(like),
+                Contact.email.ilike(like),
+            )
+        )
+    return base.order_by(Contact.first_name).limit(limit).all()
+
+
+def _upsert_contact_by_email(db, email: str):
+    """Look up a Contact by email, or create a lightweight adhoc one."""
+    from services.models import Contact
+
+    email = (email or "").strip()
+    if not email:
+        return None
+    existing = db.query(Contact).filter(Contact.email == email).first()
+    if existing:
+        return existing
+    contact = Contact(
+        id=f"adhoc_{uuid.uuid4().hex[:16]}",
+        email=email,
+        first_name="",
+        last_name="",
+        consent_status="pending",
+        consent_source="email_broadcast_individual",
+        lifecycle="new_lead",
+    )
+    db.add(contact)
+    db.flush()
+    return contact
+
+
 def _build_sample_vars_for_preview(template_slug: str) -> dict:
-    """Sample per-recipient vars used only for the preview iframe."""
     base = {
         "first_name": "Alisha",
         "last_name": "Panda",
@@ -137,11 +167,18 @@ def _build_sample_vars_for_preview(template_slug: str) -> dict:
     return base
 
 
-def _render_preview_html(template_slug: str) -> str:
-    """Render a template with sample vars for the preview panel."""
+def _render_preview_html(template_slug: str, device: str = "desktop") -> str:
+    """Render the template inside a real iframe so the viewport meta + table
+    ``max-width:640px`` rules in the email templates actually kick in.
+
+    ``device='mobile'`` wraps the iframe in a 412px phone-frame div at 390px
+    inner width, which is what unlocks an accurate mobile preview — the
+    templates already ship with ``<meta viewport>`` in base.html.
+    """
     if not template_slug:
         return (
-            f'<div style="color:{COLORS.TEXT_MUTED};padding:40px;text-align:center;">'
+            f'<div style="color:{COLORS.TEXT_MUTED};padding:40px;text-align:center;'
+            f'background:{COLORS.CARD_BG};border-radius:10px;">'
             f"Pick a template to preview.</div>"
         )
 
@@ -149,9 +186,6 @@ def _render_preview_html(template_slug: str) -> str:
     from services.email_sender import render_template_by_slug
     from services.models import Contact
 
-    # Build a dummy Contact-like object to pass to build_send_variables —
-    # it only reads first_name/last_name/company/email off it. We use a
-    # real Contact so callers don't need ad-hoc shims.
     stub = Contact(
         id="preview",
         email="preview@himalayanfibres.com",
@@ -159,7 +193,9 @@ def _render_preview_html(template_slug: str) -> str:
         last_name="Panda",
         company="",
     )
-    vars_for_preview = build_send_variables(stub, {}, extra=_build_sample_vars_for_preview(template_slug))
+    vars_for_preview = build_send_variables(
+        stub, {}, extra=_build_sample_vars_for_preview(template_slug)
+    )
 
     try:
         html = render_template_by_slug(template_slug, vars_for_preview)
@@ -170,87 +206,37 @@ def _render_preview_html(template_slug: str) -> str:
             f"Failed to render preview: {e}</div>"
         )
 
-    # Wrap in an iframe-like scrollable container
-    return (
-        f'<div style="background:#ffffff;border:1px solid rgba(255,255,255,.08);'
-        f"border-radius:10px;overflow:auto;max-height:70vh;\">{html}</div>"
-    )
+    srcdoc = html.replace("&", "&amp;").replace('"', "&quot;")
 
-
-def _build_attachments_table_html(db, campaign_id: int | None, contact_ids: list[str]) -> str:
-    """Render the 'Recipient | Email | Invoice' status table."""
-    from services.models import Contact, EmailAttachment
-
-    if not contact_ids:
+    if device == "mobile":
         return (
-            f'<div style="color:{COLORS.TEXT_MUTED};padding:12px;font-size:11px;">'
-            f"Pick a segment to see recipients.</div>"
-        )
-
-    contacts = db.query(Contact).filter(Contact.id.in_(contact_ids)).all()
-    by_id = {c.id: c for c in contacts}
-
-    attachments = {}
-    if campaign_id:
-        rows = (
-            db.query(EmailAttachment)
-            .filter(EmailAttachment.campaign_id == campaign_id)
-            .all()
-        )
-        attachments = {r.contact_id: r for r in rows}
-
-    tr_rows = []
-    for cid in contact_ids:
-        c = by_id.get(cid)
-        if not c:
-            continue
-        name = (
-            ((c.first_name or "") + " " + (c.last_name or "")).strip()
-            or c.email
-            or cid
-        )
-        att = attachments.get(cid)
-        if att:
-            status = (
-                f'<span style="color:#22c55e;font-weight:600;">✓</span> '
-                f'<span style="color:{COLORS.TEXT_SUBTLE};">{att.file_name or "invoice.pdf"}</span>'
-            )
-        else:
-            status = f'<span style="color:{COLORS.TEXT_MUTED};">—</span>'
-        tr_rows.append(
-            f'<tr style="border-bottom:1px solid rgba(255,255,255,.04);">'
-            f'<td style="padding:6px 10px;font-size:11px;color:{COLORS.TEXT};">{name}</td>'
-            f'<td style="padding:6px 10px;font-size:11px;color:{COLORS.TEXT_SUBTLE};">{c.email}</td>'
-            f"<td style=\"padding:6px 10px;font-size:11px;\">{status}</td></tr>"
+            '<div style="display:flex;justify-content:center;padding:16px 0;">'
+            '<div style="width:412px;border:10px solid #111;border-radius:36px;'
+            'box-shadow:0 12px 32px rgba(0,0,0,.45);overflow:hidden;background:#000;">'
+            f'<iframe srcdoc="{srcdoc}" '
+            'style="width:390px;height:740px;border:0;background:#fff;display:block;">'
+            '</iframe></div></div>'
         )
 
     return (
-        '<table style="width:100%;border-collapse:collapse;">'
-        f'<thead><tr style="border-bottom:1px solid rgba(255,255,255,.06);">'
-        f'<th style="padding:6px 10px;text-align:left;font-size:10px;color:{COLORS.TEXT_MUTED};text-transform:uppercase;">Recipient</th>'
-        f'<th style="padding:6px 10px;text-align:left;font-size:10px;color:{COLORS.TEXT_MUTED};text-transform:uppercase;">Email</th>'
-        f'<th style="padding:6px 10px;text-align:left;font-size:10px;color:{COLORS.TEXT_MUTED};text-transform:uppercase;">Invoice</th>'
-        "</tr></thead><tbody>" + "".join(tr_rows) + "</tbody></table>"
+        '<div style="background:#fff;border:1px solid rgba(255,255,255,.08);'
+        'border-radius:10px;overflow:hidden;">'
+        f'<iframe srcdoc="{srcdoc}" '
+        'style="width:100%;height:78vh;border:0;display:block;background:#fff;">'
+        '</iframe></div>'
     )
 
 
 def _ensure_draft_campaign(db, existing_id: int | None, template_slug: str, segment_id: str | None) -> int:
-    """Return the draft Campaign id, creating one if none exists yet.
-
-    Lazy creation keeps the table clean when the founder opens the page
-    and navigates away without attaching anything.
-    """
     from services.models import Campaign
 
     if existing_id:
         row = db.query(Campaign).filter(Campaign.id == existing_id).first()
         if row is not None:
-            # Keep the draft in sync with whatever the founder last picked
             row.template_slug = template_slug or row.template_slug
             row.segment_id = segment_id or row.segment_id
             db.flush()
             return row.id
-        # If the id was stale (db reset etc.), fall through and create a new one
 
     row = Campaign(
         name=f"Draft — {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')}",
@@ -264,58 +250,118 @@ def _ensure_draft_campaign(db, existing_id: int | None, template_slug: str, segm
     return row.id
 
 
+def _count_kpi_html(n: int, label: str = "recipients") -> str:
+    return (
+        f'<div style="background:{COLORS.CARD_BG};border-radius:8px;padding:10px 14px;'
+        f'border:1px solid rgba(255,255,255,.06);margin:8px 0;">'
+        f'<span style="font-size:20px;font-weight:700;color:{COLORS.TEXT};">{n}</span>'
+        f'<span style="font-size:10px;color:{COLORS.TEXT_MUTED};text-transform:uppercase;'
+        f'letter-spacing:.5px;margin-left:8px;">{label}</span></div>'
+    )
+
+
 # ═══════════════════════════════════════════════════════════════════════
 # Page builder
 # ═══════════════════════════════════════════════════════════════════════
 
 def build(ctx) -> dict:
-    gr.HTML(
-        f'<div style="font-size:15px;font-weight:700;color:{COLORS.TEXT};margin:0 0 4px;">Email Broadcast</div>'
-        f'<div style="font-size:11px;color:{COLORS.TEXT_MUTED};margin-bottom:14px;">'
-        f"Pick a template, pick an audience, (optionally) attach per-recipient invoices, and send.</div>"
-    )
+    # Session state
+    draft_campaign_state = gr.State(None)         # draft Campaign.id
+    send_mode_state = gr.State("broadcast")       # "broadcast" | "individual"
+    preview_device_state = gr.State("desktop")    # "desktop" | "mobile"
+    individual_contact_state = gr.State(None)     # Contact.id or None
 
-    # ── Session state (per-user in Gradio) ──
-    draft_campaign_state = gr.State(None)  # campaign_id (int) or None
-    recipient_ids_state = gr.State([])     # list[str] contact ids for current segment
-
-    with gr.Row():
+    with gr.Row(equal_height=False):
         # ═══════════════════ LEFT: compose controls ═══════════════════
-        with gr.Column(scale=2, min_width=360):
+        with gr.Column(scale=1, min_width=340):
+            gr.HTML(
+                f'<div style="background:{COLORS.CARD_BG};border:1px solid rgba(255,255,255,.06);'
+                f'border-radius:10px;padding:10px 14px;margin-bottom:10px;">'
+                f'<div style="font-size:11px;color:{COLORS.TEXT_MUTED};text-transform:uppercase;'
+                f'letter-spacing:.5px;">Send to</div></div>'
+            )
+            mode_radio = gr.Radio(
+                choices=["Broadcast", "Individual"],
+                value="Broadcast",
+                show_label=False,
+                container=False,
+            )
+
             template_dropdown = gr.Dropdown(
                 label="Template",
                 choices=[],
                 interactive=True,
                 allow_custom_value=True,
             )
-            segment_dropdown = gr.Dropdown(
-                label="Audience (Segment)",
-                choices=[],
-                interactive=True,
-                allow_custom_value=True,
-            )
+
+            # ── Broadcast sub-group ─────────────────────────────────────
+            with gr.Group(visible=True) as broadcast_group:
+                segment_dropdown = gr.Dropdown(
+                    label="Audience (Segment)",
+                    choices=[],
+                    interactive=True,
+                    allow_custom_value=True,
+                )
+                audience_kpi_html = gr.HTML(value="")
+
+            # ── Individual sub-group ────────────────────────────────────
+            with gr.Group(visible=False) as individual_group:
+                gr.HTML(
+                    f'<div style="font-size:11px;color:{COLORS.TEXT_MUTED};margin:6px 0 4px;">'
+                    f"Search by name or company, or type any email below.</div>"
+                )
+                individual_search = gr.Textbox(
+                    label="Search",
+                    placeholder="e.g. Sushank, Lakhanpal, Amazon",
+                    interactive=True,
+                )
+                individual_contact_dropdown = gr.Dropdown(
+                    label="Contact",
+                    choices=[],
+                    interactive=True,
+                    allow_custom_value=True,
+                )
+                gr.HTML(
+                    f'<div style="font-size:10px;color:{COLORS.TEXT_MUTED};text-align:center;'
+                    f'margin:6px 0;">— or —</div>'
+                )
+                individual_email_input = gr.Textbox(
+                    label="Direct email",
+                    placeholder="name@example.com",
+                    interactive=True,
+                )
+
             subject_input = gr.Textbox(
                 label="Subject",
                 placeholder="Auto-fills from template — override if needed",
                 interactive=True,
             )
 
-            audience_kpi_html = gr.HTML(value="")
+            # ── Invoice attachment accordion ────────────────────────────
+            with gr.Accordion("📎 Invoice attachment (optional)", open=False):
+                # Broadcast: per-recipient picker
+                with gr.Group(visible=True) as attach_broadcast_group:
+                    gr.HTML(
+                        f'<div style="font-size:11px;color:{COLORS.TEXT_MUTED};margin-bottom:8px;">'
+                        f"Attach a PDF invoice for <b>one specific recipient</b> in this segment. "
+                        f"The ‘Download Invoice’ button appears only in their email. "
+                        f"Repeat for each recipient who needs one.</div>"
+                    )
+                    recipient_dropdown = gr.Dropdown(
+                        label="Recipient (in segment)",
+                        choices=[],
+                        interactive=True,
+                        allow_custom_value=True,
+                    )
 
-            # ── Attachments accordion ──
-            with gr.Accordion("📎 Invoice attachments (optional)", open=False):
-                gr.HTML(
-                    f'<div style="font-size:11px;color:{COLORS.TEXT_MUTED};margin-bottom:8px;">'
-                    f"Attach a PDF invoice for any recipient. The ‘Download Invoice’ button "
-                    f"auto-appears in their email only. Recipients without an attachment see "
-                    f"the email with no invoice button.</div>"
-                )
-                recipient_dropdown = gr.Dropdown(
-                    label="Recipient",
-                    choices=[],
-                    interactive=True,
-                    allow_custom_value=True,
-                )
+                # Individual: no picker, binds to the selected individual
+                with gr.Group(visible=False) as attach_individual_group:
+                    gr.HTML(
+                        f'<div style="font-size:11px;color:{COLORS.TEXT_MUTED};margin-bottom:8px;">'
+                        f"Attach a PDF invoice to this email. It will be linked "
+                        f"to the contact you selected (or the direct email above).</div>"
+                    )
+
                 invoice_file = gr.File(
                     label="Invoice PDF",
                     file_types=[".pdf"],
@@ -325,9 +371,8 @@ def build(ctx) -> dict:
                     attach_btn = gr.Button("Attach", variant="primary", size="sm", scale=1)
                     remove_btn = gr.Button("Remove", size="sm", scale=1)
                 attach_result_html = gr.HTML(value="")
-                attachments_table_html = gr.HTML(value="")
 
-            # ── Send controls ──
+            # ── Send controls ───────────────────────────────────────────
             with gr.Row():
                 send_btn = gr.Button("Send Now", variant="primary", size="sm", scale=2)
                 test_btn = gr.Button("Send Test to Me", size="sm", scale=1)
@@ -338,24 +383,64 @@ def build(ctx) -> dict:
             )
             send_result_html = gr.HTML(value="")
 
-        # ═══════════════════ RIGHT: preview ═══════════════════
-        with gr.Column(scale=3, min_width=500):
-            gr.HTML(
-                f'<div style="font-size:12px;font-weight:600;color:{COLORS.TEXT};margin:0 0 6px;">Preview</div>'
-            )
-            preview_html = gr.HTML(value=_render_preview_html(""))
+        # ═══════════════════ RIGHT: preview (dominant) ═══════════════════
+        with gr.Column(scale=3, min_width=560):
+            with gr.Row():
+                gr.HTML(
+                    f'<div style="font-size:12px;font-weight:600;color:{COLORS.TEXT};'
+                    f'padding:6px 0;">Preview</div>'
+                )
+                device_radio = gr.Radio(
+                    choices=["Desktop", "Mobile"],
+                    value="Desktop",
+                    show_label=False,
+                    container=False,
+                )
+            preview_html = gr.HTML(value=_render_preview_html("", "desktop"))
 
     # ═══════════════════════════════════════════════════════════════════
     # Event handlers
     # ═══════════════════════════════════════════════════════════════════
 
-    def _on_template_change(template_slug: str):
-        """Refresh subject + preview when the template changes."""
+    def _on_mode_change(mode_label: str):
+        mode = "individual" if mode_label == "Individual" else "broadcast"
+        show_broadcast = mode == "broadcast"
+        return (
+            mode,
+            gr.update(visible=show_broadcast),   # broadcast_group
+            gr.update(visible=not show_broadcast),  # individual_group
+            gr.update(visible=show_broadcast),   # attach_broadcast_group
+            gr.update(visible=not show_broadcast),  # attach_individual_group
+        )
+
+    mode_radio.change(
+        fn=_on_mode_change,
+        inputs=[mode_radio],
+        outputs=[
+            send_mode_state,
+            broadcast_group,
+            individual_group,
+            attach_broadcast_group,
+            attach_individual_group,
+        ],
+    )
+
+    def _on_device_change(device_label: str, template_slug: str):
+        device = "mobile" if device_label == "Mobile" else "desktop"
+        return device, _render_preview_html(template_slug, device)
+
+    device_radio.change(
+        fn=_on_device_change,
+        inputs=[device_radio, template_dropdown],
+        outputs=[preview_device_state, preview_html],
+    )
+
+    def _on_template_change(template_slug: str, device: str):
         from services.database import get_db
         from services.models import EmailTemplate
 
         if not template_slug:
-            return "", _render_preview_html("")
+            return "", _render_preview_html("", device)
         try:
             db = get_db()
             try:
@@ -367,7 +452,7 @@ def build(ctx) -> dict:
                 subject = tpl.subject_template if tpl else ""
             finally:
                 db.close()
-            return subject, _render_preview_html(template_slug)
+            return subject, _render_preview_html(template_slug, device)
         except Exception as e:
             log.exception("_on_template_change failed for slug=%s", template_slug)
             err_html = (
@@ -379,72 +464,94 @@ def build(ctx) -> dict:
 
     template_dropdown.change(
         fn=_on_template_change,
-        inputs=[template_dropdown],
+        inputs=[template_dropdown, preview_device_state],
         outputs=[subject_input, preview_html],
     )
 
-    def _on_segment_change(segment_id: str, draft_id: int | None):
-        """Resolve segment → contact list → recipient dropdown + KPI + table."""
+    def _on_segment_change(segment_id: str):
         from services.database import get_db
 
         db = get_db()
         try:
             contacts = _resolve_segment_contacts(db, segment_id)
             choices = [_format_recipient(c) for c in contacts]
-            cids = [c.id for c in contacts]
             n = len(contacts)
-            kpi = (
-                f'<div style="background:{COLORS.CARD_BG};border-radius:8px;padding:10px 14px;'
-                f'border:1px solid rgba(255,255,255,.06);margin:8px 0;">'
-                f'<span style="font-size:20px;font-weight:700;color:{COLORS.TEXT};">{n}</span>'
-                f'<span style="font-size:10px;color:{COLORS.TEXT_MUTED};text-transform:uppercase;'
-                f'letter-spacing:.5px;margin-left:8px;">recipients</span></div>'
-            )
-            table = _build_attachments_table_html(db, draft_id, cids)
+            kpi = _count_kpi_html(n, "recipients")
         finally:
             db.close()
-        return (
-            gr.update(choices=choices, value=None),
-            cids,
-            kpi,
-            table,
-        )
+        return gr.update(choices=choices, value=None), kpi
 
     segment_dropdown.change(
         fn=_on_segment_change,
-        inputs=[segment_dropdown, draft_campaign_state],
-        outputs=[recipient_dropdown, recipient_ids_state, audience_kpi_html, attachments_table_html],
+        inputs=[segment_dropdown],
+        outputs=[recipient_dropdown, audience_kpi_html],
     )
 
-    # ── Attach handler ──
+    def _on_individual_search(query: str):
+        from services.database import get_db
+
+        db = get_db()
+        try:
+            contacts = _search_contacts(db, query, limit=25)
+            choices = [_format_recipient(c) for c in contacts]
+        finally:
+            db.close()
+        return gr.update(choices=choices, value=None)
+
+    individual_search.change(
+        fn=_on_individual_search,
+        inputs=[individual_search],
+        outputs=[individual_contact_dropdown],
+    )
+
+    def _on_individual_contact_pick(contact_value: str):
+        return _parse_recipient_value(contact_value)
+
+    individual_contact_dropdown.change(
+        fn=_on_individual_contact_pick,
+        inputs=[individual_contact_dropdown],
+        outputs=[individual_contact_state],
+    )
+
+    # ── Attach handler (mode-aware) ──
     def _on_attach(
+        mode: str,
         template_slug: str,
         segment_id: str,
         recipient_value: str,
+        individual_contact_id: str | None,
+        individual_email: str,
         file_bytes,
         draft_id: int | None,
-        contact_ids: list[str],
     ):
         from services.database import get_db
         from services.models import EmailAttachment
         from services.supabase_storage import SupabaseStorageError, upload_file
 
         if not template_slug:
-            return draft_id, _err("Pick a template first."), ""
-        if not recipient_value:
-            return draft_id, _err("Pick a recipient from the dropdown."), ""
+            return draft_id, _err("Pick a template first.")
         if not file_bytes:
-            return draft_id, _err("Drop a PDF file first."), ""
-
-        contact_id = _parse_recipient_value(recipient_value)
-        if not contact_id:
-            return draft_id, _err("Could not parse the selected recipient."), ""
-
-        # file_bytes from gr.File(type="binary") is already raw bytes
-        raw = file_bytes if isinstance(file_bytes, (bytes, bytearray)) else bytes(file_bytes)
+            return draft_id, _err("Drop a PDF file first.")
 
         db = get_db()
         try:
+            # Resolve the contact_id the attachment will bind to
+            if mode == "individual":
+                email = (individual_email or "").strip()
+                if email:
+                    contact = _upsert_contact_by_email(db, email)
+                    contact_id = contact.id if contact else None
+                elif individual_contact_id:
+                    contact_id = individual_contact_id
+                else:
+                    return draft_id, _err("Pick a contact or type a direct email first.")
+            else:
+                contact_id = _parse_recipient_value(recipient_value)
+                if not contact_id:
+                    return draft_id, _err("Pick a recipient from the dropdown.")
+
+            raw = file_bytes if isinstance(file_bytes, (bytes, bytearray)) else bytes(file_bytes)
+
             new_draft_id = _ensure_draft_campaign(db, draft_id, template_slug, segment_id)
             storage_path = (
                 f"campaign_{new_draft_id}/contact_{contact_id}/"
@@ -459,9 +566,8 @@ def build(ctx) -> dict:
                 )
             except SupabaseStorageError as e:
                 db.rollback()
-                return draft_id, _err(f"Upload failed: {e}"), ""
+                return draft_id, _err(f"Upload failed: {e}")
 
-            # Delete any existing attachment for this (campaign, contact, kind)
             db.query(EmailAttachment).filter(
                 EmailAttachment.campaign_id == new_draft_id,
                 EmailAttachment.contact_id == contact_id,
@@ -482,47 +588,60 @@ def build(ctx) -> dict:
             db.add(att)
             db.commit()
 
-            table = _build_attachments_table_html(db, new_draft_id, contact_ids)
-            return (
-                new_draft_id,
-                _ok(f"Attached invoice for {contact_id}"),
-                table,
-            )
+            return new_draft_id, _ok(f"Attached invoice for {contact_id}")
         except Exception as e:
             db.rollback()
             log.exception("Attach failed")
-            return draft_id, _err(f"Attach failed: {e}"), ""
+            return draft_id, _err(f"Attach failed: {e}")
         finally:
             db.close()
 
     attach_btn.click(
         fn=_on_attach,
         inputs=[
+            send_mode_state,
             template_dropdown,
             segment_dropdown,
             recipient_dropdown,
+            individual_contact_state,
+            individual_email_input,
             invoice_file,
             draft_campaign_state,
-            recipient_ids_state,
         ],
-        outputs=[draft_campaign_state, attach_result_html, attachments_table_html],
+        outputs=[draft_campaign_state, attach_result_html],
     )
 
     # ── Remove handler ──
     def _on_remove(
+        mode: str,
         recipient_value: str,
+        individual_contact_id: str | None,
+        individual_email: str,
         draft_id: int | None,
-        contact_ids: list[str],
     ):
         from services.database import get_db
-        from services.models import EmailAttachment
+        from services.models import Contact, EmailAttachment
         from services.supabase_storage import SupabaseStorageError, delete_file
 
         if not draft_id:
-            return _err("No draft campaign yet — nothing to remove."), ""
-        contact_id = _parse_recipient_value(recipient_value)
+            return _err("No draft campaign yet — nothing to remove.")
+
+        if mode == "individual":
+            email = (individual_email or "").strip()
+            if email:
+                db_ = get_db()
+                try:
+                    c = db_.query(Contact).filter(Contact.email == email).first()
+                    contact_id = c.id if c else None
+                finally:
+                    db_.close()
+            else:
+                contact_id = individual_contact_id
+        else:
+            contact_id = _parse_recipient_value(recipient_value)
+
         if not contact_id:
-            return _err("Pick a recipient to remove the attachment."), ""
+            return _err("Pick a recipient to remove the attachment.")
 
         db = get_db()
         try:
@@ -536,38 +655,47 @@ def build(ctx) -> dict:
                 .first()
             )
             if not att:
-                return _ok("No attachment to remove."), _build_attachments_table_html(
-                    db, draft_id, contact_ids
-                )
+                return _ok("No attachment to remove.")
 
             try:
                 delete_file(att.storage_bucket, att.storage_path)
             except SupabaseStorageError:
-                log.warning("Supabase delete failed for %s — removing DB row anyway", att.storage_path)
+                log.warning(
+                    "Supabase delete failed for %s — removing DB row anyway",
+                    att.storage_path,
+                )
 
             db.delete(att)
             db.commit()
-            table = _build_attachments_table_html(db, draft_id, contact_ids)
-            return _ok(f"Removed attachment for {contact_id}"), table
+            return _ok(f"Removed attachment for {contact_id}")
         except Exception as e:
             db.rollback()
             log.exception("Remove failed")
-            return _err(f"Remove failed: {e}"), ""
+            return _err(f"Remove failed: {e}")
         finally:
             db.close()
 
     remove_btn.click(
         fn=_on_remove,
-        inputs=[recipient_dropdown, draft_campaign_state, recipient_ids_state],
-        outputs=[attach_result_html, attachments_table_html],
+        inputs=[
+            send_mode_state,
+            recipient_dropdown,
+            individual_contact_state,
+            individual_email_input,
+            draft_campaign_state,
+        ],
+        outputs=[attach_result_html],
     )
 
-    # ── Send Now handler ──
+    # ── Send Now handler (mode-aware) ──
     def _on_send_now(
+        mode: str,
         template_slug: str,
         segment_id: str,
         subject: str,
         draft_id: int | None,
+        individual_contact_id: str | None,
+        individual_email: str,
     ):
         if not template_slug:
             return draft_id, _err("Pick a template first.")
@@ -579,23 +707,46 @@ def build(ctx) -> dict:
             build_send_variables,
             load_campaign_attachments,
         )
-        from services.email_sender import EmailSender, render_template_by_slug, generate_idempotency_key
-        from services.models import Campaign, EmailSend, EmailTemplate
+        from services.email_sender import (
+            EmailSender,
+            generate_idempotency_key,
+            render_template_by_slug,
+        )
+        from services.models import Campaign, Contact, EmailSend, EmailTemplate
 
         sender = EmailSender()
         if not sender.is_configured():
             return draft_id, _err(
-                "Gmail API not configured. Set GMAIL_REFRESH_TOKEN / GMAIL_CLIENT_ID / GMAIL_CLIENT_SECRET in HF Space secrets."
+                "Gmail API not configured. Set GMAIL_REFRESH_TOKEN / GMAIL_CLIENT_ID / GMAIL_CLIENT_SECRET."
             )
 
         db = get_db()
         try:
-            contacts = _resolve_segment_contacts(db, segment_id)
-            if not contacts:
-                return draft_id, _err("No recipients resolved from that segment.")
+            # Resolve contact list based on mode
+            if mode == "individual":
+                email = (individual_email or "").strip()
+                if email:
+                    contact = _upsert_contact_by_email(db, email)
+                    contacts = [contact] if contact else []
+                elif individual_contact_id:
+                    contacts = (
+                        db.query(Contact)
+                        .filter(Contact.id == individual_contact_id)
+                        .all()
+                    )
+                else:
+                    return draft_id, _err("Pick a contact or type a direct email.")
+                effective_segment_id = None
+            else:
+                contacts = _resolve_segment_contacts(db, segment_id)
+                effective_segment_id = segment_id
 
-            # Flip the draft into a real campaign (or create one if no draft)
-            campaign_id = _ensure_draft_campaign(db, draft_id, template_slug, segment_id)
+            if not contacts:
+                return draft_id, _err("No recipients resolved.")
+
+            campaign_id = _ensure_draft_campaign(
+                db, draft_id, template_slug, effective_segment_id
+            )
             campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
             tpl = (
                 db.query(EmailTemplate)
@@ -605,7 +756,11 @@ def build(ctx) -> dict:
             if tpl is None:
                 return campaign_id, _err(f"Template {template_slug!r} not found in DB.")
 
-            campaign.name = f"Send: {tpl.name} · {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')}"
+            mode_tag = "Individual" if mode == "individual" else "Broadcast"
+            campaign.name = (
+                f"{mode_tag}: {tpl.name} · "
+                f"{datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')}"
+            )
             campaign.subject = subject
             campaign.status = "sending"
             campaign.total_recipients = len(contacts)
@@ -663,7 +818,8 @@ def build(ctx) -> dict:
                 else:
                     failed += 1
 
-                time.sleep(3)  # light rate-limit for Gmail API
+                if len(contacts) > 1:
+                    time.sleep(3)  # light rate-limit for Gmail API
 
             campaign.total_sent = sent
             campaign.total_failed = failed
@@ -679,8 +835,6 @@ def build(ctx) -> dict:
                 f'<div style="color:{COLORS.TEXT_SUBTLE};font-size:11px;">'
                 f"Sent: {sent}  |  Failed: {failed}  |  Total: {len(contacts)}</div></div>"
             )
-            # Campaign is no longer a draft — clear the state so the next
-            # compose cycle starts fresh
             return None, msg
         except Exception as e:
             db.rollback()
@@ -691,7 +845,15 @@ def build(ctx) -> dict:
 
     send_btn.click(
         fn=_on_send_now,
-        inputs=[template_dropdown, segment_dropdown, subject_input, draft_campaign_state],
+        inputs=[
+            send_mode_state,
+            template_dropdown,
+            segment_dropdown,
+            subject_input,
+            draft_campaign_state,
+            individual_contact_state,
+            individual_email_input,
+        ],
         outputs=[draft_campaign_state, send_result_html],
     )
 
@@ -742,7 +904,7 @@ def build(ctx) -> dict:
     )
 
     # ═══════════════════════════════════════════════════════════════════
-    # Initial load — populate dropdowns
+    # Initial load
     # ═══════════════════════════════════════════════════════════════════
 
     def _refresh():
@@ -772,7 +934,7 @@ def build(ctx) -> dict:
             )
             seg_choices = ["all_opted_in"] + [s.id for s in segments]
 
-            preview = _render_preview_html(first_slug or "")
+            preview = _render_preview_html(first_slug or "", "desktop")
         finally:
             db.close()
 
@@ -803,12 +965,8 @@ def build(ctx) -> dict:
 # ═══════════════════════════════════════════════════════════════════════
 
 def _ok(msg: str) -> str:
-    return (
-        f'<div style="color:#22c55e;font-size:11px;padding:6px 0;">✓ {msg}</div>'
-    )
+    return f'<div style="color:#22c55e;font-size:11px;padding:6px 0;">✓ {msg}</div>'
 
 
 def _err(msg: str) -> str:
-    return (
-        f'<div style="color:#ef4444;font-size:11px;padding:6px 0;">✗ {msg}</div>'
-    )
+    return f'<div style="color:#ef4444;font-size:11px;padding:6px 0;">✗ {msg}</div>'
