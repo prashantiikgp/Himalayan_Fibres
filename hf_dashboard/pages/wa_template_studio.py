@@ -687,6 +687,8 @@ def build(ctx):
             header_format_input, header_text_input, header_asset_url_input,
             body_input, footer_input, buttons_input, action_result,
         ],
+    ).then(
+        fn=_render_preview, inputs=preview_inputs, outputs=[preview_html],
     )
 
     # -- Row selection: load form --
@@ -708,7 +710,9 @@ def build(ctx):
         body_input, footer_input, buttons_input,
     ]
     for radio in (drafts_radio, pending_radio, approved_radio, rejected_radio):
-        radio.change(fn=_select_row, inputs=[radio], outputs=form_outputs)
+        radio.change(fn=_select_row, inputs=[radio], outputs=form_outputs).then(
+            fn=_render_preview, inputs=preview_inputs, outputs=[preview_html],
+        )
 
     # -- Save draft --
     save_btn.click(
