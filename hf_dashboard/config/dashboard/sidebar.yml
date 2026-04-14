@@ -37,10 +37,6 @@ sidebar:
       label: "Flows"
       icon: "\U0001F504"
 
-    - id: templates_media
-      label: "Templates"
-      icon: "\U0001F4C4"
-
     - id: wa_template_studio
       label: "Template Studio"
       icon: "\U0001F9EA"
