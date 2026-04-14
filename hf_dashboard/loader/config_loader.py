@@ -12,6 +12,7 @@ from pathlib import Path
 
 import yaml
 
+from engines.cache_schemas import TtlCacheFile
 from engines.theme_schemas import (
     DashboardConfig,
     LayoutFile,
@@ -41,6 +42,7 @@ class ConfigLoader:
         self._dashboard: DashboardConfig | None = None
         self._layout: LayoutFile | None = None
         self._wa_media_guidelines: MediaGuidelinesFile | None = None
+        self._ttl_cache: TtlCacheFile | None = None
 
     def load_theme(self) -> ThemeConfig:
         if self._theme is None:
@@ -84,6 +86,17 @@ class ConfigLoader:
             self._wa_media_guidelines = MediaGuidelinesFile(**data)
             log.info("Loaded WA media guidelines")
         return self._wa_media_guidelines
+
+    def load_ttl_cache(self) -> TtlCacheFile:
+        if self._ttl_cache is None:
+            path = self._config_dir / "cache" / "ttl.yml"
+            data = _load_yaml(path)
+            self._ttl_cache = TtlCacheFile(**data)
+            log.info(
+                "Loaded TTL cache config: %d buckets",
+                len(self._ttl_cache.ttl_cache.model_fields),
+            )
+        return self._ttl_cache
 
 
 @lru_cache(maxsize=1)

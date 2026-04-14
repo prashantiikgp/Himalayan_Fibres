@@ -28,6 +28,7 @@ from services.contact_schema import (
     get_predefined_tags, get_country_options, get_field_config,
 )
 from services.segments import (
+    get_active_segments_cached,
     get_all_active_segments, get_contact_segments_map, segment_color,
     count_segment_members, get_all_tags_from_contacts, segments_for_contact,
 )
@@ -156,7 +157,10 @@ def _build_table(db, segment="All", lifecycle="All", country="All", channel="All
     # Precompute segments per contact for the current page only.
     # Evaluate rules in Python against the already-loaded Contact rows —
     # zero extra DB round-trips, ~0ms for 50 contacts × 11 segments.
-    all_segments = get_all_active_segments(db)
+    # Plan D Phase 2: cached with 5-min TTL (config/cache/ttl.yml
+    # segments_list_seconds) — segments rarely change, so every
+    # filter/search/pagination event reuses the same list.
+    all_segments = get_active_segments_cached()
     segments_by_id = {s.id: s for s in all_segments}
     contact_segments_map = {
         c.id: segments_for_contact(c, all_segments) for c in contacts
@@ -315,7 +319,8 @@ def _build_legend() -> str:
     from services.database import get_db
     db = get_db()
     try:
-        active_segments = get_all_active_segments(db)
+        # Plan D Phase 2: cached segments list (5-min TTL).
+        active_segments = get_active_segments_cached()
         live_seg_items = ""
         for s in active_segments:
             count = count_segment_members(db, s)
@@ -630,7 +635,8 @@ def build(ctx) -> dict:
                 return ("", gr.update(elem_classes=_MODAL_CLOSED["edit"])) + (gr.update(),) * 15
 
             t0 = time.time()
-            all_segs = get_all_active_segments(db)
+            # Plan D Phase 2: cached segments list.
+            all_segs = get_active_segments_cached()
             seg_ids = segments_for_contact(c, all_segs)
             _log.warning("drawer segments: %.2fs (%d matched)", time.time() - t0, len(seg_ids))
             if seg_ids:

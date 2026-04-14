@@ -27,6 +27,7 @@ from typing import Iterable
 from sqlalchemy.orm import Session
 
 from services.models import Contact, Segment
+from services.ttl_cache import ttl_cache
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -165,6 +166,20 @@ def get_all_active_segments(db: Session) -> list[Segment]:
 
 def get_segments_by_id(db: Session) -> dict[str, Segment]:
     return {s.id: s for s in db.query(Segment).all()}
+
+
+# Plan D Phase 2: cached nullary version.
+# Manages its own DB session so @ttl_cache() can key on () instead of
+# trying to hash an unhashable Session. Segments are slow-moving —
+# 5 min TTL (tuned in config/cache/ttl.yml) is invisible to users.
+@ttl_cache("segments_list_seconds")
+def get_active_segments_cached() -> list[Segment]:
+    from services.database import get_db
+    db = get_db()
+    try:
+        return get_all_active_segments(db)
+    finally:
+        db.close()
 
 
 # ══════════════════════════════════════════════════════════════════════
