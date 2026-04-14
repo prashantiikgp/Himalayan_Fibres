@@ -139,6 +139,61 @@ def _build_chat_header(db, contact_id):
     )
 
 
+# Map file extensions → (Meta API media type, display emoji)
+_MEDIA_KIND_BY_EXT = {
+    ".jpg": ("image", "🖼"),
+    ".jpeg": ("image", "🖼"),
+    ".png": ("image", "🖼"),
+    ".webp": ("image", "🖼"),
+    ".mp4": ("video", "🎬"),
+    ".3gp": ("video", "🎬"),
+    ".pdf": ("document", "📄"),
+    ".doc": ("document", "📄"),
+    ".docx": ("document", "📄"),
+    ".xls": ("document", "📄"),
+    ".xlsx": ("document", "📄"),
+    ".ppt": ("document", "📄"),
+    ".pptx": ("document", "📄"),
+    ".txt": ("document", "📄"),
+    ".csv": ("document", "📄"),
+    ".mp3": ("audio", "🎤"),
+    ".ogg": ("audio", "🎤"),
+    ".opus": ("audio", "🎤"),
+    ".aac": ("audio", "🎤"),
+    ".amr": ("audio", "🎤"),
+    ".m4a": ("audio", "🎤"),
+}
+
+
+def _media_info_for_filename(filename: str) -> tuple[str, str]:
+    """Return (meta_media_type, emoji) for a filename, defaulting to document."""
+    from pathlib import Path as _P
+    ext = _P(filename).suffix.lower()
+    return _MEDIA_KIND_BY_EXT.get(ext, ("document", "📄"))
+
+
+def _render_message_body(m) -> str:
+    """HTML for one message bubble's body — handles text + media consistently."""
+    text = (m.text or m.media_caption or "").strip()
+    if m.media_type:
+        kind = (m.media_type or "").lower()
+        icon = {"image": "🖼", "video": "🎬", "document": "📄", "audio": "🎤"}.get(kind, "📎")
+        fname = ""
+        if m.media_path:
+            fname = m.media_path.rsplit("/", 1)[-1]
+        header = (
+            f'<div style="display:flex; align-items:center; gap:6px; '
+            f'background:rgba(99,102,241,.08); padding:6px 8px; border-radius:6px; '
+            f'margin-bottom:4px; font-size:11px; color:#c7d2fe;">'
+            f'<span style="font-size:14px;">{icon}</span>'
+            f'<span>{kind.title()}{" · " + fname if fname else ""}</span>'
+            f'</div>'
+        )
+        body = f'<div style="font-size:12px; color:#e7eaf3; line-height:1.4;">{text}</div>' if text else ""
+        return header + body
+    return f'<div style="font-size:12px; color:#e7eaf3; line-height:1.4;">{text}</div>'
+
+
 def _build_chat_messages(db, contact_id):
     """Chat bubbles only — no header."""
     if not contact_id:
@@ -194,7 +249,12 @@ def _build_chat_messages(db, contact_id):
         if m.direction == "out":
             icons = {"sent": "✓", "delivered": "✓✓", "read": "✓✓", "failed": "✗"}
             si = f'<span style="color:{"#6366f1" if m.status == "read" else "#64748b"}; font-size:9px;">{icons.get(m.status, "")}</span>'
-        bubbles += f'<div style="{chat_bubble(m.direction)}"><div style="font-size:12px; color:#e7eaf3; line-height:1.4;">{m.text or ""}</div><div style="display:flex; justify-content:flex-end; gap:4px; margin-top:2px;"><span style="{chat_timestamp()}">{ts}</span>{si}</div></div>'
+        body_html = _render_message_body(m)
+        bubbles += (
+            f'<div style="{chat_bubble(m.direction)}">{body_html}'
+            f'<div style="display:flex; justify-content:flex-end; gap:4px; margin-top:2px;">'
+            f'<span style="{chat_timestamp()}">{ts}</span>{si}</div></div>'
+        )
 
     if not msgs:
         bubbles = new_conv_banner or (
@@ -264,8 +324,23 @@ def build(ctx):
         with gr.Column(scale=2, min_width=400, elem_classes=["chat-panel"]):
             chat_header = gr.HTML(value=placeholder_header, elem_classes=["chat-header-slot"])
             chat_messages = gr.HTML(value=placeholder_messages, elem_classes=["chat-messages-slot"])
+            # File upload for media attachments. When a file is attached the
+            # text input below doubles as a caption. Supported: images
+            # (jpg/png), documents (pdf/doc/xls/ppt/txt/csv), video (mp4),
+            # audio (mp3/ogg/m4a). See _MEDIA_KIND_BY_EXT.
+            media_input = gr.File(
+                label="📎 Attach image / document / video / audio",
+                file_types=[
+                    ".jpg", ".jpeg", ".png", ".webp",
+                    ".mp4", ".3gp",
+                    ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".csv",
+                    ".mp3", ".ogg", ".opus", ".aac", ".amr", ".m4a",
+                ],
+                type="filepath",
+                elem_classes=["chat-media-input"],
+            )
             with gr.Row(elem_classes=["chat-send-row"]):
-                msg_input = gr.Textbox(placeholder="Type a message...", label="", container=False, scale=8, elem_classes=["chat-send-input"])
+                msg_input = gr.Textbox(placeholder="Type a message or caption…", label="", container=False, scale=8, elem_classes=["chat-send-input"])
                 send_btn = gr.Button("Send", size="sm", variant="primary", scale=1, elem_classes=["chat-send-btn"])
             send_result = gr.HTML(value="", elem_classes=["chat-send-result"])
 
@@ -359,16 +434,26 @@ def build(ctx):
 
     tpl_dropdown.change(fn=render_wa_template_preview, inputs=[tpl_dropdown], outputs=[tpl_preview])
 
-    def _send_text(contact_id, msg):
-        """Send a plain text message and persist the outbound WAMessage so
-        it appears in the chat view immediately. Mirrors the pattern in
-        services/broadcast_engine.py:416-429.
+    def _send_message(contact_id, msg, media_path):
+        """Unified send handler: text-only OR media (with optional caption).
+
+        If a file is attached, uploads it to Meta via WhatsAppSender.upload_media
+        and sends as the right media_type. If no file, sends plain text. Both
+        paths respect the 24h customer-service window.
         """
-        if not contact_id or not msg:
+        if not contact_id:
             return (
-                '<div style="color:#ef4444; font-size:10px;">Select chat + type message</div>',
-                gr.update(), gr.update(),
+                '<div style="color:#ef4444; font-size:10px;">Select a chat first</div>',
+                gr.update(), gr.update(), gr.update(),
             )
+        has_media = bool(media_path)
+        has_text = bool((msg or "").strip())
+        if not has_media and not has_text:
+            return (
+                '<div style="color:#ef4444; font-size:10px;">Type a message or attach a file</div>',
+                gr.update(), gr.update(), gr.update(),
+            )
+
         from services.database import get_db
         from services.models import Contact, WAChat, WAMessage
         db = get_db()
@@ -377,8 +462,11 @@ def build(ctx):
             if not c or not c.wa_id:
                 return (
                     '<div style="color:#ef4444; font-size:10px;">No WhatsApp ID on contact</div>',
-                    gr.update(), gr.update(),
+                    gr.update(), gr.update(), gr.update(),
                 )
+
+            # 24h customer-service window applies to text AND media. Only
+            # templates bypass it (see _send_tpl below).
             now = datetime.now(timezone.utc)
             if c.last_wa_inbound_at:
                 last = c.last_wa_inbound_at
@@ -387,52 +475,99 @@ def build(ctx):
                 if (now - last).total_seconds() > 86400:
                     return (
                         '<div style="color:#f59e0b; font-size:10px;">Outside 24h window — use a template</div>',
-                        gr.update(), gr.update(),
+                        gr.update(), gr.update(), gr.update(),
                     )
             else:
                 return (
                     '<div style="color:#f59e0b; font-size:10px;">No inbound yet — use a template</div>',
-                    gr.update(), gr.update(),
+                    gr.update(), gr.update(), gr.update(),
                 )
 
             from services.wa_sender import WhatsAppSender
-            ok, msg_id, err = WhatsAppSender().send_text(c.wa_id, msg)
-            if not ok:
-                return (
-                    f'<div style="color:#ef4444; font-size:10px;">{err or "Send failed"}</div>',
-                    gr.update(), gr.update(),
-                )
+            sender = WhatsAppSender()
 
-            chat = db.query(WAChat).filter(WAChat.contact_id == c.id).first()
-            if not chat:
-                chat = WAChat(contact_id=c.id)
-                db.add(chat)
-                db.flush()
-            chat.last_message_at = now
-            chat.last_message_preview = (msg or "")[:100]
-            db.add(WAMessage(
-                chat_id=chat.id,
-                contact_id=c.id,
-                direction="out",
-                status="sent",
-                text=msg,
-                wa_message_id=msg_id,
-            ))
-            c.last_wa_outbound_at = now
-            db.commit()
+            if has_media:
+                original_name = media_path.rsplit("/", 1)[-1]
+                media_kind, _ = _media_info_for_filename(original_name)
+                ok_u, wa_media_id, err_u = sender.upload_media(media_path)
+                if not ok_u:
+                    return (
+                        f'<div style="color:#ef4444; font-size:10px;">Upload failed: {err_u or "?"}</div>',
+                        gr.update(), gr.update(), gr.update(),
+                    )
+                caption = msg if has_text else None
+                ok, msg_id, err = sender.send_media(
+                    c.wa_id, wa_media_id, media_type=media_kind, caption=caption,
+                )
+                if not ok:
+                    return (
+                        f'<div style="color:#ef4444; font-size:10px;">{err or "Send failed"}</div>',
+                        gr.update(), gr.update(), gr.update(),
+                    )
+                chat = db.query(WAChat).filter(WAChat.contact_id == c.id).first()
+                if not chat:
+                    chat = WAChat(contact_id=c.id)
+                    db.add(chat)
+                    db.flush()
+                preview = f"[{media_kind}] {original_name}"
+                if has_text:
+                    preview = f"[{media_kind}] {msg[:60]}"
+                chat.last_message_at = now
+                chat.last_message_preview = preview[:100]
+                db.add(WAMessage(
+                    chat_id=chat.id,
+                    contact_id=c.id,
+                    direction="out",
+                    status="sent",
+                    text=msg if has_text else "",
+                    wa_message_id=msg_id,
+                    media_type=media_kind,
+                    media_id=wa_media_id,
+                    media_path=original_name,
+                    media_caption=msg if has_text else None,
+                ))
+                c.last_wa_outbound_at = now
+                db.commit()
+                ok_msg = f'<div style="color:#22c55e; font-size:10px;">Sent {media_kind} ✓</div>'
+            else:
+                ok, msg_id, err = sender.send_text(c.wa_id, msg)
+                if not ok:
+                    return (
+                        f'<div style="color:#ef4444; font-size:10px;">{err or "Send failed"}</div>',
+                        gr.update(), gr.update(), gr.update(),
+                    )
+                chat = db.query(WAChat).filter(WAChat.contact_id == c.id).first()
+                if not chat:
+                    chat = WAChat(contact_id=c.id)
+                    db.add(chat)
+                    db.flush()
+                chat.last_message_at = now
+                chat.last_message_preview = (msg or "")[:100]
+                db.add(WAMessage(
+                    chat_id=chat.id,
+                    contact_id=c.id,
+                    direction="out",
+                    status="sent",
+                    text=msg,
+                    wa_message_id=msg_id,
+                ))
+                c.last_wa_outbound_at = now
+                db.commit()
+                ok_msg = '<div style="color:#22c55e; font-size:10px;">Sent ✓</div>'
 
             return (
-                '<div style="color:#22c55e; font-size:10px;">Sent ✓</div>',
+                ok_msg,
                 _build_chat_messages(db, contact_id),
                 gr.update(value=""),
+                gr.update(value=None),
             )
         finally:
             db.close()
 
     send_btn.click(
-        fn=_send_text,
-        inputs=[selected_cid_state, msg_input],
-        outputs=[send_result, chat_messages, msg_input],
+        fn=_send_message,
+        inputs=[selected_cid_state, msg_input, media_input],
+        outputs=[send_result, chat_messages, msg_input, media_input],
     ).then(
         fn=None, inputs=None, outputs=None, js=_SCROLL_CHAT_JS,
     )
