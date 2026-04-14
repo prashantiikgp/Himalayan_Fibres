@@ -15,10 +15,93 @@ from datetime import datetime, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formataddr, formatdate, make_msgid
+from pathlib import Path
 
 import requests
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from services.config import get_settings
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Jinja2 environment — shared by the seed loader (to resolve {% extends %} +
+# {% include %}) and the sender's per-recipient string render. Autoescape off
+# because we render HTML email bodies, not user-facing web pages.
+# ─────────────────────────────────────────────────────────────────────────────
+
+_TEMPLATES_ROOT = Path(__file__).resolve().parent.parent / "templates" / "emails"
+
+_JINJA_ENV: Environment | None = None
+
+
+def get_jinja_env() -> Environment:
+    """Lazily build the email Jinja2 environment."""
+    global _JINJA_ENV
+    if _JINJA_ENV is None:
+        _JINJA_ENV = Environment(
+            loader=FileSystemLoader(str(_TEMPLATES_ROOT)),
+            autoescape=select_autoescape(enabled_extensions=(), default=False),
+            trim_blocks=True,
+            lstrip_blocks=True,
+        )
+    return _JINJA_ENV
+
+
+def render_template_file(relative_path: str, variables: dict) -> str:
+    """Render a template file (with inheritance + includes) to HTML.
+
+    The path is relative to ``hf_dashboard/templates/emails/``. Resolves
+    ``{% extends %}`` and ``{% include %}`` against the FileSystemLoader.
+    """
+    env = get_jinja_env()
+    tpl = env.get_template(relative_path)
+    return tpl.render(**variables)
+
+
+def render_template_string(template_content: str, variables: dict) -> str:
+    """Render a raw Jinja2 string with variables.
+
+    Used as the backwards-compatible rendering path for any template whose
+    HTML lives in the DB instead of on disk (e.g. legacy seeded templates).
+    """
+    env = get_jinja_env()
+    return env.from_string(template_content).render(**variables)
+
+
+def template_file_exists(slug: str) -> bool:
+    """Check whether a seeded template file exists on disk for this slug."""
+    return (_TEMPLATES_ROOT / f"{slug}.html").exists()
+
+
+def render_template_by_slug(slug: str, variables: dict) -> str:
+    """Render an email template to HTML for a single recipient.
+
+    Prefers the on-disk file at ``templates/emails/<slug>.html`` — which
+    resolves ``{% extends %}`` against the locked shell layout — but falls
+    back to rendering the DB row's ``html_content`` if no file exists
+    (so future DB-created templates from a UI editor still work).
+
+    The ``variables`` dict should already contain the merged shared
+    branding config plus per-recipient send vars (see
+    :func:`services.email_personalization.build_send_variables`).
+    """
+    if template_file_exists(slug):
+        return render_template_file(f"{slug}.html", variables)
+
+    # Fallback: render whatever is in the DB row for this slug.
+    from services.database import get_db
+    from services.models import EmailTemplate
+
+    db = get_db()
+    try:
+        row = db.query(EmailTemplate).filter(EmailTemplate.slug == slug).first()
+        if row is None or not row.html_content:
+            raise FileNotFoundError(
+                f"No template file on disk and no DB row for slug {slug!r}"
+            )
+        return render_template_string(row.html_content, variables)
+    finally:
+        db.close()
 
 log = logging.getLogger(__name__)
 
@@ -151,13 +234,14 @@ class EmailSender:
         return self.send_email(to_email, "Test Email - Himalayan Fibres Dashboard", html)
 
     def render_template(self, template_content: str, variables: dict) -> str:
-        """Render template with {{variable}} substitution."""
-        rendered = template_content
-        for key, value in variables.items():
-            pattern = r"\{\{\s*" + re.escape(key) + r"\s*\}\}"
-            rendered = re.sub(pattern, str(value) if value else "", rendered)
-        rendered = re.sub(r"\{\{[^}]*\}\}", "", rendered)
-        return rendered
+        """Render a template string with Jinja2.
+
+        Backwards-compatible shim around :func:`render_template_string`.
+        Pre-existing callers passed a simple HTML blob with ``{{var}}``
+        placeholders; Jinja2 handles those identically to the old regex
+        path, plus it now supports ``{% if %}`` guards and filters.
+        """
+        return render_template_string(template_content, variables)
 
     def _preprocess_html(self, html_content: str) -> str:
         """Make HTML email-client friendly."""

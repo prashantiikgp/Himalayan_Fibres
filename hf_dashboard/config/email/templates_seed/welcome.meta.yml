@@ -1,0 +1,8 @@
+template:
+  slug: welcome
+  name: "Welcome — New Subscriber"
+  category: nurture
+  subject_template: "Welcome to Himalayan Fibres 🌿"
+  is_active: true
+  required_variables:
+    - first_name

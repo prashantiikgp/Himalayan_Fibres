@@ -1,0 +1,15 @@
+template:
+  slug: order_shipped
+  name: "Order Shipped — Tracking"
+  category: transactional
+  subject_template: "Your Himalayan Fibres order is on its way 📦"
+  is_active: true
+  required_variables:
+    - first_name
+    - courier_name
+    - tracking_id
+  optional_variables:
+    - dispatch_date
+    - delivery_date
+    - tracking_url
+    - invoice_url

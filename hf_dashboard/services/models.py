@@ -12,7 +12,7 @@ from typing import Any
 
 from sqlalchemy import (
     Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Text,
-    create_engine,
+    UniqueConstraint, create_engine,
 )
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.types import TypeDecorator
@@ -169,6 +169,37 @@ class EmailSend(Base):
     error_message = Column(Text, default="")
     sent_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=_utcnow)
+
+
+# -- EmailAttachment --
+# Per-recipient file attachments uploaded during broadcast composition.
+# Currently only kind='invoice' is used (a PDF uploaded via drag-drop on
+# the Broadcast page, stored in Supabase Storage, signed-URL injected
+# into the template as {{ invoice_url }} at send time).
+#
+# FK is (campaign_id, contact_id) — not send_id — because attachments
+# are uploaded BEFORE the EmailSend row exists (sends are created
+# inside the send loop at fire time, not at compose time).
+
+class EmailAttachment(Base):
+    __tablename__ = "email_attachments"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    campaign_id = Column(Integer, ForeignKey("campaigns.id"), nullable=True, index=True)
+    contact_id = Column(String(64), ForeignKey("contacts.id"), nullable=False, index=True)
+    kind = Column(String(32), nullable=False, default="invoice")
+
+    file_name = Column(String(255), default="")
+    storage_bucket = Column(String(64), default="email-invoices")
+    storage_path = Column(String(512), default="")
+    signed_url = Column(String(1024), default="")
+    content_type = Column(String(64), default="application/pdf")
+    size_bytes = Column(Integer, default=0)
+    uploaded_at = Column(DateTime, default=_utcnow)
+
+    __table_args__ = (
+        UniqueConstraint("campaign_id", "contact_id", "kind", name="uq_email_attachment"),
+    )
 
 
 # -- Flow --

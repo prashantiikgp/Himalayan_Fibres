@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ subject or company_name }}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Amiri&display=swap');
+    body { margin:0; padding:0; background-color:{{ color_footer_bg }}; font-family:{{ font_stack }}; }
+    table { border-collapse:collapse; }
+    a { color:{{ color_link }}; }
+  </style>
+</head>
+<body style="margin:0;padding:0;background-color:{{ color_footer_bg }};font-family:{{ font_stack }};color-scheme:light dark;">
+  <!-- Banner (locked) -->
+  {% include 'partials/banner.html' %}
+
+  <!-- Body content (varies per template) -->
+  {% block content %}{% endblock %}
+
+  <!-- Social row (locked) -->
+  {% include 'partials/social_row.html' %}
+
+  <!-- Footer (locked) -->
+  {% include 'partials/footer.html' %}
+</body>
+</html>

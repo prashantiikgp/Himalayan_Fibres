@@ -1,0 +1,18 @@
+{% macro heading(text, emoji='', align='center', size='22px') %}
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f5f5f5;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="640" cellspacing="0" cellpadding="0" border="0" style="max-width:640px;background:#ffffff;">
+        <tr>
+          <td style="padding:24px 24px 6px;">
+            <h2 style="text-align:{{ align }};font-size:{{ size }};font-weight:bold;color:{{ color_text }};margin:0;font-family:{{ font_stack }};">
+              {%- if emoji %}{{ emoji }} {% endif -%}
+              {{ text }}
+            </h2>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+{% endmacro %}

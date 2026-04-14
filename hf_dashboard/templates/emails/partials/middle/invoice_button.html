@@ -1,0 +1,25 @@
+{#
+  Invoice download button.
+  Hidden entirely when the recipient has no invoice attached.
+  The {% if invoice_url %} guard reads from parent template context —
+  build_send_variables() injects invoice_url='' when no attachment exists.
+#}
+{% macro invoice_button() %}
+{% if invoice_url %}
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f5f5f5;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="640" cellspacing="0" cellpadding="0" border="0" style="max-width:640px;background:#ffffff;">
+        <tr>
+          <td align="center" style="padding:20px 24px 10px;">
+            <a href="{{ invoice_url }}" target="_blank" rel="noopener" title="Download your invoice (PDF)" style="display:inline-block;background-color:{{ color_button_bg }};color:{{ color_button_text }};padding:14px 28px;text-decoration:none;border-radius:6px;font-size:16px;font-family:{{ font_stack }};font-weight:bold;">
+              🧾 Download Invoice (PDF)
+            </a>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+{% endif %}
+{% endmacro %}

@@ -1,0 +1,53 @@
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/invoice_button.html' import invoice_button with context %}
+
+{% block content %}
+
+{{ heading('Your Order is on its Way', emoji='📦') }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph('Good news! Your order from <strong>Himalayan Fibres</strong> has been dispatched and is now on its way to you.') }}
+
+{#
+  SHIPMENT DETAILS — per-send variables:
+    courier_name, tracking_id, dispatch_date, delivery_date, tracking_url
+#}
+{% if courier_name or tracking_id %}
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f5f5f5;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="640" cellspacing="0" cellpadding="0" border="0" style="max-width:640px;background:#ffffff;">
+        <tr>
+          <td style="padding:12px 24px 20px;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid {{ color_card_border }};border-radius:8px;font-family:{{ font_stack }};">
+              <tr>
+                <td style="padding:16px 18px;color:{{ color_text }};">
+                  <h3 style="margin:0 0 10px;font-size:20px;font-weight:bold;letter-spacing:0.5px;">📦 Shipment Details</h3>
+                  {% if courier_name %}<p style="margin:8px 0;font-size:14px;color:{{ color_accent }};"><strong>Courier:</strong> {{ courier_name }}</p>{% endif %}
+                  {% if tracking_id %}<p style="margin:8px 0;font-size:14px;color:{{ color_accent }};"><strong>Tracking ID:</strong> <span style="letter-spacing:0.4px;">{{ tracking_id }}</span></p>{% endif %}
+                  {% if dispatch_date %}<p style="margin:8px 0;font-size:14px;color:{{ color_accent }};"><strong>Expected Dispatch:</strong> {{ dispatch_date }}</p>{% endif %}
+                  {% if delivery_date %}<p style="margin:8px 0 12px;font-size:14px;color:{{ color_accent }};"><strong>Expected Delivery:</strong> {{ delivery_date }}</p>{% endif %}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+{% endif %}
+
+{% if tracking_url %}
+{{ cta_button('🚚 Track Shipment', tracking_url) }}
+{% endif %}
+
+{{ invoice_button() }}
+
+{{ paragraph('If you have any questions about your shipment, reply to this email or message us on WhatsApp.') }}
+
+{% endblock %}

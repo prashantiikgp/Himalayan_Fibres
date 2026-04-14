@@ -1,0 +1,27 @@
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/info_card.html' import info_card with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+
+{% block content %}
+
+{{ heading('How was your order?', emoji='💛') }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph('We hope your order from <strong>Himalayan Fibres</strong> 🌿 arrived safely and exceeded your expectations. Every fibre and yarn we ship carries a little piece of our workshop in the Himalayas.') }}
+
+{{ info_card(
+  'Your feedback means the world to us',
+  'Would you take a minute to share your thoughts? Honest feedback helps us improve, and every review from someone like you helps other conscious brands find us.',
+  icon_emoji='🌱'
+) }}
+
+{{ cta_button('⭐ Share Your Feedback', 'https://www.himalayanfibres.com/reviews') }}
+
+{{ paragraph('If something fell short of expectations, please reply directly to this email. We read every message personally and we would love the chance to make it right.') }}
+
+{{ paragraph('With gratitude,<br><strong>The Himalayan Fibres Team</strong>') }}
+
+{% endblock %}

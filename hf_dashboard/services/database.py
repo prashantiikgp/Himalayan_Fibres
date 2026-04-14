@@ -19,7 +19,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from services.config import get_settings
 from services.models import (
-    Base, Contact, Segment, Campaign, EmailSend, Flow, FlowRun,
+    Base, Contact, Segment, Campaign, EmailSend, EmailAttachment, Flow, FlowRun,
     WAChat, WAMessage, WATemplate, EmailTemplate, Broadcast,
     ContactInteraction, ContactNote,
 )
@@ -328,7 +328,9 @@ def _seed_default_templates(db: Session):
         ("Tariff Advantage", "tariff_advantage", "campaigns/tariff_advantage_campaign.html", "Beat Import Tariffs with Domestic Himalayan Fibers"),
         ("Welcome Email Final", "welcome_final", "campaigns/welcome_email_final.html", "Welcome to Himalayan Fibers, {{name}}"),
         ("Welcome Email Production", "welcome_production", "campaigns/welcome_email_production.html", "Welcome to Himalayan Fibers"),
-        ("Order Confirmation", "order_confirmation", "transactional/order_confirmation.html", "Order Confirmation #{{order_id}}"),
+        # NOTE: legacy `order_confirmation` removed — replaced by the new
+        # seed loader that reads from config/email/templates_seed/ and
+        # compiles Jinja2 templates with the locked shell partials.
         ("Welcome (Transactional)", "welcome_transactional", "transactional/welcome.html", "Welcome to Himalayan Fibers, {{first_name}}"),
     ]
 
@@ -400,3 +402,17 @@ def ensure_db_ready():
         seed_from_csv()
     else:
         log.info("Database already seeded (%d contacts)", get_db().query(Contact).count())
+
+    # Seed the Jinja2-based email templates (idempotent — skips slugs
+    # that already exist so founder edits are preserved). Runs on every
+    # boot so newly added templates_seed/*.meta.yml files are picked up.
+    try:
+        from services.template_seed import seed_email_templates
+        db = get_db()
+        try:
+            summary = seed_email_templates(db, force=False)
+            log.info("Email template seed: %s", summary)
+        finally:
+            db.close()
+    except Exception:
+        log.exception("Email template seed failed (non-fatal)")

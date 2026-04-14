@@ -1,0 +1,8 @@
+template:
+  slug: order_delivered_feedback
+  name: "Order Delivered — Feedback Request"
+  category: transactional
+  subject_template: "How was your order, {{ first_name }}?"
+  is_active: true
+  required_variables:
+    - first_name

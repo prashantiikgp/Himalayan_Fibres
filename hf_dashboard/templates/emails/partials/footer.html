@@ -1,0 +1,35 @@
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f5f5f5;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="640" cellspacing="0" cellpadding="0" border="0" style="max-width:640px;background:#ffffff;">
+        <tr>
+          <td>
+            <hr style="border:none;border-top:1px solid #eaeaea;margin:10px 24px 0 24px;">
+          </td>
+        </tr>
+        <tr>
+          <td style="background-color:{{ color_footer_bg }};padding:16px 24px;font-family:{{ font_stack }};font-size:12px;color:{{ color_text }};text-align:center;">
+            <p style="margin:6px 0;">
+              <em>📍 Address:</em>
+              <em>{{ address }}</em>
+            </p>
+            <p style="margin:6px 0;">
+              <em>📧 {{ company_email }} | 📞 {{ company_phone }}</em>
+            </p>
+            <p style="margin:6px 0;">
+              <a href="{{ privacy_url }}" style="color:{{ color_text }};margin:0 5px;text-decoration:none;">Privacy Policy</a> |
+              <a href="{{ terms_url }}" style="color:{{ color_text }};margin:0 5px;text-decoration:none;">Terms &amp; Conditions</a> |
+              <a href="{{ refund_url }}" style="color:{{ color_text }};margin:0 5px;text-decoration:none;">Refund &amp; Cancellation</a>
+            </p>
+            <p style="margin:10px 0 0;font-style:italic;">
+              To unsubscribe, please
+              <a href="mailto:{{ unsubscribe_mailto }}" style="color:#555;">email us</a>
+              with subject line <strong>"Unsubscribe"</strong>.
+            </p>
+            <p style="margin:10px 0 4px;">{{ copyright_line }}</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>

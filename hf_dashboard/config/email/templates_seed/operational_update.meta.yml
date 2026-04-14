@@ -1,0 +1,13 @@
+template:
+  slug: operational_update
+  name: "Operational Update"
+  category: announcement
+  subject_template: "{{ update_title }} — Himalayan Fibres"
+  is_active: true
+  required_variables:
+    - first_name
+    - update_title
+    - update_body_html
+  optional_variables:
+    - update_cta_label
+    - update_cta_url

@@ -1,0 +1,18 @@
+template:
+  slug: order_confirmation
+  name: "Order Confirmation"
+  category: transactional
+  subject_template: "Order confirmed — thank you, {{ first_name }}!"
+  is_active: true
+  required_variables:
+    - first_name
+    - order_number
+    - order_date
+    - items_html
+    - total
+  optional_variables:
+    - ship_to_html
+    - subtotal
+    - shipping
+    - payment_method
+    - invoice_url

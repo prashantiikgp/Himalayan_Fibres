@@ -1,0 +1,34 @@
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/info_card.html' import info_card with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+
+{% block content %}
+
+{{ heading('Welcome to Himalayan Fibres', emoji='🌿') }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>, and thank you for joining the Himalayan Fibres family. We are a small workshop in the foothills of the Himalayas, crafting natural fibres and yarns for conscious brands around the world.') }}
+
+{{ paragraph('Here is a quick look at what we offer:') }}
+
+{{ info_card(
+  '🌿 Himalayan Stinging Nettle',
+  'A wild plant grown at 1200–2000m without pesticides or fertilizers. Sustainably harvested and spun into 100% or blended yarns — popular across Europe and the US.'
+) }}
+
+{{ info_card(
+  '🌱 Himalayan Hemp',
+  'Sourced from wild Cannabis Sativa in the Himalayas. Durable, breathable, and eco-friendly — ideal for sustainable textile collections.'
+) }}
+
+{{ info_card(
+  '🐑 Tibetan Wool',
+  'Authentic wool from high-altitude regions. Soft, strong, and perfect for warm, luxurious blends.'
+) }}
+
+{{ paragraph('We offer <strong>fibres, yarns, and custom blends</strong> — crafted for conscious brands and export-ready markets. Take a look at our catalogue and let us know how we can help you build something beautiful.') }}
+
+{{ cta_button('🧶 Explore Our Products', 'https://www.himalayanfibres.com') }}
+
+{% endblock %}
