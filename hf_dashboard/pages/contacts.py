@@ -210,11 +210,27 @@ def _build_table(db, segment="All", lifecycle="All", country="All", channel="All
                 else:
                     cells += f'<td style="{table_cell()}">{missing}</td>'
             elif field == "actions":
+                # Hybrid bridge: write contact_id into the hidden Textbox via
+                # the native setter + dispatch an `input` event so Svelte's
+                # store updates, then click the hidden trigger button. The
+                # trigger button's Python handler reads the textbox value as
+                # its input AND copies it into a gr.State for the save flow.
                 cells += (
                     f'<td style="{table_cell()}; text-align:center;">'
                     f'<button type="button" class="hf-row-edit-btn" '
-                    f'onclick="window.__hfPendingEditCid=\'{contact.id}\';'
-                    f'document.querySelector(\'#hf-edit-trigger-btn button\').click();" '
+                    f'onclick="(function(cid){{'
+                    f'var box=document.querySelector(\'#hf-edit-contact-id textarea, #hf-edit-contact-id input\');'
+                    f'if(!box){{return;}}'
+                    f'var proto=box.tagName===\'INPUT\'?HTMLInputElement.prototype:HTMLTextAreaElement.prototype;'
+                    f'var setter=Object.getOwnPropertyDescriptor(proto,\'value\').set;'
+                    f'setter.call(box,cid);'
+                    f'box.dispatchEvent(new Event(\'input\',{{bubbles:true}}));'
+                    f'setTimeout(function(){{'
+                    f'var trig=document.querySelector(\'#hf-edit-trigger-btn button\')||'
+                    f'document.querySelector(\'#hf-edit-trigger-btn\');'
+                    f'if(trig){{trig.click();}}'
+                    f'}},80);'
+                    f'}})(\'{contact.id}\')" '
                     f'title="Edit {contact.first_name or contact.id}">✎ Edit</button>'
                     f'</td>'
                 )
@@ -463,10 +479,19 @@ def build(ctx) -> dict:
         gr.HTML(value=_build_legend())
         legend_close = gr.Button("Close", size="sm")
 
-    # -- Editing-contact state (survives between drawer-open and save) --
-    # gr.State is Python-side only: no DOM, no Svelte-store sync issues.
-    # Populated by the trigger-button js= callback which reads
-    # window.__hfPendingEditCid. Consumed by _save_edit and _add_note.
+    # -- Hybrid edit bridge --
+    # The row Edit button writes contact_id into `edit_contact_id_box` via
+    # native setter + 'input' event (so Svelte's store updates), then clicks
+    # `edit_trigger_btn`. The trigger fires `_open_edit_drawer` which reads
+    # the textbox value AND copies it into `edit_cid_state` (a Python-only
+    # gr.State). All downstream events (Save, Add Note) read from the State,
+    # not the textbox — that sidesteps the store-sync bug that was losing
+    # the cid between drawer-open and save in the previous implementation.
+    edit_contact_id_box = gr.Textbox(
+        value="", show_label=False, container=False,
+        elem_id="hf-edit-contact-id",
+        elem_classes=["hf-bridge-hidden"],
+    )
     edit_cid_state = gr.State("")
     edit_trigger_btn = gr.Button(
         "trigger", elem_id="hf-edit-trigger-btn",
@@ -656,9 +681,7 @@ def build(ctx) -> dict:
     ]
     edit_trigger_btn.click(
         fn=_open_edit_drawer,
-        inputs=None,
-        js="() => { const cid = window.__hfPendingEditCid || ''; "
-           "window.__hfPendingEditCid = ''; return [cid]; }",
+        inputs=[edit_contact_id_box],
         outputs=_edit_drawer_outputs,
     )
 
