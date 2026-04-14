@@ -69,7 +69,33 @@ def _build_table(db, segment="All", lifecycle="All", country="All", channel="All
     page_size = cfg.get("table", {}).get("page_size", 50)
     columns = cfg.get("table", {}).get("columns", [])
 
-    q = db.query(Contact)
+    # Plan D Phase 1.3: select only the 15 Contact columns this renderer
+    # + segment rule evaluator needs, not the full 38-col Contact row.
+    # That's a ~60% reduction in bytes per page render, and this path
+    # fires on every filter / search / page change.
+    #
+    # Columns the row renderer uses: id, first_name, last_name, company,
+    #   email, phone, wa_id, lifecycle, tags, city, country
+    # Columns segments_for_contact() rule engine uses: customer_type,
+    #   customer_subtype, geography, consent_status (plus lifecycle,
+    #   country, tags which are already listed above)
+    q = db.query(Contact).with_entities(
+        Contact.id,
+        Contact.first_name,
+        Contact.last_name,
+        Contact.company,
+        Contact.email,
+        Contact.phone,
+        Contact.wa_id,
+        Contact.lifecycle,
+        Contact.tags,
+        Contact.city,
+        Contact.country,
+        Contact.customer_type,
+        Contact.customer_subtype,
+        Contact.geography,
+        Contact.consent_status,
+    )
 
     # Filters
     if segment != "All":
