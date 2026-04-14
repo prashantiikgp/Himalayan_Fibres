@@ -21,15 +21,29 @@ Base = declarative_base()
 
 
 class JSONType(TypeDecorator):
-    """Store JSON as Text in SQLite."""
+    """Store JSON as Text in SQLite, JSONB in Postgres (auto).
+
+    Postgres returns JSONB columns already decoded as Python lists/dicts
+    via psycopg2, while SQLite returns stored strings. This decoder
+    accepts both — only calls json.loads on string input so already-
+    decoded values pass through untouched.
+    """
     impl = Text
     cache_ok = True
 
     def process_bind_param(self, value, dialect):
-        return json.dumps(value) if value is not None else None
+        if value is None:
+            return None
+        if isinstance(value, (dict, list)):
+            return json.dumps(value)
+        return value
 
     def process_result_value(self, value, dialect):
-        return json.loads(value) if value is not None else None
+        if value is None:
+            return None
+        if isinstance(value, (dict, list)):
+            return value
+        return json.loads(value)
 
 
 def _utcnow():
