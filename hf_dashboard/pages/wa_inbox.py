@@ -40,27 +40,47 @@ def _get_active_conversations(db):
 
     Label embeds an emoji avatar + name + company + preview + timestamp in a
     Gradio-safe ASCII format. The Radio value is the contact_id directly.
+
+    Plan D Phase 1.1: was 1 + 2N queries (distinct contact_ids → loop →
+    Contact.filter.first() + WAChat.filter.first() per contact). Rewrote as
+    a single JOIN query selecting only the 7 columns this renderer uses —
+    ~100 queries/load → 1 query/load.
     """
     from services.models import WAMessage, WAChat, Contact
-    contact_ids = set(r[0] for r in db.query(WAMessage.contact_id).distinct().all())
-    if not contact_ids:
-        return []
+
+    # One query: all contacts that have at least one WAMessage, left-joined
+    # with WAChat for preview/ts/unread. Column-tuple form — SQLAlchemy
+    # fetches only these 7 columns over the wire, not full 38-col Contact
+    # rows. outerjoin so contacts with a message but no chat row still
+    # appear (edge case during migration / webhook races).
+    rows = (
+        db.query(
+            Contact.id,
+            Contact.first_name,
+            Contact.last_name,
+            Contact.company,
+            WAChat.last_message_at,
+            WAChat.last_message_preview,
+            WAChat.unread_count,
+        )
+        .outerjoin(WAChat, WAChat.contact_id == Contact.id)
+        .filter(Contact.id.in_(db.query(WAMessage.contact_id).distinct()))
+        .all()
+    )
+
     convs = []
-    for cid in contact_ids:
-        c = db.query(Contact).filter(Contact.id == cid).first()
-        if not c:
-            continue
-        name = f"{c.first_name} {c.last_name}".strip() or c.company or "Unknown"
-        company = (c.company or "").strip()
-        chat = db.query(WAChat).filter(WAChat.contact_id == cid).first()
-        preview = ((chat.last_message_preview or "") if chat else "")[:28]
-        ts = chat.last_message_at.strftime("%H:%M") if chat and chat.last_message_at else ""
-        unread = f" ({chat.unread_count})" if chat and chat.unread_count else ""
+    for cid, first, last, company_raw, last_msg_at, preview_raw, unread_count in rows:
+        name = f"{first or ''} {last or ''}".strip() or (company_raw or "") or "Unknown"
+        company = (company_raw or "").strip()
+        preview = (preview_raw or "")[:28]
+        ts = last_msg_at.strftime("%H:%M") if last_msg_at else ""
+        unread = f" ({unread_count})" if unread_count else ""
         emoji = _avatar_for(cid)
         header = f"{emoji}  {name}" + (f" · {company}" if company else "")
         tail = f"{preview}" + (f"  {ts}" if ts else "") + unread
         label = f"{header}\n     {tail}" if tail.strip() else header
-        convs.append((chat.last_message_at if chat else None, label, str(cid)))
+        convs.append((last_msg_at, label, str(cid)))
+
     convs.sort(key=lambda x: x[0] or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
     return [(label, cid) for _, label, cid in convs]
 
