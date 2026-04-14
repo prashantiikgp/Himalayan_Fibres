@@ -359,8 +359,9 @@ def _render_preview(name, category, language, header_format, header_text,
     )
 
     return f"""
-<div style="max-width:420px; margin:0 auto; background:#000; border-radius:28px;
-            padding:10px 6px; box-shadow:0 25px 60px rgba(0,0,0,0.6);">
+<div style="width:100%; max-width:540px; margin:0 auto; background:#000;
+            border-radius:28px; padding:10px 6px;
+            box-shadow:0 25px 60px rgba(0,0,0,0.6);">
   <div style="background:{_WA_BG}; border-radius:20px; overflow:hidden;
               border:1px solid rgba(255,255,255,0.06);">
 
@@ -381,8 +382,8 @@ def _render_preview(name, category, language, header_format, header_text,
     </div>
 
     <!-- Conversation area -->
-    <div style="{chat_bg_style} padding:12px 10px 14px 10px; min-height:460px;
-                max-height:620px; overflow-y:auto;">
+    <div style="{chat_bg_style} padding:14px 12px 16px 12px; min-height:520px;
+                max-height:calc(100vh - 280px); overflow-y:auto;">
       <!-- Day separator -->
       <div style="text-align:center; margin:8px 0 12px 0;">
         <span style="background:{_WA_HEADER}; color:{_WA_MUTED}; font-size:10px;
@@ -614,11 +615,8 @@ def build(ctx):
 
     with gr.Row():
         # ═══ LEFT (20%) — templates list + header guidelines ═══
-        with gr.Column(scale=2, min_width=220):
-            gr.HTML(
-                '<div style="font-weight:700; color:#e7eaf3; font-size:12px; '
-                'text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">Templates</div>'
-            )
+        with gr.Column(scale=2, min_width=220, elem_classes=["ts-list-panel"]):
+            gr.HTML('<div class="ts-panel-title">Templates</div>')
             new_btn = gr.Button("+ New Draft", size="sm", variant="primary")
             sync_btn = gr.Button("🔄 Sync from Meta", size="sm", variant="secondary")
             sync_result = gr.HTML(value="")
@@ -634,7 +632,8 @@ def build(ctx):
             gr.HTML(_render_guidelines_html())
 
         # ═══ CENTER (30%) — compact editor form ═══
-        with gr.Column(scale=3, min_width=280):
+        with gr.Column(scale=3, min_width=280, elem_classes=["ts-editor-panel"]):
+            gr.HTML('<div class="ts-panel-title">Editor</div>')
             gr.HTML(_warning_banner())
             template_id_state = gr.State(value=None)
 
@@ -683,12 +682,8 @@ def build(ctx):
             action_result = gr.HTML(value="")
 
         # ═══ RIGHT (50%) — WhatsApp phone-mockup preview ═══
-        with gr.Column(scale=5, min_width=380):
-            gr.HTML(
-                '<div style="font-weight:700; color:#e7eaf3; font-size:12px; '
-                'text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">'
-                'Live preview — how it looks in chat</div>'
-            )
+        with gr.Column(scale=5, min_width=380, elem_classes=["ts-preview-panel"]):
+            gr.HTML('<div class="ts-panel-title">Live preview — how it looks in chat</div>')
             preview_html = gr.HTML(
                 value=_render_preview("", "MARKETING", "en_US", "NONE", "", "", "", "", "[]")
             )

@@ -15,6 +15,59 @@ _STATIC_CSS = """
 /* -- Remove Gradio footer -- */
 footer { display: none !important; }
 
+/* -- Template Studio: three panels with distinct accent colors --
+   Each column gets its own background tint and border so the boundaries
+   between list / editor / preview are unmistakable. */
+.ts-list-panel,
+.ts-editor-panel,
+.ts-preview-panel {
+    border-radius: 12px !important;
+    padding: 12px !important;
+    min-height: calc(100vh - 140px) !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+.ts-list-panel {
+    background: rgba(99, 102, 241, 0.05) !important;   /* indigo tint */
+    border: 1px solid rgba(99, 102, 241, 0.28) !important;
+}
+.ts-editor-panel {
+    background: rgba(16, 185, 129, 0.05) !important;   /* emerald tint */
+    border: 1px solid rgba(16, 185, 129, 0.28) !important;
+}
+.ts-preview-panel {
+    background: rgba(59, 130, 246, 0.05) !important;   /* blue tint */
+    border: 1px solid rgba(59, 130, 246, 0.28) !important;
+}
+
+/* Tighten field spacing inside the editor panel so the form doesn't
+   stretch with wasted vertical gaps. */
+.ts-editor-panel .form,
+.ts-editor-panel .block {
+    gap: 6px !important;
+}
+.ts-editor-panel label {
+    margin-bottom: 2px !important;
+}
+.ts-editor-panel .wrap { padding: 2px 0 !important; }
+
+/* Panel section headers (same style for all three) */
+.ts-panel-title {
+    font-weight: 700 !important;
+    color: #e7eaf3 !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.6px !important;
+    margin: 0 0 10px 0 !important;
+    padding-bottom: 6px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+}
+.ts-list-panel .ts-panel-title { color: #c7d2fe !important; }
+.ts-editor-panel .ts-panel-title { color: #a7f3d0 !important; }
+.ts-preview-panel .ts-panel-title { color: #93c5fd !important; }
+
+
 /* -- Global font sizing -- */
 body { font-size: 12px !important; }
 
