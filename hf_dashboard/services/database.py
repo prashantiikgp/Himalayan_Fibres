@@ -118,6 +118,13 @@ def get_engine():
                 echo=False,
                 connect_args={"connect_timeout": 10},
             )
+            # Plan D Phase 0: attach the egress tracker so we can rank
+            # actual DB readers by rows returned. No-op for SQLite.
+            try:
+                from services.egress_tracker import install_egress_tracker
+                install_egress_tracker(_engine)
+            except Exception:
+                log.exception("egress_tracker install failed")
         else:
             db_path = Path(settings.sqlite_path)
             db_path.parent.mkdir(parents=True, exist_ok=True)

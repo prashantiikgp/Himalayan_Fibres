@@ -101,6 +101,20 @@ async def health():
     return {"status": "ok", "service": "himalayan-fibers-dashboard"}
 
 
+@fastapi_app.get("/_egress/snapshot")
+async def egress_snapshot():
+    """Plan D Phase 0 — return the current in-memory query counters.
+
+    Diagnostic endpoint for ranking DB readers by rows returned during
+    the 24h baseline window. Remove once Plan D is verified.
+    """
+    try:
+        from services.egress_tracker import snapshot
+        return {"counters": snapshot()}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+
 # -- Background thread for flow automation --
 def _flow_automation_loop():
     """Check pending flow steps every 30 minutes."""
