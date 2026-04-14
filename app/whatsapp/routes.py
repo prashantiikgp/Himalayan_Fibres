@@ -322,14 +322,19 @@ async def sync_templates(db: DBSession) -> WATemplateSyncResult:
         )
         existing = result.scalar_one_or_none()
 
+        qs_raw = tpl.get("quality_score")
+        quality_score = qs_raw.get("score") if isinstance(qs_raw, dict) else qs_raw
+        rejection = tpl.get("rejected_reason") or ""
+        if rejection == "NONE":
+            rejection = ""
         if existing:
             existing.category = tpl.get("category")
             existing.status = tpl.get("status")
-            existing.quality_score = tpl.get("quality_score")
+            existing.quality_score = quality_score
             existing.components = tpl.get("components", [])
             existing.last_synced_at = now
             existing.is_draft = False
-            existing.rejection_reason = tpl.get("rejected_reason") or ""
+            existing.rejection_reason = rejection
             updated += 1
         else:
             new_template = WATemplate(
@@ -337,11 +342,11 @@ async def sync_templates(db: DBSession) -> WATemplateSyncResult:
                 language=language,
                 category=tpl.get("category"),
                 status=tpl.get("status"),
-                quality_score=tpl.get("quality_score"),
+                quality_score=quality_score,
                 components=tpl.get("components", []),
                 last_synced_at=now,
                 is_draft=False,
-                rejection_reason=tpl.get("rejected_reason") or "",
+                rejection_reason=rejection,
             )
             db.add(new_template)
             created += 1

@@ -17,6 +17,30 @@ from services.config import get_settings
 _log = logging.getLogger(__name__)
 
 
+def _quality_score_str(raw) -> str | None:
+    """Coerce Meta's quality_score field to a plain string.
+
+    Meta returns it as a dict like {"score": "GREEN", "date": 1776133652}
+    on some API versions and as a flat string on others. Local column is
+    VARCHAR(20), so normalize to just the score string.
+    """
+    if raw is None:
+        return None
+    if isinstance(raw, dict):
+        return raw.get("score")
+    return str(raw)[:20]
+
+
+def _rejection_reason_str(raw) -> str:
+    """Meta returns 'NONE' (the literal string) when there's no rejection.
+
+    Treat that as empty so the UI doesn't show '🔴 NONE' on approved rows.
+    """
+    if not raw or raw == "NONE":
+        return ""
+    return str(raw)
+
+
 class WhatsAppSender:
     """Sync client for the Meta WhatsApp Cloud API."""
 
@@ -296,11 +320,12 @@ class WhatsAppSender:
                 .filter(WATemplate.name == name, WATemplate.language == language)
                 .one_or_none()
             )
-            rejection = tpl.get("rejected_reason") or ""
+            quality_score = _quality_score_str(tpl.get("quality_score"))
+            rejection = _rejection_reason_str(tpl.get("rejected_reason"))
             if existing:
                 existing.category = tpl.get("category")
                 existing.status = tpl.get("status")
-                existing.quality_score = tpl.get("quality_score")
+                existing.quality_score = quality_score
                 existing.components = tpl.get("components", [])
                 existing.last_synced_at = now
                 existing.is_draft = False
@@ -313,7 +338,7 @@ class WhatsAppSender:
                         language=language,
                         category=tpl.get("category"),
                         status=tpl.get("status"),
-                        quality_score=tpl.get("quality_score"),
+                        quality_score=quality_score,
                         components=tpl.get("components", []),
                         last_synced_at=now,
                         is_draft=False,
