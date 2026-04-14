@@ -59,33 +59,89 @@ def _template_row_label(t) -> str:
     return f"{icon} {t.name} · {lang}"
 
 
-def _refresh_lists():
-    """Pull lists for all four tabs from the DB."""
+_STATUS_FILTER_CHOICES = [
+    ("🟢 Approved", "APPROVED"),
+    ("📝 Drafts", "DRAFT"),
+    ("🟡 Pending", "PENDING"),
+    ("🔴 Rejected", "REJECTED"),
+]
+
+
+def _counts_by_status(db) -> dict[str, int]:
+    """Return {status: count} across all WATemplate rows."""
+    from services.models import WATemplate
+
+    out = {"DRAFT": 0, "PENDING": 0, "APPROVED": 0, "REJECTED": 0}
+    for t in db.query(WATemplate).all():
+        if t.is_draft:
+            out["DRAFT"] += 1
+        else:
+            st = (t.status or "PENDING").upper()
+            if st in out:
+                out[st] += 1
+    return out
+
+
+def _status_choices_with_counts(db) -> list[tuple[str, str]]:
+    """Build the status-filter dropdown choices with row counts."""
+    counts = _counts_by_status(db)
+    out = []
+    for label, value in _STATUS_FILTER_CHOICES:
+        out.append((f"{label} ({counts.get(value, 0)})", value))
+    return out
+
+
+def _fetch_templates_for_status(status: str):
+    """Return (choices, status_dropdown_update) for the filter + radio."""
     from services.database import get_db
 
+    if not status:
+        status = "APPROVED"
     db = get_db()
     try:
-        drafts = [(_template_row_label(t), t.id) for t in _list_templates(db, drafts=True)]
-        pending = [
-            (_template_row_label(t), t.id)
-            for t in _list_templates(db, drafts=False, status="PENDING")
-        ]
-        approved = [
-            (_template_row_label(t), t.id)
-            for t in _list_templates(db, drafts=False, status="APPROVED")
-        ]
-        rejected = [
-            (_template_row_label(t), t.id)
-            for t in _list_templates(db, drafts=False, status="REJECTED")
-        ]
+        if status == "DRAFT":
+            rows = _list_templates(db, drafts=True)
+        else:
+            rows = _list_templates(db, drafts=False, status=status)
+        choices = [(_template_row_label(t), t.id) for t in rows]
+        status_choices = _status_choices_with_counts(db)
         return (
-            gr.update(choices=drafts, value=None),
-            gr.update(choices=pending, value=None),
-            gr.update(choices=approved, value=None),
-            gr.update(choices=rejected, value=None),
+            gr.update(choices=choices, value=None),
+            gr.update(choices=status_choices, value=status),
         )
     finally:
         db.close()
+
+
+def _refresh_default_view():
+    """0-arg refresh used by navigation engine update_fn. Defaults to APPROVED."""
+    return _fetch_templates_for_status("APPROVED")
+
+
+def _strip_version_suffix(name: str) -> str:
+    """'hello_world_v3' -> 'hello_world'. Leaves un-versioned names alone."""
+    return re.sub(r"_v\d+$", "", name or "")
+
+
+def _next_version_name(db, base: str, language: str) -> str:
+    """Find the next unused _vN suffix for a given (base, language) pair."""
+    from services.models import WATemplate
+
+    existing = {
+        t.name
+        for t in db.query(WATemplate)
+        .filter(WATemplate.language == language)
+        .filter(WATemplate.name.like(f"{base}%"))
+        .all()
+    }
+    if base not in existing:
+        # Rare case: original got deleted; reuse plain base for the new draft.
+        return base
+    for n in range(2, 100):
+        candidate = f"{base}_v{n}"
+        if candidate not in existing:
+            return candidate
+    return f"{base}_v100"
 
 
 def _blank_form_state() -> dict:
@@ -175,9 +231,32 @@ def _load_row_into_form(template_id: int) -> dict:
             "body_text": body,
             "footer_text": footer,
             "buttons_json": json.dumps(buttons, indent=2),
+            "is_draft": bool(t.is_draft),
+            "status": t.status or "",
         }
     finally:
         db.close()
+
+
+def _approved_banner_html(is_approved: bool, name: str, language: str) -> str:
+    """Info banner shown in the editor when a non-draft template is loaded."""
+    if not is_approved:
+        return ""
+    from services.database import get_db
+
+    db = get_db()
+    try:
+        suggested = _next_version_name(db, _strip_version_suffix(name), language)
+    finally:
+        db.close()
+    return (
+        '<div style="background:rgba(245,158,11,0.10); border:1px solid rgba(245,158,11,0.35); '
+        'border-radius:6px; padding:8px 10px; margin:0 0 8px 0; font-size:11px; color:#fcd34d;">'
+        '🔒 <b>Meta-approved template.</b> '
+        f'Saving or submitting will create a new draft <b>{suggested}</b> — '
+        f'the original <code>{name}</code> stays untouched on Meta.'
+        '</div>'
+    )
 
 
 def _parse_buttons(buttons_json: str) -> list[dict]:
@@ -447,6 +526,13 @@ def _render_guidelines_html() -> str:
   {_row("🖼", "Image", g.header_image)}
   {_row("🎬", "Video", g.header_video)}
   {_row("📄", "Document", g.header_document)}
+  <div style="font-size:10px; color:#fcd34d; padding:8px 6px 2px 6px;
+              margin-top:8px; border-top:1px solid rgba(255,255,255,0.06);
+              line-height:1.45;">
+    🔒 <b>Editing approved templates:</b> Meta locks templates once
+    approved. Editing a 🟢 Approved template and saving will create a
+    <b>new draft (_v2)</b> — the original stays untouched on Meta.
+  </div>
 </div>
 """
 
@@ -469,6 +555,13 @@ def _save_draft(
     template_id, name, category, language, header_format, header_text,
     header_asset_url, body_text, footer_text, buttons_json,
 ):
+    """Upsert a draft template row.
+
+    If `template_id` points to a non-draft (approved/pending/rejected/synced)
+    row, we DO NOT overwrite it — Meta treats approved templates as
+    immutable, and overwriting would silently demote the original. Instead
+    clone the content into a new row with a `_vN` suffix.
+    """
     from services.database import get_db
     from services.models import WATemplate
 
@@ -482,10 +575,22 @@ def _save_draft(
 
     db = get_db()
     try:
+        cloned_from = None
         if template_id:
-            t = db.query(WATemplate).filter(WATemplate.id == template_id).one_or_none()
-            if t is None:
+            existing = db.query(WATemplate).filter(WATemplate.id == template_id).one_or_none()
+            if existing is None:
                 return "❌ Template not found", None
+            if existing.is_draft:
+                t = existing
+            else:
+                # Clone-on-edit: never mutate a synced/approved row.
+                base = _strip_version_suffix(existing.name)
+                new_name = _next_version_name(db, base, language or existing.language)
+                t = WATemplate(name=new_name, language=language or existing.language, is_draft=True)
+                db.add(t)
+                cloned_from = existing.name
+                # Force the form name to the new _vN so subsequent saves reuse it.
+                name = new_name
         else:
             t = WATemplate(name=name.strip(), language=language, is_draft=True)
             db.add(t)
@@ -494,16 +599,26 @@ def _save_draft(
         t.category = category
         t.language = language
         t.header_format = None if header_format == "NONE" else header_format
-        t.header_text = header_text.strip() or None
+        t.header_text = (header_text or "").strip() or None
         t.header_asset_url = (header_asset_url or "").strip() or None
         t.body_text = body_text or ""
         t.footer_text = (footer_text or "").strip() or None
         t.buttons = buttons
         t.is_draft = True
+        # Clear any synced-from-Meta identifiers on the clone so the new row
+        # doesn't collide with the original during future sync runs.
+        if cloned_from is not None:
+            t.meta_template_id = None
+            t.status = None
+            t.quality_score = None
+            t.rejection_reason = ""
+            t.last_synced_at = None
 
         db.commit()
         db.refresh(t)
-        return f"✅ Draft saved (id {t.id})", t.id
+        if cloned_from:
+            return f"✅ Cloned from {cloned_from} → new draft {t.name} (id {t.id})", t.id
+        return f"✅ Draft saved: {t.name} (id {t.id})", t.id
     except Exception as e:
         db.rollback()
         log.exception("Save draft failed")
@@ -620,15 +735,14 @@ def build(ctx):
             new_btn = gr.Button("+ New Draft", size="sm", variant="primary")
             sync_btn = gr.Button("🔄 Sync from Meta", size="sm", variant="secondary")
             sync_result = gr.HTML(value="")
-            with gr.Tabs():
-                with gr.Tab("Drafts"):
-                    drafts_radio = gr.Radio(label="", choices=[], interactive=True)
-                with gr.Tab("Pending"):
-                    pending_radio = gr.Radio(label="", choices=[], interactive=True)
-                with gr.Tab("Approved"):
-                    approved_radio = gr.Radio(label="", choices=[], interactive=True)
-                with gr.Tab("Rejected"):
-                    rejected_radio = gr.Radio(label="", choices=[], interactive=True)
+            status_filter = gr.Dropdown(
+                label="Filter",
+                choices=_STATUS_FILTER_CHOICES,
+                value="APPROVED",
+                interactive=True,
+                container=True,
+            )
+            template_radio = gr.Radio(label="", choices=[], interactive=True)
             gr.HTML(_render_guidelines_html())
 
         # ═══ CENTER (30%) — compact editor form ═══
@@ -636,6 +750,7 @@ def build(ctx):
             gr.HTML('<div class="ts-panel-title">Editor</div>')
             gr.HTML(_warning_banner())
             template_id_state = gr.State(value=None)
+            approved_banner = gr.HTML(value="")
 
             name_input = gr.Textbox(label="Name", placeholder="welcome_v1")
             with gr.Row():
@@ -724,7 +839,7 @@ def build(ctx):
         return (
             None, s["name"], s["category"], s["language"], s["header_format"],
             s["header_text"], s["header_asset_url"], s["body_text"], s["footer_text"],
-            s["buttons_json"], "",
+            s["buttons_json"], "", "",
         )
 
     new_btn.click(
@@ -732,34 +847,45 @@ def build(ctx):
         outputs=[
             template_id_state, name_input, category_input, language_input,
             header_format_input, header_text_input, header_asset_url_input,
-            body_input, footer_input, buttons_input, action_result,
+            body_input, footer_input, buttons_input, action_result, approved_banner,
         ],
     ).then(
         fn=_render_preview, inputs=preview_inputs, outputs=[preview_html],
     )
 
-    # -- Row selection: load form --
+    # -- Row selection: load form + approved-banner --
     def _select_row(template_id):
         if not template_id:
             return (
-                None, "", "MARKETING", "en_US", "NONE", "", "", "", "", "[]",
+                None, "", "MARKETING", "en_US", "NONE", "", "", "", "", "[]", "",
             )
         s = _load_row_into_form(template_id)
+        banner = _approved_banner_html(
+            not s.get("is_draft", True), s.get("name", ""), s.get("language", "en_US"),
+        )
         return (
             s["id"], s["name"], s["category"], s["language"], s["header_format"],
             s["header_text"], s["header_asset_url"], s["body_text"], s["footer_text"],
-            s["buttons_json"],
+            s["buttons_json"], banner,
         )
 
     form_outputs = [
         template_id_state, name_input, category_input, language_input,
         header_format_input, header_text_input, header_asset_url_input,
-        body_input, footer_input, buttons_input,
+        body_input, footer_input, buttons_input, approved_banner,
     ]
-    for radio in (drafts_radio, pending_radio, approved_radio, rejected_radio):
-        radio.change(fn=_select_row, inputs=[radio], outputs=form_outputs).then(
-            fn=_render_preview, inputs=preview_inputs, outputs=[preview_html],
-        )
+    template_radio.change(
+        fn=_select_row, inputs=[template_radio], outputs=form_outputs,
+    ).then(
+        fn=_render_preview, inputs=preview_inputs, outputs=[preview_html],
+    )
+
+    # -- Status filter change → fetch new list --
+    status_filter.change(
+        fn=_fetch_templates_for_status,
+        inputs=[status_filter],
+        outputs=[template_radio, status_filter],
+    )
 
     # -- Save draft --
     save_btn.click(
@@ -770,6 +896,10 @@ def build(ctx):
             body_input, footer_input, buttons_input,
         ],
         outputs=[action_result, template_id_state],
+    ).then(
+        fn=_fetch_templates_for_status,
+        inputs=[status_filter],
+        outputs=[template_radio, status_filter],
     )
 
     # -- Submit to Meta --
@@ -782,24 +912,20 @@ def build(ctx):
         ],
         outputs=[action_result, template_id_state],
     ).then(
-        fn=_refresh_lists,
-        outputs=[drafts_radio, pending_radio, approved_radio, rejected_radio],
+        fn=_fetch_templates_for_status,
+        inputs=[status_filter],
+        outputs=[template_radio, status_filter],
     )
 
-    # -- Sync --
+    # -- Sync from Meta --
     sync_btn.click(fn=_sync_from_meta, outputs=[sync_result]).then(
-        fn=_refresh_lists,
-        outputs=[drafts_radio, pending_radio, approved_radio, rejected_radio],
+        fn=_fetch_templates_for_status,
+        inputs=[status_filter],
+        outputs=[template_radio, status_filter],
     )
 
-    # -- Save-draft list refresh --
-    save_btn.click(
-        fn=_refresh_lists,
-        outputs=[drafts_radio, pending_radio, approved_radio, rejected_radio],
-    )
-
-    # -- Refresh wiring for sidebar nav --
+    # -- Refresh wiring for sidebar nav (update_fn is 0-arg; defaults to APPROVED) --
     return {
-        "update_fn": _refresh_lists,
-        "outputs": [drafts_radio, pending_radio, approved_radio, rejected_radio],
+        "update_fn": _refresh_default_view,
+        "outputs": [template_radio, status_filter],
     }
