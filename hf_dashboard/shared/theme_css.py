@@ -618,13 +618,22 @@ html, body { scroll-behavior: auto !important; overflow-anchor: none !important;
     flex: 8 1 0 !important;
     min-width: 0 !important;
 }
-/* Cap the Send button so it doesn't expand to 160px. */
-.chat-panel .chat-send-row .chat-send-btn {
+/* Cap the Send button. Gradio renders gr.Button directly as <button>
+   with the elem_classes applied, so we target button.chat-send-btn
+   (not .chat-send-btn button — the button IS the element). Same for
+   the attach + clear buttons. */
+.chat-panel .chat-send-row button.chat-send-btn {
     flex: 0 0 auto !important;
+    min-width: 64px !important;
+    max-width: 80px !important;
+    width: 80px !important;
 }
-.chat-panel .chat-send-row .chat-send-btn button {
-    min-width: 72px !important;
-    max-width: 90px !important;
+.chat-panel .chat-send-row button.chat-attach-btn,
+.chat-panel .chat-send-row button.chat-attach-clear {
+    flex: 0 0 auto !important;
+    width: 36px !important;
+    min-width: 36px !important;
+    max-width: 36px !important;
 }
 
 /* Attachment modal — show the gr.File only when inside the modal */
