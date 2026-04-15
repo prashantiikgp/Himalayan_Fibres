@@ -618,6 +618,7 @@ def build(ctx):
         fn=_on_category_change,
         inputs=[tp_category],
         outputs=[tp_template],
+        show_progress="hidden",
     )
 
     def _on_template_change(template_name: str):
@@ -664,6 +665,7 @@ def build(ctx):
         fn=_on_template_change,
         inputs=[tp_template],
         outputs=[*var_slots, tp_preview_box],
+        show_progress="hidden",
     )
 
     def _preview_update(template_name, *slot_values):
@@ -676,12 +678,21 @@ def build(ctx):
                     values[v.name] = slot_values[i] or ""
         return render_wa_template_filled(template_name, values)
 
-    for slot in var_slots:
-        slot.change(
-            fn=_preview_update,
-            inputs=[tp_template, *var_slots],
-            outputs=[tp_preview_box],
-        )
+    # ONE merged listener for all slot.change events. When the user picks
+    # a different template, _on_template_change updates 5 slot values at
+    # once — which would otherwise queue 5 separate _preview_update jobs
+    # and stack the "processing" spinner on every input field. gr.on +
+    # trigger_mode="always_last" collapses the burst into a single call,
+    # and show_progress="hidden" suppresses the per-input spinner since
+    # the substitution is just a string replace.
+    gr.on(
+        triggers=[s.change for s in var_slots],
+        fn=_preview_update,
+        inputs=[tp_template, *var_slots],
+        outputs=[tp_preview_box],
+        trigger_mode="always_last",
+        show_progress="hidden",
+    )
 
     def _send_message(contact_id, msg, media_path):
         """Unified send handler: text-only OR media (with optional caption).

@@ -89,7 +89,7 @@ body { font-size: 12px !important; }
 .main-layout {
     display: flex !important;
     align-items: stretch !important;
-    min-height: calc(100vh - 80px) !important;
+    min-height: calc(100vh - 30px) !important;
     gap: 8px !important;
     padding: 0 !important;
     margin-top: 4px !important;
@@ -101,7 +101,7 @@ body { font-size: 12px !important; }
     border: 1px solid rgba(255,255,255,.06) !important;
     border-radius: 12px !important;
     padding: 8px 4px !important;
-    min-height: calc(100vh - 80px) !important;
+    min-height: calc(100vh - 30px) !important;
     height: 100% !important;
     position: sticky !important;
     top: 8px !important;
@@ -144,7 +144,7 @@ body { font-size: 12px !important; }
 /* -- Content area -- */
 .content-area {
     padding: 0 8px !important;
-    min-height: calc(100vh - 80px) !important;
+    min-height: calc(100vh - 30px) !important;
     gap: 0 !important;
 }
 
@@ -600,6 +600,22 @@ html, body { scroll-behavior: auto !important; overflow-anchor: none !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
 }
+/* Hide the chip slot wrapper completely when empty so the textbox can
+   stretch all the way to the buttons. The :has() selector is supported
+   in all evergreen browsers; the :not(:has(*)) check matches an HTML
+   component whose inner div has no child elements. */
+.chat-panel .chat-attach-chip-slot:not(:has(.chat-attach-chip)) {
+    display: none !important;
+    flex: 0 !important;
+    width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+/* Force the textbox to absorb every leftover pixel in the send row */
+.chat-panel .chat-send-row .chat-send-input {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+}
 
 /* Attachment modal — show the gr.File only when inside the modal */
 .wa-attach-modal { display: flex !important; flex-direction: column !important; gap: 10px !important; }
@@ -664,6 +680,12 @@ def _build_panel_css() -> str:
     # .tools-panel — both columns now manage their own internal scroll
     # regions (see wa_inbox.py rebuild). Setting it here would beat any
     # later override in _STATIC_CSS due to source-order cascade.
+    #
+    # Both height AND max-height are set to the same expression so the
+    # panels can't grow when internal content (templates list, contact
+    # card, variable inputs) would otherwise expand them. Without the
+    # cap, picking a template with 4 variables would push Panel 3 below
+    # Panel 1 / Panel 2 and break three-column alignment.
     return (
         "\n/* -- Full-height sibling panels (layout.yml) -- */\n"
         ".conv-list-panel, .tools-panel {\n"
@@ -671,6 +693,8 @@ def _build_panel_css() -> str:
         f"    border: {layout.BORDER} !important;\n"
         f"    border-radius: {layout.BORDER_RADIUS} !important;\n"
         f"    padding: {layout.PADDING} !important;\n"
+        f"    height: {layout.MIN_HEIGHT_EXPR} !important;\n"
+        f"    max-height: {layout.MIN_HEIGHT_EXPR} !important;\n"
         f"    min-height: {layout.MIN_HEIGHT_EXPR} !important;\n"
         "    display: flex !important;\n"
         "    flex-direction: column !important;\n"
@@ -680,6 +704,8 @@ def _build_panel_css() -> str:
         f"    border: {layout.CHAT_BORDER} !important;\n"
         f"    border-radius: {layout.BORDER_RADIUS} !important;\n"
         "    padding: 0 !important;\n"
+        f"    height: {layout.MIN_HEIGHT_EXPR} !important;\n"
+        f"    max-height: {layout.MIN_HEIGHT_EXPR} !important;\n"
         f"    min-height: {layout.MIN_HEIGHT_EXPR} !important;\n"
         "    display: flex !important;\n"
         "    flex-direction: column !important;\n"

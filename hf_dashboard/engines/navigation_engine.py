@@ -93,9 +93,11 @@ def build_app_with_sidebar(title: str = "Himalayan Fibers") -> gr.Blocks:
                         login_error = gr.HTML(value="")
                     gr.Column(scale=1)
 
-        # -- Header --
-        with gr.Group(visible=not has_auth) as dashboard_group:
-            gr.HTML(_render_header(title, subtitle))
+        # -- Header removed (W02 April 2026) — top banner was eating vertical
+        #    space on every page and serving no functional purpose. The
+        #    dashboard_group wrapper stays so the auth gate still has
+        #    something to toggle visible after login.
+        dashboard_group = gr.Group(visible=not has_auth)
 
         # -- Main layout: sidebar + content --
         with gr.Row(elem_classes=["main-layout"], visible=not has_auth) as main_layout:

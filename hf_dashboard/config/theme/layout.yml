@@ -12,7 +12,12 @@ layout:
   # future template studio). All three sibling panels must use the same
   # min_height_expr so they line up visually.
   panels:
-    min_height_expr: "calc(100vh - 160px)"
+    # Top banner removed in W02 April 2026 — dashboard reserve is now ~30px
+    # (sidebar margin + content padding) instead of 160 (banner + nav margin).
+    # This is used as both min-height and height so panels can't grow taller
+    # than the viewport when their internal content (templates, contact card)
+    # would otherwise expand them and break the three-column alignment.
+    min_height_expr: "calc(100vh - 30px)"
     border_radius: "10px"
     padding: "10px"
     background: "rgba(15,23,42,.50)"
