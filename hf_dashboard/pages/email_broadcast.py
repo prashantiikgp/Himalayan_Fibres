@@ -154,13 +154,14 @@ def _upsert_contact_by_email(db, email: str):
 def _build_slot_updates(meta) -> tuple[list, list[str]]:
     """Map a template's variables onto the pre-declared slot textboxes.
 
-    Returns ``(updates, names)`` where:
-    - ``updates`` is a list of 8 ``gr.update(...)`` objects — 6 short slots
-      followed by 2 long (textarea) slots. Unused slots are hidden and
-      cleared.
-    - ``names`` is a list of 8 variable names (empty string for unused
-      slots). This is the session state used to zip slot values back into
-      a ``{name: value}`` dict on preview refresh + send.
+    All 8 slots stay visible regardless of which template is selected —
+    the layout is stable across template switches (no fields appearing
+    or disappearing). Slots not bound to a template variable show a
+    generic ``Variable N`` label and an empty value; ``names[i]`` is
+    ``""`` for those, so ``_collect_var_values`` skips them on send.
+
+    Returns ``(updates, names)`` — both 8 elements, in order: 6 short
+    slots followed by 2 long (textarea) slots.
     """
     vars_list = list(meta.variables) if meta is not None else []
     short_vars = [v for v in vars_list if v.type != "textarea"]
@@ -182,7 +183,14 @@ def _build_slot_updates(meta) -> tuple[list, list[str]]:
             )
             names.append(v.name)
         else:
-            updates.append(gr.update(visible=False, value="", label="", placeholder=""))
+            updates.append(
+                gr.update(
+                    visible=True,
+                    label=f"Variable {i + 1}",
+                    placeholder="",
+                    value="",
+                )
+            )
             names.append("")
 
     for j in range(MAX_VAR_SLOTS_LONG):
@@ -198,7 +206,14 @@ def _build_slot_updates(meta) -> tuple[list, list[str]]:
             )
             names.append(v.name)
         else:
-            updates.append(gr.update(visible=False, value="", label="", placeholder=""))
+            updates.append(
+                gr.update(
+                    visible=True,
+                    label=f"Long variable {j + 1}",
+                    placeholder="",
+                    value="",
+                )
+            )
             names.append("")
 
     return updates, names
