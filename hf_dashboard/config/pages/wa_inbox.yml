@@ -3,7 +3,7 @@ page:
 
   column_1:
     title: "Active Chats"
-    refresh_caption: "Click Refresh to see updated conversation."
+    refresh_caption: "Click Refresh after sending a message to see updates."
     search_placeholder: "Search active..."
     empty_message: "No active WhatsApp conversations"
     new_conversation:

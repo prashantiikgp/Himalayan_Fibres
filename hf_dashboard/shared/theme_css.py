@@ -653,8 +653,20 @@ html, body { scroll-behavior: auto !important; overflow-anchor: none !important;
 
 /* Panel 3 — heights tightened so all sections (refresh + activity +
    2 dropdowns + var inputs + preview + send button) fit one viewport
-   without pushing Send Template below the fold. */
-.tools-panel { overflow: hidden !important; padding: 10px !important; }
+   without pushing Send Template below the fold.
+
+   flex-wrap: nowrap is critical — Gradio's gr.Column defaults to
+   flex-wrap: wrap, which causes children that don't fit to spill into
+   a second column track overlapping the top. Without this, tp-vars-box
+   (flex: 1 1 auto) would grow to fill the whole panel and push Preview
+   + Send Template into a wrap-around track at top=58, overlapping the
+   refresh button. Same fix needed for .conv-list-panel for safety. */
+.tools-panel {
+    overflow: hidden !important;
+    padding: 10px !important;
+    flex-wrap: nowrap !important;
+}
+.conv-list-panel { flex-wrap: nowrap !important; }
 .tools-panel button.tp-refresh-btn {
     flex: 0 0 auto !important;
     height: 32px !important;
