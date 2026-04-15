@@ -204,7 +204,13 @@ def _build_table(db, segment="All", lifecycle="All", country="All", channel="All
                 font = col.get("font", "")
                 display = contact.email if _is_real_email(contact.email) else missing
                 tip = html.escape(contact.email or "") if _is_real_email(contact.email) else ""
-                cells += f'<td style="{table_cell(font=font)}; color:#94a3b8;" title="{tip}">{display}</td>'
+                # Email cell wraps (white-space:normal) so a long address
+                # doesn't blow out the column. CSS .contact-email-cell in
+                # theme_css.py overrides table_cell()'s default ellipsis.
+                cells += (
+                    f'<td class="contact-email-cell" '
+                    f'style="{table_cell(font=font)}; color:#94a3b8;" title="{tip}">{display}</td>'
+                )
             elif field == "phone":
                 display = contact.phone if contact.phone else missing
                 tip = html.escape(contact.phone or "")
@@ -455,27 +461,33 @@ def build(ctx) -> dict:
         _db_tags.close()
 
     with gr.Row():
-        # -- Left: Filters + KPIs --
+        # -- Left: Filters (legend removed W02 April 2026) --
+        # The wa-filter-lg variant gives each dropdown a larger input
+        # height so the filter column reads as the primary surface,
+        # not as decoration around a legend that used to dominate.
         with gr.Column(scale=1, min_width=200, elem_classes=["page-left-col"]):
             segment_filter = gr.Dropdown(
                 label="Segment", choices=get_segment_choices(), value="All", interactive=True,
+                elem_classes=["wa-filter-lg"],
             )
             lifecycle_filter = gr.Dropdown(
                 label="Lifecycle", choices=get_lifecycle_choices(), value="All", interactive=True,
+                elem_classes=["wa-filter-lg"],
             )
             country_filter = gr.Dropdown(
                 label="Country", choices=["All"] + get_country_options(), value="All", interactive=True,
+                elem_classes=["wa-filter-lg"],
             )
             channel_filter = gr.Dropdown(
                 label="Channel", choices=["All", "Email Only", "WhatsApp Only", "Both"], value="All", interactive=True,
+                elem_classes=["wa-filter-lg"],
             )
             tag_filter = gr.Dropdown(
                 label="Tags", choices=_all_tags, value=[],
                 multiselect=True, interactive=True,
                 info="Empty = any. Pick tags to narrow.",
+                elem_classes=["wa-filter-lg"],
             )
-            gr.HTML('<div style="height:1px; background:rgba(255,255,255,.06); margin:12px 0;"></div>')
-            gr.HTML(value=_build_legend(inline=True))
 
         # -- Right: Top bar + table + compact footer (legend + pagination) --
         top_bar_cfg = cfg.get("top_bar", {})
@@ -498,12 +510,8 @@ def build(ctx) -> dict:
             with gr.Column(elem_classes=["contacts-table-host"]):
                 table_html = gr.HTML(value="")
 
-            # Compact footer: legend button on the left, pagination on the right
+            # Compact footer: pagination only (Legend removed W02 April 2026)
             with gr.Row(elem_classes=["contacts-footer-bar"]):
-                legend_btn = gr.Button(
-                    top_bar_cfg.get("legend_label", "ℹ Legend"),
-                    size="sm", scale=0, min_width=90,
-                )
                 pag_label = gr.HTML(value="")
                 prev_btn = gr.Button(pag_cfg.get("prev_label", "‹"), size="sm", scale=0, min_width=40)
                 page_num = gr.Number(
@@ -551,11 +559,6 @@ def build(ctx) -> dict:
             import_back = gr.Button("Close", size="sm")
             download_btn = gr.Button("Download All CSV", size="sm")
         download_file = gr.File(visible=False)
-
-    # -- Legend modal overlay --
-    with gr.Column(visible=True, elem_classes=["hf-modal", "hf-modal-wide", "hf-modal-closed"]) as legend_panel:
-        gr.HTML(value=_build_legend())
-        legend_close = gr.Button("Close", size="sm")
 
     # -- Hybrid edit bridge --
     # The row Edit button writes contact_id into `edit_contact_id_box` via
@@ -652,7 +655,6 @@ def build(ctx) -> dict:
     # -- Modal toggles via CSS class (avoids Svelte mount race on first open) --
     _MODAL_OPEN = {"add": ["hf-modal"],
                     "import": ["hf-modal"],
-                    "legend": ["hf-modal", "hf-modal-wide"],
                     "edit": ["hf-modal", "hf-modal-drawer"]}
     _MODAL_CLOSED = {k: v + ["hf-modal-closed"] for k, v in _MODAL_OPEN.items()}
 
@@ -660,8 +662,6 @@ def build(ctx) -> dict:
     cancel_btn.click(fn=lambda: gr.update(elem_classes=_MODAL_CLOSED["add"]), outputs=[add_panel])
     import_btn.click(fn=lambda: gr.update(elem_classes=_MODAL_OPEN["import"]), outputs=[import_panel])
     import_back.click(fn=lambda: gr.update(elem_classes=_MODAL_CLOSED["import"]), outputs=[import_panel])
-    legend_btn.click(fn=lambda: gr.update(elem_classes=_MODAL_OPEN["legend"]), outputs=[legend_panel])
-    legend_close.click(fn=lambda: gr.update(elem_classes=_MODAL_CLOSED["legend"]), outputs=[legend_panel])
     edit_cancel_btn.click(fn=lambda: gr.update(elem_classes=_MODAL_CLOSED["edit"]), outputs=[edit_panel])
 
     # -- Open edit drawer (called by JS bridge via hidden trigger button) --

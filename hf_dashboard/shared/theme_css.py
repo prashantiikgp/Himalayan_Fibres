@@ -179,11 +179,38 @@ body { font-size: 12px !important; }
     flex: 1 1 auto !important;
     min-height: 0 !important;
     overflow-y: auto !important;
-    overflow-x: hidden !important;
+    overflow-x: auto !important;
     border: 1px solid rgba(255,255,255,.06) !important;
     border-radius: 8px !important;
     background: rgba(15,23,42,.40) !important;
 }
+/* Force horizontal scroll on narrow viewports — the contacts table
+   has many columns (Name, Company, Channel, Lifecycle, Segments, Email,
+   Phone, City, Country, Tags, Edit) and squeezes them all into a
+   100% width by default, which truncates almost every value. Setting
+   a min-width forces overflow at narrow widths so the user can scroll
+   sideways and read the full row. */
+.contacts-right-col .contacts-table-host table {
+    min-width: 1100px !important;
+    table-layout: auto !important;
+}
+/* Email cell wraps instead of ellipsis — long addresses (40+ chars)
+   were either truncated invisibly or pushed neighbour columns off
+   screen. word-break:break-all handles both 'long.local-part@host'
+   and unbroken garbage strings. */
+.contacts-right-col .contacts-table-host td.contact-email-cell {
+    white-space: normal !important;
+    word-break: break-all !important;
+    max-width: 200px !important;
+    line-height: 1.35 !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+}
+/* Filters in .page-left-col use the wa-filter-lg variant. Add
+   breathing room between them so the column reads as the primary
+   surface (legend was removed from this column). */
+.page-left-col .wa-filter-lg { margin: 6px 0 !important; }
+.page-left-col .wa-filter-lg:first-child { margin-top: 0 !important; }
 .contacts-right-col .contacts-table-host > * { margin: 0 !important; }
 /* Visible scrollbar inside the table */
 .contacts-right-col .contacts-table-host::-webkit-scrollbar {
