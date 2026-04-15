@@ -23,6 +23,7 @@ editor are preserved. Pass ``force=True`` to overwrite metadata
 from __future__ import annotations
 
 import logging
+from functools import lru_cache
 from pathlib import Path
 
 import yaml
@@ -37,6 +38,17 @@ log = logging.getLogger(__name__)
 _CFG_DIR = Path(__file__).resolve().parent.parent / "config" / "email" / "templates_seed"
 
 
+class TemplateVariableSpec(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str
+    label: str = ""
+    type: str = "text"      # text | textarea | url | date
+    placeholder: str = ""
+    example: str = ""
+    required: bool = False
+
+
 class SeedTemplateMeta(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -47,6 +59,7 @@ class SeedTemplateMeta(BaseModel):
     is_active: bool = True
     required_variables: list[str] = Field(default_factory=list)
     optional_variables: list[str] = Field(default_factory=list)
+    variables: list[TemplateVariableSpec] = Field(default_factory=list)
 
 
 class _SeedDocument(BaseModel):
@@ -58,6 +71,24 @@ def _load_meta(path: Path) -> SeedTemplateMeta:
     with path.open("r", encoding="utf-8") as f:
         raw = yaml.safe_load(f) or {}
     return _SeedDocument(**raw).template
+
+
+@lru_cache(maxsize=32)
+def get_template_meta(slug: str) -> SeedTemplateMeta | None:
+    """Load a template's meta YAML for runtime UI use. Cached per-process.
+
+    Used by the Email Broadcast page to render per-variable input widgets.
+    Returns None if the slug has no meta file (UI then falls back to
+    showing no variable inputs — e.g. welcome, order_delivered_feedback).
+    """
+    path = _CFG_DIR / f"{slug}.meta.yml"
+    if not path.exists():
+        return None
+    try:
+        return _load_meta(path)
+    except Exception:
+        log.exception("Failed to load template meta: %s", path)
+        return None
 
 
 def seed_email_templates(db: Session, *, force: bool = False) -> dict:

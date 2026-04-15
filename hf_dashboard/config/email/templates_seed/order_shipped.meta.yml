@@ -13,3 +13,34 @@ template:
     - delivery_date
     - tracking_url
     - invoice_url
+  variables:
+    - name: courier_name
+      label: "Courier"
+      type: text
+      placeholder: "BlueDart"
+      example: "BlueDart"
+      required: true
+    - name: tracking_id
+      label: "Tracking ID"
+      type: text
+      placeholder: "BD123456789"
+      example: "BD123456789"
+      required: true
+    - name: dispatch_date
+      label: "Dispatch date"
+      type: date
+      placeholder: "02-Sep-2025"
+      example: "02-Sep-2025"
+      required: false
+    - name: delivery_date
+      label: "Est. delivery"
+      type: date
+      placeholder: "05-Sep-2025"
+      example: "05-Sep-2025"
+      required: false
+    - name: tracking_url
+      label: "Tracking URL"
+      type: url
+      placeholder: "https://www.bluedart.com/track/BD123456789"
+      example: "https://www.bluedart.com/track/BD123456789"
+      required: false

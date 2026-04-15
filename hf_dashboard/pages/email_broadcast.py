@@ -12,6 +12,17 @@ Preview supports a Desktop / Mobile toggle that renders the template inside
 a real ``<iframe srcdoc>`` so the templates' own ``<meta viewport>`` +
 ``max-width:640px`` tables take effect and the founder sees an accurate
 phone preview before sending.
+
+Phase 2 addition: dynamic per-template variable editor. Each template's
+user-editable variables (order_number, ship_to_html, update_title, …) come
+from its meta YAML under ``hf_dashboard/config/email/templates_seed/*.meta.yml``
+via ``services.template_seed.get_template_meta``. The page pre-declares
+a fixed number of textbox slots (``MAX_VAR_SLOTS_SHORT`` short + ``MAX_VAR_SLOTS_LONG``
+textarea) and swaps their labels/values/visibility when the template changes.
+Every slot edit re-renders the preview live; the collected slot values are
+passed as ``extra=`` to ``build_send_variables`` on Send Now AND on Test Send
+(which fixes the Phase 1 bug where the hardcoded "Alisha Panda" stub leaked
+into real test emails).
 """
 
 from __future__ import annotations
@@ -26,6 +37,21 @@ import gradio as gr
 from shared.theme import COLORS
 
 log = logging.getLogger(__name__)
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Constants
+# ═══════════════════════════════════════════════════════════════════════
+
+# Number of pre-declared variable input slots. Gradio components can't be
+# added/removed at runtime — so we declare a fixed set and swap their
+# labels/visibility per template. Max short = 6 (order_confirmation has 6
+# single-line variables); max textarea = 2 (order_confirmation has
+# ship_to_html + items_html). If a future template needs more, bump these
+# and add the corresponding gr.Textbox() rows in build().
+MAX_VAR_SLOTS_SHORT = 6
+MAX_VAR_SLOTS_LONG = 2
+MAX_VAR_SLOTS_TOTAL = MAX_VAR_SLOTS_SHORT + MAX_VAR_SLOTS_LONG
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -125,55 +151,89 @@ def _upsert_contact_by_email(db, email: str):
     return contact
 
 
-def _build_sample_vars_for_preview(template_slug: str) -> dict:
-    base = {
-        "first_name": "Alisha",
-        "last_name": "Panda",
-        "name": "Alisha Panda",
-        "email": "preview@himalayanfibres.com",
-        "contact_company": "",
-        "invoice_url": "",
-    }
+def _build_slot_updates(meta) -> tuple[list, list[str]]:
+    """Map a template's variables onto the pre-declared slot textboxes.
 
-    if template_slug == "order_confirmation":
-        base.update(
-            order_number="10014",
-            order_date="30-Aug-2025",
-            items_html='<p style="margin:4px 0;">Himalayan Woollen Yarn × 500 g</p>',
-            ship_to_html="Mrs. Alisha Panda<br>Brahmapur, Odisha 760004",
-            subtotal="Rs 750",
-            shipping="Rs 200",
-            total="Rs 950",
-            payment_method="UPI",
-            invoice_url="https://example.com/preview-invoice.pdf",
-        )
-    elif template_slug == "order_shipped":
-        base.update(
-            courier_name="BlueDart",
-            tracking_id="BD123456789",
-            dispatch_date="02-Sep-2025",
-            delivery_date="05-Sep-2025",
-            tracking_url="https://www.bluedart.com/track/BD123456789",
-            invoice_url="https://example.com/preview-invoice.pdf",
-        )
-    elif template_slug == "operational_update":
-        base.update(
-            update_title="A quick update from Himalayan Fibres",
-            update_body_html=(
-                "<p>We wanted to let you know about a small change coming next week.</p>"
-                "<p>Thanks for being with us.</p>"
-            ),
-        )
-    return base
+    Returns ``(updates, names)`` where:
+    - ``updates`` is a list of 8 ``gr.update(...)`` objects — 6 short slots
+      followed by 2 long (textarea) slots. Unused slots are hidden and
+      cleared.
+    - ``names`` is a list of 8 variable names (empty string for unused
+      slots). This is the session state used to zip slot values back into
+      a ``{name: value}`` dict on preview refresh + send.
+    """
+    vars_list = list(meta.variables) if meta is not None else []
+    short_vars = [v for v in vars_list if v.type != "textarea"]
+    long_vars = [v for v in vars_list if v.type == "textarea"]
+
+    updates: list = []
+    names: list[str] = []
+
+    for i in range(MAX_VAR_SLOTS_SHORT):
+        if i < len(short_vars):
+            v = short_vars[i]
+            updates.append(
+                gr.update(
+                    visible=True,
+                    label=v.label or v.name,
+                    placeholder=v.placeholder,
+                    value=v.example,
+                )
+            )
+            names.append(v.name)
+        else:
+            updates.append(gr.update(visible=False, value="", label="", placeholder=""))
+            names.append("")
+
+    for j in range(MAX_VAR_SLOTS_LONG):
+        if j < len(long_vars):
+            v = long_vars[j]
+            updates.append(
+                gr.update(
+                    visible=True,
+                    label=v.label or v.name,
+                    placeholder=v.placeholder,
+                    value=v.example,
+                )
+            )
+            names.append(v.name)
+        else:
+            updates.append(gr.update(visible=False, value="", label="", placeholder=""))
+            names.append("")
+
+    return updates, names
 
 
-def _render_preview_html(template_slug: str, device: str = "desktop") -> str:
+def _collect_var_values(names: list[str], slot_vals: tuple | list) -> dict:
+    """Zip slot values back into a ``{var_name: value}`` dict.
+
+    Empty names (unused slots) are skipped. None / empty string values
+    are preserved — an explicit blank should blank out the corresponding
+    Jinja variable so the template's ``{% if %}`` guards still work.
+    """
+    out: dict[str, str] = {}
+    for name, val in zip(names or [], slot_vals or ()):
+        if not name:
+            continue
+        out[name] = "" if val is None else val
+    return out
+
+
+def _render_preview_html(
+    template_slug: str,
+    device: str = "desktop",
+    extra: dict | None = None,
+) -> str:
     """Render the template inside a real iframe so the viewport meta + table
     ``max-width:640px`` rules in the email templates actually kick in.
 
     ``device='mobile'`` wraps the iframe in a 412px phone-frame div at 390px
-    inner width, which is what unlocks an accurate mobile preview — the
-    templates already ship with ``<meta viewport>`` in base.html.
+    inner width, which is what unlocks an accurate mobile preview.
+
+    ``extra`` is a per-send variable dict (e.g. ``{order_number: '10014'}``).
+    When not given, falls back to the ``example`` values from the template's
+    meta YAML so the first-load preview is still meaningful. This replaces
+    the old hardcoded "Alisha Panda" ``_build_sample_vars_for_preview``.
     """
     if not template_slug:
         return (
@@ -185,17 +245,24 @@ def _render_preview_html(template_slug: str, device: str = "desktop") -> str:
     from services.email_personalization import build_send_variables
     from services.email_sender import render_template_by_slug
     from services.models import Contact
+    from services.template_seed import get_template_meta
+
+    if extra is None:
+        meta = get_template_meta(template_slug)
+        extra = {
+            v.name: v.example
+            for v in (meta.variables if meta else [])
+            if v.example
+        }
 
     stub = Contact(
         id="preview",
         email="preview@himalayanfibres.com",
-        first_name="Alisha",
-        last_name="Panda",
+        first_name="Preview",
+        last_name="",
         company="",
     )
-    vars_for_preview = build_send_variables(
-        stub, {}, extra=_build_sample_vars_for_preview(template_slug)
-    )
+    vars_for_preview = build_send_variables(stub, {}, extra=extra)
 
     try:
         html = render_template_by_slug(template_slug, vars_for_preview)
@@ -222,7 +289,7 @@ def _render_preview_html(template_slug: str, device: str = "desktop") -> str:
         '<div style="background:#fff;border:1px solid rgba(255,255,255,.08);'
         'border-radius:10px;overflow:hidden;">'
         f'<iframe srcdoc="{srcdoc}" '
-        'style="width:100%;height:78vh;border:0;display:block;background:#fff;">'
+        'style="width:100%;height:72vh;border:0;display:block;background:#fff;">'
         '</iframe></div>'
     )
 
@@ -270,16 +337,11 @@ def build(ctx) -> dict:
     send_mode_state = gr.State("broadcast")       # "broadcast" | "individual"
     preview_device_state = gr.State("desktop")    # "desktop" | "mobile"
     individual_contact_state = gr.State(None)     # Contact.id or None
+    var_names_state = gr.State([""] * MAX_VAR_SLOTS_TOTAL)  # per-slot var names
 
     with gr.Row(equal_height=False):
         # ═══════════════════ LEFT: compose controls ═══════════════════
-        with gr.Column(scale=1, min_width=340):
-            gr.HTML(
-                f'<div style="background:{COLORS.CARD_BG};border:1px solid rgba(255,255,255,.06);'
-                f'border-radius:10px;padding:10px 14px;margin-bottom:10px;">'
-                f'<div style="font-size:11px;color:{COLORS.TEXT_MUTED};text-transform:uppercase;'
-                f'letter-spacing:.5px;">Send to</div></div>'
-            )
+        with gr.Column(scale=1, min_width=320):
             mode_radio = gr.Radio(
                 choices=["Broadcast", "Individual"],
                 value="Broadcast",
@@ -306,13 +368,9 @@ def build(ctx) -> dict:
 
             # ── Individual sub-group ────────────────────────────────────
             with gr.Group(visible=False) as individual_group:
-                gr.HTML(
-                    f'<div style="font-size:11px;color:{COLORS.TEXT_MUTED};margin:6px 0 4px;">'
-                    f"Search by name or company, or type any email below.</div>"
-                )
                 individual_search = gr.Textbox(
                     label="Search",
-                    placeholder="e.g. Sushank, Lakhanpal, Amazon",
+                    placeholder="Search by name or company — or type any email below",
                     interactive=True,
                 )
                 individual_contact_dropdown = gr.Dropdown(
@@ -331,15 +389,8 @@ def build(ctx) -> dict:
                     interactive=True,
                 )
 
-            subject_input = gr.Textbox(
-                label="Subject",
-                placeholder="Auto-fills from template — override if needed",
-                interactive=True,
-            )
-
             # ── Invoice attachment accordion ────────────────────────────
             with gr.Accordion("📎 Invoice attachment (optional)", open=False):
-                # Broadcast: per-recipient picker
                 with gr.Group(visible=True) as attach_broadcast_group:
                     gr.HTML(
                         f'<div style="font-size:11px;color:{COLORS.TEXT_MUTED};margin-bottom:8px;">'
@@ -354,7 +405,6 @@ def build(ctx) -> dict:
                         allow_custom_value=True,
                     )
 
-                # Individual: no picker, binds to the selected individual
                 with gr.Group(visible=False) as attach_individual_group:
                     gr.HTML(
                         f'<div style="font-size:11px;color:{COLORS.TEXT_MUTED};margin-bottom:8px;">'
@@ -383,12 +433,43 @@ def build(ctx) -> dict:
             )
             send_result_html = gr.HTML(value="")
 
-        # ═══════════════════ RIGHT: preview (dominant) ═══════════════════
+        # ═══════════════════ RIGHT: variables + preview ═══════════════
         with gr.Column(scale=3, min_width=560):
+            # ── Template variables block (above preview) ────────────────
+            gr.HTML(
+                f'<div style="font-size:11px;color:{COLORS.TEXT_MUTED};text-transform:uppercase;'
+                f'letter-spacing:.5px;margin:0 0 6px;">Template variables</div>'
+            )
+            subject_input = gr.Textbox(
+                label="Subject",
+                placeholder="Auto-fills from template — override if needed",
+                interactive=True,
+            )
+
+            # 6 single-line slots in 3 rows of 2
+            with gr.Row():
+                var_slot_0 = gr.Textbox(label="", visible=False, lines=1, interactive=True)
+                var_slot_1 = gr.Textbox(label="", visible=False, lines=1, interactive=True)
+            with gr.Row():
+                var_slot_2 = gr.Textbox(label="", visible=False, lines=1, interactive=True)
+                var_slot_3 = gr.Textbox(label="", visible=False, lines=1, interactive=True)
+            with gr.Row():
+                var_slot_4 = gr.Textbox(label="", visible=False, lines=1, interactive=True)
+                var_slot_5 = gr.Textbox(label="", visible=False, lines=1, interactive=True)
+            # 2 textarea slots stacked full-width
+            var_slot_6 = gr.Textbox(label="", visible=False, lines=3, interactive=True)
+            var_slot_7 = gr.Textbox(label="", visible=False, lines=3, interactive=True)
+
+            var_slots = [
+                var_slot_0, var_slot_1, var_slot_2, var_slot_3,
+                var_slot_4, var_slot_5, var_slot_6, var_slot_7,
+            ]
+
+            # ── Preview header + device toggle ──────────────────────────
             with gr.Row():
                 gr.HTML(
                     f'<div style="font-size:12px;font-weight:600;color:{COLORS.TEXT};'
-                    f'padding:6px 0;">Preview</div>'
+                    f'padding:6px 0;margin-top:8px;">Preview</div>'
                 )
                 device_radio = gr.Radio(
                     choices=["Desktop", "Mobile"],
@@ -407,10 +488,10 @@ def build(ctx) -> dict:
         show_broadcast = mode == "broadcast"
         return (
             mode,
-            gr.update(visible=show_broadcast),   # broadcast_group
-            gr.update(visible=not show_broadcast),  # individual_group
-            gr.update(visible=show_broadcast),   # attach_broadcast_group
-            gr.update(visible=not show_broadcast),  # attach_individual_group
+            gr.update(visible=show_broadcast),       # broadcast_group
+            gr.update(visible=not show_broadcast),   # individual_group
+            gr.update(visible=show_broadcast),       # attach_broadcast_group
+            gr.update(visible=not show_broadcast),   # attach_individual_group
         )
 
     mode_radio.change(
@@ -425,22 +506,26 @@ def build(ctx) -> dict:
         ],
     )
 
-    def _on_device_change(device_label: str, template_slug: str):
+    def _on_device_change(device_label, template_slug, var_names, *slot_vals):
         device = "mobile" if device_label == "Mobile" else "desktop"
-        return device, _render_preview_html(template_slug, device)
+        extra = _collect_var_values(var_names, slot_vals)
+        return device, _render_preview_html(template_slug, device, extra=extra or None)
 
     device_radio.change(
         fn=_on_device_change,
-        inputs=[device_radio, template_dropdown],
+        inputs=[device_radio, template_dropdown, var_names_state, *var_slots],
         outputs=[preview_device_state, preview_html],
     )
 
-    def _on_template_change(template_slug: str, device: str):
+    def _on_template_change(template_slug, device):
         from services.database import get_db
         from services.models import EmailTemplate
+        from services.template_seed import get_template_meta
 
         if not template_slug:
-            return "", _render_preview_html("", device)
+            slot_updates, names = _build_slot_updates(None)
+            return ("", _render_preview_html("", device), *slot_updates, names)
+
         try:
             db = get_db()
             try:
@@ -452,7 +537,11 @@ def build(ctx) -> dict:
                 subject = tpl.subject_template if tpl else ""
             finally:
                 db.close()
-            return subject, _render_preview_html(template_slug, device)
+
+            meta = get_template_meta(template_slug)
+            slot_updates, names = _build_slot_updates(meta)
+            preview = _render_preview_html(template_slug, device)
+            return (subject, preview, *slot_updates, names)
         except Exception as e:
             log.exception("_on_template_change failed for slug=%s", template_slug)
             err_html = (
@@ -460,15 +549,27 @@ def build(ctx) -> dict:
                 f'font-size:11px;white-space:pre-wrap;">'
                 f"{type(e).__name__}: {e}</div>"
             )
-            return "", err_html
+            empty_updates, empty_names = _build_slot_updates(None)
+            return ("", err_html, *empty_updates, empty_names)
 
     template_dropdown.change(
         fn=_on_template_change,
         inputs=[template_dropdown, preview_device_state],
-        outputs=[subject_input, preview_html],
+        outputs=[subject_input, preview_html, *var_slots, var_names_state],
     )
 
-    def _on_segment_change(segment_id: str):
+    def _on_variables_change(template_slug, device, var_names, *slot_vals):
+        extra = _collect_var_values(var_names, slot_vals)
+        return _render_preview_html(template_slug, device, extra=extra or None)
+
+    for slot in var_slots:
+        slot.change(
+            fn=_on_variables_change,
+            inputs=[template_dropdown, preview_device_state, var_names_state, *var_slots],
+            outputs=[preview_html],
+        )
+
+    def _on_segment_change(segment_id):
         from services.database import get_db
 
         db = get_db()
@@ -487,7 +588,7 @@ def build(ctx) -> dict:
         outputs=[recipient_dropdown, audience_kpi_html],
     )
 
-    def _on_individual_search(query: str):
+    def _on_individual_search(query):
         from services.database import get_db
 
         db = get_db()
@@ -504,7 +605,7 @@ def build(ctx) -> dict:
         outputs=[individual_contact_dropdown],
     )
 
-    def _on_individual_contact_pick(contact_value: str):
+    def _on_individual_contact_pick(contact_value):
         return _parse_recipient_value(contact_value)
 
     individual_contact_dropdown.change(
@@ -515,14 +616,14 @@ def build(ctx) -> dict:
 
     # ── Attach handler (mode-aware) ──
     def _on_attach(
-        mode: str,
-        template_slug: str,
-        segment_id: str,
-        recipient_value: str,
-        individual_contact_id: str | None,
-        individual_email: str,
+        mode,
+        template_slug,
+        segment_id,
+        recipient_value,
+        individual_contact_id,
+        individual_email,
         file_bytes,
-        draft_id: int | None,
+        draft_id,
     ):
         from services.database import get_db
         from services.models import EmailAttachment
@@ -535,7 +636,6 @@ def build(ctx) -> dict:
 
         db = get_db()
         try:
-            # Resolve the contact_id the attachment will bind to
             if mode == "individual":
                 email = (individual_email or "").strip()
                 if email:
@@ -612,13 +712,7 @@ def build(ctx) -> dict:
     )
 
     # ── Remove handler ──
-    def _on_remove(
-        mode: str,
-        recipient_value: str,
-        individual_contact_id: str | None,
-        individual_email: str,
-        draft_id: int | None,
-    ):
+    def _on_remove(mode, recipient_value, individual_contact_id, individual_email, draft_id):
         from services.database import get_db
         from services.models import Contact, EmailAttachment
         from services.supabase_storage import SupabaseStorageError, delete_file
@@ -687,15 +781,17 @@ def build(ctx) -> dict:
         outputs=[attach_result_html],
     )
 
-    # ── Send Now handler (mode-aware) ──
+    # ── Send Now handler (mode-aware + dynamic vars) ──
     def _on_send_now(
-        mode: str,
-        template_slug: str,
-        segment_id: str,
-        subject: str,
-        draft_id: int | None,
-        individual_contact_id: str | None,
-        individual_email: str,
+        mode,
+        template_slug,
+        segment_id,
+        subject,
+        draft_id,
+        individual_contact_id,
+        individual_email,
+        var_names,
+        *slot_vals,
     ):
         if not template_slug:
             return draft_id, _err("Pick a template first.")
@@ -720,9 +816,10 @@ def build(ctx) -> dict:
                 "Gmail API not configured. Set GMAIL_REFRESH_TOKEN / GMAIL_CLIENT_ID / GMAIL_CLIENT_SECRET."
             )
 
+        extra_vars = _collect_var_values(var_names, slot_vals)
+
         db = get_db()
         try:
-            # Resolve contact list based on mode
             if mode == "individual":
                 email = (individual_email or "").strip()
                 if email:
@@ -774,7 +871,9 @@ def build(ctx) -> dict:
                 if db.query(EmailSend).filter(EmailSend.idempotency_key == idem_key).first():
                     continue
 
-                variables = build_send_variables(contact, attachments)
+                variables = build_send_variables(
+                    contact, attachments, extra=extra_vars or None
+                )
                 try:
                     rendered_html = render_template_by_slug(template_slug, variables)
                     rendered_subject = sender.render_template(subject, variables)
@@ -819,7 +918,7 @@ def build(ctx) -> dict:
                     failed += 1
 
                 if len(contacts) > 1:
-                    time.sleep(3)  # light rate-limit for Gmail API
+                    time.sleep(3)
 
             campaign.total_sent = sent
             campaign.total_failed = failed
@@ -853,12 +952,14 @@ def build(ctx) -> dict:
             draft_campaign_state,
             individual_contact_state,
             individual_email_input,
+            var_names_state,
+            *var_slots,
         ],
         outputs=[draft_campaign_state, send_result_html],
     )
 
-    # ── Test-send handler ──
-    def _on_test_send(template_slug: str, subject: str, test_email: str):
+    # ── Test-send handler (uses current slot values — no Alisha leak) ──
+    def _on_test_send(template_slug, subject, test_email, var_names, *slot_vals):
         if not template_slug or not test_email or not subject:
             return _err("Pick a template, enter a subject, and enter a test email.")
 
@@ -870,6 +971,8 @@ def build(ctx) -> dict:
         if not sender.is_configured():
             return _err("Gmail API not configured.")
 
+        extra_vars = _collect_var_values(var_names, slot_vals)
+
         stub = Contact(
             id="test_send",
             email=test_email,
@@ -877,11 +980,7 @@ def build(ctx) -> dict:
             last_name="User",
         )
         try:
-            variables = build_send_variables(
-                stub,
-                {},
-                extra=_build_sample_vars_for_preview(template_slug),
-            )
+            variables = build_send_variables(stub, {}, extra=extra_vars or None)
             rendered_html = render_template_by_slug(template_slug, variables)
             rendered_subject = sender.render_template(subject, variables)
         except Exception as e:
@@ -899,7 +998,13 @@ def build(ctx) -> dict:
 
     test_btn.click(
         fn=_on_test_send,
-        inputs=[template_dropdown, subject_input, test_email_input],
+        inputs=[
+            template_dropdown,
+            subject_input,
+            test_email_input,
+            var_names_state,
+            *var_slots,
+        ],
         outputs=[send_result_html],
     )
 
@@ -910,6 +1015,7 @@ def build(ctx) -> dict:
     def _refresh():
         from services.database import get_db
         from services.models import EmailTemplate, Segment
+        from services.template_seed import get_template_meta
 
         db = get_db()
         try:
@@ -935,6 +1041,9 @@ def build(ctx) -> dict:
             seg_choices = ["all_opted_in"] + [s.id for s in segments]
 
             preview = _render_preview_html(first_slug or "", "desktop")
+
+            meta = get_template_meta(first_slug) if first_slug else None
+            slot_updates, names = _build_slot_updates(meta)
         finally:
             db.close()
 
@@ -945,6 +1054,8 @@ def build(ctx) -> dict:
             preview,
             "",  # attach_result_html
             "",  # send_result_html
+            *slot_updates,
+            names,
         )
 
     return {
@@ -956,6 +1067,8 @@ def build(ctx) -> dict:
             preview_html,
             attach_result_html,
             send_result_html,
+            *var_slots,
+            var_names_state,
         ],
     }
 
