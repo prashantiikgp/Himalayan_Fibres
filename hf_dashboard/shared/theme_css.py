@@ -532,6 +532,124 @@ html, body { scroll-behavior: auto !important; overflow-anchor: none !important;
     font-style: italic !important;
     margin: 4px 2px 0 2px !important;
 }
+
+/* -- WhatsApp Inbox rebuild (W02 April 2026) -- */
+
+/* Panel 1 — header row (title + refresh icon) and refresh caption */
+.conv-list-panel { overflow: hidden !important; }
+.conv-list-panel .conv-header-row {
+    flex: 0 0 auto !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin-bottom: 4px !important;
+}
+.conv-list-panel .conv-refresh-caption {
+    flex: 0 0 auto !important;
+    font-size: 9px !important;
+    color: #64748b !important;
+    font-style: italic !important;
+    margin: 0 2px 8px 2px !important;
+    line-height: 1.3 !important;
+}
+.conv-list-panel .conv-refresh-btn button {
+    height: 28px !important;
+    min-width: 36px !important;
+    padding: 0 8px !important;
+    font-size: 14px !important;
+}
+
+/* Two scroll regions inside Panel 1 — radio lists scroll, search boxes pinned */
+.conv-list-panel .wa-active-scroll,
+.conv-list-panel .wa-new-scroll {
+    flex: 1 1 auto !important;
+    min-height: 60px !important;
+    overflow-y: auto !important;
+    border: 1px solid rgba(255,255,255,.04) !important;
+    border-radius: 6px !important;
+    padding: 4px !important;
+    margin-top: 4px !important;
+}
+.conv-list-panel .wa-active-scroll { flex-grow: 3 !important; }
+.conv-list-panel .wa-new-scroll    { flex-grow: 2 !important; }
+
+/* Panel 2 — hide the inline gr.File (drop-zone moves into the modal) */
+.chat-panel .chat-media-input { display: none !important; }
+.chat-panel .chat-send-row .chat-send-input {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+}
+.chat-panel .chat-attach-btn button,
+.chat-panel .chat-attach-clear button {
+    height: 36px !important;
+    min-width: 36px !important;
+    padding: 0 8px !important;
+    font-size: 14px !important;
+}
+.chat-panel .chat-attach-chip {
+    flex: 0 0 auto !important;
+    padding: 4px 8px !important;
+    background: rgba(99,102,241,.12) !important;
+    border: 1px solid rgba(99,102,241,.3) !important;
+    border-radius: 6px !important;
+    font-size: 10px !important;
+    color: #c7d2fe !important;
+    max-width: 140px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+/* Attachment modal — show the gr.File only when inside the modal */
+.wa-attach-modal { display: flex !important; flex-direction: column !important; gap: 10px !important; }
+.wa-attach-modal .chat-media-input { display: block !important; }
+.wa-attach-modal .wa-attach-actions { display: flex !important; gap: 8px !important; justify-content: flex-end !important; }
+
+/* Panel 3 — flex column with fixed Past Activity, flex variables, capped preview */
+.tools-panel { overflow: hidden !important; padding: 10px !important; }
+.tools-panel .tp-activity-box {
+    flex: 0 0 25% !important;
+    overflow-y: auto !important;
+    border: 1px solid rgba(255,255,255,.06) !important;
+    border-radius: 6px !important;
+    padding: 6px 8px !important;
+    margin-bottom: 8px !important;
+}
+.tools-panel .tp-category,
+.tools-panel .tp-template,
+.tools-panel .tp-send-btn,
+.tools-panel .tp-send-result { flex: 0 0 auto !important; }
+.tools-panel .tp-vars-box {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    padding: 4px 0 !important;
+}
+.tools-panel .tp-preview-box {
+    flex: 0 0 auto !important;
+    max-height: 30% !important;
+    overflow-y: auto !important;
+    border: 1px solid rgba(255,255,255,.08) !important;
+    border-left: 2px solid rgba(34,197,94,.4) !important;
+    background: rgba(34,197,94,.04) !important;
+    border-radius: 6px !important;
+    padding: 8px 10px !important;
+    margin: 8px 0 !important;
+}
+.tools-panel .wa-var-slot { margin: 2px 0 !important; }
+.tools-panel .wa-var-slot textarea,
+.tools-panel .wa-var-slot input {
+    min-height: 28px !important;
+    height: 28px !important;
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+    resize: none !important;
+}
+.tools-panel .wa-var-slot label span {
+    font-size: 9px !important;
+    color: #94a3b8 !important;
+}
 """
 
 
@@ -542,6 +660,10 @@ def _build_panel_css() -> str:
     tests can drive a mock engine if needed.
     """
     layout = get_theme_engine().panel_layout
+    # Note: overflow-y intentionally NOT set on .conv-list-panel /
+    # .tools-panel — both columns now manage their own internal scroll
+    # regions (see wa_inbox.py rebuild). Setting it here would beat any
+    # later override in _STATIC_CSS due to source-order cascade.
     return (
         "\n/* -- Full-height sibling panels (layout.yml) -- */\n"
         ".conv-list-panel, .tools-panel {\n"
@@ -552,7 +674,6 @@ def _build_panel_css() -> str:
         f"    min-height: {layout.MIN_HEIGHT_EXPR} !important;\n"
         "    display: flex !important;\n"
         "    flex-direction: column !important;\n"
-        "    overflow-y: auto !important;\n"
         "}\n"
         ".chat-panel {\n"
         f"    background: {layout.CHAT_BACKGROUND} !important;\n"

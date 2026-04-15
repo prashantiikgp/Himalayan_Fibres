@@ -155,6 +155,14 @@ class WAConfigManager:
     def get_template_names(self) -> list[str]:
         return list(self._templates.keys())
 
+    def get_template_categories(self) -> list[str]:
+        return sorted({t.category for t in self._templates.values() if t.category})
+
+    def get_templates_by_category(self, category: str) -> list[str]:
+        if not category or category == "All":
+            return self.get_template_names()
+        return [name for name, t in self._templates.items() if t.category == category]
+
     def get_template_variable_names(self, name: str) -> list[str]:
         tpl = self.get_template(name)
         return tpl.variable_names if tpl else []

@@ -14,7 +14,19 @@ import gradio as gr
 import yaml
 
 from components.styles import chat_bubble, chat_timestamp
-from components.tools_panel import render_full_tools, render_wa_template_preview, render_tools_empty
+from components.tools_panel import (
+    render_activity_compact,
+    render_full_tools,
+    render_tools_empty,
+    render_wa_template_filled,
+    render_wa_template_preview,
+)
+
+# Pre-allocated variable input slots in Panel 3. Real templates max out
+# at 4 vars (order_confirmation, order_tracking); 5 gives one slot of
+# headroom. Gradio components must exist at page-build time, so we
+# create N slots up front and toggle visibility per template.
+MAX_VARS = 5
 
 _CFG_PATH = Path(__file__).resolve().parent.parent / "config" / "pages" / "wa_inbox.yml"
 
@@ -25,6 +37,16 @@ def _cfg():
 
 
 _AVATAR_EMOJIS = ["🙂", "😊", "😎", "🤗", "🧑", "👤", "🧔", "👨", "👩", "🦊", "🐼", "🐻", "🐯", "🦁", "🐸", "🦄"]
+
+
+def get_wa_config_safe_categories() -> list[str]:
+    """Return the sorted unique template categories. Wrapped so the
+    page module degrades gracefully if the YAML config is missing."""
+    try:
+        from services.wa_config import get_wa_config
+        return get_wa_config().get_template_categories()
+    except Exception:
+        return []
 
 
 def _avatar_for(contact_id: str) -> str:
@@ -310,20 +332,35 @@ def build(ctx):
     # from this State so they work no matter which list the user picked from.
     selected_cid_state = gr.State("")
 
+    refresh_caption_text = col1_cfg.get(
+        "refresh_caption", "Click Refresh to see updated conversation."
+    )
+
     with gr.Row():
         # ═══ PANEL 1: Conversations (Active + Start New) ═══
         with gr.Column(scale=1, min_width=260, elem_classes=["conv-list-panel"]):
+            with gr.Row(elem_classes=["conv-header-row"]):
+                gr.HTML(
+                    f'<div class="conv-section-title" style="margin:0;">'
+                    f'{col1_cfg.get("title", "Active Chats")}</div>'
+                )
+                refresh_btn = gr.Button(
+                    "🔄", size="sm", variant="secondary",
+                    scale=0, min_width=40,
+                    elem_classes=["conv-refresh-btn"],
+                )
             gr.HTML(
-                f'<div class="conv-section-title">{col1_cfg.get("title", "Active Chats")}</div>'
+                f'<div class="conv-refresh-caption">{refresh_caption_text}</div>'
             )
             search_box = gr.Textbox(
                 placeholder=col1_cfg.get("search_placeholder", "Search active… (press Enter)"),
                 label="", container=False,
             )
-            conversation_radio = gr.Radio(
-                label="", choices=[], interactive=True,
-                elem_classes=["wa-conv-radio"],
-            )
+            with gr.Column(elem_classes=["wa-active-scroll"]):
+                conversation_radio = gr.Radio(
+                    label="", choices=[], interactive=True,
+                    elem_classes=["wa-conv-radio"],
+                )
             gr.HTML('<div class="conv-section-divider"></div>')
             gr.HTML(
                 f'<div class="conv-section-title">{new_conv_cfg.get("title", "Start New Conversation")}</div>'
@@ -332,10 +369,11 @@ def build(ctx):
                 placeholder=new_conv_cfg.get("search_placeholder", "Search contact… (press Enter)"),
                 label="", container=False,
             )
-            new_conv_radio = gr.Radio(
-                label="", choices=[], interactive=True,
-                elem_classes=["wa-new-conv-radio"],
-            )
+            with gr.Column(elem_classes=["wa-new-scroll"]):
+                new_conv_radio = gr.Radio(
+                    label="", choices=[], interactive=True,
+                    elem_classes=["wa-new-conv-radio"],
+                )
             gr.HTML(
                 f'<div class="conv-section-hint">{new_conv_cfg.get("empty_hint", "")}</div>'
             )
@@ -344,36 +382,102 @@ def build(ctx):
         with gr.Column(scale=2, min_width=400, elem_classes=["chat-panel"]):
             chat_header = gr.HTML(value=placeholder_header, elem_classes=["chat-header-slot"])
             chat_messages = gr.HTML(value=placeholder_messages, elem_classes=["chat-messages-slot"])
-            # File upload for media attachments. When a file is attached the
-            # text input below doubles as a caption. Supported: images
-            # (jpg/png), documents (pdf/doc/xls/ppt/txt/csv), video (mp4),
-            # audio (mp3/ogg/m4a). See _MEDIA_KIND_BY_EXT.
-            media_input = gr.File(
-                label="📎 Attach image / document / video / audio",
-                file_types=[
-                    ".jpg", ".jpeg", ".png", ".webp",
-                    ".mp4", ".3gp",
-                    ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".csv",
-                    ".mp3", ".ogg", ".opus", ".aac", ".amr", ".m4a",
-                ],
-                type="filepath",
-                elem_classes=["chat-media-input"],
-            )
+
+            # Send row: textbox + attach chip (visible when file picked)
+            # + clear-attach button + 📎 attach button + Send button.
+            # The real gr.File lives inside the attachment modal below.
             with gr.Row(elem_classes=["chat-send-row"]):
-                msg_input = gr.Textbox(placeholder="Type a message or caption…", label="", container=False, scale=8, elem_classes=["chat-send-input"])
-                send_btn = gr.Button("Send", size="sm", variant="primary", scale=1, elem_classes=["chat-send-btn"])
+                msg_input = gr.Textbox(
+                    placeholder="Type a message or caption…",
+                    label="", container=False, scale=8,
+                    elem_classes=["chat-send-input"],
+                )
+                attach_chip = gr.HTML(value="", elem_classes=["chat-attach-chip-slot"])
+                clear_attach_btn = gr.Button(
+                    "✕", size="sm", variant="secondary",
+                    scale=0, min_width=24, visible=False,
+                    elem_classes=["chat-attach-clear"],
+                )
+                attach_btn = gr.Button(
+                    "📎", size="sm", variant="secondary",
+                    scale=0, min_width=36,
+                    elem_classes=["chat-attach-btn"],
+                )
+                send_btn = gr.Button(
+                    "Send", size="sm", variant="primary",
+                    scale=1, elem_classes=["chat-send-btn"],
+                )
             send_result = gr.HTML(value="", elem_classes=["chat-send-result"])
 
-        # ═══ PANEL 3: Contact details + Templates + Refresh ═══
+            # Attachment modal — hidden by default. Clicking 📎 reveals it.
+            with gr.Column(visible=False, elem_classes=["hf-modal", "wa-attach-modal"]) as attach_modal:
+                gr.HTML(
+                    '<div style="font-size:14px; font-weight:700; color:#e7eaf3;">Attach a file</div>'
+                    '<div style="font-size:11px; color:#94a3b8; margin-top:4px;">'
+                    'Image, document, video, or audio. Max one file per message.</div>'
+                )
+                media_input = gr.File(
+                    label="Drop file or click to upload",
+                    file_types=[
+                        ".jpg", ".jpeg", ".png", ".webp",
+                        ".mp4", ".3gp",
+                        ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".csv",
+                        ".mp3", ".ogg", ".opus", ".aac", ".amr", ".m4a",
+                    ],
+                    type="filepath",
+                    elem_classes=["chat-media-input"],
+                )
+                with gr.Row(elem_classes=["wa-attach-actions"]):
+                    attach_cancel_btn = gr.Button("Cancel", size="sm", variant="secondary")
+                    attach_done_btn = gr.Button("Done", size="sm", variant="primary")
+
+        # ═══ PANEL 3: Past Activity + Category + Template + Variables + Preview ═══
         with gr.Column(scale=1, min_width=260, elem_classes=["tools-panel"]):
-            tools_html = gr.HTML(value=render_tools_empty())
-            gr.HTML('<div style="height:1px; background:rgba(255,255,255,.06); margin:10px 0;"></div>')
-            tpl_dropdown = gr.Dropdown(label="Select Template", choices=[], interactive=True)
-            tpl_preview = gr.HTML(value=render_wa_template_preview(""))
-            send_tpl_btn = gr.Button("Send Template", variant="primary", size="sm")
-            send_tpl_result = gr.HTML(value="")
-            gr.HTML('<div style="height:1px; background:rgba(255,255,255,.06); margin:10px 0;"></div>')
-            refresh_btn = gr.Button("🔄 Refresh", size="sm", variant="secondary")
+            tp_activity_box = gr.HTML(
+                value='<div style="color:#64748b; font-size:10px;">No activity</div>',
+                elem_classes=["tp-activity-box"],
+            )
+            tp_category = gr.Dropdown(
+                label="Category",
+                choices=["All"] + get_wa_config_safe_categories(),
+                value="All", interactive=True,
+                elem_classes=["tp-category"],
+            )
+            tp_template = gr.Dropdown(
+                label="Template",
+                choices=[], interactive=True,
+                elem_classes=["tp-template"],
+            )
+            with gr.Column(elem_classes=["tp-vars-box"]) as tp_vars_box:
+                var_slots: list[gr.Textbox] = []
+                for i in range(MAX_VARS):
+                    slot = gr.Textbox(
+                        label=f"var_{i}",
+                        placeholder="",
+                        visible=False,
+                        interactive=True,
+                        container=True,
+                        elem_classes=["wa-var-slot"],
+                    )
+                    var_slots.append(slot)
+            tp_preview_box = gr.HTML(
+                value=render_wa_template_filled("", {}),
+                elem_classes=["tp-preview-box"],
+            )
+            tp_send_btn = gr.Button(
+                "Send Template", variant="primary", size="sm",
+                elem_classes=["tp-send-btn"],
+            )
+            tp_send_result = gr.HTML(value="", elem_classes=["tp-send-result"])
+
+            # Legacy handles for downstream wiring that referenced the old
+            # names. We keep them as no-op aliases so the rest of build()
+            # need not change.
+            tools_html = tp_activity_box
+            tpl_dropdown = tp_template
+            tpl_preview = tp_preview_box
+            send_tpl_btn = tp_send_btn
+            send_tpl_result = tp_send_result
 
     # JS snippet that scrolls the chat panel to the bottom after send —
     # Gradio 6 sanitizes <script> inside gr.HTML so we can't inline it;
@@ -385,16 +489,22 @@ def build(ctx):
 
     def _load_chat_view(contact_id: str):
         """Build the full chat view for a contact. Returns the tuple of
-        outputs needed by both radio .change handlers below."""
+        outputs needed by both radio .change handlers below.
+
+        Panel 3 now renders compact past-activity instead of the full
+        tools card — the contact name already shows in Panel 2's chat
+        header so the duplicate card was just noise.
+        """
+        empty_activity = '<div style="color:#64748b; font-size:10px;">No activity</div>'
         if not contact_id:
-            return (placeholder_header, placeholder_messages, render_tools_empty(), "")
+            return (placeholder_header, placeholder_messages, empty_activity, "")
         from services.database import get_db
         db = get_db()
         try:
             return (
                 _build_chat_header(db, contact_id),
                 _build_chat_messages(db, contact_id),
-                render_full_tools(db, contact_id, "whatsapp"),
+                render_activity_compact(db, contact_id),
                 "",
             )
         finally:
@@ -404,7 +514,8 @@ def build(ctx):
         """Active Chats radio picked. Clear the New radio, set shared state,
         and render the chat view."""
         if not cid:
-            return ("", placeholder_header, placeholder_messages, render_tools_empty(), "", gr.update(value=None))
+            empty_activity = '<div style="color:#64748b; font-size:10px;">No activity</div>'
+            return ("", placeholder_header, placeholder_messages, empty_activity, "", gr.update(value=None))
         header, messages, tools, _ = _load_chat_view(cid)
         return (cid, header, messages, tools, "", gr.update(value=None))
 
@@ -412,7 +523,8 @@ def build(ctx):
         """Start New radio picked. Clear the Active radio, set shared state,
         and render the chat view."""
         if not cid:
-            return ("", placeholder_header, placeholder_messages, render_tools_empty(), "", gr.update(value=None))
+            empty_activity = '<div style="color:#64748b; font-size:10px;">No activity</div>'
+            return ("", placeholder_header, placeholder_messages, empty_activity, "", gr.update(value=None))
         header, messages, tools, _ = _load_chat_view(cid)
         return (cid, header, messages, tools, "", gr.update(value=None))
 
@@ -455,7 +567,97 @@ def build(ctx):
     # Plan D Phase 1.4: submit on Enter instead of firing per keystroke.
     new_conv_search.submit(fn=_search_new, inputs=[new_conv_search], outputs=[new_conv_radio])
 
-    tpl_dropdown.change(fn=render_wa_template_preview, inputs=[tpl_dropdown], outputs=[tpl_preview])
+    # ─── Attachment popover ───
+    def _open_attach():
+        return gr.update(visible=True)
+
+    def _close_attach():
+        return gr.update(visible=False)
+
+    def _on_media_change(path):
+        if not path:
+            return ("", gr.update(visible=False))
+        name = path.rsplit("/", 1)[-1]
+        chip = (
+            f'<div class="chat-attach-chip" title="{name}">📎 {name}</div>'
+        )
+        return (chip, gr.update(visible=True))
+
+    def _clear_attach():
+        return (gr.update(value=None), "", gr.update(visible=False))
+
+    attach_btn.click(fn=_open_attach, outputs=[attach_modal])
+    attach_cancel_btn.click(fn=_close_attach, outputs=[attach_modal])
+    attach_done_btn.click(fn=_close_attach, outputs=[attach_modal])
+    media_input.change(
+        fn=_on_media_change,
+        inputs=[media_input],
+        outputs=[attach_chip, clear_attach_btn],
+    )
+    clear_attach_btn.click(
+        fn=_clear_attach,
+        outputs=[media_input, attach_chip, clear_attach_btn],
+    )
+
+    # ─── Template flow: category → template → variables → preview ───
+    def _on_category_change(category: str):
+        from services.wa_config import get_wa_config
+        names = get_wa_config().get_templates_by_category(category or "All")
+        return gr.update(choices=names, value=None)
+
+    tp_category.change(
+        fn=_on_category_change,
+        inputs=[tp_category],
+        outputs=[tp_template],
+    )
+
+    def _on_template_change(template_name: str):
+        """Reconfigure variable slots and reset preview when a template
+        is picked. Returns updates for *all* MAX_VARS slots + preview."""
+        from services.wa_config import get_wa_config
+        if not template_name:
+            updates = [gr.update(visible=False, value="", label=f"var_{i}") for i in range(MAX_VARS)]
+            return (*updates, render_wa_template_filled("", {}))
+        tpl = get_wa_config().get_template(template_name)
+        if not tpl:
+            updates = [gr.update(visible=False, value="", label=f"var_{i}") for i in range(MAX_VARS)]
+            return (*updates, f'<div style="color:#ef4444; font-size:10px;">Template not found</div>')
+        updates = []
+        for i in range(MAX_VARS):
+            if i < len(tpl.variables):
+                v = tpl.variables[i]
+                placeholder_text = v.example or v.description or ""
+                updates.append(gr.update(
+                    visible=True, value="",
+                    label=v.name,
+                    placeholder=placeholder_text,
+                ))
+            else:
+                updates.append(gr.update(visible=False, value="", label=f"var_{i}"))
+        return (*updates, render_wa_template_filled(template_name, {}))
+
+    tp_template.change(
+        fn=_on_template_change,
+        inputs=[tp_template],
+        outputs=[*var_slots, tp_preview_box],
+    )
+
+    def _preview_update(template_name, *slot_values):
+        from services.wa_config import get_wa_config
+        tpl = get_wa_config().get_template(template_name) if template_name else None
+        values: dict[str, str] = {}
+        if tpl:
+            for i, v in enumerate(tpl.variables):
+                if i < len(slot_values):
+                    values[v.name] = slot_values[i] or ""
+        return render_wa_template_filled(template_name, values)
+
+    for slot in var_slots:
+        slot.change(
+            fn=_preview_update,
+            inputs=[tp_template, *var_slots],
+            outputs=[tp_preview_box],
+        )
 
     def _send_message(contact_id, msg, media_path):
         """Unified send handler: text-only OR media (with optional caption).
@@ -595,33 +797,70 @@ def build(ctx):
         fn=None, inputs=None, outputs=None, js=_SCROLL_CHAT_JS,
     )
 
-    def _send_tpl(contact_id, tpl):
-        """Send an approved template and persist the outbound WAMessage so
-        it appears in the chat view. Templates bypass the 24h window check.
-        """
-        if not contact_id or not tpl:
+    def _send_tpl_filled(contact_id, template_name, *slot_values):
+        """Send a filled template, persist the substituted body, and
+        reset the variable slots + preview. Templates bypass the 24h
+        customer-service window."""
+        n_slots = MAX_VARS
+        no_change_slots = [gr.update() for _ in range(n_slots)]
+
+        def _err(msg):
             return (
-                '<div style="color:#ef4444; font-size:10px;">Select chat + template</div>',
+                f'<div style="color:#ef4444; font-size:10px;">{msg}</div>',
+                gr.update(),
+                *no_change_slots,
                 gr.update(),
             )
+
+        if not contact_id or not template_name:
+            return _err("Select chat + template")
+
+        from services.wa_config import get_wa_config
+        tpl = get_wa_config().get_template(template_name)
+        if not tpl:
+            return _err("Template not found")
+
+        # Build the named-variable list strictly from the template's
+        # declared variables (slot indices > len(tpl.variables) are
+        # ignored even if the user typed something there).
+        variables: list[tuple[str, str]] = []
+        for i, v in enumerate(tpl.variables):
+            if i < len(slot_values):
+                variables.append((v.name, (slot_values[i] or "").strip()))
+
+        # Required-field validation
+        required_names = {v.name for v in tpl.variables if v.required}
+        missing = [name for name, val in variables if not val and name in required_names]
+        if missing:
+            return (
+                f'<div style="color:#f59e0b; font-size:10px;">Missing: {", ".join(missing)}</div>',
+                gr.update(),
+                *no_change_slots,
+                gr.update(),
+            )
+
         from services.database import get_db
         from services.models import Contact, WAChat, WAMessage
+        from services.wa_sender import WhatsAppSender
         db = get_db()
         try:
             c = db.query(Contact).filter(Contact.id == contact_id).first()
             if not c or not c.wa_id:
-                return (
-                    '<div style="color:#ef4444; font-size:10px;">No WhatsApp ID on contact</div>',
-                    gr.update(),
-                )
+                return _err("No WhatsApp ID on contact")
 
-            from services.wa_sender import WhatsAppSender
-            ok, msg_id, err = WhatsAppSender().send_template(c.wa_id, tpl)
+            ok, msg_id, err = WhatsAppSender().send_template(
+                c.wa_id, template_name,
+                lang=tpl.language or "en_US",
+                variables=variables,
+            )
             if not ok:
-                return (
-                    f'<div style="color:#ef4444; font-size:10px;">{err or "Send failed"}</div>',
-                    gr.update(),
-                )
+                return _err(err or "Send failed")
+
+            # Substitute into the body so the chat log shows what Meta
+            # actually delivered, not "[Template: xyz]".
+            filled_body = tpl.body_text or ""
+            for name, val in variables:
+                filled_body = filled_body.replace("{{" + name + "}}", val)
 
             now = datetime.now(timezone.utc)
             chat = db.query(WAChat).filter(WAChat.contact_id == c.id).first()
@@ -630,29 +869,32 @@ def build(ctx):
                 db.add(chat)
                 db.flush()
             chat.last_message_at = now
-            chat.last_message_preview = f"[Template: {tpl}]"[:100]
+            chat.last_message_preview = filled_body[:100]
             db.add(WAMessage(
                 chat_id=chat.id,
                 contact_id=c.id,
                 direction="out",
                 status="sent",
-                text=f"[Template: {tpl}]",
+                text=filled_body,
                 wa_message_id=msg_id,
             ))
             c.last_wa_outbound_at = now
             db.commit()
 
+            cleared_slots = [gr.update(value="") for _ in range(n_slots)]
             return (
                 '<div style="color:#22c55e; font-size:10px;">Template sent ✓</div>',
                 _build_chat_messages(db, contact_id),
+                *cleared_slots,
+                render_wa_template_filled(template_name, {}),
             )
         finally:
             db.close()
 
-    send_tpl_btn.click(
-        fn=_send_tpl,
-        inputs=[selected_cid_state, tpl_dropdown],
-        outputs=[send_tpl_result, chat_messages],
+    tp_send_btn.click(
+        fn=_send_tpl_filled,
+        inputs=[selected_cid_state, tp_template, *var_slots],
+        outputs=[tp_send_result, chat_messages, *var_slots, tp_preview_box],
     ).then(
         fn=None, inputs=None, outputs=None, js=_SCROLL_CHAT_JS,
     )
@@ -663,18 +905,26 @@ def build(ctx):
         db = get_db()
         try:
             convs = _get_active_conversations(db)
-            tpls = get_wa_config().get_template_names()
+            cfg_wa = get_wa_config()
+            empty_activity = '<div style="color:#64748b; font-size:10px;">No activity</div>'
+            slot_resets = [
+                gr.update(visible=False, value="", label=f"var_{i}")
+                for i in range(MAX_VARS)
+            ]
             return (
-                gr.update(choices=convs, value=None),
-                gr.update(choices=[], value=None),
-                gr.update(value=""),
-                "",
-                placeholder_header,
-                placeholder_messages,
-                render_tools_empty(),
-                "",
-                gr.update(choices=tpls, value=None),
-                render_wa_template_preview(""),
+                gr.update(choices=convs, value=None),       # conversation_radio
+                gr.update(choices=[], value=None),          # new_conv_radio
+                gr.update(value=""),                        # new_conv_search
+                "",                                          # selected_cid_state
+                placeholder_header,                          # chat_header
+                placeholder_messages,                        # chat_messages
+                empty_activity,                              # tp_activity_box
+                "",                                          # send_result
+                gr.update(value="All"),                      # tp_category
+                gr.update(choices=cfg_wa.get_template_names(), value=None),  # tp_template
+                *slot_resets,                                # var_slots × MAX_VARS
+                render_wa_template_filled("", {}),           # tp_preview_box
+                "",                                          # tp_send_result
             )
         finally:
             db.close()
@@ -686,10 +936,13 @@ def build(ctx):
         selected_cid_state,
         chat_header,
         chat_messages,
-        tools_html,
+        tp_activity_box,
         send_result,
-        tpl_dropdown,
-        tpl_preview,
+        tp_category,
+        tp_template,
+        *var_slots,
+        tp_preview_box,
+        tp_send_result,
     ]
 
     refresh_btn.click(fn=_do_refresh, outputs=_refresh_outputs)

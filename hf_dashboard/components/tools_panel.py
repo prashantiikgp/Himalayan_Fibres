@@ -6,6 +6,8 @@ Styles from config/theme/components.yml → tools_panel section.
 
 from __future__ import annotations
 
+import html as _html
+from datetime import datetime, timezone
 from functools import lru_cache
 from pathlib import Path
 
@@ -272,6 +274,118 @@ def render_email_template_preview(template_slug: str) -> str:
         )
     finally:
         db.close()
+
+
+def render_activity_compact(db, contact_id: str, limit: int = 12) -> str:
+    """Timestamp + action only — no contact name, no emojis, no icons.
+
+    Used by the WA inbox Panel 3 where the contact is already implicit
+    from Panel 2's chat header. Renders a single tight log of recent
+    WhatsApp messages and email sends.
+    """
+    if not contact_id:
+        return '<div style="color:#64748b; font-size:10px; padding:4px;">No activity</div>'
+
+    from services.models import WAMessage, EmailSend
+
+    rows: list[tuple[datetime | None, str, str]] = []
+
+    for wm in (
+        db.query(WAMessage)
+        .filter(WAMessage.contact_id == contact_id)
+        .order_by(WAMessage.created_at.desc())
+        .limit(limit)
+        .all()
+    ):
+        ts = wm.created_at.strftime("%b %d %H:%M") if wm.created_at else ""
+        if wm.direction == "in":
+            label = "WA received"
+        else:
+            label = f"WA sent · {wm.status}".rstrip(" ·") if wm.status else "WA sent"
+        rows.append((wm.created_at, ts, label))
+
+    for es in (
+        db.query(EmailSend)
+        .filter(EmailSend.contact_id == contact_id)
+        .order_by(EmailSend.created_at.desc())
+        .limit(limit)
+        .all()
+    ):
+        when = es.sent_at or es.created_at
+        ts = when.strftime("%b %d %H:%M") if when else ""
+        status = (es.status or "queued").lower()
+        rows.append((when, ts, f"Email {status}"))
+
+    rows.sort(key=lambda x: x[0] or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
+    rows = rows[:limit]
+
+    if not rows:
+        body = '<div style="color:#64748b; font-size:10px; padding:4px;">No activity yet</div>'
+    else:
+        body = "".join(
+            f'<div style="display:flex; justify-content:space-between; gap:8px; '
+            f'padding:3px 0; font-size:10px; '
+            f'border-bottom:1px dashed rgba(255,255,255,.04);">'
+            f'<span style="color:#64748b; flex:0 0 auto;">{_html.escape(ts)}</span>'
+            f'<span style="color:#e7eaf3; flex:1; text-align:right;">{_html.escape(label)}</span>'
+            f'</div>'
+            for _, ts, label in rows
+        )
+
+    header = (
+        '<div style="font-size:9px; font-weight:700; color:#64748b; '
+        'text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px;">'
+        'Past Activity</div>'
+    )
+    return header + body
+
+
+def render_wa_template_filled(template_name: str, values: dict[str, str]) -> str:
+    """Render a WA template body with variable placeholders substituted.
+
+    XSS-safe: escapes the template body BEFORE substitution and escapes
+    each variable value before insertion. The `{{name}}` placeholder
+    marker survives html.escape unchanged because { and } are not
+    special HTML characters. `name` itself comes from trusted YAML and
+    is treated as safe.
+    """
+    if not template_name:
+        return (
+            '<div style="font-size:9px; font-weight:700; color:#64748b; '
+            'text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px;">'
+            'Preview</div>'
+            '<div style="color:#64748b; font-size:10px; font-style:italic;">'
+            'Pick a template to see the rendered message.</div>'
+        )
+
+    from services.wa_config import get_wa_config
+    tpl = get_wa_config().get_template(template_name)
+    if not tpl:
+        return f'<div style="color:#ef4444; font-size:10px;">"{_html.escape(template_name)}" not found</div>'
+
+    body = _html.escape(tpl.body_text or "")
+    for v in tpl.variables:
+        placeholder = "{{" + v.name + "}}"
+        raw = (values.get(v.name) or "").strip()
+        if raw:
+            val = _html.escape(raw)
+        else:
+            val = (
+                f'<span style="color:#94a3b8; background:rgba(99,102,241,.10); '
+                f'padding:0 4px; border-radius:3px;">⟨{_html.escape(v.name)}⟩</span>'
+            )
+        body = body.replace(placeholder, val)
+
+    header = (
+        '<div style="font-size:9px; font-weight:700; color:#64748b; '
+        'text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px;">'
+        'Preview</div>'
+    )
+    return (
+        f'{header}'
+        f'<div style="font-size:11px; color:#e7eaf3; line-height:1.5; '
+        f'white-space:pre-wrap; word-wrap:break-word;">{body}</div>'
+    )
 
 
 def render_tools_empty(message: str = "Select a conversation to see tools") -> str:
