@@ -320,13 +320,12 @@ def render_activity_compact(db, contact_id: str, limit: int = 12) -> str:
     rows = rows[:limit]
 
     if not rows:
-        body = '<div style="color:#64748b; font-size:10px; padding:4px;">No activity yet</div>'
+        body = '<div style="color:#64748b; font-size:10px;">No activity yet</div>'
     else:
         body = "".join(
-            f'<div style="display:flex; justify-content:space-between; gap:8px; '
-            f'padding:3px 0; font-size:10px; '
-            f'border-bottom:1px dashed rgba(255,255,255,.04);">'
-            f'<span style="color:#64748b; flex:0 0 auto;">{_html.escape(ts)}</span>'
+            f'<div style="display:flex; justify-content:space-between; gap:6px; '
+            f'padding:1px 6px; font-size:11px; line-height:1.35;">'
+            f'<span style="color:#64748b; flex:0 0 auto; font-size:10px;">{_html.escape(ts)}</span>'
             f'<span style="color:#e7eaf3; flex:1; text-align:right;">{_html.escape(label)}</span>'
             f'</div>'
             for _, ts, label in rows
@@ -334,7 +333,9 @@ def render_activity_compact(db, contact_id: str, limit: int = 12) -> str:
 
     header = (
         '<div style="font-size:9px; font-weight:700; color:#64748b; '
-        'text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px;">'
+        'text-transform:uppercase; letter-spacing:.5px; '
+        'padding:2px 6px 1px 6px; '
+        'border-bottom:1px solid rgba(255,255,255,.06);">'
         'Past Activity</div>'
     )
     return header + body

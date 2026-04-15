@@ -332,25 +332,17 @@ def build(ctx):
     # from this State so they work no matter which list the user picked from.
     selected_cid_state = gr.State("")
 
-    refresh_caption_text = col1_cfg.get(
-        "refresh_caption", "Click Refresh to see updated conversation."
+    refresh_hint_text = col1_cfg.get(
+        "refresh_caption", "Click Refresh after sending a message to see updates."
     )
 
     with gr.Row():
         # ═══ PANEL 1: Conversations (Active + Start New) ═══
-        with gr.Column(scale=1, min_width=260, elem_classes=["conv-list-panel"]):
-            with gr.Row(elem_classes=["conv-header-row"]):
-                gr.HTML(
-                    f'<div class="conv-section-title" style="margin:0;">'
-                    f'{col1_cfg.get("title", "Active Chats")}</div>'
-                )
-                refresh_btn = gr.Button(
-                    "🔄", size="sm", variant="secondary",
-                    scale=0, min_width=40,
-                    elem_classes=["conv-refresh-btn"],
-                )
+        # Width: 20% of content area (scale=1 of 1+2+2=5 total)
+        with gr.Column(scale=1, min_width=240, elem_classes=["conv-list-panel"]):
             gr.HTML(
-                f'<div class="conv-refresh-caption">{refresh_caption_text}</div>'
+                f'<div class="conv-section-title" style="margin:0 0 6px 0;">'
+                f'{col1_cfg.get("title", "Active Chats")}</div>'
             )
             search_box = gr.Textbox(
                 placeholder=col1_cfg.get("search_placeholder", "Search active… (press Enter)"),
@@ -379,7 +371,8 @@ def build(ctx):
             )
 
         # ═══ PANEL 2: Chat ═══
-        with gr.Column(scale=2, min_width=400, elem_classes=["chat-panel"]):
+        # Width: 40% of content area (scale=2 of 5 total)
+        with gr.Column(scale=2, min_width=380, elem_classes=["chat-panel"]):
             chat_header = gr.HTML(value=placeholder_header, elem_classes=["chat-header-slot"])
             chat_messages = gr.HTML(value=placeholder_messages, elem_classes=["chat-messages-slot"])
 
@@ -431,22 +424,33 @@ def build(ctx):
                     attach_cancel_btn = gr.Button("Cancel", size="sm", variant="secondary")
                     attach_done_btn = gr.Button("Done", size="sm", variant="primary")
 
-        # ═══ PANEL 3: Past Activity + Category + Template + Variables + Preview ═══
-        with gr.Column(scale=1, min_width=260, elem_classes=["tools-panel"]):
+        # ═══ PANEL 3: Refresh + Past Activity + Category + Template + Variables + Preview ═══
+        # Width: 40% of content area (scale=2 of 5 total). Refresh button
+        # moved here from Panel 1 — it's prominent at the top with a hint
+        # right below it. A single _do_refresh handler reloads everything.
+        with gr.Column(scale=2, min_width=320, elem_classes=["tools-panel"]):
+            refresh_btn = gr.Button(
+                "🔄  Refresh",
+                size="sm", variant="secondary",
+                elem_classes=["tp-refresh-btn"],
+            )
+            gr.HTML(
+                f'<div class="tp-refresh-hint">{refresh_hint_text}</div>'
+            )
             tp_activity_box = gr.HTML(
-                value='<div style="color:#64748b; font-size:10px;">No activity</div>',
+                value='<div style="color:#64748b; font-size:11px; padding:6px;">No activity</div>',
                 elem_classes=["tp-activity-box"],
             )
             tp_category = gr.Dropdown(
                 label="Category",
                 choices=["All"] + get_wa_config_safe_categories(),
                 value="All", interactive=True,
-                elem_classes=["tp-category"],
+                elem_classes=["tp-category", "wa-filter-sm"],
             )
             tp_template = gr.Dropdown(
                 label="Template",
                 choices=[], interactive=True,
-                elem_classes=["tp-template"],
+                elem_classes=["tp-template", "wa-filter-sm"],
             )
             with gr.Column(elem_classes=["tp-vars-box"]) as tp_vars_box:
                 # Pre-allocate slots as visible=True so they exist in the DOM

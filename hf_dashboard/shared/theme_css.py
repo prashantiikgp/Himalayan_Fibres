@@ -203,7 +203,17 @@ body { font-size: 12px !important; }
     background: rgba(255,255,255,.03) !important;
 }
 
-/* Also constrain the left column so the page height doesn't grow past viewport */
+/* Also constrain the left column so the page height doesn't grow past viewport.
+   flex-wrap: nowrap prevents Gradio's default gr.Column and its auto-grouped
+   .form child (both display:flex, flex-direction:column, flex-wrap:wrap)
+   from wrapping overflow children into a second column track when they
+   exceed max-height — without this the inline legend AND the filter
+   dropdowns wrap sideways out of the sidebar. Apply to both the col and
+   its inner .form. */
+.page-left-col,
+.page-left-col .form {
+    flex-wrap: nowrap !important;
+}
 .page-left-col {
     max-height: calc(100vh - 110px) !important;
     overflow-y: auto !important;
@@ -641,15 +651,40 @@ html, body { scroll-behavior: auto !important; overflow-anchor: none !important;
 .wa-attach-modal .chat-media-input { display: block !important; }
 .wa-attach-modal .wa-attach-actions { display: flex !important; gap: 8px !important; justify-content: flex-end !important; }
 
-/* Panel 3 — flex column with fixed Past Activity, flex variables, capped preview */
+/* Panel 3 — heights tightened so all sections (refresh + activity +
+   2 dropdowns + var inputs + preview + send button) fit one viewport
+   without pushing Send Template below the fold. */
 .tools-panel { overflow: hidden !important; padding: 10px !important; }
+.tools-panel button.tp-refresh-btn {
+    flex: 0 0 auto !important;
+    height: 32px !important;
+    width: 100% !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    padding: 0 14px !important;
+    background: rgba(99,102,241,.15) !important;
+    border: 1px solid rgba(99,102,241,.4) !important;
+    color: #c7d2fe !important;
+    margin-bottom: 2px !important;
+}
+.tools-panel button.tp-refresh-btn:hover {
+    background: rgba(99,102,241,.25) !important;
+}
+.tools-panel .tp-refresh-hint {
+    flex: 0 0 auto !important;
+    font-size: 9px !important;
+    color: #64748b !important;
+    font-style: italic !important;
+    margin: 0 2px 6px 2px !important;
+    line-height: 1.3 !important;
+}
 .tools-panel .tp-activity-box {
-    flex: 0 0 25% !important;
+    flex: 0 0 16% !important;
     overflow-y: auto !important;
     border: 1px solid rgba(255,255,255,.06) !important;
     border-radius: 6px !important;
-    padding: 6px 8px !important;
-    margin-bottom: 8px !important;
+    padding: 0 !important;
+    margin-bottom: 6px !important;
 }
 .tools-panel .tp-category,
 .tools-panel .tp-template,
@@ -659,19 +694,42 @@ html, body { scroll-behavior: auto !important; overflow-anchor: none !important;
     flex: 1 1 auto !important;
     min-height: 0 !important;
     overflow-y: auto !important;
-    padding: 4px 0 !important;
+    padding: 2px 0 !important;
 }
 .tools-panel .tp-preview-box {
     flex: 0 0 auto !important;
-    max-height: 30% !important;
+    max-height: 22% !important;
     overflow-y: auto !important;
     border: 1px solid rgba(255,255,255,.08) !important;
     border-left: 2px solid rgba(34,197,94,.4) !important;
     background: rgba(34,197,94,.04) !important;
     border-radius: 6px !important;
-    padding: 8px 10px !important;
-    margin: 8px 0 !important;
+    padding: 6px 8px !important;
+    margin: 6px 0 !important;
 }
+
+/* Filter dropdown size variants — mirror tools_panel.filter_sizes
+   in components.yml. Apply via elem_classes=["wa-filter-sm"]. */
+.wa-filter-sm { margin: 1px 0 !important; }
+.wa-filter-sm .wrap,
+.wa-filter-sm input,
+.wa-filter-sm .secondary-wrap {
+    min-height: 26px !important;
+    font-size: 10px !important;
+    padding: 2px 8px !important;
+}
+.wa-filter-sm label span,
+.wa-filter-sm .head label {
+    font-size: 9px !important;
+    margin-bottom: 1px !important;
+    color: #94a3b8 !important;
+}
+.wa-filter-md .wrap,
+.wa-filter-md input { min-height: 32px !important; font-size: 11px !important; padding: 4px 10px !important; }
+.wa-filter-md label span { font-size: 10px !important; }
+.wa-filter-lg .wrap,
+.wa-filter-lg input { min-height: 40px !important; font-size: 13px !important; padding: 8px 12px !important; }
+.wa-filter-lg label span { font-size: 11px !important; }
 .tools-panel .wa-var-slot { margin: 2px 0 !important; }
 /* Hide the per-component status tracker on the variable slots — the
    live preview substitution is fast (string replace) and the spinner
