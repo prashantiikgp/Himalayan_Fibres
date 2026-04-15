@@ -198,13 +198,29 @@ body { font-size: 12px !important; }
    were either truncated invisibly or pushed neighbour columns off
    screen. word-break:break-all handles both 'long.local-part@host'
    and unbroken garbage strings. */
-.contacts-right-col .contacts-table-host td.contact-email-cell {
+.contacts-right-col .contacts-table-host td.contact-email-cell,
+.contacts-right-col .contacts-table-host td.contact-name-cell,
+.contacts-right-col .contacts-table-host td.contact-company-cell {
     white-space: normal !important;
-    word-break: break-all !important;
-    max-width: 200px !important;
     line-height: 1.35 !important;
     padding-top: 8px !important;
     padding-bottom: 8px !important;
+    /* Cap at 2 lines, then ellipsize. -webkit-line-clamp is supported
+       in every Chromium-based browser (HF Spaces serve via Chrome). */
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+}
+/* Emails are one unbroken token, so they must break mid-character;
+   names and companies break on word/space boundaries naturally. */
+.contacts-right-col .contacts-table-host td.contact-email-cell {
+    word-break: break-all !important;
+    max-width: 200px !important;
+}
+.contacts-right-col .contacts-table-host td.contact-name-cell,
+.contacts-right-col .contacts-table-host td.contact-company-cell {
+    word-break: break-word !important;
 }
 /* Filters in .page-left-col use the wa-filter-lg variant. Add
    breathing room between them so the column reads as the primary
@@ -774,14 +790,26 @@ html, body { scroll-behavior: auto !important; overflow-anchor: none !important;
 .wa-filter-lg .wrap,
 .wa-filter-lg input { min-height: 40px !important; font-size: 13px !important; padding: 8px 12px !important; }
 .wa-filter-lg label span { font-size: 11px !important; }
-/* Category + Template row: side by side, no horizontal scroll. */
+/* Category + Template row: side by side, no horizontal scroll.
+   Gradio auto-wraps consecutive form components (two Dropdowns) in a
+   <div class="form"> wrapper with flex-direction: column — that's why
+   the previous '.tp-filter-row > .block' rule never matched (the
+   .form sits between). Override the .form wrapper to flex horizontally. */
 .tools-panel .tp-filter-row {
     flex: 0 0 auto !important;
     flex-wrap: nowrap !important;
     gap: 6px !important;
     margin-bottom: 4px !important;
 }
-.tools-panel .tp-filter-row > .block {
+.tools-panel .tp-filter-row .form {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    width: 100% !important;
+    flex: 1 1 auto !important;
+}
+.tools-panel .tp-filter-row .form > * {
     flex: 1 1 0 !important;
     min-width: 0 !important;
 }
