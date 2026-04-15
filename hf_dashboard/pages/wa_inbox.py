@@ -449,16 +449,24 @@ def build(ctx):
                 elem_classes=["tp-template"],
             )
             with gr.Column(elem_classes=["tp-vars-box"]) as tp_vars_box:
+                # Per-slot wrapper Column toggled visible/hidden per template.
+                # Wrapping is required because Gradio omits Textboxes created
+                # with visible=False from the DOM entirely, so a later
+                # gr.update(visible=True) has nothing to attach to. Toggling
+                # the wrapper Column works because the inner Textbox renders
+                # eagerly.
+                var_rows: list[gr.Column] = []
                 var_slots: list[gr.Textbox] = []
                 for i in range(MAX_VARS):
-                    slot = gr.Textbox(
-                        label=f"var_{i}",
-                        placeholder="",
-                        visible=False,
-                        interactive=True,
-                        container=True,
-                        elem_classes=["wa-var-slot"],
-                    )
+                    with gr.Column(visible=False, elem_classes=["wa-var-row"]) as row:
+                        slot = gr.Textbox(
+                            label=f"var_{i}",
+                            placeholder="",
+                            interactive=True,
+                            container=True,
+                            elem_classes=["wa-var-slot"],
+                        )
+                    var_rows.append(row)
                     var_slots.append(slot)
             tp_preview_box = gr.HTML(
                 value=render_wa_template_filled("", {}),
@@ -612,34 +620,45 @@ def build(ctx):
     )
 
     def _on_template_change(template_name: str):
-        """Reconfigure variable slots and reset preview when a template
-        is picked. Returns updates for *all* MAX_VARS slots + preview."""
+        """Reconfigure variable slot rows and reset preview when a
+        template is picked. Returns updates for var_rows (visibility),
+        var_slots (label/value/placeholder), then the preview HTML."""
         from services.wa_config import get_wa_config
+        n = MAX_VARS
+
+        def _all_hidden(preview_html):
+            row_updates = [gr.update(visible=False) for _ in range(n)]
+            slot_updates = [gr.update(value="", label=f"var_{i}") for i in range(n)]
+            return (*row_updates, *slot_updates, preview_html)
+
         if not template_name:
-            updates = [gr.update(visible=False, value="", label=f"var_{i}") for i in range(MAX_VARS)]
-            return (*updates, render_wa_template_filled("", {}))
+            return _all_hidden(render_wa_template_filled("", {}))
         tpl = get_wa_config().get_template(template_name)
         if not tpl:
-            updates = [gr.update(visible=False, value="", label=f"var_{i}") for i in range(MAX_VARS)]
-            return (*updates, f'<div style="color:#ef4444; font-size:10px;">Template not found</div>')
-        updates = []
-        for i in range(MAX_VARS):
+            return _all_hidden(
+                '<div style="color:#ef4444; font-size:10px;">Template not found</div>'
+            )
+
+        row_updates = []
+        slot_updates = []
+        for i in range(n):
             if i < len(tpl.variables):
                 v = tpl.variables[i]
-                placeholder_text = v.example or v.description or ""
-                updates.append(gr.update(
-                    visible=True, value="",
+                row_updates.append(gr.update(visible=True))
+                slot_updates.append(gr.update(
+                    value="",
                     label=v.name,
-                    placeholder=placeholder_text,
+                    placeholder=v.example or v.description or "",
                 ))
             else:
-                updates.append(gr.update(visible=False, value="", label=f"var_{i}"))
-        return (*updates, render_wa_template_filled(template_name, {}))
+                row_updates.append(gr.update(visible=False))
+                slot_updates.append(gr.update(value="", label=f"var_{i}"))
+        return (*row_updates, *slot_updates, render_wa_template_filled(template_name, {}))
 
     tp_template.change(
         fn=_on_template_change,
         inputs=[tp_template],
-        outputs=[*var_slots, tp_preview_box],
+        outputs=[*var_rows, *var_slots, tp_preview_box],
     )
 
     def _preview_update(template_name, *slot_values):
@@ -907,10 +926,8 @@ def build(ctx):
             convs = _get_active_conversations(db)
             cfg_wa = get_wa_config()
             empty_activity = '<div style="color:#64748b; font-size:10px;">No activity</div>'
-            slot_resets = [
-                gr.update(visible=False, value="", label=f"var_{i}")
-                for i in range(MAX_VARS)
-            ]
+            row_resets = [gr.update(visible=False) for _ in range(MAX_VARS)]
+            slot_resets = [gr.update(value="", label=f"var_{i}") for i in range(MAX_VARS)]
             return (
                 gr.update(choices=convs, value=None),       # conversation_radio
                 gr.update(choices=[], value=None),          # new_conv_radio
@@ -922,6 +939,7 @@ def build(ctx):
                 "",                                          # send_result
                 gr.update(value="All"),                      # tp_category
                 gr.update(choices=cfg_wa.get_template_names(), value=None),  # tp_template
+                *row_resets,                                 # var_rows × MAX_VARS
                 *slot_resets,                                # var_slots × MAX_VARS
                 render_wa_template_filled("", {}),           # tp_preview_box
                 "",                                          # tp_send_result
@@ -940,6 +958,7 @@ def build(ctx):
         send_result,
         tp_category,
         tp_template,
+        *var_rows,
         *var_slots,
         tp_preview_box,
         tp_send_result,
