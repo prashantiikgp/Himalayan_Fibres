@@ -77,6 +77,9 @@ def _home_counters_cached() -> dict:
             func.sum(
                 case((Contact.last_wa_inbound_at >= window_cutoff, 1), else_=0)
             ).label("wa_24h"),
+            func.sum(
+                case((Contact.wa_id.isnot(None), 1), else_=0)
+            ).label("wa_ready"),
         ).one()
 
         emails_today = db.query(func.count()).select_from(EmailSend).filter(
@@ -101,6 +104,7 @@ def _home_counters_cached() -> dict:
             "opted_in": int(contact_row.opted_in or 0),
             "pending": int(contact_row.pending or 0),
             "wa_24h": int(contact_row.wa_24h or 0),
+            "wa_ready": int(contact_row.wa_ready or 0),
             "emails_today": int(emails_today),
             "wa_today": int(wa_today),
             "email_campaigns": int(email_campaigns),
@@ -232,6 +236,7 @@ def build(ctx) -> dict:
         opted_in = counts["opted_in"]
         pending = counts["pending"]
         wa_24h = counts["wa_24h"]
+        wa_ready = counts["wa_ready"]
         emails_today = counts["emails_today"]
         wa_today = counts["wa_today"]
         email_campaigns = counts["email_campaigns"]
@@ -282,6 +287,7 @@ def build(ctx) -> dict:
             row2 = render_kpi_row([
                 (str(opted_in), "Opted In", "", "#22c55e"),
                 (str(pending), "Pending", "", "#f59e0b"),
+                (str(wa_ready), "WA Ready", "", "#6366f1"),
                 (str(email_campaigns), "Email Campaigns", "", "#6366f1"),
                 (str(wa_campaigns), "WA Campaigns", "", "#22c55e"),
             ])

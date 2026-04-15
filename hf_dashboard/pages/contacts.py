@@ -6,6 +6,7 @@ Styles from config/theme/components.yml.
 
 from __future__ import annotations
 
+import html
 import tempfile
 import uuid
 from pathlib import Path
@@ -14,7 +15,6 @@ import pandas as pd
 import gradio as gr
 import yaml
 
-from components.kpi_card import render_kpi_row
 from components.styles import (
     table_container, table_wrapper, table_header_cell,
     table_cell, table_row, table_row_hover, table_footer,
@@ -176,15 +176,18 @@ def _build_table(db, segment="All", lifecycle="All", country="All", channel="All
         for col in columns:
             field = col["field"]
             if field == "name":
-                name = f"{contact.first_name or ''} {contact.last_name or ''}".strip() or missing
+                raw_name = f"{contact.first_name or ''} {contact.last_name or ''}".strip()
+                name = raw_name or missing
                 company_line = contact.company or ""
+                tip = html.escape(f"{raw_name} · {company_line}".strip(" ·")) if (raw_name or company_line) else ""
                 cells += (
-                    f'<td style="{table_cell()}">'
+                    f'<td style="{table_cell()}" title="{tip}">'
                     f'<div style="font-weight:600; color:#e7eaf3;">{name}</div>'
                     f'<div style="font-size:10px; color:#64748b;">{company_line}</div></td>'
                 )
             elif field == "company":
-                cells += f'<td style="{table_cell()}">{_display_or_missing(contact.company)}</td>'
+                tip = html.escape(contact.company or "")
+                cells += f'<td style="{table_cell()}" title="{tip}">{_display_or_missing(contact.company)}</td>'
             elif field == "channels":
                 ch = ""
                 if _is_real_email(contact.email):
@@ -200,10 +203,12 @@ def _build_table(db, segment="All", lifecycle="All", country="All", channel="All
             elif field == "email":
                 font = col.get("font", "")
                 display = contact.email if _is_real_email(contact.email) else missing
-                cells += f'<td style="{table_cell(font=font)}; color:#94a3b8;">{display}</td>'
+                tip = html.escape(contact.email or "") if _is_real_email(contact.email) else ""
+                cells += f'<td style="{table_cell(font=font)}; color:#94a3b8;" title="{tip}">{display}</td>'
             elif field == "phone":
                 display = contact.phone if contact.phone else missing
-                cells += f'<td style="{table_cell()}; color:#94a3b8;">{display}</td>'
+                tip = html.escape(contact.phone or "")
+                cells += f'<td style="{table_cell()}; color:#94a3b8;" title="{tip}">{display}</td>'
             elif field == "segments":
                 seg_ids = contact_segments_map.get(contact.id, [])
                 if seg_ids:
@@ -236,7 +241,8 @@ def _build_table(db, segment="All", lifecycle="All", country="All", channel="All
                     )
                     if len(tags_val) > 3:
                         pills += f' <span style="color:#64748b; font-size:9px;">+{len(tags_val)-3}</span>'
-                    cells += f'<td style="{table_cell()}">{pills}</td>'
+                    tip = html.escape(", ".join(tags_val))
+                    cells += f'<td style="{table_cell()}" title="{tip}">{pills}</td>'
                 else:
                     cells += f'<td style="{table_cell()}">{missing}</td>'
             elif field == "actions":
@@ -266,7 +272,8 @@ def _build_table(db, segment="All", lifecycle="All", country="All", channel="All
                 )
             else:
                 value = getattr(contact, field, None)
-                cells += f'<td style="{table_cell()}">{_display_or_missing(value)}</td>'
+                tip = html.escape(str(value)) if value else ""
+                cells += f'<td style="{table_cell()}" title="{tip}">{_display_or_missing(value)}</td>'
 
         hover = table_row_hover()
         rows_html += (
@@ -300,11 +307,13 @@ def _build_table(db, segment="All", lifecycle="All", country="All", channel="All
     return table_html, total, total_pages, page
 
 
-def _build_legend() -> str:
-    """Collapsible legend explaining Customer Types, Segments, and Tags.
+def _build_legend(inline: bool = False) -> str:
+    """Legend explaining Customer Types, Segments, and Tags.
 
     YAML-driven headings/copy from contacts.yml; segment descriptions from
-    schema.yml; live segments + counts from the DB.
+    schema.yml; live segments + counts from the DB. When ``inline=True`` the
+    wrapper uses a compact heading suitable for the Contacts sidebar; the
+    default (``inline=False``) renders the full-width modal styling.
     """
     cfg = _load_page_config()
     legend_cfg = cfg.get("legend", {})
@@ -357,6 +366,44 @@ def _build_legend() -> str:
     seg_note = seg_cfg.get("note", "")
     tag_heading = tag_cfg.get("heading", "Tags")
     tag_intro = tag_cfg.get("intro", "")
+
+    if inline:
+        # Compact sidebar render: pills only, no paragraph intros or
+        # per-segment descriptions. Fits inside the ~790px page-left-col
+        # max-height without reintroducing a scroller.
+        ct_pills_only = " ".join(
+            f'<span class="legend-pill" style="background:{seg.get("color", "#64748b")}22; '
+            f'color:{seg.get("color", "#64748b")}; border:1px solid {seg.get("color", "#64748b")}55;">'
+            f'{seg.get("label", seg.get("id", ""))}</span>'
+            for seg in segments
+        )
+        live_seg_pills_only = ""
+        for s in get_active_segments_cached():
+            color = segment_color(s.id)
+            live_seg_pills_only += (
+                f'<span class="legend-pill" style="background:{color}22; color:{color}; '
+                f'border:1px solid {color}55;">{s.name}</span> '
+            )
+        return f'''
+<div class="contacts-legend contacts-legend-inline">
+  <h4 style="margin:0 0 6px 0; font-size:10px; font-weight:700;
+    text-transform:uppercase; letter-spacing:.4px; color:#e7eaf3;">Legend</h4>
+  <div style="font-size:10px; color:#94a3b8;">
+    <div style="margin-bottom:6px;">
+      <div style="color:#64748b; font-size:9px; text-transform:uppercase; letter-spacing:.4px; margin-bottom:3px;">{ct_heading}</div>
+      {ct_pills_only}
+    </div>
+    <div style="margin-bottom:6px;">
+      <div style="color:#64748b; font-size:9px; text-transform:uppercase; letter-spacing:.4px; margin-bottom:3px;">{seg_heading}</div>
+      {live_seg_pills_only}
+    </div>
+    <div>
+      <div style="color:#64748b; font-size:9px; text-transform:uppercase; letter-spacing:.4px; margin-bottom:3px;">{tag_heading}</div>
+      {tag_pills}
+    </div>
+  </div>
+</div>
+'''
 
     return f'''
 <div class="contacts-legend contacts-legend-modal">
@@ -427,8 +474,8 @@ def build(ctx) -> dict:
                 multiselect=True, interactive=True,
                 info="Empty = any. Pick tags to narrow.",
             )
-            gr.HTML('<div style="height:1px; background:rgba(255,255,255,.06); margin:8px 0;"></div>')
-            left_kpis = gr.HTML(value="")
+            gr.HTML('<div style="height:1px; background:rgba(255,255,255,.06); margin:12px 0;"></div>')
+            gr.HTML(value=_build_legend(inline=True))
 
         # -- Right: Top bar + table + compact footer (legend + pagination) --
         top_bar_cfg = cfg.get("top_bar", {})
@@ -756,31 +803,19 @@ def build(ctx) -> dict:
     # -- Apply filters / render table --
     def _apply(search_val, seg, lc, country, channel, tags, page):
         from services.database import get_db
-        from services.models import Contact
         db = get_db()
         try:
-            total = db.query(Contact).count()
-            opted_in = db.query(Contact).filter(Contact.consent_status == "opted_in").count()
-            pending = db.query(Contact).filter(Contact.consent_status == "pending").count()
-            wa_ready = db.query(Contact).filter(Contact.wa_id.isnot(None)).count()
-
-            kpis = render_kpi_row([
-                (str(total), "Total", "", "#e7eaf3"),
-                (str(opted_in), "Opted In", "", "#22c55e"),
-                (str(pending), "Pending", "", "#f59e0b"),
-                (str(wa_ready), "WA Ready", "", "#6366f1"),
-            ])
             table, row_total, total_pages, effective_page = _build_table(
                 db, segment=seg, lifecycle=lc, country=country, channel=channel,
                 tags=tags, search=search_val, page=int(page or 0),
             )
             label = _build_pagination_label(effective_page, total_pages, row_total)
-            return kpis, table, label, effective_page, total_pages, effective_page + 1
+            return table, label, effective_page, total_pages, effective_page + 1
         finally:
             db.close()
 
     apply_inputs = [search, segment_filter, lifecycle_filter, country_filter, channel_filter, tag_filter, page_state]
-    apply_outputs = [left_kpis, table_html, pag_label, page_state, total_pages_state, page_num]
+    apply_outputs = [table_html, pag_label, page_state, total_pages_state, page_num]
 
     # Filter/search changes reset to page 0
     def _apply_reset(search_val, seg, lc, country, channel, tags):
@@ -830,9 +865,9 @@ def build(ctx) -> dict:
     def _save(first, last, phone, email, company, country, segment_label, lifecycle_label, tags_str,
               search_val, seg_f, lc_f, country_f, channel_f, tag_f):
         if not first:
-            return f'<div style="color:#ef4444; font-size:11px;">First name is required</div>', *([gr.update()] * 7)
+            return f'<div style="color:#ef4444; font-size:11px;">First name is required</div>', *([gr.update()] * 6)
         if not phone:
-            return f'<div style="color:#ef4444; font-size:11px;">Phone is required</div>', *([gr.update()] * 7)
+            return f'<div style="color:#ef4444; font-size:11px;">Phone is required</div>', *([gr.update()] * 6)
 
         clean_phone = "".join(c for c in phone if c.isdigit())
         if len(clean_phone) == 10:
@@ -840,14 +875,14 @@ def build(ctx) -> dict:
         elif len(clean_phone) > 10:
             wa_id = clean_phone
         else:
-            return f'<div style="color:#ef4444; font-size:11px;">Phone must be 10 digits</div>', *([gr.update()] * 7)
+            return f'<div style="color:#ef4444; font-size:11px;">Phone must be 10 digits</div>', *([gr.update()] * 6)
 
         from services.database import get_db
         from services.models import Contact
         db = get_db()
         try:
             if email and db.query(Contact).filter(Contact.email == email).first():
-                return f'<div style="color:#ef4444; font-size:11px;">Email already exists</div>', *([gr.update()] * 7)
+                return f'<div style="color:#ef4444; font-size:11px;">Email already exists</div>', *([gr.update()] * 6)
 
             seg_id = get_segment_id_by_label(segment_label) or "other"
             lc_id = get_lifecycle_id_by_label(lifecycle_label) or "new_lead"
@@ -871,15 +906,15 @@ def build(ctx) -> dict:
         finally:
             db.close()
 
-        kpis, table, label, new_page, tot_pages, num = _apply(search_val, seg_f, lc_f, country_f, channel_f, tag_f, 0)
+        table, label, new_page, tot_pages, num = _apply(search_val, seg_f, lc_f, country_f, channel_f, tag_f, 0)
         msg = f'<div style="color:#22c55e; font-size:11px;">Contact {first} {last} added</div>'
-        return msg, kpis, table, label, new_page, tot_pages, num, gr.update(elem_classes=_MODAL_CLOSED["add"])
+        return msg, table, label, new_page, tot_pages, num, gr.update(elem_classes=_MODAL_CLOSED["add"])
 
     save_btn.click(
         fn=_save,
         inputs=[new_first, new_last, new_phone, new_email, new_company, new_country, new_segment, new_lifecycle, new_tags,
                 search, segment_filter, lifecycle_filter, country_filter, channel_filter, tag_filter],
-        outputs=[save_result, left_kpis, table_html, pag_label, page_state, total_pages_state, page_num, add_panel],
+        outputs=[save_result, table_html, pag_label, page_state, total_pages_state, page_num, add_panel],
     )
 
     # -- Save edited contact (inline drawer) --
@@ -891,7 +926,7 @@ def build(ctx) -> dict:
         if not cid:
             return (
                 '<div style="color:#ef4444; font-size:11px;">No contact id</div>',
-                gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(),
+                gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(),
             )
         db = get_db()
         try:
@@ -899,7 +934,7 @@ def build(ctx) -> dict:
             if not c:
                 return (
                     '<div style="color:#ef4444; font-size:11px;">Contact not found</div>',
-                    gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(),
+                    gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(),
                 )
 
             # Enforce email uniqueness (only if changing to a new non-empty value)
@@ -908,7 +943,7 @@ def build(ctx) -> dict:
                 if other:
                     return (
                         '<div style="color:#ef4444; font-size:11px;">Email already in use</div>',
-                        gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(),
+                        gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(),
                     )
 
             # Capture before-state for diff summary
@@ -957,11 +992,11 @@ def build(ctx) -> dict:
         finally:
             db.close()
 
-        kpis, table, label, new_page, tot_pages, num = _apply(
+        table, label, new_page, tot_pages, num = _apply(
             search_val, seg_f, lc_f, country_f, channel_f, tag_f, 0,
         )
         msg = f'<div style="color:#22c55e; font-size:11px;">Saved · table refreshed</div>'
-        return msg, kpis, table, label, new_page, tot_pages, num, gr.update(elem_classes=_MODAL_CLOSED["edit"])
+        return msg, table, label, new_page, tot_pages, num, gr.update(elem_classes=_MODAL_CLOSED["edit"])
 
     edit_save_btn.click(
         fn=_save_edit,
@@ -971,7 +1006,7 @@ def build(ctx) -> dict:
             search, segment_filter, lifecycle_filter, country_filter, channel_filter, tag_filter,
         ],
         outputs=[
-            edit_result, left_kpis, table_html, pag_label, page_state, total_pages_state, page_num, edit_panel,
+            edit_result, table_html, pag_label, page_state, total_pages_state, page_num, edit_panel,
         ],
     )
 

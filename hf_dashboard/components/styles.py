@@ -76,7 +76,10 @@ def table_header_cell() -> str:
 def table_cell(font: str = "") -> str:
     c = _c("table")
     mono = "font-family:monospace;" if font == "monospace" else ""
-    return f"padding:{c['cell_padding']}; font-size:{c['cell_font_size']}; {mono}"
+    return (
+        f"padding:{c['cell_padding']}; font-size:{c['cell_font_size']}; {mono}"
+        f"overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"
+    )
 
 
 def table_row() -> str:
