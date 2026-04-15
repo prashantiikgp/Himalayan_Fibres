@@ -611,10 +611,20 @@ html, body { scroll-behavior: auto !important; overflow-anchor: none !important;
     padding: 0 !important;
     margin: 0 !important;
 }
-/* Force the textbox to absorb every leftover pixel in the send row */
+/* Textbox: high flex-grow so it dominates against the small icon
+   buttons. flex: 8 1 0 (grow=8, shrink=1, basis=0) means it takes 8x
+   the leftover space share vs the buttons' grow=1. */
 .chat-panel .chat-send-row .chat-send-input {
-    flex: 1 1 100% !important;
+    flex: 8 1 0 !important;
     min-width: 0 !important;
+}
+/* Cap the Send button so it doesn't expand to 160px. */
+.chat-panel .chat-send-row .chat-send-btn {
+    flex: 0 0 auto !important;
+}
+.chat-panel .chat-send-row .chat-send-btn button {
+    min-width: 72px !important;
+    max-width: 90px !important;
 }
 
 /* Attachment modal — show the gr.File only when inside the modal */
@@ -654,6 +664,15 @@ html, body { scroll-behavior: auto !important; overflow-anchor: none !important;
     margin: 8px 0 !important;
 }
 .tools-panel .wa-var-slot { margin: 2px 0 !important; }
+/* Hide the per-component status tracker on the variable slots — the
+   live preview substitution is fast (string replace) and the spinner
+   only flickered as visual noise. show_progress="hidden" on the
+   handler isn't sufficient because Gradio still mounts the tracker
+   element; we hide it via CSS so it can never render. */
+.tools-panel .wa-var-slot [data-testid="status-tracker"],
+.tools-panel .tp-vars-box [data-testid="status-tracker"] {
+    display: none !important;
+}
 .tools-panel .wa-var-slot textarea,
 .tools-panel .wa-var-slot input {
     min-height: 28px !important;
