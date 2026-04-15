@@ -441,17 +441,23 @@ def build(ctx):
                 value='<div style="color:#64748b; font-size:11px; padding:6px;">No activity</div>',
                 elem_classes=["tp-activity-box"],
             )
-            tp_category = gr.Dropdown(
-                label="Category",
-                choices=["All"] + get_wa_config_safe_categories(),
-                value="All", interactive=True,
-                elem_classes=["tp-category", "wa-filter-sm"],
-            )
-            tp_template = gr.Dropdown(
-                label="Template",
-                choices=[], interactive=True,
-                elem_classes=["tp-template", "wa-filter-sm"],
-            )
+            # Category + Template share one row so they fit without
+            # horizontal scrolling and free up ~70px of vertical space
+            # for the variable inputs and preview below.
+            with gr.Row(elem_classes=["tp-filter-row"]):
+                tp_category = gr.Dropdown(
+                    label="Category",
+                    choices=["All"] + get_wa_config_safe_categories(),
+                    value="All", interactive=True,
+                    scale=1, min_width=0,
+                    elem_classes=["tp-category", "wa-filter-sm"],
+                )
+                tp_template = gr.Dropdown(
+                    label="Template",
+                    choices=[], interactive=True,
+                    scale=1, min_width=0,
+                    elem_classes=["tp-template", "wa-filter-sm"],
+                )
             with gr.Column(elem_classes=["tp-vars-box"]) as tp_vars_box:
                 # Pre-allocate slots as visible=True so they exist in the DOM
                 # from the start. Gradio omits visible=False components from

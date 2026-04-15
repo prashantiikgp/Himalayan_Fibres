@@ -749,27 +749,44 @@ html, body { scroll-behavior: auto !important; overflow-anchor: none !important;
 
 /* Filter dropdown size variants — mirror tools_panel.filter_sizes
    in components.yml. Apply via elem_classes=["wa-filter-sm"]. */
-.wa-filter-sm { margin: 1px 0 !important; }
+.wa-filter-sm { margin: 0 !important; }
 .wa-filter-sm .wrap,
 .wa-filter-sm input,
 .wa-filter-sm .secondary-wrap {
-    min-height: 26px !important;
+    min-height: 24px !important;
     font-size: 10px !important;
-    padding: 2px 8px !important;
+    padding: 2px 6px !important;
 }
 .wa-filter-sm label span,
 .wa-filter-sm .head label {
     font-size: 9px !important;
-    margin-bottom: 1px !important;
+    margin-bottom: 0 !important;
+    line-height: 1.1 !important;
     color: #94a3b8 !important;
 }
+/* Inside the side-by-side filter row in tools-panel, drop the dropdown's
+   own container padding so the labels sit flush at the top. */
+.tools-panel .tp-filter-row .wa-filter-sm { padding: 0 !important; }
+.tools-panel .tp-filter-row .wa-filter-sm .wrap { width: 100% !important; }
 .wa-filter-md .wrap,
 .wa-filter-md input { min-height: 32px !important; font-size: 11px !important; padding: 4px 10px !important; }
 .wa-filter-md label span { font-size: 10px !important; }
 .wa-filter-lg .wrap,
 .wa-filter-lg input { min-height: 40px !important; font-size: 13px !important; padding: 8px 12px !important; }
 .wa-filter-lg label span { font-size: 11px !important; }
-.tools-panel .wa-var-slot { margin: 2px 0 !important; }
+/* Category + Template row: side by side, no horizontal scroll. */
+.tools-panel .tp-filter-row {
+    flex: 0 0 auto !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    margin-bottom: 4px !important;
+}
+.tools-panel .tp-filter-row > .block {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+}
+
+.tools-panel .wa-var-slot { margin: 1px 0 !important; }
 /* Hide the per-component status tracker on the variable slots — the
    live preview substitution is fast (string replace) and the spinner
    only flickered as visual noise. show_progress="hidden" on the
@@ -781,15 +798,26 @@ html, body { scroll-behavior: auto !important; overflow-anchor: none !important;
 }
 .tools-panel .wa-var-slot textarea,
 .tools-panel .wa-var-slot input {
-    min-height: 28px !important;
-    height: 28px !important;
-    font-size: 11px !important;
-    padding: 4px 8px !important;
+    min-height: 22px !important;
+    height: 22px !important;
+    font-size: 10px !important;
+    padding: 2px 6px !important;
     resize: none !important;
+    line-height: 1.2 !important;
 }
 .tools-panel .wa-var-slot label span {
-    font-size: 9px !important;
+    font-size: 8px !important;
     color: #94a3b8 !important;
+    margin-bottom: 0 !important;
+    line-height: 1.1 !important;
+}
+/* Smaller placeholder text — examples like "Natural Nettle Yarn,
+   Hemp Blend" overflowed the 22px input row before. */
+.tools-panel .wa-var-slot input::placeholder,
+.tools-panel .wa-var-slot textarea::placeholder {
+    font-size: 9px !important;
+    font-style: italic !important;
+    opacity: 0.6 !important;
 }
 """
 
