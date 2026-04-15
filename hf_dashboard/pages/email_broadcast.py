@@ -446,19 +446,23 @@ def build(ctx) -> dict:
                 interactive=True,
             )
 
-            # 6 single-line slots in 3 rows of 2
+            # 6 single-line slots in 3 rows of 2. Note: initialize all slots
+            # visible=True with placeholder labels — some Gradio versions
+            # strip components declared with visible=False at build time from
+            # the component tree entirely, and later gr.update(visible=True)
+            # calls have no effect. _refresh() hides unused slots on load.
             with gr.Row():
-                var_slot_0 = gr.Textbox(label="", visible=False, lines=1, interactive=True)
-                var_slot_1 = gr.Textbox(label="", visible=False, lines=1, interactive=True)
+                var_slot_0 = gr.Textbox(label="Var 1", visible=True, lines=1, interactive=True)
+                var_slot_1 = gr.Textbox(label="Var 2", visible=True, lines=1, interactive=True)
             with gr.Row():
-                var_slot_2 = gr.Textbox(label="", visible=False, lines=1, interactive=True)
-                var_slot_3 = gr.Textbox(label="", visible=False, lines=1, interactive=True)
+                var_slot_2 = gr.Textbox(label="Var 3", visible=True, lines=1, interactive=True)
+                var_slot_3 = gr.Textbox(label="Var 4", visible=True, lines=1, interactive=True)
             with gr.Row():
-                var_slot_4 = gr.Textbox(label="", visible=False, lines=1, interactive=True)
-                var_slot_5 = gr.Textbox(label="", visible=False, lines=1, interactive=True)
+                var_slot_4 = gr.Textbox(label="Var 5", visible=True, lines=1, interactive=True)
+                var_slot_5 = gr.Textbox(label="Var 6", visible=True, lines=1, interactive=True)
             # 2 textarea slots stacked full-width
-            var_slot_6 = gr.Textbox(label="", visible=False, lines=3, interactive=True)
-            var_slot_7 = gr.Textbox(label="", visible=False, lines=3, interactive=True)
+            var_slot_6 = gr.Textbox(label="Long var 1", visible=True, lines=3, interactive=True)
+            var_slot_7 = gr.Textbox(label="Long var 2", visible=True, lines=3, interactive=True)
 
             var_slots = [
                 var_slot_0, var_slot_1, var_slot_2, var_slot_3,
