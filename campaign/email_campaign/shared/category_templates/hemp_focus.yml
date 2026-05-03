@@ -1,0 +1,41 @@
+# Email template metadata — Himalayan hemp range focus.
+# HTML at hf_dashboard/templates/emails/hemp_focus.html.
+
+name: hemp_focus
+tier: category
+product_category: hemp
+voice: founder_warm
+
+subject: "Himalayan hemp yarn — strong, antimicrobial, hand-spun"
+preview_text: "Hand-spun in the hills. Eco-friendly. Three forms: natural yarn, white yarn, raw fibre. Free sample, no MOQ."
+
+html_template_file: "hemp_focus.html"
+
+required_variables:
+  - first_name
+
+# Optional variables (template renders gracefully without them):
+#   hero_image_url   override the default hemp1 hero
+#   catalog_link     adds a "View full catalog" CTA button
+
+hero_image: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/hemp1-4159d907.jpg"
+
+alternates:
+  - "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/hemp-natural-yarn-42b9dfe4.jpg"
+  - "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/hemp-white-yarn-9aeb0912.jpg"
+
+target_segments:
+  - potential_domestic
+  - existing_clients
+  - international_email
+
+status: READY
+
+description: |
+  Category-level deep-dive on Himalayan hemp. Used as alternate to
+  nettle_focus in the potential_domestic cold sequence Day 7 when
+  prospect is tagged hemp/plant-fibre buyer; also used in
+  existing_clients quarterly highlight rotation.
+
+  Voice: founder_warm (English, longer-form than the WA equivalent).
+  Sample-first CTA — no MOQ on samples, lead with the free dispatch.

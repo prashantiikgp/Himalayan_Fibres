@@ -1,0 +1,38 @@
+# Tier UTILITY — sample dispatch confirmation, Hinglish.
+#
+# Triggered when sample order status flips to "shipped" in the
+# dashboard. Falls within Meta's UTILITY criteria — relates to
+# an existing transaction event the recipient initiated.
+#
+# Replaces the equivalent template in config/whatsapp/new_templates.yml
+# once approved by Meta and the dashboard send wiring is updated.
+
+name: sample_shipped_v2
+tier: utility
+voice: transactional_clear
+
+meta_category: UTILITY
+language: en
+
+body: |
+  Hi {{1}},
+
+  Your sample is on its way.
+
+  Tracking ID: {{2}}
+  Expected delivery: {{3}}
+
+  Once it arrives, let us know how it feels — even a quick
+  "the nettle was nice" works.
+
+body_example:
+  - "Rahul"
+  - "DL123456789IN"
+  - "3-5 business days"
+
+footer: "Himalayan Fibres"
+
+notes: |
+  - {{1}} = first_name, {{2}} = tracking_id, {{3}} = eta_text
+  - Replaces config/whatsapp/new_templates.yml :: sample_shipped once
+    approved by Meta

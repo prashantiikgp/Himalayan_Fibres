@@ -1,0 +1,44 @@
+{#-
+  SAMPLE INVITATION — sample-CTA email used in:
+    - welcome series day 7
+    - potential_domestic cold sequence day 14
+    - international_email sequence day 21
+    - churned winback step 2
+
+  Per-send variables:
+    first_name*       recipient first name
+    hero_image_url    public HTTPS URL (default: nettle thick yarn)
+    sample_request_link  optional URL to a sample-request form
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/hero_image.html' import hero_image with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% block content %}
+
+{{ heading('Try a free yarn sample', emoji='🌿') }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph("We'd love for you to feel our yarn before you commit. Send a free sample pack — a small swatch from each fibre family — to your address, no MOQ, no commitment.") }}
+
+{{ hero_image(hero_image_url or 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/nettle-thick-yarn-975912fa.jpg', alt='Hand-spun Himalayan yarn — sample swatch') }}
+
+{{ paragraph("Three families to choose from:") }}
+
+{{ paragraph("• <strong>Plant</strong> — Himalayan nettle and hemp<br>• <strong>Animal</strong> — Tibetan wool from high-altitude sheep<br>• <strong>Blend</strong> — signature collections (Burberry, Noor, and more)") }}
+
+{{ paragraph("Reply with your address and which family fits your project — or let us know to send all three. We dispatch within 2-3 days.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{% if sample_request_link %}
+{{ cta_button('Request your free sample', sample_request_link) }}
+{% endif %}
+
+{{ whatsapp_help_button('Hi Himalayan Fibres — I would like a free yarn sample.') }}
+
+{% endblock %}

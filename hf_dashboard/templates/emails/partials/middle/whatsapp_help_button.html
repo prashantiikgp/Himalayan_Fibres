@@ -1,17 +1,17 @@
-{% macro whatsapp_help_button(prompt='Hi Himalayan Fibres — I have a question.') %}
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f5f5f5;">
-  <tr>
-    <td align="center">
-      <table role="presentation" width="640" cellspacing="0" cellpadding="0" border="0" style="max-width:640px;background:#ffffff;">
-        <tr>
-          <td align="center" style="padding:6px 24px 20px;">
-            <a href="{{ whatsapp_url }}?text={{ prompt | urlencode }}" target="_blank" rel="noopener" style="display:inline-block;background-color:#25d366;color:#ffffff;padding:10px 16px;text-decoration:none;border-radius:5px;font-size:14px;font-family:{{ font_stack }};">
-              💬 Get help on WhatsApp
-            </a>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>
+{#-
+  WHATSAPP HELP BUTTON — secondary CTA, brand-WhatsApp green (#25d366).
+  Smaller than primary cta_button so it visually sits below.
+
+  Args:
+    prompt — pre-filled message body when WhatsApp opens
+    label  — button text (default: "Message us on WhatsApp")
+-#}
+{% macro whatsapp_help_button(prompt='Hi Himalayan Fibres — I have a question.', label='Message us on WhatsApp') %}
+<tr>
+  <td align="center" style="padding:8px 24px 24px;background-color:#ffffff;text-align:center;">
+    <a href="{{ whatsapp_url }}?text={{ prompt | urlencode }}" target="_blank" rel="noopener" style="display:inline-block;background-color:#25d366;color:#ffffff;padding:14px 24px;text-decoration:none;border-radius:4px;font-size:13px;font-family:{{ font_stack }};font-weight:600;letter-spacing:0.5px;line-height:1.2;">
+      <span style="font-size:15px;vertical-align:-1px;">💬</span> &nbsp;{{ label }}
+    </a>
+  </td>
+</tr>
 {% endmacro %}

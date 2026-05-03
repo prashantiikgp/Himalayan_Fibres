@@ -1,0 +1,35 @@
+# Tier UTILITY — sample request acknowledgment.
+#
+# Auto-sent when a prospect taps "Yes, send sample" on any MARKETING
+# template. Confirms we got the request and asks for the address +
+# fibre preference. Lives within the 24h customer service window so
+# we could also use a free-form message — but a UTILITY template is
+# safer because it works whether or not the window is active.
+
+name: sample_request_thanks
+tier: utility
+voice: transactional_clear
+
+meta_category: UTILITY
+language: en
+
+body: |
+  Hi {{1}},
+
+  We've received your sample request.
+
+  Just share your address and fibre preference (nettle / hemp /
+  wool / collections / "all") — we'll dispatch within 2-3 days.
+
+body_example:
+  - "Rahul"
+
+footer: "Himalayan Fibres"
+
+notes: |
+  - {{1}} = first_name
+  - STRICT UTILITY: no upsell, no other product names listed beyond
+    the categories the prospect needs to choose from
+  - Triggered by quick-reply 'Yes, send sample' on any MARKETING
+    template, OR by a generic inbound 'sample please' / 'samples chahiye'
+    keyword match

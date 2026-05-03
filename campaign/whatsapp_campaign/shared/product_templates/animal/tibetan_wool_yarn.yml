@@ -1,0 +1,52 @@
+# Tier 3 (PRODUCT) — Tibetan wool yarn (animal-fibre flagship).
+#
+# References Meta Catalog product retailer_id `wte1jvygze`
+# ("Himalayan Woollen Yarn | Himalayan Fibres", ₹375).
+
+name: tibetan_wool_yarn
+tier: product
+product_category: wool
+voice: founder_warm
+
+meta_category: MARKETING
+language: en
+
+header:
+  format: IMAGE
+  image: https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/wool1-f329d1f9.jpg
+  image_caption: "Tibetan wool yarn — hand-spun by Himalayan artisans"
+  alternates:
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/wool2-593bdf91.jpg
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/wool3-005db721.jpg
+
+body: |
+  Hi {{1}},
+
+  Our Tibetan wool yarn — from high-altitude sheep, hand-spun
+  by Himalayan artisans.
+
+  • 100% pure Tibetan wool
+  • Warm, soft, naturally insulating
+  • Perfect for carpets and knitwear
+
+  Want a free sample? Worth feeling the difference.
+
+  — Prashant
+
+body_example:
+  - "Rahul"
+
+footer: "Himalayan Fibres • himalayanfibres.com"
+
+buttons:
+  - type: QUICK_REPLY
+    text: "Yes, send sample"
+  - type: QUICK_REPLY
+    text: "Spec sheet"
+  - type: CATALOG
+    text: "View catalog"
+
+notes: |
+  - {{1}} = first_name
+  - Catalog: retailer_id wte1jvygze (₹375 INR)
+  - Currently the only animal-fibre SKU in the Meta catalog

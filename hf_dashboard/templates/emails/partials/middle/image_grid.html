@@ -1,0 +1,41 @@
+{#-
+  IMAGE GRID — 3 small product images side by side with optional captions
+  and per-item product links. Used to show product variants ("natural /
+  dyed / blend"), collection members, or 3 process steps.
+
+  Total row at 680 outer with 24px outer padding = 632px content. Three
+  200×200 images with 16px gaps between = 632. Snug fit.
+
+  Each item is a dict — all fields except image_url are optional:
+    image_url   (required)  full HTTPS URL of the image
+    caption     (optional)  subtitle below the image
+    link        (optional)  product-page URL — wraps both image + caption
+                            in <a> so the whole cell is clickable
+    image_alt   (optional)  alt text; falls back to caption
+
+  Args:
+    items — list of dicts (pass exactly 3 for snug layout)
+    image_size — square dimensions (default 200)
+-#}
+{% macro image_grid(items, image_size=200) %}
+<tr>
+  <td style="padding:14px 24px;background-color:#ffffff;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tr>
+        {% for it in items %}
+        <td valign="top" align="center" {% if not loop.last %}style="padding-right:16px;"{% endif %} width="{{ image_size }}">
+          {% if it.link %}<a href="{{ it.link }}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">{% endif %}
+          <img src="{{ it.image_url }}" alt="{{ it.image_alt or it.caption or '' }}" width="{{ image_size }}" height="{{ image_size }}" style="display:block;width:100%;max-width:{{ image_size }}px;height:{{ image_size }}px;max-height:{{ image_size }}px;object-fit:cover;border:0;outline:none;text-decoration:none;border-radius:6px;">
+          {% if it.caption %}
+          <p style="font-size:12px;color:{{ color_body }};margin:8px 0 0;font-family:{{ font_stack }};line-height:1.4;text-align:center;">
+            {{ it.caption | safe }}
+          </p>
+          {% endif %}
+          {% if it.link %}</a>{% endif %}
+        </td>
+        {% endfor %}
+      </tr>
+    </table>
+  </td>
+</tr>
+{% endmacro %}

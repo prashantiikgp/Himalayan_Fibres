@@ -1,0 +1,25 @@
+# Email template metadata — welcome email.
+#
+# The HTML body lives at hf_dashboard/templates/emails/welcome.html.
+# This file is the side-car: subject line, voice, audience, variables.
+
+name: welcome
+tier: lifecycle
+voice: founder_warm
+
+subject: "Welcome to Himalayan Fibres — your story starts here 🌿"
+preview_text: "Hand-spun yarn from the Himalayas, sourced directly from artisan partners."
+
+html_template_file: "welcome.html"
+
+required_variables:
+  - first_name
+
+target_segments:
+  - existing_clients
+  - potential_domestic
+  - international_email
+
+description: |
+  Sent on first email signup. Sets the brand tone (sustainable, hand-spun,
+  founder-led) and invites the recipient to engage.

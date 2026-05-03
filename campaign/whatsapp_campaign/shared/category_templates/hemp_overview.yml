@@ -1,0 +1,49 @@
+# Tier 2 (CATEGORY) — Himalayan hemp range overview, Hinglish.
+
+name: hemp_range_overview
+tier: category
+product_category: hemp
+voice: founder_warm
+
+meta_category: MARKETING
+language: en
+
+header:
+  format: IMAGE
+  image: https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/hemp-natural-yarn-42b9dfe4.jpg
+  image_caption: "Hand-spun Himalayan hemp yarn — natural"
+  alternates:
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/hemp-white-yarn-9aeb0912.jpg
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/hemp1-4159d907.jpg
+
+body: |
+  Hi {{1}},
+
+  Our Himalayan hemp yarn — eco-friendly, durable, and
+  naturally antimicrobial.
+
+  • Hand-spun in the Himalayan hills
+  • Available in natural and white
+  • Raw fibre and blends also available
+
+  Want a free yarn sample? No MOQ, no commitment.
+
+  — Prashant
+
+body_example:
+  - "Rahul"
+
+footer: "Himalayan Fibres • himalayanfibres.com"
+
+buttons:
+  - type: QUICK_REPLY
+    text: "Yes, send sample"
+  - type: QUICK_REPLY
+    text: "Spec sheet"
+  - type: CATALOG
+    text: "View catalog"
+
+notes: |
+  - {{1}} = first_name
+  - Image candidates: config/media/products/plant_fibre/hemp/
+  - Verify hemp specs (yarn counts, fiber length) from Wix before submit

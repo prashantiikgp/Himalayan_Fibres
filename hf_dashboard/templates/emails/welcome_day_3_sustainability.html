@@ -1,0 +1,118 @@
+{#-
+  CAMPAIGN / BLOG canonical (REVISED) — Patagonia-style sustainability story.
+
+  Per 2026 sustainability-email research:
+    - BLUF: lead with the takeaway, not the build-up
+    - Show data/proof (numbers carry the claim, not adjectives)
+    - Less product-y, more cause-y — soft "read more" / "see how it's
+      made" CTAs over hard sample asks
+    - Founder voice + raw photos > polished marketing
+
+  Layout pattern:
+    heading (BLUF) → lead → stats_row (3 proof numbers) →
+    image_split #1 → pull quote → image_split #2 → close → soft CTAs.
+
+  Per-send variables (all optional except first_name):
+    first_name*
+
+    -- 3 stats (proof points) --
+    stat_1_value, stat_1_label
+    stat_2_value, stat_2_label
+    stat_3_value, stat_3_label
+
+    -- Story image #1 (left) --
+    story1_image_url, story1_title, story1_body, story1_link
+
+    -- Pull quote --
+    quote_text, quote_attribution
+
+    -- Story image #2 (right) --
+    story2_image_url, story2_title, story2_body, story2_link
+
+    -- CTAs --
+    blog_link           optional URL — adds "See how it's made" CTA
+    catalog_link        optional URL — adds soft secondary CTA
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/stats_row.html' import stats_row with context %}
+{% from 'partials/middle/image_split.html' import image_split with context %}
+{% from 'partials/middle/pull_quote.html' import pull_quote with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% set _field = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field' %}
+
+{% set _stat1_v = stat_1_value or '0' %}
+{% set _stat1_l = stat_1_label or 'Pesticides used' %}
+{% set _stat2_v = stat_2_value or '1,200m+' %}
+{% set _stat2_l = stat_2_label or 'Wild harvest altitude' %}
+{% set _stat3_v = stat_3_value or '120+' %}
+{% set _stat3_l = stat_3_label or 'Artisan partner homes' %}
+
+{% set _s1_img = story1_image_url or (_field + '/field-artisan1-3bd5ca62.jpg') %}
+{% set _s1_title = story1_title or 'Wild, not farmed' %}
+{% set _s1_body = story1_body or "Himalayan stinging nettle isn't planted &mdash; it grows on its own across the slopes of Gorkha and Almora at 1,200&ndash;2,000 metres. No irrigation, no fertilizer, no pesticide. Local women hand-harvest in the dry season and process the fibre in mountain streams the way it has been done for generations." %}
+{% set _s1_link = story1_link or '' %}
+
+{% set _s2_img = story2_image_url or (_field + '/field-artisan3-b4235ee8.jpg') %}
+{% set _s2_title = story2_title or 'Made by hand, in homes' %}
+{% set _s2_body = story2_body or "Once decorticated, the fibre is hand-spun on traditional wooden wheels in artisan homes &mdash; no factory, no electricity-driven mill, no industrial throughput. Every kilogram of yarn we ship has a name and a place behind it." %}
+{% set _s2_link = story2_link or '' %}
+
+{% set _quote = quote_text or "We don't innovate. We remember. Our fibres have been used in these mountains since long before the wheel reached them." %}
+{% set _quote_attr = quote_attribution or '— Prashant Agrawal, Founder' %}
+
+{% block content %}
+
+{{ heading('The supply chain is a hill,<br>a plant, and a person.') }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph("Three days ago you joined our list, so here's the short version of how a kilogram of yarn actually gets made when the supply chain is two villages and a mountain stream long.") }}
+
+{# -- BLUF stats row: 3 proof points before the story unfolds -- #}
+{{ stats_row([
+     {'value': _stat1_v, 'label': _stat1_l},
+     {'value': _stat2_v, 'label': _stat2_l},
+     {'value': _stat3_v, 'label': _stat3_l},
+]) }}
+
+{{ paragraph("None of those numbers are spin. They're how the fibre is sourced &mdash; the same way nettle, hemp, and Tibetan wool have been gathered in these mountains for centuries, just now with a logistics chain that ends at workshops across India, Europe, and the US.") }}
+
+{{ image_split(
+     image_url=_s1_img,
+     title=_s1_title,
+     body=_s1_body,
+     link=_s1_link,
+     image_side='left',
+     image_size=300
+) }}
+
+{{ pull_quote(_quote, attribution=_quote_attr) }}
+
+{{ image_split(
+     image_url=_s2_img,
+     title=_s2_title,
+     body=_s2_body,
+     link=_s2_link,
+     image_side='right',
+     image_size=300
+) }}
+
+{{ paragraph("That's the why behind what we sell. Not because hand-spinning is romantic &mdash; because the fibre genuinely behaves differently when it hasn't been through an industrial mill. The irregularity is what holds dye through wet processing, what holds knots in carpets, what makes wool feel like wool and not like a synthetic.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{% if blog_link %}
+{{ cta_button("See how it's made", blog_link) }}
+{% endif %}
+
+{% if catalog_link %}
+{{ cta_button('Browse the yarn catalog', catalog_link) }}
+{% endif %}
+
+{{ whatsapp_help_button('Hi Himalayan Fibres — I read your sustainability story and would like to know more.') }}
+
+{% endblock %}

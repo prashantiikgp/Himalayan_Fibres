@@ -1,0 +1,36 @@
+# Campaigns targeting POTENTIAL DOMESTIC prospects.
+#
+# Audience: Indian carpet manufacturers, weavers, yarn store owners,
+# plant-based product makers — contacts where we have a phone number
+# from trade shows / scraping / referrals but no prior order.
+#
+# Compliance note: WhatsApp opt-in is strict. Cold templates are
+# allowed but quality drops fast if recipients mark them as spam.
+# Keep volume low, tone respectful, and always include opt-out.
+
+campaigns:
+
+  - id: potential_domestic_first_touch_v1
+    name: "First-touch intro (3-step)"
+    segment: potential_domestic
+    channel: whatsapp
+    description: |
+      Cold introduction sequence. Step 1 establishes who we are and
+      asks permission to share more. Step 2 (if no reply after 3
+      days) sends a category overview based on what we know about
+      the prospect's industry. Step 3 (if still no reply at day 7)
+      sends a soft followup; after that we stop.
+    is_active: false       # flip to true once templates are approved
+    steps:
+      - template: company_intro_b2b
+        delay_hours: 0
+      - template: nettle_range_overview
+        delay_hours: 72
+        only_if_no_reply: true
+      - template: followup_interest
+        delay_hours: 168    # 7 days from step 1
+        only_if_no_reply: true
+    audience_filter:
+      tags_any: ["carpet_maker", "weaver", "yarn_store", "plant_fibre_buyer"]
+      country: "IN"
+      wa_consent_status: ["unknown", "opted_in"]   # never send to opted_out

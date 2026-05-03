@@ -1,0 +1,36 @@
+# Email campaigns targeting INTERNATIONAL EMAIL contacts.
+#
+# Audience: international (non-IN) B2B leads. Most won't have a WA number.
+# Email is the only channel until they share contact details.
+#
+# Tone is English-only (founder_warm voice). International buyers respond
+# strongly to sustainability + transparency narratives — lead with story,
+# product specs second.
+
+campaigns:
+
+  - id: international_warmup_4_touch_v1
+    name: "International 4-email warm-up"
+    segment: international_email
+    channel: email
+    description: |
+      Slow warm-up sequence (weekly cadence) prioritizing brand story
+      over product pitch. International buyers want to know who we are
+      before they commit to a sample shipment that costs them in customs.
+    is_active: false
+    steps:
+      - template: welcome
+        delay_hours: 0
+      - template: sustainability_field_story
+        delay_hours: 168    # +7 days
+        only_if_no_reply: true
+      - template: nettle_focus
+        delay_hours: 336    # +14 days
+        only_if_no_reply: true
+      - template: sample_invitation
+        delay_hours: 504    # +21 days
+        only_if_no_reply: true
+    audience_filter:
+      country_not: "IN"
+      consent_status: "opted_in"
+      gdpr_compliant: true   # ensure unsubscribe + lawful basis are recorded

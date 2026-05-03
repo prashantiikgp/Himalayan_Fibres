@@ -3,25 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="light only">
+  <meta name="supported-color-schemes" content="light only">
   <title>{{ subject or company_name }}</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Amiri&display=swap');
-    body { margin:0; padding:0; background-color:{{ color_footer_bg }}; font-family:{{ font_stack }}; }
-    table { border-collapse:collapse; }
-    a { color:{{ color_link }}; }
+    /* Email reset — keep these even after the inline-style preprocessor runs */
+    :root { color-scheme: light only; supported-color-schemes: light only; }
+    body { margin:0 !important; padding:0 !important; background-color:#ffffff !important; font-family:{{ font_stack }}; }
+    table { border-collapse:collapse !important; mso-table-lspace:0pt; mso-table-rspace:0pt; }
+    td { padding:0; vertical-align:top; }
+    img { display:block; border:0; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic; }
+    a { color:{{ color_link }}; text-decoration:none; }
+
+    /* Gmail Android dark-mode mitigation: lock the card to a single background.
+       Gmail Android partial inversion picks DIFFERENT dark greys for #ffffff
+       vs #f5f5f5 so the seams between sections become visible — keeping every
+       background literal #ffffff inverts them all to the same dark grey. */
+    [data-ogsc] body, [data-ogsb] body { background-color:#ffffff !important; }
+    [data-ogsc] td, [data-ogsb] td { background-color:#ffffff !important; }
   </style>
 </head>
-<body style="margin:0;padding:0;background-color:{{ color_footer_bg }};font-family:{{ font_stack }};color-scheme:light dark;">
-  <!-- Banner (locked) -->
-  {% include 'partials/banner.html' %}
-
-  <!-- Body content (varies per template) -->
-  {% block content %}{% endblock %}
-
-  <!-- Social row (locked) -->
-  {% include 'partials/social_row.html' %}
-
-  <!-- Footer (locked) -->
-  {% include 'partials/footer.html' %}
+<body bgcolor="#ffffff" style="margin:0;padding:0;background-color:#ffffff;font-family:{{ font_stack }};color-scheme:light only;">
+  {#-
+    SINGLE outer shell. Every partial and middle-macro emits one or more
+    `<tr><td>...</td></tr>` rows with bgcolor="#ffffff" inside this single
+    640px white container — no per-section nested wrappers.
+  -#}
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" align="center" bgcolor="#ffffff" style="background-color:#ffffff;">
+    <tr>
+      <td align="center" bgcolor="#ffffff" style="padding:0;background-color:#ffffff;">
+        <table role="presentation" width="680" cellspacing="0" cellpadding="0" border="0" align="center" bgcolor="#ffffff" style="max-width:680px;background-color:#ffffff;margin:0 auto;">
+          {% include 'partials/banner.html' %}
+          {% block content %}{% endblock %}
+          {% include 'partials/social_row.html' %}
+          {% include 'partials/footer.html' %}
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>

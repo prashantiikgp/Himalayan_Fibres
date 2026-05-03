@@ -1,0 +1,52 @@
+# Tier 2 (CATEGORY) — Himalayan nettle range overview, Hinglish.
+
+name: nettle_range_overview
+tier: category
+product_category: nettle
+voice: founder_warm
+
+meta_category: MARKETING
+language: en
+
+header:
+  format: IMAGE
+  image: https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/nettle-thick-yarn-975912fa.jpg
+  image_caption: "Hand-spun Himalayan nettle yarn — thick count"
+  alternates:
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/nettle-white-yarn-dd1a1e68.jpg
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/nettle1-5313de78.jpg
+
+body: |
+  Hi {{1}},
+
+  Our Himalayan nettle yarn — hand-spun in Gorkha district.
+
+  • Counts: 10/2, 20/2
+  • Multiple natural colors
+  • Raw fibre and blends also available
+
+  Strong, silky, completely different from cotton. Worth
+  trying once.
+
+  Want a free yarn sample?
+
+  — Prashant
+
+body_example:
+  - "Rahul"
+
+footer: "Himalayan Fibres • himalayanfibres.com"
+
+buttons:
+  - type: QUICK_REPLY
+    text: "Yes, send sample"
+  - type: QUICK_REPLY
+    text: "Spec sheet"
+  - type: CATALOG
+    text: "View catalog"
+
+notes: |
+  - {{1}} = first_name
+  - Image candidates: config/media/products/plant_fibre/nettle/
+  - Verify yarn counts (10/2, 20/2) against Wix product pages before
+    submission to Meta

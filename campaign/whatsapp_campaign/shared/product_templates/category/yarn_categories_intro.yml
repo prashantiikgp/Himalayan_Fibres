@@ -1,0 +1,54 @@
+# Tier 3 (PRODUCT) — intro to our 3 fibre families.
+#
+# Helps a prospect understand the difference between plant / animal /
+# blend before they pick what to try. Educational top-of-funnel.
+# Pairs well as a follow-up to company_intro_b2b when the prospect
+# replies "tell me more / what's the difference?".
+
+name: yarn_categories_intro
+tier: product
+voice: founder_warm
+
+meta_category: MARKETING
+language: en
+
+header:
+  format: IMAGE
+  image: https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/nettle-thick-yarn-975912fa.jpg
+  image_caption: "Hand-spun yarn — overview of our 3 fibre families"
+  alternates:
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/wool1-f329d1f9.jpg
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/burberry-27f4a1b3.jpg
+
+body: |
+  Hi {{1}},
+
+  Our yarn comes in 3 families:
+
+  • Plant — nettle and hemp, hand-spun in the Himalayas
+  • Animal — Tibetan wool from high-altitude sheep
+  • Blend — signature collections (plant + animal)
+
+  Tell me which family fits your project and I'll send the
+  matching swatch — free sample, no commitment.
+
+  — Prashant
+
+body_example:
+  - "Rahul"
+
+footer: "Himalayan Fibres • himalayanfibres.com"
+
+buttons:
+  - type: QUICK_REPLY
+    text: "Send plant"
+  - type: QUICK_REPLY
+    text: "Send animal"
+  - type: CATALOG
+    text: "View catalog"
+
+notes: |
+  - {{1}} = first_name
+  - Educational template — sits at the top of product_templates/ as a
+    "primer" the user can send when prospects ask "what should I try?"
+  - Buttons split by family + catalog browse for full picture

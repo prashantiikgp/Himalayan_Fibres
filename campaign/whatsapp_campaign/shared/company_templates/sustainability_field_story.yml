@@ -1,0 +1,53 @@
+# Tier 1 (COMPANY) — Sustainability / field story.
+#
+# Brand-level story template that can be used as a 2nd-touch after
+# company_intro_b2b for prospects who replied "Tell me more", or as
+# a standalone for sustainability-curious audiences.
+#
+# Image header: a real shot from Gorkha / Almora / Meghalaya — an
+# artisan, a field, a hand processing nettle. Pick from
+# config/media/field_stories/ in the media catalog.
+
+name: sustainability_field_story
+tier: company
+voice: founder_warm
+
+meta_category: MARKETING
+language: en
+
+header:
+  format: IMAGE
+  image: https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field/field-artisan1-3bd5ca62.jpg
+  image_caption: "Woman processing nettle in front of Himalayan field"
+  alternates:
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field/field-artisan2-6d81e6bb.jpg
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field/field-artisan3-b4235ee8.jpg
+
+body: |
+  Hi {{1}},
+
+  A small story to share. Our nettle grows wild in Gorkha
+  district. Local artisans hand-process it — no pesticides,
+  no factory.
+
+  The same artisans hand-spin the yarn. Every step from fibre
+  to finished yarn is hand-made. Want a free sample?
+
+  — Prashant
+
+body_example:
+  - "Rahul"
+
+footer: "Himalayan Fibres • himalayanfibres.com"
+
+buttons:
+  - type: QUICK_REPLY
+    text: "Yes, send sample"
+  - type: QUICK_REPLY
+    text: "Read full story"
+
+notes: |
+  - {{1}} = first_name
+  - Pair with field story image (Gorkha / Almora / Meghalaya / Bishal Farm)
+  - "Read full story" button can deep-link to a blog post on Wix once
+    we have the URL

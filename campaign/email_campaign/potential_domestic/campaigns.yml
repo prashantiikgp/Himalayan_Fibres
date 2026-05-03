@@ -1,0 +1,33 @@
+# Email campaigns targeting POTENTIAL DOMESTIC prospects.
+#
+# Audience: Indian B2B prospects who gave us their email (trade shows,
+# blog signups, referrals). No prior order. We have email but may not
+# have phone / WA number.
+#
+# Channel choice: email is the primary channel for this segment because
+# WhatsApp opt-in is strict and many didn't share a number.
+
+campaigns:
+
+  - id: domestic_cold_3_touch_v1
+    name: "Domestic cold sequence (3-email warm-up)"
+    segment: potential_domestic
+    channel: email
+    description: |
+      Standard 3-touch cold sequence for new domestic B2B prospects.
+      Spaced over 14 days; if they reply at any step the sequence stops.
+      No discount baiting — sample is the conversion event.
+    is_active: false   # flip when all referenced templates have HTML built
+    steps:
+      - template: welcome
+        delay_hours: 0
+      - template: nettle_focus
+        delay_hours: 168    # +7 days
+        only_if_no_reply: true
+      - template: sample_invitation
+        delay_hours: 336    # +14 days from step 1
+        only_if_no_reply: true
+    audience_filter:
+      tags_any: ["carpet_maker", "weaver", "yarn_store", "plant_fibre_buyer"]
+      country: "IN"
+      consent_status: "opted_in"

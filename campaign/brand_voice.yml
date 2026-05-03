@@ -1,0 +1,233 @@
+# =============================================================
+# Himalayan Fibres — Brand Voice
+# =============================================================
+# Central voice definitions. Every WhatsApp template and email
+# campaign declares `voice: <key>` so copy stays consistent.
+#
+# DEFAULT: founder_hinglish — for B2B Indian audience.
+# Use founder_warm only for international (English-only) audiences.
+# =============================================================
+
+default_voice: founder_warm
+
+voices:
+
+  # Default voice. Hinglish (Roman script), image-first,
+  # 3-block structure, sample-led CTAs. For domestic Indian B2B.
+  founder_hinglish:
+    name: "Founder, Hinglish"
+    description: |
+      Code-mixed English/Hindi (Roman script) in WhatsApp style for
+      B2B Indian contacts. Sounds like a real person typing — lightly
+      informal, occasional humor, respectful but never stiff.
+
+      Templates using this voice are image-first: hero image carries
+      the visual weight, text stays short, buttons do the CTA work.
+
+      For international (English-only) contacts use `founder_warm`.
+    pillars:
+      - "60-70% English, 30-40% Hindi for warmth/connection"
+      - "Image carries the visual weight; text is short"
+      - "3 blocks: acknowledge -> product -> CTA buttons"
+      - "Sounds typed in WhatsApp, not authored"
+      - "Sample-first: lead with free sample offer, not pricing"
+    tone:
+      formality: 2
+      warmth: 5
+      technical_density: 2
+      enthusiasm: 4
+    do:
+      - "Open warm — 'Hi {{1}}!', 'Namaste {{1}}!', or 'Hi {{1}} ji'"
+      - "Use Hindi for connection moments — 'bilkul free', 'sample chahiye?', 'koi pressure nahi'"
+      - "Keep English for product specs (yarn count, MOQ, lead time) — clarity matters"
+      - "End with — Prashant"
+      - "Light humor when natural — 'pakka bohot accha hai', 'no spam, promise'"
+      - "Quick-reply buttons do the heavy CTA work; body has at most a soft ask"
+      - "Lead with FREE SAMPLE, not pricing or MOQ"
+    dont:
+      - "No Devanagari script — Roman only ('sample bhejun?' not 'सैंपल भेजूं?')"
+      - "No long messages — image plus 4-6 lines max"
+      - "No formal openers ('Greetings of the day', 'Dear Sir/Madam')"
+      - "No fake urgency, no hype, no ALL CAPS"
+      - "Don't mix Hinglish with technical specs in same line — separate them"
+      - "Don't translate everything to Hindi; keep English where it's clearer"
+    glossary:
+      sample_pack: "free swatch with 3-4 fibre variants — say 'sample pack' or just 'sample'"
+      MOQ: "say 'MOQ' (B2B contacts know it)"
+      bhejun: "I'll send (informal)"
+      pakka: "definitely / for sure"
+      acha: "good"
+      ji: "respectful suffix; use for first names of older or unknown contacts"
+      bilkul: "absolutely / completely"
+    sign_off: "— Prashant"
+    emoji_policy: "Sparing. Leaf for nature, package for shipping, namaste only when thanking. Max 1 per message."
+    examples:
+      good: |
+        Hi Rahul ji!
+
+        Prashant from Himalayan Fibres. Humari nettle yarn
+        wild-grown hai Gorkha district mein — strong, silky,
+        bilkul different from regular cotton.
+
+        Ek free sample bhejun? Bas address bhej do, no MOQ.
+
+        — Prashant
+
+        [Buttons: Yes, send sample • Tell me more • Website]
+      bad: |
+        Hello Sir! Greetings from Himalayan Fibres! We are
+        excited to introduce our REVOLUTIONARY new range of
+        sustainable fibres which are world-class and best-in-class.
+        Don't miss this AMAZING opportunity!!! Order today!!!
+
+  # English-only voice for international audiences.
+  founder_warm:
+    name: "Founder, English"
+    description: |
+      Founder-direct in English only. Used for international email
+      contacts where Hindi would be foreign. Personal, warm, not
+      formal.
+    pillars:
+      - "Personal — sign as Prashant"
+      - "Specific — name real places when invoking origin"
+      - "Quiet — let the product speak; no hype words"
+    tone:
+      formality: 3
+      warmth: 5
+      technical_density: 3
+      enthusiasm: 3
+    do:
+      - "Open with first name, no formality"
+      - "Name the place when invoking origin (Almora, Gorkha, Bishal Farm)"
+      - "Soft CTA — 'Want a sample pack?' over 'Buy now'"
+      - "Sign with — Prashant"
+    dont:
+      - "No hype: amazing, incredible, game-changing, revolutionary"
+      - "No fake urgency or marketing jargon"
+      - "No more than one emoji per message"
+    glossary:
+      we_us: "the team at Himalayan Fibres"
+      i_me: "Prashant personally"
+    sign_off: "— Prashant"
+    emoji_policy: "Rare. Leaf for nature only. Max 1 per message."
+    examples:
+      good: |
+        Hi Sarah, Prashant from Himalayan Fibres here.
+        We just finished a small batch of nettle yarn from
+        Gorkha district, thought it might suit your work.
+        Want me to ship a sample pack?
+
+        — Prashant
+      bad: null
+
+  # Spec-heavy voice for established B2B buyers past the introduction stage.
+  technical_b2b:
+    name: "Technical B2B"
+    description: |
+      Spec-focused, professional, no fluff. Used for contacts who
+      already saw the company intro and now want details — yarn
+      counts, certifications, MOQs, lead times.
+    pillars:
+      - "Specs first, story later"
+      - "Numbers over adjectives"
+      - "Compliance and certifications visible"
+    tone:
+      formality: 4
+      warmth: 3
+      technical_density: 5
+      enthusiasm: 2
+    do:
+      - "Lead with product + spec ('Re: Nettle yarn 10/2, GOTS-certified')"
+      - "Use bullet lists for specs"
+      - "State MOQ and lead time within first 2 lines"
+    dont:
+      - "No origin stories or sustainability narrative unless asked"
+      - "No emojis"
+    glossary: {}
+    sign_off: "Best regards,\nPrashant Agrawal\nHimalayan Fibres"
+    emoji_policy: "None."
+
+  # Win-back voice for churned clients.
+  reactivation_gentle:
+    name: "Reactivation, gentle"
+    description: |
+      For churned clients (no order in 6+ months). Acknowledges
+      the gap honestly without guilt-tripping. Leads with what
+      has changed, not 'we miss you'.
+    pillars:
+      - "Acknowledge the gap honestly"
+      - "Lead with substance — what's new, what's changed"
+      - "Easy out — make 'no thanks' totally fine"
+    tone:
+      formality: 3
+      warmth: 4
+      technical_density: 3
+      enthusiasm: 3
+    do:
+      - "Name what has changed since they last bought"
+      - "Offer a fresh sample pack as the low-friction CTA"
+      - "Use 'when you're back in the market' framing, not 'come back'"
+    dont:
+      - "No 'we miss you' / 'where have you been'"
+      - "No discount-baiting unless approved separately"
+    glossary: {}
+    sign_off: "— Prashant"
+    emoji_policy: "Rare. Default to none."
+
+  # Utility messages in light Hinglish for Indian audience.
+  transactional_hinglish:
+    name: "Transactional, Hinglish"
+    description: |
+      For Meta UTILITY-category messages to Indian contacts —
+      sample shipped, order confirmed, delivery update. Brief
+      and factual with light Hinglish for warmth. Lighter than
+      founder_hinglish — utility messages need clarity above warmth.
+
+      No upsell — Meta reclassifies promotional UTILITY templates
+      as MARKETING.
+    pillars:
+      - "Confirm the event"
+      - "Show data clearly on separate lines"
+      - "Brief warm close, no sales pitch"
+    tone:
+      formality: 3
+      warmth: 3
+      technical_density: 3
+      enthusiasm: 2
+    do:
+      - "Open with the event ('Aapka sample dispatch ho gaya')"
+      - "Show data on separate lines (tracking, ETA, amount)"
+      - "Close with one human line"
+    dont:
+      - "No upsell, cross-sell, or 'while you're at it'"
+      - "No CTAs to other products"
+    glossary: {}
+    sign_off: ""
+    emoji_policy: "Sparing. Package for shipping events only."
+
+  # Utility voice for international audience (English only).
+  transactional_clear:
+    name: "Transactional, English"
+    description: |
+      For Meta UTILITY-category messages to international contacts.
+      Brief, factual, neutral English. Same rules as
+      transactional_hinglish but English-only.
+    pillars:
+      - "Confirm the event"
+      - "State the data"
+      - "Brief warm close, no sales pitch"
+    tone:
+      formality: 3
+      warmth: 3
+      technical_density: 3
+      enthusiasm: 2
+    do:
+      - "Open with the event ('Your sample is on the way')"
+      - "Show data on separate lines"
+      - "Close with one human line"
+    dont:
+      - "No upsell"
+      - "No emojis"
+    glossary: {}
+    sign_off: ""
+    emoji_policy: "None."

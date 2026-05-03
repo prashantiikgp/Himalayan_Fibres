@@ -1,0 +1,33 @@
+{#-
+  STATS ROW — 3 large-number proof points side by side. Used to put
+  data behind a sustainability or impact claim ("0 pesticides | 1,200m
+  altitude | 50 artisan partners").
+
+  Total row at 680 outer with 24px outer padding = 632px content. Three
+  cells with 16px gaps between = ~200px each.
+
+  Args:
+    items — required, list of dicts: [{value, label}]
+            Pass exactly 3 items. `value` is the big number / phrase,
+            `label` is the small caption underneath.
+-#}
+{% macro stats_row(items) %}
+<tr>
+  <td style="padding:16px 24px;background-color:#ffffff;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top:1px solid {{ color_card_border }};border-bottom:1px solid {{ color_card_border }};">
+      <tr>
+        {% for it in items %}
+        <td valign="middle" align="center" style="padding:18px 8px;font-family:{{ font_stack }};{% if not loop.last %}border-right:1px solid {{ color_card_border }};{% endif %}">
+          <div style="font-size:28px;font-weight:700;color:{{ color_link }};line-height:1.1;letter-spacing:-0.5px;">
+            {{ it.value | safe }}
+          </div>
+          <div style="font-size:11px;color:{{ color_body }};margin-top:6px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;">
+            {{ it.label | safe }}
+          </div>
+        </td>
+        {% endfor %}
+      </tr>
+    </table>
+  </td>
+</tr>
+{% endmacro %}

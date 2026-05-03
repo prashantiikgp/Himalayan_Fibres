@@ -1,17 +1,23 @@
-{% macro cta_button(label, url, bg=None, text_color=None) %}
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f5f5f5;">
-  <tr>
-    <td align="center">
-      <table role="presentation" width="640" cellspacing="0" cellpadding="0" border="0" style="max-width:640px;background:#ffffff;">
-        <tr>
-          <td align="center" style="padding:16px 24px;">
-            <a href="{{ url }}" target="_blank" rel="noopener" style="display:inline-block;background-color:{{ bg or color_button_bg }};color:{{ text_color or color_button_text }};padding:14px 28px;text-decoration:none;border-radius:6px;font-size:16px;font-family:{{ font_stack }};font-weight:bold;">
-              {{ label }}
-            </a>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>
+{#-
+  CTA BUTTON — primary call-to-action, full row, centered.
+
+  Args:
+    label       — button text (will get an automatic " →" appended)
+    url         — destination URL
+    bg          — override background colour (default: brand button bg)
+    text_color  — override text colour (default: brand button text)
+    width       — 'auto' (default, hugs content) or 'full' (632px wide block button)
+
+  Styling: uppercase letterspacing, 16px tap-friendly padding, rounded
+  corners, automatic arrow. Tap target is 44×175+ px which exceeds the
+  WCAG mobile minimum of 44×44.
+-#}
+{% macro cta_button(label, url, bg=None, text_color=None, width='auto') %}
+<tr>
+  <td align="center" style="padding:18px 24px 8px;background-color:#ffffff;text-align:center;">
+    <a href="{{ url }}" target="_blank" rel="noopener" style="display:inline-block;background-color:{{ bg or color_button_bg }};color:{{ text_color or color_button_text }};padding:14px 32px;text-decoration:none;border-radius:4px;font-size:14px;font-family:{{ font_stack }};font-weight:700;letter-spacing:1.2px;text-transform:uppercase;{% if width == 'full' %}width:100%;max-width:584px;{% endif %}box-sizing:border-box;">
+      {{ label }} &nbsp;→
+    </a>
+  </td>
+</tr>
 {% endmacro %}

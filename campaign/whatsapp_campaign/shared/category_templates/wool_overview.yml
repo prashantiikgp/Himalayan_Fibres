@@ -1,0 +1,52 @@
+# Tier 2 (CATEGORY) — Tibetan wool range overview, Hinglish.
+
+name: wool_range_overview
+tier: category
+product_category: wool
+voice: founder_warm
+
+meta_category: MARKETING
+language: en
+
+header:
+  format: IMAGE
+  image: https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/wool1-f329d1f9.jpg
+  image_caption: "Hand-spun Tibetan wool yarn"
+  alternates:
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/wool2-593bdf91.jpg
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/wool3-005db721.jpg
+
+body: |
+  Hi {{1}},
+
+  Our Tibetan wool yarn — from high-altitude sheep,
+  hand-spun by Himalayan artisans.
+
+  • Pure Tibetan wool yarn
+  • Wool blends (with nettle, with hemp)
+
+  Warm, soft, naturally insulating. Perfect for carpets
+  and knitwear.
+
+  Want a free yarn sample? It feels notably different.
+
+  — Prashant
+
+body_example:
+  - "Rahul"
+
+footer: "Himalayan Fibres • himalayanfibres.com"
+
+buttons:
+  - type: QUICK_REPLY
+    text: "Yes, send sample"
+  - type: QUICK_REPLY
+    text: "Spec sheet"
+  - type: CATALOG
+    text: "View catalog"
+
+notes: |
+  - {{1}} = first_name
+  - Image candidates: config/media/products/animal_fibre/tibetan_wool/
+  - "Carpets ke liye perfect" tilts toward carpet manufacturers; refine
+    if sending to non-carpet audiences

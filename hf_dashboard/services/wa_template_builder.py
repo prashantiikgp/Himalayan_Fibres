@@ -56,6 +56,8 @@ def build_components(template: dict[str, Any]) -> list[dict[str, Any]]:
                 buttons.append(
                     {"type": "PHONE_NUMBER", "text": btn["text"], "phone_number": btn["phone_number"]}
                 )
+            elif btype == "CATALOG":
+                buttons.append({"type": "CATALOG", "text": btn["text"]})
         if buttons:
             components.append({"type": "BUTTONS", "buttons": buttons})
 

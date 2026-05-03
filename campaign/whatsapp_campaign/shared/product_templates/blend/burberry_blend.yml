@@ -1,0 +1,53 @@
+# Tier 3 (PRODUCT) — Burberry Series (plant + animal blend).
+#
+# References Meta Catalog product retailer_id `hf_burberry_series`
+# (₹1200) added 2026-05-02. Composition: nettle + Tibetan wool blend
+# in earthy autumn tones.
+
+name: burberry_blend
+tier: product
+product_category: collections
+voice: founder_warm
+
+meta_category: MARKETING
+language: en
+
+header:
+  format: IMAGE
+  image: https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/burberry-27f4a1b3.jpg
+  image_caption: "Burberry Series — earthy autumn-tone blend"
+  alternates:
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/burberry-detail-618346bb.jpg
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/noor-840a12e8.jpg
+
+body: |
+  Hi {{1}},
+
+  Burberry Series — our signature plant-and-animal blend yarn
+  in earthy autumn tones.
+
+  • Hand-spun blend of nettle and Tibetan wool
+  • Curated for designers and special projects
+  • Limited-batch, naturally dyed
+
+  Want a free sample swatch?
+
+  — Prashant
+
+body_example:
+  - "Rahul"
+
+footer: "Himalayan Fibres • himalayanfibres.com"
+
+buttons:
+  - type: QUICK_REPLY
+    text: "Yes, send sample"
+  - type: QUICK_REPLY
+    text: "Spec sheet"
+  - type: CATALOG
+    text: "View catalog"
+
+notes: |
+  - {{1}} = first_name
+  - Catalog: retailer_id hf_burberry_series (₹1200 INR)
+  - Verify exact composition % (e.g. 80/20 nettle/wool) before submit

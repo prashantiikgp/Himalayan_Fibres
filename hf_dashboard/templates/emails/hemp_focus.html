@@ -1,0 +1,74 @@
+{#-
+  CATEGORY FOCUS — Himalayan hemp range.
+  Used in:
+    - potential_domestic cold sequence (alternate to nettle_focus when
+      prospect is tagged as a hemp/plant-fibre buyer)
+    - existing_clients quarterly highlight rotation
+    - international_email sequence as a category deep-dive
+
+  Per-send variables:
+    first_name*        recipient first name
+    hero_image_url     public HTTPS URL (default: hemp range display)
+    catalog_link       optional URL into the WhatsApp catalog or website
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/hero_image.html' import hero_image with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% block content %}
+
+{{ heading('Our Himalayan hemp yarn', emoji='🌿') }}
+
+{{ hero_image(hero_image_url or 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/hemp1-4159d907.jpg', alt='Himalayan hemp range — yarn and raw fibre') }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph("Our Himalayan hemp yarn is hand-spun by partner artisans from Cannabis sativa cultivated in the hills. Low water, no pesticides, processed in mountain streams the same way nettle has been for generations.") }}
+
+<tr>
+  <td style="padding:8px 24px;background-color:#ffffff;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="width:100%;font-family:{{ font_stack }};font-size:14px;color:#444;line-height:1.7;">
+      <tr>
+        <td style="padding:6px 0;width:160px;color:{{ color_accent }};vertical-align:top;"><strong>Forms</strong></td>
+        <td style="padding:6px 0;">Hand-spun yarn (natural &amp; white), raw fibre, hemp blends</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0;color:{{ color_accent }};vertical-align:top;"><strong>Origin</strong></td>
+        <td style="padding:6px 0;">Cultivated in the Himalayan hills, hand-processed by artisan partners</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0;color:{{ color_accent }};vertical-align:top;"><strong>Properties</strong></td>
+        <td style="padding:6px 0;">Strong, durable, naturally antimicrobial, breathable</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0;color:{{ color_accent }};vertical-align:top;"><strong>Sustainability</strong></td>
+        <td style="padding:6px 0;">Low water, no pesticides, biodegradable</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0;color:{{ color_accent }};vertical-align:top;"><strong>MOQ</strong></td>
+        <td style="padding:6px 0;">50 kg per fibre type (samples are free, no MOQ)</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0;color:{{ color_accent }};vertical-align:top;"><strong>Lead time</strong></td>
+        <td style="padding:6px 0;">2-3 weeks from confirmed order</td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
+{{ paragraph("Used by carpet manufacturers, weavers, and yarn stores across India and overseas. The natural antimicrobial property makes hemp particularly suited to bedding, towels, and apparel that needs to handle sweat and humidity.") }}
+
+{{ paragraph("If you'd like to feel the difference yourself, just reply with your address. We'll dispatch a free sample within 2-3 days, no commitment.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{% if catalog_link %}
+{{ cta_button('View full catalog', catalog_link) }}
+{% endif %}
+
+{{ whatsapp_help_button('Hi Himalayan Fibres — I would like more details on the hemp yarn.') }}
+
+{% endblock %}

@@ -1,0 +1,51 @@
+{#-
+  IMAGE CARD — image-on-top + title + body block. Standard component for
+  multi-category templates and any place you want a photo card inside the
+  email body (collections overview, "our 3 fibre families", etc.).
+
+  Dimensions: image is fixed at full-card-width × 200px, cropped via
+  object-fit:cover. Card width is 632px content-area (680 outer − 24 padding × 2).
+  Modern clients honor the crop; Outlook desktop letterboxes.
+
+  Usage:
+    {% from 'partials/middle/image_card.html' import image_card with context %}
+    {{ image_card(
+         image_url='https://.../nettle.jpg',
+         title='Himalayan Nettle',
+         body='Wild-grown, hand-spun, antimicrobial. Yarn + raw fibre.',
+         link='https://...'
+    ) }}
+
+  All args optional except image_url + title + body. `image_height` overrides
+  the default 200px crop if you need a taller / shorter card.
+-#}
+{% macro image_card(image_url, title, body, link='', image_alt='', image_height=200, icon_emoji='') %}
+<tr>
+  <td style="padding:12px 24px;background-color:#ffffff;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:{{ color_card_bg or '#ffffff' }};border:1px solid {{ color_card_border }};border-radius:8px;overflow:hidden;">
+      <tr>
+        <td style="padding:0;">
+          {% if link %}
+          <a href="{{ link }}" target="_blank" rel="noopener" style="text-decoration:none;">
+            <img src="{{ image_url }}" alt="{{ image_alt or title }}" width="632" height="{{ image_height }}" style="display:block;width:100%;max-width:632px;height:{{ image_height }}px;max-height:{{ image_height }}px;object-fit:cover;border:0;outline:none;text-decoration:none;">
+          </a>
+          {% else %}
+          <img src="{{ image_url }}" alt="{{ image_alt or title }}" width="632" height="{{ image_height }}" style="display:block;width:100%;max-width:632px;height:{{ image_height }}px;max-height:{{ image_height }}px;object-fit:cover;border:0;outline:none;text-decoration:none;">
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:14px 18px 16px;font-family:{{ font_stack }};">
+          <h4 style="font-size:16px;font-weight:700;color:{{ color_accent }};margin:0 0 6px;">
+            {%- if icon_emoji %}{{ icon_emoji }} {% endif -%}
+            {{ title }}
+          </h4>
+          <p style="font-size:14px;color:{{ color_body }};margin:0;line-height:1.5;">
+            {{ body | safe }}
+          </p>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+{% endmacro %}

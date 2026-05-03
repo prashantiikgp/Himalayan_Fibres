@@ -1,0 +1,46 @@
+{#-
+  WINBACK — for clients silent 60+ days. Honest tone, no "we miss you".
+  Lead with what HAS CHANGED since they last engaged. Single touch
+  (paired with sample_invitation as step 2 in the churned campaign).
+
+  Per-send variables:
+    first_name*        recipient first name
+    last_engagement_at human-readable e.g. "your last order in October"
+    whats_new_html     short bullet list of recent changes (safe HTML)
+    hero_image_url     public HTTPS URL (default: yarn batch)
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/hero_image.html' import hero_image with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% block content %}
+
+{{ heading("What's new at Himalayan Fibres") }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph("Quick honest note — it's been a while since we last spoke. No pitch coming, just a short update on what's changed at our end since" + (' ' + last_engagement_at if last_engagement_at else ' your last visit') + '.') }}
+
+{% if whats_new_html %}
+<tr>
+  <td style="padding:8px 24px;background-color:#ffffff;">
+    <div style="border-left:3px solid {{ color_accent }};padding:8px 14px;font-family:{{ font_stack }};font-size:14px;color:#444;line-height:1.7;">
+      {{ whats_new_html | safe }}
+    </div>
+  </td>
+</tr>
+{% else %}
+{{ paragraph("• New batch of fine-count Himalayan nettle yarn (20/2)<br>• Burberry and Noor signature blends now in our catalog<br>• Updated proforma + payment process — easier sample-to-order flow") }}
+{% endif %}
+
+{{ hero_image(hero_image_url or 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/burberry-27f4a1b3.jpg', alt='Recent yarn batch from Himalayan Fibres') }}
+
+{{ paragraph("If any of this is relevant when you're back in the market, we'd be glad to send a fresh sample pack. If not, also fine — no follow-up after this.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{{ whatsapp_help_button('Hi Himalayan Fibres — I would like to see what is new.') }}
+
+{% endblock %}

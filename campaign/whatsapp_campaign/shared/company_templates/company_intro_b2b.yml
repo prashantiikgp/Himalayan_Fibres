@@ -1,0 +1,54 @@
+# Tier 1 (COMPANY) — top-of-funnel B2B introduction in Hinglish.
+#
+# First-touch template for any cold prospect (Indian B2B). Image
+# header carries the brand visual; body is short and ends with a
+# free-sample CTA. Quick-reply buttons do the heavy lifting.
+#
+# Status: DRAFT — image asset still TBD.
+
+name: company_intro_b2b
+tier: company
+voice: founder_warm
+
+meta_category: MARKETING
+language: en
+
+header:
+  format: IMAGE
+  image: https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/nettle-thick-yarn-975912fa.jpg
+  image_caption: "Hand-spun nettle yarn — flagship product, hero shot"
+  alternates:
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/hemp-natural-yarn-42b9dfe4.jpg
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/wool1-f329d1f9.jpg
+
+body: |
+  Hi {{1}},
+
+  Prashant from Himalayan Fibres. We make premium hand-spun
+  yarn — nettle, hemp, Tibetan wool, signature blends —
+  crafted by Himalayan artisans from naturally sourced fibre.
+
+  Want a free yarn sample? Share your address and we'll take
+  care of the rest.
+
+  — Prashant
+
+body_example:
+  - "Rahul"
+
+footer: "Himalayan Fibres • himalayanfibres.com"
+
+buttons:
+  - type: QUICK_REPLY
+    text: "Yes, send sample"
+  - type: QUICK_REPLY
+    text: "Tell me more"
+  - type: CATALOG
+    text: "View catalog"
+
+notes: |
+  - 3-block structure: greet -> 2-line product highlight -> sample CTA
+  - {{1}} = recipient first_name
+  - Image: brand hero. Pick from Drive once we audit folder structure.
+  - This replaces the older `b2b_fiber_intro` in
+    config/whatsapp/new_templates.yml once Meta-approved.

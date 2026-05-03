@@ -1,0 +1,24 @@
+# Email template metadata — winback for clients silent 60+ days.
+# HTML to be built.
+
+name: winback_60d_silent
+tier: lifecycle
+voice: founder_warm   # for international/English audiences
+
+subject: "{{ first_name }}, what's new at Himalayan Fibres since you last visited"
+preview_text: "A short note — no pitch, just an update on what's changed since we last spoke."
+
+html_template_file: "winback_60d_silent.html"  # TO BE BUILT
+
+required_variables:
+  - first_name
+
+target_segments:
+  - churned_clients
+
+description: |
+  Single-touch reactivation, sent 60 days after last engagement (any channel).
+  Honest tone (no "we miss you"). Lead with what's NEW since they left:
+  certifications, new SKUs, new colors. Soft CTA: free fresh sample pack.
+
+status: PLANNED

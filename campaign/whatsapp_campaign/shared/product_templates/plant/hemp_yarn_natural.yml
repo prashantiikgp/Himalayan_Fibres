@@ -1,0 +1,53 @@
+# Tier 3 (PRODUCT) — Natural Himalayan hemp yarn.
+#
+# References Meta Catalog product retailer_id `otgmx28zqr`
+# ("Himalayan Hemp Yarn | Himalayan Fibres", ₹275).
+# White variant exists separately as `ownr6dwat6` (₹350).
+
+name: hemp_yarn_natural
+tier: product
+product_category: hemp
+voice: founder_warm
+
+meta_category: MARKETING
+language: en
+
+header:
+  format: IMAGE
+  image: https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/hemp-natural-yarn-42b9dfe4.jpg
+  image_caption: "Natural Himalayan hemp yarn — hand-spun"
+  alternates:
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/hemp-white-yarn-9aeb0912.jpg
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/hemp1-4159d907.jpg
+
+body: |
+  Hi {{1}},
+
+  Our natural Himalayan hemp yarn — hand-spun from Cannabis
+  sativa cultivated in the Himalayan hills.
+
+  • Strong, durable, naturally antimicrobial
+  • Eco-friendly: low water, no pesticides
+  • Also available in white
+
+  Want a free sample? No MOQ on samples.
+
+  — Prashant
+
+body_example:
+  - "Rahul"
+
+footer: "Himalayan Fibres • himalayanfibres.com"
+
+buttons:
+  - type: QUICK_REPLY
+    text: "Yes, send sample"
+  - type: QUICK_REPLY
+    text: "Send white variant"
+  - type: CATALOG
+    text: "View catalog"
+
+notes: |
+  - {{1}} = first_name
+  - Catalog: retailer_id otgmx28zqr (₹275 INR) — natural
+  - White variant is a separate catalog item: ownr6dwat6 (₹350)

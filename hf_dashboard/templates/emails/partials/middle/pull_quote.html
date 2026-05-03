@@ -1,0 +1,28 @@
+{#-
+  PULL QUOTE — italic accent quote block with a left border in the brand
+  accent colour. Used for editorial / blog-style email layouts to surface
+  customer voice or a memorable line from the body.
+
+  Args:
+    quote      — required, the quote text (no surrounding quote marks
+                 needed; macro adds visual quote marks)
+    attribution — optional, "— Name, Title / Location"
+-#}
+{% macro pull_quote(quote, attribution='') %}
+<tr>
+  <td style="padding:14px 24px;background-color:#ffffff;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tr>
+        <td style="border-left:4px solid {{ color_link }};padding:8px 0 8px 18px;font-family:{{ font_stack }};">
+          <p style="font-size:16px;color:{{ color_text }};margin:0 0 8px;line-height:1.5;font-style:italic;">
+            <span style="color:{{ color_link }};font-size:22px;line-height:1;vertical-align:-4px;">&ldquo;</span>{{ quote }}<span style="color:{{ color_link }};font-size:22px;line-height:1;vertical-align:-4px;">&rdquo;</span>
+          </p>
+          {% if attribution %}
+          <p style="font-size:13px;color:#777;margin:0;font-style:normal;">{{ attribution }}</p>
+          {% endif %}
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+{% endmacro %}

@@ -1,0 +1,75 @@
+# Email template metadata — Tibetan wool range focus (editorial blog format).
+# HTML at hf_dashboard/templates/emails/wool_focus.html.
+
+name: wool_focus
+tier: category
+product_category: wool
+voice: founder_warm
+
+subject: "From the Tibetan Plateau to hand-knotted carpets"
+preview_text: "How sheep at 4,000 metres grow a fleece no machine can replicate — and where it ends up."
+
+html_template_file: "wool_focus.html"
+
+required_variables:
+  - first_name
+
+# Optional per-send variables — every text + image + link is overrideable.
+# Defaults are baked into the template and use Wix product-page URLs.
+optional_variables:
+  # Hero / texture split block (left)
+  - texture_image_url        # default: wool-millspun (Supabase)
+  - texture_title            # default: 'The texture, up close'
+  - texture_body             # default: fineness/microns story
+  - texture_link             # default: /product-page/himalayan-wool-yarn
+
+  # Pull quote
+  - quote_text               # default: Mahesh testimonial
+  - quote_attribution        # default: '— Mahesh, carpet exporter, Bhadohi'
+
+  # Artisan split block (right)
+  - artisan_image_url        # default: field-artisan2 (Supabase)
+  - artisan_title            # default: 'Hand-spun, in their homes'
+  - artisan_body             # default: artisan-partner story
+  - artisan_link             # default: '' (story image, no product link)
+
+  # Product variant grid (3 cells)
+  - variant_1_image_url      # default: wool1 — natural undyed
+  - variant_1_caption        # default: 'Natural Tibetan wool — undyed'
+  - variant_1_link           # default: /product-page/himalayan-wool-yarn
+  - variant_2_image_url      # default: wool2 — dyed
+  - variant_2_caption        # default: 'Dyed yarn — earth-tone palette'
+  - variant_2_link           # default: /product-page/hand-dyed-wool-yarn
+  - variant_3_image_url      # default: wool3 — blended
+  - variant_3_caption        # default: 'Blended yarn — wool with nettle'
+  - variant_3_link           # default: /product-page/wool-roving-bundle
+
+  # Footer CTA
+  - catalog_link             # optional; renders the "View the full catalog" button
+
+# Hero imagery (the first big image in the body — image_split #1)
+hero_image: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/wool-millspun-cfdf995d.jpg"
+
+alternates:
+  - "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/wool1-f329d1f9.jpg"
+  - "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/wool2-593bdf91.jpg"
+  - "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/wool3-005db721.jpg"
+
+target_segments:
+  - potential_domestic
+  - existing_clients
+  - international_email
+
+status: READY
+
+description: |
+  Editorial blog-format category email for Tibetan wool. Story-driven
+  prose with origin → texture → sustainability → social proof, a
+  customer pull quote, and a 3-image variant grid before the order ask.
+
+  Every text + image + link is exposed as a per-send variable so
+  campaigns can override copy without editing the HTML. All images
+  deep-link to their Wix product page (not the homepage).
+
+  Voice: founder_warm. Length: ~3 short and 3 medium paragraphs +
+  2 image_splits + pull quote + variant grid + sign-off.

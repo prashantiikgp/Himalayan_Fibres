@@ -1,0 +1,94 @@
+{#-
+  PROFORMA INVOICE — sent BEFORE payment. Shares the structure of
+  order_confirmation but reframes for pre-payment review:
+    - Heading: "Proforma Invoice — Awaiting Confirmation"
+    - PROFORMA stamp top-right
+    - Validity period
+    - Bank/payment details block
+    - CTA: "Confirm & Pay"
+
+  Per-send variables (all optional unless noted):
+    proforma_number*       e.g. "PRO-2026-001"
+    proforma_date          e.g. "02 May 2026"
+    validity_days          int, default 7
+    ship_to_html           safe HTML address block
+    items_html             safe HTML line-items block
+    subtotal               formatted "₹1,200.00"
+    shipping_estimate      formatted, optional
+    total_due              formatted "₹1,560.00"
+    bank_details_html      safe HTML block (UPI / account / IFSC)
+    pay_link               URL to payment gateway / UPI deep-link
+    first_name*            recipient first name
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/proforma_stamp.html' import proforma_stamp with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% block content %}
+
+{{ proforma_stamp() }}
+
+{{ heading('Proforma Invoice — Awaiting Confirmation', emoji='📄') }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph("Please find below the proforma invoice for your order with <strong>Himalayan Fibres</strong>. Once payment is received, we'll confirm the order and begin preparing your items with care.") }}
+
+{# PROFORMA SUMMARY — same shape as order_confirmation but framed as a quotation #}
+{% if proforma_number or items_html %}
+<tr>
+  <td style="padding:12px 24px 20px;background-color:#ffffff;">
+    <div style="border:1px solid {{ color_card_border }};border-radius:6px;padding:16px;font-family:{{ font_stack }};">
+      <h3 style="font-size:18px;font-weight:bold;color:{{ color_text }};margin:0 0 10px;">Proforma Summary</h3>
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="width:100%;font-size:14px;color:#555;">
+        <tr><td style="padding:4px 0;width:140px;color:{{ color_accent }};"><strong>Proforma #:</strong></td><td style="padding:4px 0;">{{ proforma_number or '—' }}</td></tr>
+        <tr><td style="padding:4px 0;color:{{ color_accent }};"><strong>Date:</strong></td><td style="padding:4px 0;">{{ proforma_date or '—' }}</td></tr>
+        <tr><td style="padding:4px 0;color:{{ color_accent }};"><strong>Valid for:</strong></td><td style="padding:4px 0;">{{ validity_days or 7 }} days from issue</td></tr>
+        {% if ship_to_html %}
+        <tr><td style="padding:4px 0;vertical-align:top;color:{{ color_accent }};"><strong>Ship To:</strong></td><td style="padding:4px 0;">{{ ship_to_html | safe }}</td></tr>
+        {% endif %}
+      </table>
+
+      {% if items_html %}
+      <div style="margin-top:10px;background:#fafafa;border:1px solid #eee;border-radius:6px;">
+        {{ items_html | safe }}
+      </div>
+      {% endif %}
+
+      {% if subtotal or total_due %}
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="width:100%;font-size:14px;color:{{ color_accent }};margin-top:10px;">
+        {% if subtotal %}<tr><td style="padding:6px 0;color:#555;">Subtotal</td><td style="padding:6px 0;" align="right">{{ subtotal }}</td></tr>{% endif %}
+        {% if shipping_estimate %}<tr><td style="padding:6px 0;color:#555;">Courier (estimated)</td><td style="padding:6px 0;" align="right">{{ shipping_estimate }}</td></tr>{% endif %}
+        <tr><td colspan="2" style="border-top:1px solid {{ color_card_border }};height:1px;line-height:1px;"></td></tr>
+        {% if total_due %}<tr><td style="padding:8px 0;font-weight:bold;">Total Due</td><td style="padding:8px 0;font-weight:bold;" align="right">{{ total_due }}</td></tr>{% endif %}
+      </table>
+      {% endif %}
+    </div>
+  </td>
+</tr>
+{% endif %}
+
+{# PAYMENT DETAILS — bank / UPI / wire — passed as HTML so each region's format works #}
+{% if bank_details_html %}
+<tr>
+  <td style="padding:0 24px 16px;background-color:#ffffff;">
+    <div style="border:1px dashed {{ color_card_border }};border-radius:6px;padding:14px;font-family:{{ font_stack }};font-size:13px;color:#555;">
+      <div style="font-weight:bold;color:{{ color_text }};font-size:14px;margin-bottom:6px;">Payment Details</div>
+      {{ bank_details_html | safe }}
+    </div>
+  </td>
+</tr>
+{% endif %}
+
+{% if pay_link %}
+{{ cta_button('Confirm & Pay', pay_link) }}
+{% endif %}
+
+{{ paragraph('<em style="color:#888;font-size:13px;">Once payment lands, you\'ll receive an order confirmation with shipping ETA. This proforma is valid for ' + (validity_days or 7) | string + ' days from the issue date.</em>') }}
+
+{{ whatsapp_help_button('Hi Himalayan Fibres — I have a question about this proforma invoice.') }}
+
+{% endblock %}

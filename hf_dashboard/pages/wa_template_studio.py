@@ -124,6 +124,55 @@ _STATUS_FILTER_CHOICES = [
     ("🔴 Rejected", "REJECTED"),
 ]
 
+# Folder/tier filter — mirrors campaign/whatsapp_campaign/shared/<tier>_templates/
+# folder structure on disk. Tier is inferred from the template name pattern at
+# query time so no DB migration is needed.
+_TIER_FILTER_CHOICES = [
+    ("📁 All folders", ""),
+    ("🏢 Company", "company"),
+    ("📦 Category", "category"),
+    ("🛍 Product", "product"),
+    ("⚙️ Utility", "utility"),
+]
+
+# Names hardcoded as company-tier (top-level brand/intro templates).
+_COMPANY_TIER_NAMES = {
+    "company_intro_b2b",
+    "followup_interest",
+    "sustainability_field_story",
+    "catalog_browse",
+}
+
+# Names hardcoded as product-tier (specific SKU / category-of-products).
+# Mirrors campaign/whatsapp_campaign/shared/product_templates/{category,plant,animal,blend}/.
+_PRODUCT_TIER_NAMES = {
+    "yarn_categories_intro",
+    "nettle_yarn_fine",
+    "hemp_yarn_natural",
+    "tibetan_wool_yarn",
+    "burberry_blend",
+    "noor_blend",
+}
+
+
+def _infer_tier(name: str, meta_category: str) -> str:
+    """Map a template name + Meta category to one of: company / category / product / utility.
+
+    Strips `_vN` suffix first so versioned templates (e.g. `followup_interest_v2`,
+    submitted after the original was already approved by Meta) inherit the
+    base name's tier without needing a duplicate entry in the *_TIER_NAMES sets.
+    """
+    if (meta_category or "").upper() == "UTILITY":
+        return "utility"
+    nl = re.sub(r"_v\d+$", "", (name or "").lower())
+    if nl in _COMPANY_TIER_NAMES:
+        return "company"
+    if nl in _PRODUCT_TIER_NAMES:
+        return "product"
+    if nl.endswith("_overview") or "_range_overview" in nl:
+        return "category"
+    return "company"
+
 
 def _counts_by_status(db) -> dict[str, int]:
     """Return {status: count} across all WATemplate rows."""
@@ -140,6 +189,17 @@ def _counts_by_status(db) -> dict[str, int]:
     return out
 
 
+def _counts_by_tier(db) -> dict[str, int]:
+    """Return {tier: count} across all WATemplate rows."""
+    from services.models import WATemplate
+
+    out = {"company": 0, "category": 0, "product": 0, "utility": 0}
+    for t in db.query(WATemplate).all():
+        tier = _infer_tier(t.name, t.category)
+        out[tier] = out.get(tier, 0) + 1
+    return out
+
+
 def _status_choices_with_counts(db) -> list[tuple[str, str]]:
     """Build the status-filter dropdown choices with row counts."""
     counts = _counts_by_status(db)
@@ -149,8 +209,55 @@ def _status_choices_with_counts(db) -> list[tuple[str, str]]:
     return out
 
 
-def _fetch_templates_for_status(status: str):
-    """Return (choices, status_dropdown_update) for the filter + radio."""
+def _render_folder_tree_html(db) -> str:
+    """Render the campaign/ folder hierarchy as a tree with template counts per folder.
+
+    Mirrors the on-disk layout under campaign/whatsapp_campaign/. The four
+    segment folders (existing_clients/etc.) are listed for visibility but
+    counts are blank for now — campaigns live in YAML, not DB, so they need
+    a separate loader to count.
+    """
+    c = _counts_by_tier(db)
+
+    def _node(label: str, count: str | int = "", indent: int = 0, dim: bool = False) -> str:
+        col = "#94a3b8" if dim else "#e7eaf3"
+        cnt = f' <span style="color:#64748b;">({count})</span>' if count != "" else ""
+        return (
+            f'<div style="padding-left:{indent}px; color:{col}; line-height:1.7;">'
+            f'{label}{cnt}</div>'
+        )
+
+    return f"""
+<div style="font-family: ui-monospace, SFMono-Regular, monospace; font-size: 10px;
+            background: rgba(15,23,42,.50); border: 1px solid rgba(255,255,255,.06);
+            border-radius: 8px; padding: 10px; margin-bottom: 8px; line-height:1.5;">
+  <div style="font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+              color: #c7d2fe; margin-bottom: 6px; font-size: 10px;">
+    Campaign folders
+  </div>
+  {_node("📁 campaign/", "", 0)}
+  {_node("📁 whatsapp_campaign/", "", 12)}
+  {_node("📁 shared/", "", 24)}
+  {_node("🏢 company/", c.get("company", 0), 36)}
+  {_node("📦 category/", c.get("category", 0), 36)}
+  {_node("🛍 product/", c.get("product", 0), 36)}
+  {_node("⚙️ utility/", c.get("utility", 0), 36)}
+  {_node("📁 existing_clients/", "—", 24, dim=True)}
+  {_node("📁 churned_clients/", "—", 24, dim=True)}
+  {_node("📁 potential_domestic/", "—", 24, dim=True)}
+  {_node("📁 international_email/", "—", 24, dim=True)}
+  {_node("📁 email_campaign/", "—", 12, dim=True)}
+  <div style="font-size:9px; color:#64748b; margin-top:6px; padding-top:6px;
+              border-top:1px solid rgba(255,255,255,.04); line-height:1.4;">
+    Pick a folder below to filter the list. Segment counts are blank —
+    campaigns live in YAML; loader integration is next.
+  </div>
+</div>
+"""
+
+
+def _fetch_templates_for_filters(status: str, tier: str = ""):
+    """Return updates for (radio, status dropdown, folder tree) — filtered by status + tier."""
     from services.database import get_db
 
     if not status:
@@ -161,19 +268,23 @@ def _fetch_templates_for_status(status: str):
             rows = _list_templates(db, drafts=True)
         else:
             rows = _list_templates(db, drafts=False, status=status)
+        if tier:
+            rows = [t for t in rows if _infer_tier(t.name, t.category) == tier]
         choices = [(_template_row_label(t), t.id) for t in rows]
         status_choices = _status_choices_with_counts(db)
+        folder_html = _render_folder_tree_html(db)
         return (
             gr.update(choices=choices, value=None),
             gr.update(choices=status_choices, value=status),
+            folder_html,
         )
     finally:
         db.close()
 
 
 def _refresh_default_view():
-    """0-arg refresh used by navigation engine update_fn. Defaults to APPROVED."""
-    return _fetch_templates_for_status("APPROVED")
+    """0-arg refresh used by navigation engine update_fn. Defaults to APPROVED, no tier filter."""
+    return _fetch_templates_for_filters("APPROVED", "")
 
 
 def _strip_version_suffix(name: str) -> str:
@@ -789,16 +900,26 @@ def build(ctx):
     is_https = get_settings().public_base_url.lower().startswith("https://")
 
     with gr.Row():
-        # ═══ LEFT (20%) — templates list + header guidelines ═══
+        # ═══ LEFT (20%) — folder tree + templates list + header guidelines ═══
         with gr.Column(scale=2, min_width=220, elem_classes=["ts-list-panel"]):
             gr.HTML('<div class="ts-panel-title">Templates</div>')
             new_btn = gr.Button("+ New Draft", size="sm", variant="primary")
             sync_btn = gr.Button("🔄 Sync from Meta", size="sm", variant="secondary")
             sync_result = gr.HTML(value="")
+            # Folder hierarchy mirroring campaign/ on disk; populated on page-load
+            # by _refresh_default_view (the nav engine update_fn).
+            folder_tree_html = gr.HTML(value="")
             status_filter = gr.Dropdown(
-                label="Filter",
+                label="Status",
                 choices=_STATUS_FILTER_CHOICES,
                 value="APPROVED",
+                interactive=True,
+                container=True,
+            )
+            tier_filter = gr.Dropdown(
+                label="Folder",
+                choices=_TIER_FILTER_CHOICES,
+                value="",
                 interactive=True,
                 container=True,
             )
@@ -1009,11 +1130,18 @@ def build(ctx):
         fn=_render_preview, inputs=preview_inputs, outputs=[preview_html],
     )
 
-    # -- Status filter change → fetch new list --
+    # -- Status / tier filter change → fetch new list (both feed the same handler) --
+    _filter_inputs = [status_filter, tier_filter]
+    _filter_outputs = [template_radio, status_filter, folder_tree_html]
     status_filter.change(
-        fn=_fetch_templates_for_status,
-        inputs=[status_filter],
-        outputs=[template_radio, status_filter],
+        fn=_fetch_templates_for_filters,
+        inputs=_filter_inputs,
+        outputs=_filter_outputs,
+    )
+    tier_filter.change(
+        fn=_fetch_templates_for_filters,
+        inputs=_filter_inputs,
+        outputs=_filter_outputs,
     )
 
     # -- Save draft --
@@ -1026,9 +1154,9 @@ def build(ctx):
         ],
         outputs=[action_result, template_id_state],
     ).then(
-        fn=_fetch_templates_for_status,
-        inputs=[status_filter],
-        outputs=[template_radio, status_filter],
+        fn=_fetch_templates_for_filters,
+        inputs=_filter_inputs,
+        outputs=_filter_outputs,
     )
 
     # -- Submit to Meta --
@@ -1041,20 +1169,20 @@ def build(ctx):
         ],
         outputs=[action_result, template_id_state],
     ).then(
-        fn=_fetch_templates_for_status,
-        inputs=[status_filter],
-        outputs=[template_radio, status_filter],
+        fn=_fetch_templates_for_filters,
+        inputs=_filter_inputs,
+        outputs=_filter_outputs,
     )
 
     # -- Sync from Meta --
     sync_btn.click(fn=_sync_from_meta, outputs=[sync_result]).then(
-        fn=_fetch_templates_for_status,
-        inputs=[status_filter],
-        outputs=[template_radio, status_filter],
+        fn=_fetch_templates_for_filters,
+        inputs=_filter_inputs,
+        outputs=_filter_outputs,
     )
 
-    # -- Refresh wiring for sidebar nav (update_fn is 0-arg; defaults to APPROVED) --
+    # -- Refresh wiring for sidebar nav (update_fn is 0-arg; defaults to APPROVED, no tier) --
     return {
         "update_fn": _refresh_default_view,
-        "outputs": [template_radio, status_filter],
+        "outputs": _filter_outputs,
     }

@@ -1,0 +1,15 @@
+# Campaigns targeting INTERNATIONAL EMAIL contacts on WhatsApp.
+#
+# Audience: international leads (mostly EU/US/UK) where we have an
+# email but the contact has also shared a WhatsApp number
+# (typically after replying to an email outreach).
+#
+# IMPORTANT: international email-only contacts WITHOUT a confirmed
+# wa_id are NOT eligible for any WhatsApp campaign here. The bulk
+# of international outreach lives under campaign/email_campaign/.
+
+campaigns: []
+
+# Examples to add later:
+#   - intl_followup_post_email    → triggered after an email reply that
+#                                   includes a WhatsApp number

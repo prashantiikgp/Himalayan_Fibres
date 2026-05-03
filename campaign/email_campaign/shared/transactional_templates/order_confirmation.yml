@@ -1,0 +1,31 @@
+# Email template metadata — order confirmation (post-payment).
+#
+# HTML at hf_dashboard/templates/emails/order_confirmation.html.
+
+name: order_confirmation
+tier: transactional
+voice: founder_warm
+
+subject: "Order {{ order_number }} confirmed — Himalayan Fibres"
+preview_text: "We're preparing your order. Here's the summary."
+
+html_template_file: "order_confirmation.html"
+
+required_variables:
+  - first_name
+  - order_number
+  - order_date
+  - ship_to_html
+  - items_html
+  - subtotal
+  - total
+  - payment_method
+
+target_segments:
+  - existing_clients
+  - potential_domestic
+  - international_email
+
+description: |
+  Sent after payment lands for a proforma. Confirms the order and sets
+  shipping expectations.

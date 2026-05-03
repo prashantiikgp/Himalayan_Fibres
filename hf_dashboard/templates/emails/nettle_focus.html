@@ -1,0 +1,71 @@
+{#-
+  CATEGORY FOCUS — Himalayan nettle range.
+  Used in:
+    - potential_domestic cold sequence day 7 (when prospect tagged as
+      carpet/weaver/yarn-store buyer)
+    - existing_clients quarterly highlight series
+    - international_email sequence day 14
+
+  Per-send variables:
+    first_name*        recipient first name
+    hero_image_url     public HTTPS URL (default: nettle thick yarn)
+    catalog_link       optional URL into the WhatsApp catalog or website
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/hero_image.html' import hero_image with context %}
+{% from 'partials/middle/info_card.html' import info_card with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% block content %}
+
+{{ heading('Hand-spun nettle yarn from the Himalayas', emoji='🌿') }}
+
+{{ hero_image(hero_image_url or 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/nettle-thick-yarn-975912fa.jpg', alt='Hand-spun Himalayan nettle yarn') }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph("Sharing our Himalayan nettle yarn — wild-grown in Gorkha district, hand-processed by partner artisans, then spun into yarn or supplied as raw fibre.") }}
+
+<tr>
+  <td style="padding:8px 24px;background-color:#ffffff;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="width:100%;font-family:{{ font_stack }};font-size:14px;color:#444;line-height:1.7;">
+      <tr>
+        <td style="padding:6px 0;width:160px;color:{{ color_accent }};vertical-align:top;"><strong>Yarn counts</strong></td>
+        <td style="padding:6px 0;">10/2 (thick), 20/2 (fine)</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0;color:{{ color_accent }};vertical-align:top;"><strong>Forms</strong></td>
+        <td style="padding:6px 0;">Hand-spun yarn, raw fibre (decorticated), nettle blends</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0;color:{{ color_accent }};vertical-align:top;"><strong>Origin</strong></td>
+        <td style="padding:6px 0;">Wild-grown nettle, Gorkha &amp; Almora districts</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0;color:{{ color_accent }};vertical-align:top;"><strong>MOQ</strong></td>
+        <td style="padding:6px 0;">50 kg per fibre type (samples are free, no MOQ)</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0;color:{{ color_accent }};vertical-align:top;"><strong>Lead time</strong></td>
+        <td style="padding:6px 0;">2-3 weeks from confirmed order</td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
+{{ paragraph("Strong, silky, naturally lustrous — closer in feel to silk than to cotton. Used by carpet manufacturers, yarn stores, and designers across India and overseas.") }}
+
+{{ paragraph("If you'd like a free sample to feel the difference, just reply with your address. We dispatch within 2-3 days, no commitment.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{% if catalog_link %}
+{{ cta_button('View full catalog', catalog_link) }}
+{% endif %}
+
+{{ whatsapp_help_button('Hi Himalayan Fibres — I would like more details on the nettle yarn.') }}
+
+{% endblock %}

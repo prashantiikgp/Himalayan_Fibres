@@ -1,0 +1,52 @@
+# Tier 2 (CATEGORY) — Signature collections overview, Hinglish.
+# Covers the four named blends: Burberry, Noor, Seriry, Snow White.
+
+name: collections_range_overview
+tier: category
+product_category: collections
+voice: founder_warm
+
+meta_category: MARKETING
+language: en
+
+header:
+  format: IMAGE
+  image: https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/burberry-27f4a1b3.jpg
+  image_caption: "Burberry Series — earthy autumn-tone blend"
+  alternates:
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/noor-840a12e8.jpg
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/burberry-detail-618346bb.jpg
+
+body: |
+  Hi {{1}},
+
+  Our signature yarn collections —
+  • Burberry — earthy, autumn tones
+  • Noor — soft, neutral palette
+  • Seriry — vibrant, festive blend
+  • Snow White — pure, undyed natural
+
+  Curated yarns for designers and special projects.
+
+  Want a sample? Tell me which one — or I can send all four.
+
+  — Prashant
+
+body_example:
+  - "Rahul"
+
+footer: "Himalayan Fibres • himalayanfibres.com"
+
+buttons:
+  - type: QUICK_REPLY
+    text: "Send Burberry"
+  - type: QUICK_REPLY
+    text: "Send Noor"
+  - type: CATALOG
+    text: "View catalog"
+
+notes: |
+  - {{1}} = first_name
+  - Image: 2x2 grid of all 4 collections is ideal for the header
+  - "All 4 swatches" button optimizes for trial-phase volume — most
+    will pick this if uncertain

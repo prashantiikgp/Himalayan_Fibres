@@ -1,0 +1,47 @@
+# Tier 1 (COMPANY) — Catalog browse template.
+#
+# Dedicated MARKETING template whose primary CTA opens the connected
+# Meta catalog (id 605077809183163, "Catalog_products"). Use as a
+# follow-up when a prospect says "show me everything" or as a
+# standalone for engaged contacts who want to browse before requesting.
+
+name: catalog_browse
+tier: company
+voice: founder_warm
+
+meta_category: MARKETING
+language: en
+
+header:
+  format: IMAGE
+  image: https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/nettle-thick-yarn-975912fa.jpg
+  image_caption: "Hand-spun yarn — open the catalog to see the full range"
+  alternates:
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/burberry-27f4a1b3.jpg
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/wool1-f329d1f9.jpg
+
+body: |
+  Hi {{1}},
+
+  Our full yarn catalog — nettle, hemp, Tibetan wool, and
+  signature collections — all in one place. Tap below to
+  browse prices, specs, and place a sample request directly.
+
+  — Prashant
+
+body_example:
+  - "Rahul"
+
+footer: "Himalayan Fibres • himalayanfibres.com"
+
+buttons:
+  - type: CATALOG
+    text: "View catalog"
+
+notes: |
+  - The CATALOG button opens the connected Meta catalog
+    "Catalog_products" (id 605077809183163) inside WhatsApp.
+  - Per Meta rules, CATALOG is a standalone button — best paired
+    with NO other buttons in the same template (catalog templates
+    typically have just the one CTA).
+  - {{1}} = recipient first_name

@@ -1,0 +1,35 @@
+# Email template metadata — proforma invoice.
+#
+# Sent BEFORE payment. Order is not yet confirmed.
+# HTML at hf_dashboard/templates/emails/proforma_invoice.html.
+
+name: proforma_invoice
+tier: transactional
+voice: founder_warm
+
+subject: "Proforma Invoice {{ proforma_number }} — Himalayan Fibres"
+preview_text: "Please review the proforma. Once payment is received, we'll confirm the order."
+
+html_template_file: "proforma_invoice.html"
+
+required_variables:
+  - first_name
+  - proforma_number
+  - proforma_date
+  - validity_days
+  - ship_to_html
+  - items_html
+  - subtotal
+  - total_due
+  - bank_details_html
+  - pay_link
+
+target_segments:
+  - existing_clients
+  - potential_domestic
+  - international_email
+
+description: |
+  Pre-payment template. Triggered by the dashboard when a sales rep generates
+  a quotation. Recipient reviews + pays via the bank details / pay link;
+  payment landing flips the row to order_confirmation.

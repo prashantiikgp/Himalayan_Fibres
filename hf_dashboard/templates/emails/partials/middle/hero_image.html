@@ -1,21 +1,26 @@
-{% macro hero_image(url, alt='', link='') %}
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f5f5f5;">
-  <tr>
-    <td align="center">
-      <table role="presentation" width="640" cellspacing="0" cellpadding="0" border="0" style="max-width:640px;background:#ffffff;">
-        <tr>
-          <td style="padding:12px 24px;">
-            {% if link %}
-            <a href="{{ link }}" target="_blank" rel="noopener" style="text-decoration:none;">
-              <img src="{{ url }}" alt="{{ alt }}" style="display:block;width:100%;max-width:592px;height:auto;border:0;border-radius:6px;">
-            </a>
-            {% else %}
-            <img src="{{ url }}" alt="{{ alt }}" style="display:block;width:100%;max-width:592px;height:auto;border:0;border-radius:6px;">
-            {% endif %}
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>
+{#-
+  Hero image block — fixed 640×360 crop (16:9). Auto-resizes/crops any source
+  image into a consistent box via object-fit:cover. Modern clients (Apple Mail,
+  Gmail web, Outlook for Web) honor object-fit; Outlook desktop falls back to
+  the explicit width/height attrs and letterboxes the image.
+
+  Inset 24px on each side so it visually aligns with the paragraph and info_card
+  blocks beneath it (which use padding:8-12px 24px). NOT full-bleed — the
+  banner partial owns the full-bleed slot at the top of the email.
+
+  Use this partial for any product / lifestyle / campaign hero in the email
+  body. Do NOT use it as the brand banner — that's `partials/banner.html`.
+-#}
+{% macro hero_image(url, alt='', link='', height=360) %}
+<tr>
+  <td style="padding:12px 24px;background-color:#ffffff;">
+    {% if link %}
+    <a href="{{ link }}" target="_blank" rel="noopener" style="text-decoration:none;">
+      <img src="{{ url }}" alt="{{ alt }}" width="632" height="{{ height }}" style="display:block;width:100%;max-width:632px;height:{{ height }}px;max-height:{{ height }}px;object-fit:cover;border:0;outline:none;text-decoration:none;border-radius:6px;">
+    </a>
+    {% else %}
+    <img src="{{ url }}" alt="{{ alt }}" width="632" height="{{ height }}" style="display:block;width:100%;max-width:632px;height:{{ height }}px;max-height:{{ height }}px;object-fit:cover;border:0;outline:none;text-decoration:none;border-radius:6px;">
+    {% endif %}
+  </td>
+</tr>
 {% endmacro %}

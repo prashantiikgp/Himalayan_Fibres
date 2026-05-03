@@ -1,0 +1,28 @@
+# Email template metadata — Himalayan nettle range focus.
+# HTML to be built.
+
+name: nettle_focus
+tier: category
+product_category: nettle
+voice: founder_warm
+
+subject: "Our Himalayan nettle yarn — fine and thick counts available"
+preview_text: "Hand-spun nettle yarn from Gorkha. Strong, silky, completely different from cotton."
+
+html_template_file: "nettle_focus.html"  # TO BE BUILT
+
+required_variables:
+  - first_name
+
+hero_image: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/nettle-thick-yarn-975912fa.jpg"
+
+target_segments:
+  - potential_domestic
+  - existing_clients
+
+description: |
+  Category-level deep-dive on nettle. Used in potential_domestic cold
+  sequence Day 7 (when prospect is a carpet/weaver/yarn-store buyer) and
+  in existing_clients quarterly highlight series.
+
+status: PLANNED

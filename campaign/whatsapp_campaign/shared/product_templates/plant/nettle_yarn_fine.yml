@@ -1,0 +1,53 @@
+# Tier 3 (PRODUCT) — Fine-count Himalayan nettle yarn.
+#
+# References Meta Catalog product retailer_id `ys9qh6g0zt`
+# ("Himalayan Stinging Nettle Yarn [Fine] | Himalayan Fibres", ₹625).
+# Position: premium fine variant vs the regular thick 10/2 yarn.
+
+name: nettle_yarn_fine
+tier: product
+product_category: nettle
+voice: founder_warm
+
+meta_category: MARKETING
+language: en
+
+header:
+  format: IMAGE
+  image: https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/nettle-white-yarn-dd1a1e68.jpg
+  image_caption: "Fine-count Himalayan nettle yarn — hand-spun"
+  alternates:
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/nettle-thick-yarn-975912fa.jpg
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/nettle1-5313de78.jpg
+
+body: |
+  Hi {{1}},
+
+  Our fine-count Himalayan nettle yarn — hand-spun by Nepali
+  artisans from wild-grown nettle in Gorkha district.
+
+  • Count: 20/2 (fine)
+  • Natural earthy tones
+  • Strong and silky — lustrous like silk
+
+  Want a free sample to feel the difference?
+
+  — Prashant
+
+body_example:
+  - "Rahul"
+
+footer: "Himalayan Fibres • himalayanfibres.com"
+
+buttons:
+  - type: QUICK_REPLY
+    text: "Yes, send sample"
+  - type: QUICK_REPLY
+    text: "Spec sheet"
+  - type: CATALOG
+    text: "View catalog"
+
+notes: |
+  - {{1}} = first_name
+  - Catalog reference: retailer_id ys9qh6g0zt (₹625 INR)
+  - Verify yarn count (20/2) against Wix product page before submit

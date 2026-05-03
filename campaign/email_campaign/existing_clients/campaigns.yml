@@ -1,0 +1,40 @@
+# Email campaigns targeting EXISTING CLIENTS.
+#
+# Audience: contacts with at least one fulfilled order or active sample
+# relationship in the last 6 months.
+#
+# Tone: warmer, less "selling" — assume they already know us. Lead with
+# what's NEW (batch arrivals, certifications, behind-the-scenes).
+
+campaigns:
+
+  - id: existing_quarterly_highlight_v1
+    name: "Quarterly new-batch highlight"
+    segment: existing_clients
+    channel: email
+    description: |
+      Sent once per quarter. Highlights new yarn batches, color drops,
+      or process updates. Single-touch (no follow-up sequence).
+    is_active: false
+    steps:
+      - template: nettle_focus
+        delay_hours: 0
+    audience_filter:
+      lifecycle: ["active_customer", "repeat_customer"]
+      consent_status: "opted_in"
+
+  - id: existing_diwali_greetings_v1
+    name: "Diwali greetings + festive offer"
+    segment: existing_clients
+    channel: email
+    description: |
+      Annual festival touch — warm greetings, optional small thank-you
+      offer for repeat customers. Defaults to greetings only; offer is
+      enabled per send.
+    is_active: false
+    steps:
+      - template: sustainability_field_story    # placeholder until diwali_greetings.html exists
+        delay_hours: 0
+    audience_filter:
+      country: "IN"
+      consent_status: "opted_in"

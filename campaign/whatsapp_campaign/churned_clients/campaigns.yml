@@ -1,0 +1,11 @@
+# Campaigns targeting CHURNED CLIENTS.
+#
+# Audience: contacts with prior orders but no activity in 6+ months.
+# Voice: `reactivation_gentle` — acknowledge the gap, lead with what
+# has changed, easy "no thanks" out.
+
+campaigns: []
+
+# Examples to add later:
+#   - winback_whats_new           → "Since you last bought, we've added X"
+#   - winback_certification       → if a new GOTS / Fairtrade cert lands

@@ -1,0 +1,39 @@
+# Tier 1 (COMPANY) — Hinglish follow-up after silence.
+#
+# Sent 5-7 days after `company_intro_b2b` when the prospect did not
+# reply. No image — keeps it casual, like a friendly text nudge.
+# After this, the sequence stops — no third follow-up.
+
+name: followup_interest_v2
+tier: company
+voice: founder_warm
+
+meta_category: MARKETING
+language: en
+
+# No image header — followup is a casual text nudge
+
+body: |
+  Hi {{1}}, Prashant again.
+
+  No pressure on my last note — just checking in. If you'd
+  like a sample, let me know. If not, no worries at all.
+
+  — Prashant
+
+body_example:
+  - "Rahul"
+
+footer: "Himalayan Fibres"
+
+buttons:
+  - type: QUICK_REPLY
+    text: "Yes, send sample"
+  - type: QUICK_REPLY
+    text: "Not now"
+
+notes: |
+  - {{1}} = first_name
+  - Casual tone (no image, short body) is intentional — heavy follow-up
+    after a cold first-touch reads as desperate
+  - 3rd nudge feels spammy; campaign sequence stops here

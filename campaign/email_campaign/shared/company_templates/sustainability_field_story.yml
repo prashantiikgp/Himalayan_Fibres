@@ -1,0 +1,26 @@
+# Email template metadata — sustainability / field story.
+# HTML to be built (placeholder in shared registry until ready).
+
+name: sustainability_field_story
+tier: company
+voice: founder_warm
+
+subject: "How our nettle yarn is made — Gorkha district 🌿"
+preview_text: "A short story from the field. No pesticides, no factory — just hands and time."
+
+html_template_file: "sustainability_field_story.html"  # TO BE BUILT
+
+required_variables:
+  - first_name
+
+target_segments:
+  - potential_domestic
+  - international_email
+  - existing_clients
+
+description: |
+  Brand-level story email. Used in welcome series day 3 and as a standalone
+  for sustainability-curious audiences. Pairs the field-artisan imagery from
+  the WA template of the same name.
+
+status: PLANNED  # HTML body not yet implemented

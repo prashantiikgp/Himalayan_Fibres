@@ -1,0 +1,50 @@
+{#-
+  IMAGE CARD PAIR — 2 image_cards side by side in a row, used for
+  multi-category templates with a 1+2 layout (one big hero card above,
+  two smaller paired cards beneath).
+
+  Total row at 680 outer with 24px outer padding = 632px content.
+  Two ~308px cells with 16px gap = 632. On mobile, modern clients
+  reflow to stacked.
+
+  Args (per item):
+    image_url   (required)
+    title       (required)
+    body        (required, HTML safe)
+    link        (optional product-page URL)
+    image_alt   (optional)
+    image_height (default 180)
+
+  Pass two item dicts as left + right.
+-#}
+{% macro image_card_pair(left, right, image_height=180) %}
+<tr>
+  <td style="padding:8px 24px;background-color:#ffffff;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tr>
+        {% for it in [left, right] %}
+        <td valign="top" width="308" {% if loop.first %}style="padding-right:16px;"{% endif %}>
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:{{ color_card_bg or '#ffffff' }};border:1px solid {{ color_card_border }};border-radius:8px;overflow:hidden;">
+            <tr>
+              <td style="padding:0;">
+                {% if it.link %}<a href="{{ it.link }}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">{% endif %}
+                <img src="{{ it.image_url }}" alt="{{ it.image_alt or it.title }}" width="308" height="{{ it.image_height or image_height }}" style="display:block;width:100%;max-width:308px;height:{{ it.image_height or image_height }}px;max-height:{{ it.image_height or image_height }}px;object-fit:cover;border:0;outline:none;text-decoration:none;">
+                {% if it.link %}</a>{% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:14px 16px 16px;font-family:{{ font_stack }};">
+                <h4 style="font-size:15px;font-weight:700;color:{{ color_accent }};margin:0 0 6px;">
+                  {% if it.link %}<a href="{{ it.link }}" target="_blank" rel="noopener" style="color:{{ color_accent }};text-decoration:none;">{{ it.title }}</a>{% else %}{{ it.title }}{% endif %}
+                </h4>
+                <p style="font-size:13px;color:{{ color_body }};margin:0;line-height:1.5;">{{ it.body | safe }}</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+        {% endfor %}
+      </tr>
+    </table>
+  </td>
+</tr>
+{% endmacro %}

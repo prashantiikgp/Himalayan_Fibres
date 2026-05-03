@@ -1,0 +1,30 @@
+# Email campaigns targeting CHURNED CLIENTS.
+#
+# Audience: contacts with prior orders but no activity in 6+ months
+# (no orders, no email opens, no replies).
+#
+# Voice principle: acknowledge the gap honestly. Lead with substance
+# ("here's what's new") not sentiment ("we miss you"). Easy out — make
+# "no thanks" totally fine.
+
+campaigns:
+
+  - id: churned_winback_2_touch_v1
+    name: "Churned client win-back (2 emails)"
+    segment: churned_clients
+    channel: email
+    description: |
+      Two-email reactivation, 2-week gap. Email 1: what's new since
+      you left. Email 2: personal note + free fresh sample offer.
+      No third nudge — if they don't engage we stop.
+    is_active: false
+    steps:
+      - template: winback_60d_silent
+        delay_hours: 0
+      - template: sample_invitation
+        delay_hours: 336    # +14 days
+        only_if_no_reply: true
+    audience_filter:
+      lifecycle: ["churned"]
+      last_order_days_ago_min: 180
+      consent_status: "opted_in"

@@ -1,0 +1,64 @@
+{#-
+  IMAGE-TEXT SPLIT — 2-column row with image on one side and text on the
+  other. Used for editorial / blog-style email layouts where you want the
+  body to feel like a magazine spread rather than a stack of paragraphs.
+
+  Image is 280×280 by default (1:1 square crop). Text occupies the
+  remaining width. Total row sits inside the 24px outer inset.
+
+  Layout collapses to stacked on narrow viewports because the inner table
+  cells use width attributes that most modern clients reflow on mobile.
+  Outlook desktop keeps the side-by-side rendering.
+
+  When `link` is supplied, the image is wrapped in <a> so it deep-links to
+  the relevant product page; the title is also linkified.
+
+  Args:
+    image_url   — required, full HTTPS URL
+    title       — optional, short heading above the body
+    body        — required, paragraph text (HTML safe)
+    link        — optional, deep-link URL (e.g., Wix product page).
+                  Wraps image + title in <a>.
+    image_side  — 'left' (default) or 'right'
+    image_alt   — optional alt text
+    image_size  — square dimensions in px (default 280)
+-#}
+{% macro image_split(image_url, body, title='', link='', image_side='left', image_alt='', image_size=280) %}
+<tr>
+  <td style="padding:12px 24px;background-color:#ffffff;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tr>
+        {% if image_side == 'left' %}
+        <td width="{{ image_size }}" valign="top" style="padding-right:16px;">
+          {% if link %}<a href="{{ link }}" target="_blank" rel="noopener" style="text-decoration:none;">{% endif %}
+          <img src="{{ image_url }}" alt="{{ image_alt }}" width="{{ image_size }}" height="{{ image_size }}" style="display:block;width:100%;max-width:{{ image_size }}px;height:{{ image_size }}px;max-height:{{ image_size }}px;object-fit:cover;border:0;outline:none;text-decoration:none;border-radius:6px;">
+          {% if link %}</a>{% endif %}
+        </td>
+        <td valign="top" style="font-family:{{ font_stack }};">
+          {% if title %}
+          <h4 style="font-size:15px;font-weight:700;color:{{ color_accent }};margin:0 0 8px;">
+            {% if link %}<a href="{{ link }}" target="_blank" rel="noopener" style="color:{{ color_accent }};text-decoration:none;">{{ title }}</a>{% else %}{{ title }}{% endif %}
+          </h4>
+          {% endif %}
+          <p style="font-size:14px;color:{{ color_body }};margin:0;line-height:1.6;">{{ body | safe }}</p>
+        </td>
+        {% else %}
+        <td valign="top" style="font-family:{{ font_stack }};padding-right:16px;">
+          {% if title %}
+          <h4 style="font-size:15px;font-weight:700;color:{{ color_accent }};margin:0 0 8px;">
+            {% if link %}<a href="{{ link }}" target="_blank" rel="noopener" style="color:{{ color_accent }};text-decoration:none;">{{ title }}</a>{% else %}{{ title }}{% endif %}
+          </h4>
+          {% endif %}
+          <p style="font-size:14px;color:{{ color_body }};margin:0;line-height:1.6;">{{ body | safe }}</p>
+        </td>
+        <td width="{{ image_size }}" valign="top">
+          {% if link %}<a href="{{ link }}" target="_blank" rel="noopener" style="text-decoration:none;">{% endif %}
+          <img src="{{ image_url }}" alt="{{ image_alt }}" width="{{ image_size }}" height="{{ image_size }}" style="display:block;width:100%;max-width:{{ image_size }}px;height:{{ image_size }}px;max-height:{{ image_size }}px;object-fit:cover;border:0;outline:none;text-decoration:none;border-radius:6px;">
+          {% if link %}</a>{% endif %}
+        </td>
+        {% endif %}
+      </tr>
+    </table>
+  </td>
+</tr>
+{% endmacro %}

@@ -1,0 +1,12 @@
+# Campaigns targeting EXISTING CLIENTS.
+#
+# Audience: contacts with at least one fulfilled order or active
+# sample relationship in the last 6 months. They opted in by
+# transacting with us, so we have wider latitude on outreach.
+
+campaigns: []
+
+# Examples to add later:
+#   - new_arrivals_quarterly      → "Here's what we just finished spinning"
+#   - restock_alert               → utility, when a previously-bought SKU is back
+#   - field_story_seasonal        → behind-the-scenes from the harvest

@@ -1,0 +1,25 @@
+# Email template metadata — free sample invitation (welcome series day 7).
+# HTML to be built.
+
+name: sample_invitation
+tier: lifecycle
+voice: founder_warm
+
+subject: "Want a free yarn sample, {{ first_name }}? 🌿"
+preview_text: "Tell me which fibre family you work with most and I'll match the swatch."
+
+html_template_file: "sample_invitation.html"  # TO BE BUILT
+
+required_variables:
+  - first_name
+
+target_segments:
+  - potential_domestic
+  - international_email
+
+description: |
+  Welcome series day 7 — converts an email signup into a sample request.
+  Mirrors the WA company_intro_b2b CTA but with the slower email-pacing
+  expectation. Buttons → reply with fibre preference + address.
+
+status: PLANNED

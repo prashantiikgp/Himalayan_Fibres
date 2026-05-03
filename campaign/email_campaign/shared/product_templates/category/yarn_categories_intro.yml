@@ -1,0 +1,51 @@
+# Email template metadata — Multi-category canonical (3 fibre families).
+# HTML at hf_dashboard/templates/emails/yarn_categories_intro.html.
+
+name: yarn_categories_intro
+tier: product           # in our taxonomy this is product/category — multi-category umbrella
+voice: founder_warm
+
+subject: "Three fibre families. One craft tradition."
+preview_text: "Plants from the high pastures, animals from the Tibetan plateau, and the spinners who turn it into yarn."
+
+html_template_file: "yarn_categories_intro.html"
+
+required_variables:
+  - first_name
+
+# Each card is fully overrideable per-send. Defaults baked into the
+# template; campaigns can swap any card's image, title, body, or link
+# without editing HTML.
+optional_variables:
+  - nettle_image_url
+  - nettle_title
+  - nettle_body
+  - nettle_link
+  - hemp_image_url
+  - hemp_title
+  - hemp_body
+  - hemp_link
+  - wool_image_url
+  - wool_title
+  - wool_body
+  - wool_link
+  - catalog_link
+
+target_segments:
+  - potential_domestic
+  - international_email
+  - existing_clients
+
+status: READY
+
+description: |
+  Multi-category canonical email. Used in welcome sequences, "fibre 101"
+  educational sends, and as the entry point for cold sequences when we
+  don't yet know which fibre family the prospect cares about.
+
+  Three image_cards: Himalayan Nettle, Himalayan Hemp, Tibetan Wool.
+  Each card is fully clickable and links to the relevant Wix product
+  page. Captions, titles, and bodies are dynamic.
+
+  This template is the canonical example of the multi-category type
+  per the standardization spec.

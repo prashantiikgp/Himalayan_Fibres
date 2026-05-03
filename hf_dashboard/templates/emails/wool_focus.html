@@ -1,0 +1,133 @@
+{#-
+  CATEGORY FOCUS — Tibetan wool yarn (editorial / blog format).
+
+  Per 2026 best-practice research:
+    - No hero image at top — leads with heading + lead paragraph
+    - 680px container, modern-safe wider canvas
+    - Imagery enters via image_split + image_grid blocks
+    - Story-driven prose, specs woven in
+    - One primary CTA, WhatsApp as subordinate
+    - Every body image links to its own Wix product page (deep-link),
+      not the homepage
+
+  Per-send variables (all optional except first_name):
+    first_name*           recipient first name
+
+    -- Hero / texture image_split (left side) --
+    texture_image_url     defaults to wool-millspun
+    texture_title         defaults to 'The texture, up close'
+    texture_body          defaults to fineness/microns story
+    texture_link          defaults to Wix wool yarn product page
+
+    -- Pull quote --
+    quote_text            defaults to Mahesh testimonial
+    quote_attribution     defaults to Mahesh attribution
+
+    -- Artisan image_split (right side) --
+    artisan_image_url     defaults to field-artisan2
+    artisan_title         defaults to 'Hand-spun, in their homes'
+    artisan_body          defaults to artisan-partners story
+    artisan_link          optional; default unlinked (story image, not product)
+
+    -- Variant grid (3 product variants, fully overrideable) --
+    variant_1_image_url   default: wool1
+    variant_1_caption     default: 'Natural Tibetan wool — undyed'
+    variant_1_link        default: Wix /product-page/himalayan-wool-yarn
+    variant_2_image_url   default: wool2
+    variant_2_caption     default: 'Dyed yarn — earth-tone palette'
+    variant_2_link        default: Wix /product-page/hand-dyed-wool-yarn
+    variant_3_image_url   default: wool3
+    variant_3_caption     default: 'Blended yarn — wool with nettle'
+    variant_3_link        default: Wix /product-page/wool-roving-bundle
+
+    -- Footer CTA --
+    catalog_link          optional URL into the catalog
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/image_split.html' import image_split with context %}
+{% from 'partials/middle/image_grid.html' import image_grid with context %}
+{% from 'partials/middle/pull_quote.html' import pull_quote with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{# -- Defaults for every dynamic field -- #}
+{% set _wix_root = 'https://www.himalayanfibres.com/product-page' %}
+{% set _img_root = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category' %}
+{% set _field_root = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field' %}
+
+{% set _texture_image = texture_image_url or (_img_root + '/wool-millspun-cfdf995d.jpg') %}
+{% set _texture_title = texture_title or 'The texture, up close' %}
+{% set _texture_body  = texture_body or "Fineness sits between 25 and 30 microns. Each strand is hand-spun, which means you feel the slight irregularity that comes from human hands &mdash; never the dead-flat uniformity of a factory mill. That irregularity is what holds dye, holds knots, and holds up to wet processing." %}
+{% set _texture_link  = texture_link or (_wix_root + '/himalayan-wool-yarn') %}
+
+{% set _quote_text = quote_text or 'We tested mill wool, Indian wool, imported European fleece. The Himalayan Fibres Tibetan wool retains colour through four wet processes. None of the others made it past two.' %}
+{% set _quote_attr = quote_attribution or '— Mahesh, carpet exporter, Bhadohi' %}
+
+{% set _artisan_image = artisan_image_url or (_field_root + '/field-artisan2-6d81e6bb.jpg') %}
+{% set _artisan_title = artisan_title or 'Hand-spun, in their homes' %}
+{% set _artisan_body  = artisan_body or "The artisan partners we work with are women in villages across the Himalayan foothills. They process the fleece, spin the yarn, and ship to us in batches. Every kilogram of yarn carries a name and a place behind it &mdash; not an SKU and a factory." %}
+{% set _artisan_link  = artisan_link or '' %}
+
+{% set _v1_img = variant_1_image_url or (_img_root + '/wool1-f329d1f9.jpg') %}
+{% set _v1_cap = variant_1_caption or 'Natural Tibetan wool — undyed' %}
+{% set _v1_lnk = variant_1_link or (_wix_root + '/himalayan-wool-yarn') %}
+{% set _v2_img = variant_2_image_url or (_img_root + '/wool2-593bdf91.jpg') %}
+{% set _v2_cap = variant_2_caption or 'Dyed yarn — earth-tone palette' %}
+{% set _v2_lnk = variant_2_link or (_wix_root + '/hand-dyed-wool-yarn') %}
+{% set _v3_img = variant_3_image_url or (_img_root + '/wool3-005db721.jpg') %}
+{% set _v3_cap = variant_3_caption or 'Blended yarn — wool with nettle' %}
+{% set _v3_lnk = variant_3_link or (_wix_root + '/wool-roving-bundle') %}
+
+{% block content %}
+
+{{ heading('From the Tibetan Plateau to Hand-Knotted Carpets') }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph("At four thousand metres above sea level, where the air thins and winter temperatures drop below freezing, sheep grow a fleece that no machine has yet learned to replicate. For over a decade we've been bringing this Tibetan wool down from the high pastures into the workshops of carpet weavers and knitwear designers across India and abroad.") }}
+
+{{ paragraph("<strong>Where it comes from.</strong> Our wool is sourced from sheep raised in the high pastures of Tibet &mdash; summer grazing at 4,500 metres, winter shelters in the valleys. The fleece these sheep grow is denser, loftier, and naturally more insulating than wool from lower elevations. That's not a marketing claim &mdash; it's biology.") }}
+
+{{ image_split(
+     image_url=_texture_image,
+     title=_texture_title,
+     body=_texture_body,
+     link=_texture_link,
+     image_side='left',
+     image_size=300
+) }}
+
+{{ pull_quote(_quote_text, attribution=_quote_attr) }}
+
+{{ paragraph("<strong>Sustainability isn't a label, it's how it's made.</strong> Sheep graze on natural pastures &mdash; no industrial feed, no growth hormones. Shearing happens once a year, by hand, in the traditional way. Our partner artisans hand-spin the yarn in their homes on simple wooden wheels &mdash; no mill, no factory floor, no electricity-driven processing. From the mountain to the yarn ball, the footprint stays small.") }}
+
+{{ image_split(
+     image_url=_artisan_image,
+     title=_artisan_title,
+     body=_artisan_body,
+     link=_artisan_link,
+     image_side='right',
+     image_size=300
+) }}
+
+{{ paragraph("<strong>Where it ends up.</strong> Today our Tibetan wool sits in workshops across Bhadohi, Mirzapur, and Jaipur &mdash; supplying hand-knotted carpet manufacturers who export to Europe and the US. Knitwear designers use it for shawls, blankets, and winter wear that needs both warmth and softness. Custom blends with our Himalayan nettle and hemp are increasingly common for designer projects with specific tonal or compositional requirements.") }}
+
+{{ image_grid([
+     {'image_url': _v1_img, 'caption': _v1_cap, 'link': _v1_lnk},
+     {'image_url': _v2_img, 'caption': _v2_cap, 'link': _v2_lnk},
+     {'image_url': _v3_img, 'caption': _v3_cap, 'link': _v3_lnk},
+]) }}
+
+{{ paragraph("<strong>How to order.</strong> Available as pure 100% Tibetan wool yarn (natural and dyed), as raw fibre for spinners, or as part of our signature blend collections. Minimum order is 50 kg per fibre type, lead time 2-3 weeks from confirmed order. Samples are free, with no MOQ &mdash; reply with your address and we'll dispatch within 2-3 days.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{% if catalog_link %}
+{{ cta_button('View the full catalog', catalog_link) }}
+{% endif %}
+
+{{ whatsapp_help_button('Hi Himalayan Fibres — I would like more details on the Tibetan wool yarn.') }}
+
+{% endblock %}
