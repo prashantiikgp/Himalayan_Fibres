@@ -27,9 +27,12 @@ campaigns:
       - template: nettle_range_overview
         delay_hours: 72
         only_if_no_reply: true
-      - template: followup_interest
+      - template: followup_interest_v2
         delay_hours: 168    # 7 days from step 1
         only_if_no_reply: true
+        # Note: renamed from `followup_interest` to `_v2` on 2026-05-03
+        # because the original name is locked as APPROVED on Meta with
+        # the older Hinglish copy. The _v2 carries our current English copy.
     audience_filter:
       tags_any: ["carpet_maker", "weaver", "yarn_store", "plant_fibre_buyer"]
       country: "IN"

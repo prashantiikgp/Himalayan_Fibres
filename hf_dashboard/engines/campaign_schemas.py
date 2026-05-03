@@ -7,7 +7,8 @@ in YAML keys fail at load time instead of silently dropping.
 Schemas:
     BrandVoiceFile      campaign/brand_voice.yml
     WhatsAppTemplate    campaign/whatsapp_campaign/shared/**/*.yml
-    CampaignFile        campaign/whatsapp_campaign/<segment>/campaigns.yml
+    EmailTemplate       campaign/email_campaign/shared/**/*.yml
+    CampaignFile        campaign/<channel>_campaign/<segment>/campaigns.yml
 """
 
 from __future__ import annotations
@@ -112,6 +113,59 @@ class WhatsAppTemplate(BaseModel):
     notes: str = ""
 
 
+# -- Email template --------------------------------------------------------
+
+# Broader tier set than WhatsApp because email has more template categories
+# (lifecycle/transactional/blog/seasonal don't exist on the WA side).
+EmailTier = Literal[
+    "company",
+    "category",
+    "product",
+    "lifecycle",
+    "transactional",
+    "seasonal",
+    "blog",
+]
+
+TemplateStatus = Literal["READY", "PLANNED", "RETIRED"]
+
+
+class EmailTemplate(BaseModel):
+    """Sidecar metadata for one HTML email template.
+
+    The HTML body lives at hf_dashboard/templates/emails/<html_template_file>.
+    This sidecar tells the broadcast page everything else: what to put in
+    the subject line, which voice the copy uses, which variables are
+    required vs. optional, and which audience segments are eligible.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: str
+    tier: EmailTier
+    voice: str                              # validated against BrandVoiceFile.voices
+
+    subject: str
+    preview_text: str = ""
+
+    html_template_file: str                 # relative path under templates/emails/
+
+    required_variables: list[str] = Field(default_factory=list)
+    optional_variables: list[str] = Field(default_factory=list)
+
+    # Imagery
+    hero_image: Optional[str] = None
+    alternates: list[str] = Field(default_factory=list)
+
+    # Optional product tagging — populated for category/product/blog templates
+    product_category: Optional[ProductCategory] = None
+
+    target_segments: list["Segment"] = Field(default_factory=list)
+
+    status: TemplateStatus = "READY"
+    description: str = ""
+
+
 # -- Campaign --------------------------------------------------------------
 
 Segment = Literal[
@@ -148,3 +202,7 @@ class CampaignFile(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     campaigns: list[Campaign]
+
+
+# Resolve forward reference (Segment defined after EmailTemplate's use)
+EmailTemplate.model_rebuild()
