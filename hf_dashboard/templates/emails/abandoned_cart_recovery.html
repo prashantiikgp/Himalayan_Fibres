@@ -1,0 +1,56 @@
+{#-
+  LIFECYCLE — Abandoned quotation recovery.
+  Sent when a prospect started a quotation / proforma flow but didn't
+  complete payment within 5 days.
+
+  Per-send variables (most required because we're referencing a real cart):
+    first_name*
+    quotation_id*            e.g. 'PRO-2026-001'
+    items_html*              the line-items they had in cart
+    total*                   the cart total
+    pay_link                 if active, renders "Resume payment" CTA
+    proforma_link            renders "View the proforma" CTA
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% block content %}
+
+{{ heading('Your proforma is still active') }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph("Just a quick note &mdash; the proforma we generated for you (<strong>" + quotation_id + "</strong>) is still active and the inventory is still reserved. Pricing is locked through the validity window we set.") }}
+
+<tr>
+  <td style="padding:12px 24px 20px;background-color:#ffffff;">
+    <div style="border:1px solid {{ color_card_border }};border-radius:6px;padding:16px;font-family:{{ font_stack }};">
+      <h3 style="font-size:16px;font-weight:bold;color:{{ color_text }};margin:0 0 10px;">Items in your proforma</h3>
+      <div style="background:#fafafa;border:1px solid #eee;border-radius:6px;">
+        {{ items_html | safe }}
+      </div>
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="width:100%;font-size:14px;color:{{ color_accent }};margin-top:10px;">
+        <tr><td style="padding:8px 0;font-weight:bold;color:{{ color_text }};">Total Due</td><td style="padding:8px 0;font-weight:bold;" align="right">{{ total }}</td></tr>
+      </table>
+    </div>
+  </td>
+</tr>
+
+{{ paragraph("If timing has shifted on your side, no problem &mdash; we can extend the validity, swap items, or pause until you're ready. Just reply.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{% if pay_link %}
+{{ cta_button('Resume payment', pay_link) }}
+{% endif %}
+
+{% if proforma_link %}
+{{ cta_button('View the proforma', proforma_link) }}
+{% endif %}
+
+{{ whatsapp_help_button('Hi Prashant — about proforma ' + quotation_id + '…') }}
+
+{% endblock %}

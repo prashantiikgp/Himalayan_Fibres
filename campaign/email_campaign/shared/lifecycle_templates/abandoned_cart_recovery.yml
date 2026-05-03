@@ -1,0 +1,37 @@
+# Email template metadata — Abandoned proforma / cart recovery.
+# Sent 5 days after a quotation flow started but no payment landed.
+
+name: abandoned_cart_recovery
+tier: lifecycle
+voice: founder_warm
+
+subject: "Your proforma {{ quotation_id }} is still active"
+preview_text: "Inventory still reserved, pricing still locked. If timing has shifted, just reply — we can extend or pause."
+
+html_template_file: "abandoned_cart_recovery.html"
+
+# All required because we reference a real cart
+required_variables:
+  - first_name
+  - quotation_id
+  - items_html
+  - total
+
+optional_variables:
+  - pay_link                  # adds "Resume payment" CTA
+  - proforma_link             # adds "View the proforma" CTA
+
+target_segments:
+  - existing_clients
+  - potential_domestic
+  - international_email
+
+status: READY
+
+description: |
+  Triggered 5 days after a proforma was generated without payment.
+  Light and accommodating — no urgency manufactured, no pressure.
+  Offers to extend, swap, or pause if timing shifted.
+
+  Inventory + pricing stay reserved through the original proforma's
+  validity window (default 7 days).

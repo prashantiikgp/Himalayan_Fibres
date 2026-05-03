@@ -1,0 +1,33 @@
+# Email template metadata — Diwali greetings (P1, calendar-locked).
+# Diwali 2026 = 8 November. Ship by 15 October to avoid late-send.
+
+name: diwali_greetings
+tier: seasonal
+voice: founder_warm
+
+subject: "Diwali greetings from the hills 🪔"
+preview_text: "Wishing you a year of light and craft. From everyone at Himalayan Fibres."
+
+html_template_file: "diwali_greetings.html"
+
+required_variables:
+  - first_name
+
+optional_variables:
+  - diwali_year              # default: '2026'
+  - custom_message           # override of the standard greeting body
+
+target_segments:
+  - existing_clients         # primary
+  - potential_domestic       # Indian B2B audience
+  # International: skip — Diwali greeting could feel performative
+
+status: READY
+
+description: |
+  Typography-led festive email. Brand-gold border block with
+  Devanagari "शुभ दीपावली" + English "A year of light and craft."
+  No imagery (no Diwali assets in Drive); leans on brand color +
+  type for visual moment. Pure brand voice slot, no product CTA.
+
+  Calendar-locked: Diwali 2026 = 8 November. Ship by 15 October.

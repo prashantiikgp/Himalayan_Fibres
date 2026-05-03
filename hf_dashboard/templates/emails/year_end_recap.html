@@ -1,0 +1,81 @@
+{#-
+  SEASONAL — Year-end recap.
+  Annual reflection email. BLUF + 3 stats + 2 image_splits + soft CTA.
+
+  Per-send variables (all optional except first_name):
+    first_name*
+    recap_year                default: '2026'
+    heading_text              default: 'A year, in numbers and stories'
+    lead_paragraph            default: opening reflection
+    stat_1_value/label        default: ('1,200 kg', 'Yarn shipped')
+    stat_2_value/label        default: ('40+', 'Countries reached')
+    stat_3_value/label        default: ('120', 'Artisan partners')
+    story1_image_url, story1_title, story1_body
+    story2_image_url, story2_title, story2_body
+    quote_text, quote_attribution
+    blog_link                 "Read the full year-in-review" CTA
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/stats_row.html' import stats_row with context %}
+{% from 'partials/middle/image_split.html' import image_split with context %}
+{% from 'partials/middle/pull_quote.html' import pull_quote with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% set _field = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field' %}
+{% set _img = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category' %}
+
+{% set _year = recap_year or '2026' %}
+{% set _heading = heading_text or ('A year, in numbers and stories — ' + _year) %}
+{% set _lead = lead_paragraph or ("It's the end of " + _year + ". The workshops are winding down, the artisans are heading home for the festive break, and we wanted to send a short year-in-review before the year actually ends. No pitch attached &mdash; just where we landed.") %}
+
+{% set _s1_img = story1_image_url or (_field + '/field-artisan2-6d81e6bb.jpg') %}
+{% set _s1_title = story1_title or 'The supply chain held' %}
+{% set _s1_body = story1_body or "We added two new retting sites this year, brought 22 new artisan partners online, and shipped to four new countries. The big lesson: we're no longer single-source-of-failure on weather, which means the spring 2027 supply should be the smoothest we've ever had." %}
+
+{% set _s2_img = story2_image_url or (_img + '/burberry-27f4a1b3.jpg') %}
+{% set _s2_title = story2_title or 'The collection grew' %}
+{% set _s2_body = story2_body or "Burberry and Noor each shipped over 200 kg this year. Snow White is on track for active-inventory promotion in Q1. We added Seriry, our newest signature collection, in October &mdash; festive-tone yarn that's already moving faster than we expected." %}
+
+{% set _quote = quote_text or "The year ended better than the start suggested. Slow Q1, strong Q3, surprising Q4. Mostly because of you — the people on this list — placing orders that gave us the confidence to keep building." %}
+{% set _quote_attr = quote_attribution or '— Prashant Agrawal, Founder' %}
+
+{% block content %}
+
+{{ heading(_heading) }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph(_lead) }}
+
+{{ stats_row([
+     {'value': stat_1_value or '1,200 kg', 'label': stat_1_label or 'Yarn shipped'},
+     {'value': stat_2_value or '40+',      'label': stat_2_label or 'Countries reached'},
+     {'value': stat_3_value or '120',      'label': stat_3_label or 'Artisan partners'},
+]) }}
+
+{{ image_split(
+     image_url=_s1_img, title=_s1_title, body=_s1_body,
+     image_side='left', image_size=300
+) }}
+
+{{ pull_quote(_quote, attribution=_quote_attr) }}
+
+{{ image_split(
+     image_url=_s2_img, title=_s2_title, body=_s2_body,
+     image_side='right', image_size=300
+) }}
+
+{{ paragraph("Thank you for being part of " + _year + ". We'll be back in January with what's planned for the next twelve months &mdash; new collections, a deeper certifications push, and (hopefully) a much-improved website. Until then, take care of yourselves and your people.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{% if blog_link %}
+{{ cta_button('Read the full year-in-review', blog_link) }}
+{% endif %}
+
+{{ whatsapp_help_button('Hi Prashant — wishing you a great year ahead.') }}
+
+{% endblock %}

@@ -1,4 +1,4 @@
-# Email template metadata — Himalayan hemp range focus.
+# Email template metadata — Himalayan hemp range focus (editorial blog format).
 # HTML at hf_dashboard/templates/emails/hemp_focus.html.
 
 name: hemp_focus
@@ -6,23 +6,51 @@ tier: category
 product_category: hemp
 voice: founder_warm
 
-subject: "Himalayan hemp yarn — strong, antimicrobial, hand-spun"
-preview_text: "Hand-spun in the hills. Eco-friendly. Three forms: natural yarn, white yarn, raw fibre. Free sample, no MOQ."
+subject: "Hemp from the Himalayan hills — antimicrobial, hand-spun, durable"
+preview_text: "Cannabis sativa, cultivated by partner farmers. 4× longer-lasting than cotton. Hand-spun in artisan homes."
 
 html_template_file: "hemp_focus.html"
 
 required_variables:
   - first_name
 
-# Optional variables (template renders gracefully without them):
-#   hero_image_url   override the default hemp1 hero
-#   catalog_link     adds a "View full catalog" CTA button
+# Every text + image + link is overrideable per send.
+optional_variables:
+  # Texture image_split (left)
+  - texture_image_url        # default: hemp-natural-yarn
+  - texture_title            # default: 'The plant, up close'
+  - texture_body             # default: hemp fibre / antimicrobial story
+  - texture_link             # default: /product-page/himalayan-hemp-yarn
 
-hero_image: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/hemp1-4159d907.jpg"
+  # Pull quote
+  - quote_text               # default: design partner Auroville quote
+  - quote_attribution        # default: '— design partner, Auroville'
+
+  # Process image_split (right)
+  - process_image_url        # default: field-artisan3 (decorticator scene)
+  - process_title            # default: 'Cultivated, retted, hand-spun'
+  - process_body             # default: artisan partner story
+  - process_link             # default: '' (story image, no product link)
+
+  # Variant grid
+  - variant_1_image_url      # default: hemp-natural-yarn
+  - variant_1_caption        # default: 'Natural hemp yarn — undyed'
+  - variant_1_link           # default: /product-page/himalayan-hemp-yarn
+  - variant_2_image_url      # default: hemp-white-yarn
+  - variant_2_caption        # default: 'White hemp — bleach-processed'
+  - variant_2_link           # default: /product-page/himalayan-hemp-yarn
+  - variant_3_image_url      # default: hemp1 (raw fibre display)
+  - variant_3_caption        # default: 'Raw hemp fibre — for spinners'
+  - variant_3_link           # default: /product-page/himalayan-hemp-yarn
+
+  # Footer CTA
+  - catalog_link             # adds "See the full catalog" button
+
+hero_image: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/hemp-natural-yarn-42b9dfe4.jpg"
 
 alternates:
-  - "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/hemp-natural-yarn-42b9dfe4.jpg"
   - "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/hemp-white-yarn-9aeb0912.jpg"
+  - "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/hemp1-4159d907.jpg"
 
 target_segments:
   - potential_domestic
@@ -32,10 +60,10 @@ target_segments:
 status: READY
 
 description: |
-  Category-level deep-dive on Himalayan hemp. Used as alternate to
-  nettle_focus in the potential_domestic cold sequence Day 7 when
-  prospect is tagged hemp/plant-fibre buyer; also used in
-  existing_clients quarterly highlight rotation.
+  Editorial blog-format category email for Himalayan hemp. Story-driven
+  prose: the plant → texture/properties → sustainability → social proof,
+  with a customer pull quote and a 3-image variant grid before the
+  order ask.
 
-  Voice: founder_warm (English, longer-form than the WA equivalent).
-  Sample-first CTA — no MOQ on samples, lead with the free dispatch.
+  Voice: founder_warm. Refactored 2026-05-03 from the old spec-table
+  layout to match the wool_focus editorial pattern.

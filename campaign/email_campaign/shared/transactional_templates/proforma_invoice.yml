@@ -12,24 +12,33 @@ preview_text: "Please review the proforma. Once payment is received, we'll confi
 
 html_template_file: "proforma_invoice.html"
 
+# Required: invoice cannot render without these
 required_variables:
   - first_name
   - proforma_number
   - proforma_date
-  - validity_days
   - ship_to_html
   - items_html
-  - subtotal
   - total_due
   - bank_details_html
-  - pay_link
+
+# Optional: have sensible defaults / can be omitted
+optional_variables:
+  - validity_days           # default: 7
+  - subtotal                # if omitted, hides subtotal row in template
+  - shipping_estimate       # if omitted, hides courier row
+  - pay_link                # if omitted, "Confirm & Pay" button hidden
 
 target_segments:
   - existing_clients
   - potential_domestic
   - international_email
 
+status: READY
+
 description: |
   Pre-payment template. Triggered by the dashboard when a sales rep generates
   a quotation. Recipient reviews + pays via the bank details / pay link;
   payment landing flips the row to order_confirmation.
+
+  Renders the new PROFORMA stamp partial top-right of the body.

@@ -1,5 +1,13 @@
 # Email template metadata — sustainability / field story.
-# HTML to be built (placeholder in shared registry until ready).
+#
+# Note: the canonical campaign/blog template is now
+# `welcome_day_3_sustainability.html` (lifecycle_templates/) — that file
+# fulfills the role this YAML originally pointed to. This entry is kept
+# as a forward-looking placeholder for a separate company-tier template
+# if we want one not tied to the welcome series.
+#
+# Until then, use welcome_day_3_sustainability.html for any sustainability
+# story send.
 
 name: sustainability_field_story
 tier: company
@@ -8,19 +16,43 @@ voice: founder_warm
 subject: "How our nettle yarn is made — Gorkha district 🌿"
 preview_text: "A short story from the field. No pesticides, no factory — just hands and time."
 
-html_template_file: "sustainability_field_story.html"  # TO BE BUILT
+html_template_file: "sustainability_field_story.html"  # TO BE BUILT (or alias to welcome_day_3_sustainability.html)
 
 required_variables:
   - first_name
+
+optional_variables:
+  # Same shape as welcome_day_3_sustainability.yml so we can copy the
+  # canonical body when ready
+  - stat_1_value
+  - stat_1_label
+  - stat_2_value
+  - stat_2_label
+  - stat_3_value
+  - stat_3_label
+  - story1_image_url
+  - story1_title
+  - story1_body
+  - story1_link
+  - quote_text
+  - quote_attribution
+  - story2_image_url
+  - story2_title
+  - story2_body
+  - story2_link
+  - blog_link
+  - catalog_link
 
 target_segments:
   - potential_domestic
   - international_email
   - existing_clients
 
-description: |
-  Brand-level story email. Used in welcome series day 3 and as a standalone
-  for sustainability-curious audiences. Pairs the field-artisan imagery from
-  the WA template of the same name.
+status: PLANNED
 
-status: PLANNED  # HTML body not yet implemented
+description: |
+  Brand-level company-tier story email. Currently superseded by
+  welcome_day_3_sustainability.html (lifecycle_templates/) which covers
+  the same use case for the welcome series. If we need a company-tier
+  variant decoupled from the welcome series, build sustainability_field_story.html
+  using the same skeleton.

@@ -1,0 +1,59 @@
+# Email template metadata — Blog variant 2: field / origin story.
+# HTML at hf_dashboard/templates/emails/blog_field_origin_story.html.
+
+name: blog_field_origin_story
+tier: lifecycle           # canonical "blog" type lives in lifecycle for now
+voice: founder_warm
+
+subject: "{{ region_name or 'Almora' }}: a week in the field"
+preview_text: "Visiting our partner artisans, watching the harvest, and shooting photographs we'll be sharing over the next month."
+
+html_template_file: "blog_field_origin_story.html"
+
+required_variables:
+  - first_name
+
+optional_variables:
+  - region_name              # default: 'Almora'
+  - trip_date                # default: 'October 2026'
+  - heading_text             # default: '{region}: a week in the field'
+  - lead_paragraph           # trip-recap intro
+  # 3 stats
+  - stat_1_value
+  - stat_1_label
+  - stat_2_value
+  - stat_2_label
+  - stat_3_value
+  - stat_3_label
+  # Story #1 (left)
+  - story1_image_url
+  - story1_title
+  - story1_body
+  - story1_link
+  # Pull quote
+  - quote_text
+  - quote_attribution
+  # Story #2 (right)
+  - story2_image_url
+  - story2_title
+  - story2_body
+  - story2_link
+  # Contributor + CTAs
+  - contributor_name
+  - blog_link
+  - catalog_link
+
+target_segments:
+  - existing_clients
+  - potential_domestic
+  - international_email
+
+status: READY
+
+description: |
+  Photojournalism-style email — a "trip dispatch" from a specific region
+  (Almora, Gorkha, Uttarakhand, etc.). Used for behind-the-scenes harvest
+  drops, partnership announcements, or quarterly field updates.
+
+  Reuses the canonical sustainability skeleton; defaults are tuned for
+  trip-recap voice. All stats, quote, region name overrideable per send.

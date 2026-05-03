@@ -1,5 +1,5 @@
 # Email template metadata — free sample invitation (welcome series day 7).
-# HTML to be built.
+# HTML at hf_dashboard/templates/emails/sample_invitation.html.
 
 name: sample_invitation
 tier: lifecycle
@@ -8,18 +8,28 @@ voice: founder_warm
 subject: "Want a free yarn sample, {{ first_name }}? 🌿"
 preview_text: "Tell me which fibre family you work with most and I'll match the swatch."
 
-html_template_file: "sample_invitation.html"  # TO BE BUILT
+html_template_file: "sample_invitation.html"
 
 required_variables:
   - first_name
+
+optional_variables:
+  - hero_image_url          # default: nettle-thick-yarn
+  - sample_request_link     # default: '' (renders CTA only if passed)
+
+hero_image: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/nettle-thick-yarn-975912fa.jpg"
+
+alternates:
+  - "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/hemp-natural-yarn-42b9dfe4.jpg"
+  - "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/wool-millspun-cfdf995d.jpg"
 
 target_segments:
   - potential_domestic
   - international_email
 
+status: READY
+
 description: |
   Welcome series day 7 — converts an email signup into a sample request.
-  Mirrors the WA company_intro_b2b CTA but with the slower email-pacing
-  expectation. Buttons → reply with fibre preference + address.
-
-status: PLANNED
+  Pairs WA company_intro_b2b's CTA with the slower email-pacing expectation.
+  Reply triggers a 2-3 day sample dispatch.

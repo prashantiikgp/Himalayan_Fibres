@@ -1,0 +1,47 @@
+# Email template metadata — Year-end recap (P2 seasonal).
+
+name: year_end_recap
+tier: seasonal
+voice: founder_warm
+
+subject: "A year, in numbers and stories — {{ recap_year or '2026' }}"
+preview_text: "Where we landed at the end of the year. No pitch — just numbers and stories."
+
+html_template_file: "year_end_recap.html"
+
+required_variables:
+  - first_name
+
+optional_variables:
+  - recap_year
+  - heading_text
+  - lead_paragraph
+  - stat_1_value
+  - stat_1_label
+  - stat_2_value
+  - stat_2_label
+  - stat_3_value
+  - stat_3_label
+  - story1_image_url
+  - story1_title
+  - story1_body
+  - story2_image_url
+  - story2_title
+  - story2_body
+  - quote_text
+  - quote_attribution
+  - blog_link
+
+target_segments:
+  - existing_clients
+  - potential_domestic
+  - international_email
+
+status: READY
+
+description: |
+  Annual end-of-year reflection. BLUF heading + stats_row of 3 numbers
+  + 2 image_split blocks framing supply-chain and collection-line
+  growth + founder pull quote + soft "read more" CTA.
+
+  Cadence: once per year, late December.

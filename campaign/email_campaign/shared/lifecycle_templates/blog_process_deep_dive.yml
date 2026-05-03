@@ -1,0 +1,53 @@
+# Email template metadata — Blog variant 5: process deep-dive.
+# HTML at hf_dashboard/templates/emails/blog_process_deep_dive.html.
+
+name: blog_process_deep_dive
+tier: lifecycle
+voice: founder_warm
+
+subject: "{{ step_count or '12' }} steps from a wild plant to a yarn ball"
+preview_text: "How a kilogram of yarn actually gets made — 12 steps across 2 seasons, 3 locations, 30+ pairs of hands."
+
+html_template_file: "blog_process_deep_dive.html"
+
+required_variables:
+  - first_name
+
+optional_variables:
+  - process_title            # default: '12 steps from a wild plant to a yarn ball'
+  - fibre_name               # default: 'Himalayan nettle'
+  - step_count               # default: '12'
+  - lead_paragraph
+  # 3 image_grid cells (each represents a step group)
+  - step_1_image_url
+  - step_1_caption
+  - step_2_image_url
+  - step_2_caption
+  - step_3_image_url
+  - step_3_caption
+  # 3 inline paragraphs between sections
+  - section_1_body           # harvest + retting
+  - section_2_body           # decortication + spinning
+  - section_3_body           # dyeing + finishing
+  # Founder pull quote
+  - quote_text
+  - quote_attribution
+  # CTAs
+  - video_link               # "Watch the process video"
+  - blog_link                # "See the full breakdown"
+
+target_segments:
+  - existing_clients
+  - potential_domestic
+  - international_email
+
+status: READY
+
+description: |
+  Educational long-form. "How a fibre becomes yarn" content. Uses a
+  3-cell image_grid (one per step group), inline paragraph
+  explanations, and a founder pull quote.
+
+  Adaptable per fibre — defaults assume nettle but the same template
+  works for hemp (cultivation-retting-spinning) or wool
+  (shearing-cleaning-spinning) by overriding fibre_name + section bodies.

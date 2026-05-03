@@ -1,28 +1,67 @@
-# Email template metadata — Himalayan nettle range focus.
-# HTML to be built.
+# Email template metadata — Himalayan nettle range focus (editorial blog format).
+# HTML at hf_dashboard/templates/emails/nettle_focus.html.
 
 name: nettle_focus
 tier: category
 product_category: nettle
 voice: founder_warm
 
-subject: "Our Himalayan nettle yarn — fine and thick counts available"
-preview_text: "Hand-spun nettle yarn from Gorkha. Strong, silky, completely different from cotton."
+subject: "Wild nettle, hand-spun in Gorkha — 30-50% stronger than cotton"
+preview_text: "Why a wild plant produces some of the finest natural fibres known. Hand-harvested, hand-spun, ready to ship."
 
-html_template_file: "nettle_focus.html"  # TO BE BUILT
+html_template_file: "nettle_focus.html"
 
 required_variables:
   - first_name
 
+optional_variables:
+  # Texture image_split (left)
+  - texture_image_url        # default: nettle-thick-yarn
+  - texture_title            # default: 'Hand-spun, lustrous like silk'
+  - texture_body             # default: yarn count + dye-acceptance story
+  - texture_link             # default: /product-page/nettle-blend-yarn
+
+  # Pull quote
+  - quote_text               # default: founder voice — Greeks/wheel quote
+  - quote_attribution        # default: '— Prashant Agrawal, Founder'
+
+  # Process image_split (right)
+  - process_image_url        # default: field-artisan1 (Gorkha woman)
+  - process_title            # default: 'Wild, harvested by hand'
+  - process_body             # default: Gorkha harvest + retting story
+  - process_link             # default: ''
+
+  # Variant grid
+  - variant_1_image_url      # default: nettle-thick-yarn
+  - variant_1_caption        # default: 'Thick yarn — 10/2 count'
+  - variant_1_link           # default: /product-page/nettle-blend-yarn
+  - variant_2_image_url      # default: nettle-white-yarn
+  - variant_2_caption        # default: 'White nettle — bleach-processed'
+  - variant_2_link           # default: /product-page/nettle-blend-yarn
+  - variant_3_image_url      # default: nettle1 (cottonised fibre)
+  - variant_3_caption        # default: 'Raw fibre — cottonised'
+  - variant_3_link           # default: /product-page/nettle-blend-yarn
+
+  # Footer CTA
+  - catalog_link
+
 hero_image: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/nettle-thick-yarn-975912fa.jpg"
+
+alternates:
+  - "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/nettle-white-yarn-dd1a1e68.jpg"
+  - "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/nettle1-5313de78.jpg"
 
 target_segments:
   - potential_domestic
   - existing_clients
+  - international_email
+
+status: READY
 
 description: |
-  Category-level deep-dive on nettle. Used in potential_domestic cold
-  sequence Day 7 (when prospect is a carpet/weaver/yarn-store buyer) and
-  in existing_clients quarterly highlight series.
+  Editorial blog-format category email for Himalayan nettle. Story-driven
+  prose: economics + romance → texture → harvest/retting process → social
+  proof, with a founder-voice pull quote and a 3-image variant grid.
 
-status: PLANNED
+  Voice: founder_warm. Refactored 2026-05-03 from the old spec-table
+  layout to match the wool_focus editorial pattern.

@@ -1,0 +1,74 @@
+# Email template metadata — Welcome series Day 3, sustainability story.
+# Canonical example of the campaign/blog template type.
+# HTML at hf_dashboard/templates/emails/welcome_day_3_sustainability.html.
+
+name: welcome_day_3_sustainability
+tier: lifecycle           # functionally lifecycle (welcome series day 3)
+                          # but also doubles as the canonical for blog type
+voice: founder_warm
+
+subject: "The supply chain is a hill, a plant, and a person."
+preview_text: "How a kilogram of yarn actually gets made when the supply chain is two villages and a mountain stream long."
+
+html_template_file: "welcome_day_3_sustainability.html"
+
+required_variables:
+  - first_name
+
+# Every overrideable field exposed per the v3 plan §IX variable contract.
+# Defaults are baked into the HTML; campaigns override per-send.
+optional_variables:
+  # 3 stats_row proof points (BLUF)
+  - stat_1_value           # default: "0"
+  - stat_1_label           # default: "Pesticides used"
+  - stat_2_value           # default: "1,200m+"
+  - stat_2_label           # default: "Wild harvest altitude"
+  - stat_3_value           # default: "120+"
+  - stat_3_label           # default: "Artisan partner homes"
+
+  # Story image_split #1 (left)
+  - story1_image_url       # default: field-artisan1
+  - story1_title           # default: "Wild, not farmed"
+  - story1_body            # default: nettle-in-Gorkha story
+  - story1_link            # default: '' (story image, not product)
+
+  # Pull quote
+  - quote_text             # default: founder voice
+  - quote_attribution      # default: "— Prashant Agrawal, Founder"
+
+  # Story image_split #2 (right)
+  - story2_image_url       # default: field-artisan3
+  - story2_title           # default: "Made by hand, in homes"
+  - story2_body            # default: artisan-spinning story
+  - story2_link            # default: ''
+
+  # CTAs (both optional — render only if passed)
+  - blog_link              # primary "See how it's made" CTA
+  - catalog_link           # secondary "Browse the yarn catalog" CTA
+
+# Hero image — the first body image (image_split #1)
+hero_image: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field/field-artisan1-3bd5ca62.jpg"
+
+alternates:
+  - "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field/field-artisan2-6d81e6bb.jpg"
+  - "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field/field-artisan3-b4235ee8.jpg"
+
+target_segments:
+  - potential_domestic
+  - international_email
+  - existing_clients
+
+status: READY
+
+description: |
+  Welcome series day 3 — sustainability story. Lead with BLUF heading,
+  3-cell stats_row of proof points, then 2 image_split blocks framing
+  origin and process, with a founder-voice pull quote between them.
+
+  This template is the canonical example of the blog/campaign type per
+  the standardization spec. Other blog variants (field_origin_story,
+  founder_letter, customer_case_study, process_deep_dive) reuse the
+  same skeleton with different defaults.
+
+  Voice: founder_warm. Tone: Patagonia-style — focus on the "why",
+  not "buy". Soft CTAs (blog post / catalog browse), no hard sample ask.

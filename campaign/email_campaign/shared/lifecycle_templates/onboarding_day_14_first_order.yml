@@ -1,0 +1,30 @@
+# Email template metadata — Onboarding Day 14 first-order nudge.
+# Sent 14 days after email signup if no sample/order yet.
+
+name: onboarding_day_14_first_order
+tier: lifecycle
+voice: founder_warm
+
+subject: "Still on the fence, {{ first_name }}?"
+preview_text: "Two paths that usually help at this stage — a free sample, or a 15-min call."
+
+html_template_file: "onboarding_day_14_first_order.html"
+
+required_variables:
+  - first_name
+
+optional_variables:
+  - signup_at                 # default: 'two weeks ago'
+  - sample_form_link          # adds "Request a free sample" CTA
+  - catalog_link              # adds "Browse the catalog" CTA
+
+target_segments:
+  - potential_domestic
+  - international_email
+
+status: READY
+
+description: |
+  Soft re-engagement at day 14 if no sample request + no order. Two
+  side-by-side image_split blocks: free sample (left) and 15-min call
+  (right). Acknowledges the slow B2B decision cycle.

@@ -1,0 +1,51 @@
+{#-
+  SEASONAL — Diwali greetings.
+  Typography-led (no festive imagery commissioned). Brand-gold accents.
+  Soft, no hard CTA — pure brand voice moment.
+
+  Per-send variables:
+    first_name*
+    diwali_year             default: '2026'
+    custom_message          optional override of the body paragraph
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/pull_quote.html' import pull_quote with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% set _year = diwali_year or '2026' %}
+
+{% block content %}
+
+{{ heading('Diwali greetings from the hills', emoji='🪔') }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph(custom_message or "Wishing you, your family, and your team a Diwali full of light, warmth, and the good kind of work. Whether you're shipping orders this season or taking a quiet week with the people you love, we hope this Diwali brings the year to a clean close.") }}
+
+<tr>
+  <td align="center" style="padding:28px 24px;background-color:#ffffff;text-align:center;">
+    <div style="display:inline-block;border-top:2px solid {{ color_link }};border-bottom:2px solid {{ color_link }};padding:24px 36px;font-family:{{ font_stack }};">
+      <div style="font-size:14px;letter-spacing:3px;text-transform:uppercase;color:{{ color_link }};font-weight:600;margin-bottom:10px;">शुभ दीपावली</div>
+      <div style="font-size:24px;color:{{ color_text }};font-weight:700;letter-spacing:0.5px;line-height:1.2;">A year of light<br>and craft.</div>
+      <div style="font-size:11px;color:#888;margin-top:14px;letter-spacing:1px;text-transform:uppercase;">Diwali {{ _year }}</div>
+    </div>
+  </td>
+</tr>
+
+{{ pull_quote(
+     "May the lamps you light this Diwali warm the hands that craft for you all year.",
+     attribution='— Prashant + the team at Himalayan Fibres'
+) }}
+
+{{ paragraph("Our workshops will be quiet from Diwali through the weekend after &mdash; everyone heading home to families. We'll be back to full dispatch on the following Monday. If you have anything urgent before then, reply and we'll do our best.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{{ whatsapp_help_button(
+     prompt='Hi Prashant — wishing you a happy Diwali!',
+     label='Wish us back on WhatsApp'
+) }}
+
+{% endblock %}

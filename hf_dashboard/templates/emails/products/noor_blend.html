@@ -1,0 +1,65 @@
+{#-
+  PRODUCT SKU — Noor Series blend (catalog hf_noor_series, ₹1100).
+
+  Per-send variables:
+    first_name*
+    sku_image_url           default: noor
+    sku_link                default: /product-page/noor-series
+    price_label             default: '₹1,100 / kg'
+    moq_label               default: 'MOQ 50 kg'
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/image_split.html' import image_split with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% set _img = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category' %}
+{% set _wix = 'https://www.himalayanfibres.com/product-page' %}
+
+{% set _sku_img = sku_image_url or (_img + '/noor-840a12e8.jpg') %}
+{% set _sku_link = sku_link or (_wix + '/noor-series') %}
+
+{% block content %}
+
+{{ heading('Noor Series — soft neutrals') }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph("Noor is the soft, neutral counterpart to our Burberry collection. A fixed recipe of Himalayan nettle and Tibetan wool, dyed in muted creams, dove-greys, and natural undyed strands. Where Burberry is autumn, Noor is morning light &mdash; quieter, more restrained.") }}
+
+{{ image_split(
+     image_url=_sku_img,
+     title='Restrained, modern, repeat-orderable',
+     body="Designers who don't want their yarn to compete with the pattern they're working into pick Noor. The palette stays inside a narrow band &mdash; greys, creams, undyed natural &mdash; so it works in modernist and minimalist projects without the warm-tone interference Burberry brings.",
+     link=_sku_link,
+     image_side='left',
+     image_size=300
+) }}
+
+<tr>
+  <td style="padding:14px 24px;background-color:#ffffff;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid {{ color_card_border }};border-radius:6px;">
+      <tr>
+        <td valign="middle" style="padding:18px 22px;font-family:{{ font_stack }};">
+          <div style="font-size:11px;color:{{ color_link }};letter-spacing:1.5px;text-transform:uppercase;font-weight:600;">Order specs</div>
+          <div style="font-size:20px;color:{{ color_text }};font-weight:700;margin:4px 0 6px;">{{ price_label or '₹1,100 / kg' }}</div>
+          <div style="font-size:13px;color:{{ color_body }};line-height:1.6;">
+            Nettle + Tibetan wool blend &nbsp;·&nbsp; Naturally dyed &nbsp;·&nbsp; {{ moq_label or 'MOQ 50 kg' }} &nbsp;·&nbsp; Lead time 2-3 weeks
+          </div>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
+{{ paragraph("Where it's used: contemporary carpet ateliers in Mirzapur and EU galleries that focus on minimalist work. Designer shawls in cream and natural. Bedding makers who want a wool-blended natural yarn for hand-loomed throws.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{{ cta_button('See on the product page', _sku_link) }}
+
+{{ whatsapp_help_button('Hi Himalayan Fibres — I would like to order Noor Series blend.') }}
+
+{% endblock %}

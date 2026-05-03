@@ -1,0 +1,92 @@
+{#-
+  BLOG VARIANT 3 — Founder Letter (quarterly long-form, no product pitch).
+
+  Personal voice from the founder. Sparse imagery (1 hero, 1 small inline),
+  multi-paragraph reflective body, optional pull quote, soft "read more"
+  CTA only. NO sample/catalog ask — this is a brand voice moment.
+
+  Per-send variables (most overrideable):
+    first_name*
+
+    -- Header --
+    quarter                  e.g. 'Q4 2026'
+    letter_title             default: '{{ quarter }}: a note from Prashant'
+    lead_paragraph           default: opening reflection
+
+    -- Body sections (3 paragraphs) --
+    body_para_1              default: state of the work
+    body_para_2              default: what we learned
+    body_para_3              default: where we go next
+
+    -- Single image_split (optional) --
+    hero_image_url           default: brand-hero
+    hero_caption             default: '' (no caption)
+
+    -- Pull quote (optional) --
+    quote_text, quote_attribution
+
+    -- Sole CTA: "Read the full letter" (or none) --
+    blog_link                if passed, renders "Read the full letter" button
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/image_split.html' import image_split with context %}
+{% from 'partials/middle/pull_quote.html' import pull_quote with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% set _field = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field' %}
+{% set _comp = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/company' %}
+
+{% set _quarter = quarter or 'Q4 2026' %}
+{% set _title = letter_title or (_quarter + ': a note from Prashant') %}
+{% set _lead = lead_paragraph or ("It's been a quarter. Long enough to learn something, short enough to remember what it felt like at the start. This is a longer note than usual &mdash; no product pitch, no sample ask. Just where we are.") %}
+
+{% set _p1 = body_para_1 or "When we started Himalayan Fibres, the question wasn't whether the world needed more sustainable yarn (it did), but whether we could connect a supply chain that ran from a wild plant in Gorkha to a workshop in Bhadohi without breaking the price-point that makes either side of that chain economically viable. The honest answer this quarter: we still don't have it perfect. The retting season slipped two weeks because of an early frost, the dye supply we've been working on isn't yet certified, and we lost one artisan partner to a family emergency that's reshaped how we think about supply concentration." %}
+
+{% set _p2 = body_para_2 or "But the part that worked: we shipped to seventeen new countries this quarter, expanded our Tibetan wool partnership to a second valley, and cleared the GOTS certification process that had been blocking three EU buyers. We also sent out a thousand sample packs &mdash; about 40% of which converted into a sample request for a second fibre, and 18% into an actual order within ninety days. Not extraordinary numbers, but real ones." %}
+
+{% set _p3 = body_para_3 or "The next quarter we're focused on three things: getting a second retting site online so we're not single-source-of-failure on weather; bringing the founder letters back to a monthly cadence (this is the first since June); and shipping the new website that lets carpet manufacturers configure custom blends without a phone call. None of these are launches in the marketing sense. They're just the next ninety days of the work." %}
+
+{% set _h_img = hero_image_url or (_comp + '/brand-hero-053743a5.jpg') %}
+{% set _h_caption = hero_caption or '' %}
+
+{% set _quote = quote_text or 'The supply chain is a hill, a plant, and a person. Anything we can simplify past that, we have.' %}
+{% set _quote_attr = quote_attribution or '— Prashant Agrawal, Founder' %}
+
+{% block content %}
+
+{{ heading(_title) }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph(_lead) }}
+
+{{ paragraph(_p1) }}
+
+{{ image_split(
+     image_url=_h_img,
+     title='',
+     body=_h_caption or "Field, October. Long stem of stinging nettle, retted in the Daudi stream for fourteen days, hand-stripped and ready for the wheel.",
+     image_side='left',
+     image_size=300
+) }}
+
+{{ paragraph(_p2) }}
+
+{{ pull_quote(_quote, attribution=_quote_attr) }}
+
+{{ paragraph(_p3) }}
+
+{{ paragraph("Thanks for reading this far. If something here lands, reply &mdash; I read every response personally, and the founder-letter format only works if it's a conversation.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{% if blog_link %}
+{{ cta_button('Read the full letter', blog_link) }}
+{% endif %}
+
+{{ whatsapp_help_button('Hi Prashant — I read your quarterly letter and would like to talk.') }}
+
+{% endblock %}

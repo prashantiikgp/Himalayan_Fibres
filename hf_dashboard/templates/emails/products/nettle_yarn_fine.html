@@ -1,0 +1,66 @@
+{#-
+  PRODUCT SKU — Fine-count nettle yarn (catalog ys9qh6g0zt, ₹625).
+  Single-product spotlight: hero shot + spec narrative + price + buy CTA.
+
+  Per-send variables:
+    first_name*
+    sku_image_url           default: nettle-white-yarn
+    sku_link                default: /product-page/nettle-blend-yarn (fine variant)
+    price_label             default: '₹625 / kg'
+    moq_label               default: 'MOQ 50 kg'
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/image_split.html' import image_split with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% set _img = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category' %}
+{% set _wix = 'https://www.himalayanfibres.com/product-page' %}
+
+{% set _sku_img = sku_image_url or (_img + '/nettle-white-yarn-dd1a1e68.jpg') %}
+{% set _sku_link = sku_link or (_wix + '/nettle-blend-yarn') %}
+
+{% block content %}
+
+{{ heading('Nettle Yarn, Fine Count (20/2)', emoji='🌿') }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph("This is the fine-count variant of our flagship Himalayan nettle yarn &mdash; hand-spun by partner artisans in Gorkha, plied in 20/2 count for designers who need a finer, drapey-er hand than our 10/2 thick yarn.") }}
+
+{{ image_split(
+     image_url=_sku_img,
+     title='Hand-spun, 20/2',
+     body="Wild-grown stinging nettle, hand-stripped and hand-spun in Nepali artisan homes. Lustrous like silk, strong enough for warps in hand-knotted carpets, drapey enough for designer shawls. Naturally earth-toned (dye-receptive); also available in white.",
+     link=_sku_link,
+     image_side='left',
+     image_size=300
+) }}
+
+<tr>
+  <td style="padding:14px 24px;background-color:#ffffff;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid {{ color_card_border }};border-radius:6px;">
+      <tr>
+        <td valign="middle" style="padding:18px 22px;font-family:{{ font_stack }};">
+          <div style="font-size:11px;color:{{ color_link }};letter-spacing:1.5px;text-transform:uppercase;font-weight:600;">Order specs</div>
+          <div style="font-size:20px;color:{{ color_text }};font-weight:700;margin:4px 0 6px;">{{ price_label or '₹625 / kg' }}</div>
+          <div style="font-size:13px;color:{{ color_body }};line-height:1.6;">
+            Count: 20/2 fine &nbsp;·&nbsp; {{ moq_label or 'MOQ 50 kg' }} &nbsp;·&nbsp; Lead time 2-3 weeks &nbsp;·&nbsp; Free samples on request
+          </div>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
+{{ paragraph("Where it's used: high-end carpet warps in Bhadohi, designer shawls in Auroville, hand-knit accessories in EU yarn stores. Pairs naturally with our Tibetan wool in custom blends.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{{ cta_button('See on the product page', _sku_link) }}
+
+{{ whatsapp_help_button('Hi Himalayan Fibres — I would like to order Nettle Yarn Fine 20/2.') }}
+
+{% endblock %}

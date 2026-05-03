@@ -1,0 +1,101 @@
+{#-
+  CATEGORY FOCUS — Signature blend collections (4 named blends).
+  Mirrors wool_focus editorial pattern. Variant grid shows the 4
+  collections (Burberry, Noor, Seriry, Snow White).
+
+  Per-send variables (all optional except first_name):
+    first_name*
+
+    -- Texture / hero image_split (left) --
+    texture_image_url, texture_title, texture_body, texture_link
+
+    -- Pull quote --
+    quote_text, quote_attribution
+
+    -- Process image_split (right) --
+    process_image_url, process_title, process_body, process_link
+
+    -- Variant grid (each cell = one collection) --
+    variant_1_image_url, variant_1_caption, variant_1_link  (Burberry)
+    variant_2_image_url, variant_2_caption, variant_2_link  (Noor)
+    variant_3_image_url, variant_3_caption, variant_3_link  (Snow White or Seriry)
+
+    -- Footer CTAs --
+    catalog_link
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/image_split.html' import image_split with context %}
+{% from 'partials/middle/image_grid.html' import image_grid with context %}
+{% from 'partials/middle/pull_quote.html' import pull_quote with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% set _wix = 'https://www.himalayanfibres.com/product-page' %}
+{% set _img = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category' %}
+
+{% set _t_img   = texture_image_url or (_img + '/burberry-27f4a1b3.jpg') %}
+{% set _t_title = texture_title or 'Curated, not catalogued' %}
+{% set _t_body  = texture_body or "Each named blend in our signature collections is a fixed recipe &mdash; the same fibre ratio, the same dye palette, the same yarn count, batch after batch. Designers can place repeat orders months apart and know the next shipment will look and feel like the last. That consistency is rare in the hand-spun world." %}
+{% set _t_link  = texture_link or (_wix + '/burberry-series') %}
+
+{% set _quote = quote_text or "Burberry Series has been in our atelier for three years. Same wool, same dye, same hand. Three customers can place orders 18 months apart and the carpets sit next to each other like siblings." %}
+{% set _quote_attr = quote_attribution or '— atelier partner, Mirzapur' %}
+
+{% set _p_img   = process_image_url or (_img + '/burberry-detail-618346bb.jpg') %}
+{% set _p_title = process_title or 'How a collection is born' %}
+{% set _p_body  = process_body or "Each named blend started as a one-off custom request from a designer. When the colour and feel landed cleanly &mdash; and we'd refined the recipe through three or four batches &mdash; we promoted it into the signature collection line. Burberry, Noor, Seriry, and Snow White each have a story this way." %}
+{% set _p_link  = process_link or '' %}
+
+{% set _v1_img = variant_1_image_url or (_img + '/burberry-27f4a1b3.jpg') %}
+{% set _v1_cap = variant_1_caption or 'Burberry — earthy, autumn tones' %}
+{% set _v1_lnk = variant_1_link or (_wix + '/burberry-series') %}
+{% set _v2_img = variant_2_image_url or (_img + '/noor-840a12e8.jpg') %}
+{% set _v2_cap = variant_2_caption or 'Noor — soft, neutral palette' %}
+{% set _v2_lnk = variant_2_link or (_wix + '/noor-series') %}
+{% set _v3_img = variant_3_image_url or (_img + '/burberry-detail-618346bb.jpg') %}
+{% set _v3_cap = variant_3_caption or 'Snow White — pure, undyed natural' %}
+{% set _v3_lnk = variant_3_link or (_wix + '/snow-white-series') %}
+
+{% block content %}
+
+{{ heading('Signature collections, hand-spun in named recipes') }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph("Most of our work ships as raw material &mdash; nettle yarn, hemp yarn, Tibetan wool &mdash; for designers and ateliers who want to develop their own blend. But over the years a handful of those custom blends settled into recipes consistent enough that we now ship them as named collections. Four of them have made it into the line: <strong>Burberry, Noor, Seriry, Snow White</strong>.") }}
+
+{{ paragraph("<strong>What makes a signature collection.</strong> A named blend has to clear three bars: a stable fibre ratio (we don't change it batch-to-batch), a stable dye palette (same recipe, same hands, same lots), and enough demand that we can keep at least 50 kg in active inventory at any time. Of the dozens of custom blends we've developed over the years, four cleared all three.") }}
+
+{{ image_split(
+     image_url=_t_img, title=_t_title, body=_t_body, link=_t_link,
+     image_side='left', image_size=300
+) }}
+
+{{ pull_quote(_quote, attribution=_quote_attr) }}
+
+{{ image_split(
+     image_url=_p_img, title=_p_title, body=_p_body, link=_p_link,
+     image_side='right', image_size=300
+) }}
+
+{{ paragraph("<strong>Where they end up.</strong> Burberry has become our most-requested collection for hand-knotted carpets in autumn-tone palettes. Noor is the go-to for designer shawls and lightweight winter wear. Snow White is what people order when they want a colour-receptive natural to dye in-house. Seriry, our newest, is finding its home in festive-collection projects.") }}
+
+{{ image_grid([
+     {'image_url': _v1_img, 'caption': _v1_cap, 'link': _v1_lnk},
+     {'image_url': _v2_img, 'caption': _v2_cap, 'link': _v2_lnk},
+     {'image_url': _v3_img, 'caption': _v3_cap, 'link': _v3_lnk},
+]) }}
+
+{{ paragraph("<strong>How to order.</strong> Each collection is available in standard yarn counts (10/2 or 20/2) starting at 50 kg minimum order. Lead time 2-3 weeks. Custom blends still very much possible &mdash; a third of our work is one-off custom recipes. Free swatches of any collection (or all four) on request &mdash; reply with your address and we'll dispatch.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{% if catalog_link %}
+{{ cta_button('See the full catalog', catalog_link) }}
+{% endif %}
+
+{{ whatsapp_help_button('Hi Himalayan Fibres — I would like more details on the signature collections.') }}
+
+{% endblock %}

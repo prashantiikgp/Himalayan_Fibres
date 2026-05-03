@@ -1,0 +1,64 @@
+{#-
+  LIFECYCLE — Onboarding Day 14 first-order nudge.
+  Sent 14 days after email signup if no sample requested + no order.
+  Soft re-engagement. Acknowledges the time gap, offers an easy next step.
+
+  Per-send variables (most optional):
+    first_name*
+    signup_at                 e.g. 'two weeks ago' (default)
+    sample_form_link          optional; renders "Request a sample" CTA
+    catalog_link              optional; renders "Browse the catalog" CTA
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/image_split.html' import image_split with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% set _when = signup_at or 'two weeks ago' %}
+{% set _img = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category' %}
+
+{% block content %}
+
+{{ heading('Still on the fence?') }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph("You signed up " + _when + ", and we haven't heard back yet &mdash; which is totally fine. B2B sourcing decisions are slow, and a yarn supplier is a long-term relationship, not an impulse buy.") }}
+
+{{ paragraph("Two things that often help at this stage:") }}
+
+{{ image_split(
+     image_url=(_img + '/nettle-thick-yarn-975912fa.jpg'),
+     title='1. A free sample',
+     body="The fastest way to know if our yarn fits your project is to feel it. We send free sample packs (3&ndash;4 swatches across the fibre families you ask for) within 2&ndash;3 days. No MOQ on samples, no commitment.",
+     link='https://www.himalayanfibres.com/product-page/nettle-blend-yarn',
+     image_side='left',
+     image_size=240
+) }}
+
+{{ image_split(
+     image_url=(_img + '/wool-millspun-cfdf995d.jpg'),
+     title='2. A 15-min call',
+     body="If you'd rather talk through specs and applications first, book a 15-minute call with me. I'll walk through the catalog, your project requirements, and where the fit is or isn't.",
+     link='https://www.himalayanfibres.com/contact',
+     image_side='right',
+     image_size=240
+) }}
+
+{{ paragraph("Either path is fine; both are free. Just reply with which one fits.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{% if sample_form_link %}
+{{ cta_button('Request a free sample', sample_form_link) }}
+{% endif %}
+
+{% if catalog_link %}
+{{ cta_button('Browse the catalog', catalog_link) }}
+{% endif %}
+
+{{ whatsapp_help_button('Hi Prashant — I would like to discuss a project.') }}
+
+{% endblock %}

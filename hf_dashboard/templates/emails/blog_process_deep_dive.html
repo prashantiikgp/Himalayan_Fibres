@@ -1,0 +1,103 @@
+{#-
+  BLOG VARIANT 5 — Process Deep-Dive.
+
+  Educational long-form. "How a fibre becomes yarn" type content. Uses
+  numbered steps in an image_grid + paragraph explanation between groups
+  of steps. Soft CTA: blog post or video link.
+
+  Per-send variables (most overrideable):
+    first_name*
+
+    -- Header + lead --
+    process_title            default: '12 steps from a wild plant to a yarn ball'
+    fibre_name               default: 'Himalayan nettle'
+    step_count               default: '12'
+    lead_paragraph           default: process intro
+
+    -- 3 image_grid cells (each represents a step or step group) --
+    step_1_image_url, step_1_caption
+    step_2_image_url, step_2_caption
+    step_3_image_url, step_3_caption
+
+    -- Inline paragraphs between sections (3) --
+    section_1_body           default: harvest + retting story
+    section_2_body           default: decortication + spinning story
+    section_3_body           default: dyeing + finishing story
+
+    -- Pull quote (founder voice) --
+    quote_text, quote_attribution
+
+    -- CTAs --
+    video_link               "Watch the process video" CTA (e.g. YouTube)
+    blog_link                "See the full breakdown" CTA
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/image_grid.html' import image_grid with context %}
+{% from 'partials/middle/image_split.html' import image_split with context %}
+{% from 'partials/middle/pull_quote.html' import pull_quote with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% set _field = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field' %}
+{% set _img = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category' %}
+
+{% set _fibre = fibre_name or 'Himalayan nettle' %}
+{% set _steps = step_count or '12' %}
+{% set _title = process_title or (_steps + ' steps from a wild plant to a yarn ball') %}
+{% set _lead = lead_paragraph or ("Most people picture yarn-making as a single step: somehow plant becomes string. The reality, for " + _fibre + ", is " + _steps + " steps spread across two seasons, three locations, and the hands of about thirty people. This is the short version of how it actually happens.") %}
+
+{% set _step1_img = step_1_image_url or (_field + '/field-artisan1-3bd5ca62.jpg') %}
+{% set _step1_cap = step_1_caption or 'Step 1-3: Hand-harvest the wild stems' %}
+{% set _step2_img = step_2_image_url or (_field + '/field-artisan2-6d81e6bb.jpg') %}
+{% set _step2_cap = step_2_caption or 'Step 4-7: Rett, decorticate, comb' %}
+{% set _step3_img = step_3_image_url or (_img + '/nettle-thick-yarn-975912fa.jpg') %}
+{% set _step3_cap = step_3_caption or 'Step 8-12: Spin, ply, skein, finish' %}
+
+{% set _sec1 = section_1_body or "<strong>Steps 1&ndash;3: harvest.</strong> The wild plant grows on its own across the slopes of Gorkha and Almora. The first cut of the season happens in October-November, when the stems have lignified but before the autumn frost makes them brittle. Local women cut the stems at the base, bundle them into 10-15 kg bales, and carry them to the retting site." %}
+
+{% set _sec2 = section_2_body or "<strong>Steps 4&ndash;7: retting and fibre extraction.</strong> The bundles are weighted down in flowing mountain streams for 14&ndash;21 days. Cold-water retting breaks down the pectin holding the fibre to the woody core of the stem. After retting, the fibre is hand-stripped from the stem, washed, sun-dried, and combed to remove the last bits of bark." %}
+
+{% set _sec3 = section_3_body or "<strong>Steps 8&ndash;12: spinning, plying, finishing.</strong> The cleaned fibre is hand-spun on traditional wooden wheels in artisan homes &mdash; one fibre at a time, drawn out by hand and twisted into a single ply. Two single plies are then twisted together (plied) into 2-ply yarn. The plied yarn is wound into skeins, washed once more to set the twist, dyed if requested, and finally hand-skeined for shipping." %}
+
+{% set _quote = quote_text or "There's nothing in this process that wasn't done a thousand years ago. We've added shipping, traceability, and an electric kettle for the dye bath. That's it." %}
+{% set _quote_attr = quote_attribution or '— Prashant Agrawal, Founder' %}
+
+{% block content %}
+
+{{ heading(_title) }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph(_lead) }}
+
+{{ image_grid([
+     {'image_url': _step1_img, 'caption': _step1_cap},
+     {'image_url': _step2_img, 'caption': _step2_cap},
+     {'image_url': _step3_img, 'caption': _step3_cap},
+]) }}
+
+{{ paragraph(_sec1) }}
+
+{{ paragraph(_sec2) }}
+
+{{ pull_quote(_quote, attribution=_quote_attr) }}
+
+{{ paragraph(_sec3) }}
+
+{{ paragraph("Total time from harvest to shipped yarn: about 60-75 days. Total people involved per kilogram: between four and seven, depending on whether the fibre gets dyed and how. The reason this process can't be replicated by an industrial mill isn't romance &mdash; it's the variation. Hand-spun yarn has a specific character that comes from human inconsistency, and that's what makes it useful for the projects it ends up in.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{% if video_link %}
+{{ cta_button('Watch the process video', video_link) }}
+{% endif %}
+
+{% if blog_link %}
+{{ cta_button('See the full breakdown', blog_link) }}
+{% endif %}
+
+{{ whatsapp_help_button('Hi Himalayan Fibres — I would like to know more about your process.') }}
+
+{% endblock %}

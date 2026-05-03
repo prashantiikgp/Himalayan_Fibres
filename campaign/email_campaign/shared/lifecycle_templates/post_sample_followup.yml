@@ -1,0 +1,32 @@
+# Email template metadata — Post-sample follow-up.
+# Sent 5-7 days after sample dispatch.
+
+name: post_sample_followup
+tier: lifecycle
+voice: founder_warm
+
+subject: "How did the {{ fibre_sent or 'sample' }} feel, {{ first_name }}?"
+preview_text: "Quick check-in — did it arrive in good shape? Did it feel right for what you're working on?"
+
+html_template_file: "post_sample_followup.html"
+
+required_variables:
+  - first_name
+  - fibre_sent
+
+optional_variables:
+  - sample_dispatched_at      # default: 'last week'
+  - proforma_link             # if passed, renders "Generate a proforma" CTA
+  - book_call_link            # if passed, renders "Book a 15-min call" CTA
+
+target_segments:
+  - existing_clients          # customers who got samples
+  - potential_domestic
+  - international_email
+
+status: READY
+
+description: |
+  Triggered 5-7 days after a sample dispatch. Soft, conversational tone
+  — not editorial. Asks how the fibre felt, offers three next-step
+  paths (different fibre / larger trial / proforma).

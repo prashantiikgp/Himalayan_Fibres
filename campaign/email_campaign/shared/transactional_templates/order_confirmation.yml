@@ -11,21 +11,29 @@ preview_text: "We're preparing your order. Here's the summary."
 
 html_template_file: "order_confirmation.html"
 
+# Required: confirmation cannot render without these
 required_variables:
   - first_name
   - order_number
   - order_date
   - ship_to_html
   - items_html
-  - subtotal
   - total
-  - payment_method
+
+# Optional: hidden in template if missing
+optional_variables:
+  - subtotal                # hides subtotal row if omitted
+  - shipping                # hides courier row if omitted
+  - payment_method          # hides payment line if omitted
 
 target_segments:
   - existing_clients
   - potential_domestic
   - international_email
 
+status: READY
+
 description: |
   Sent after payment lands for a proforma. Confirms the order and sets
-  shipping expectations.
+  shipping expectations. Items block fixed 2026-05-03: dropped nested
+  10px padding so line descriptions use the full 560px inner width.

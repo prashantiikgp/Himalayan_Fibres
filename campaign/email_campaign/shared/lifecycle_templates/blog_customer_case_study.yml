@@ -1,0 +1,59 @@
+# Email template metadata — Blog variant 4: customer case study.
+# HTML at hf_dashboard/templates/emails/blog_customer_case_study.html.
+
+name: blog_customer_case_study
+tier: lifecycle
+voice: founder_warm
+
+subject: "How {{ customer_name or 'Mahesh Singh' }} switched from imported wool"
+preview_text: "Why a Bhadohi atelier moved from European fleece to Himalayan Fibres Tibetan wool — and what changed."
+
+html_template_file: "blog_customer_case_study.html"
+
+required_variables:
+  - first_name
+
+optional_variables:
+  - customer_name            # default: 'Mahesh Singh'
+  - customer_business        # default: 'Alham Rugs, Bhadohi'
+  - case_title               # default: 'How {customer_name} switched...'
+  - lead_paragraph           # case-study intro
+  # Before/after stats (3)
+  - before_after_stat_1_v
+  - before_after_stat_1_l
+  - before_after_stat_2_v
+  - before_after_stat_2_l
+  - before_after_stat_3_v
+  - before_after_stat_3_l
+  # Workshop image_split (left)
+  - workshop_image_url
+  - workshop_title
+  - workshop_body
+  - workshop_link
+  # Customer quote
+  - customer_quote
+  - customer_quote_attribution
+  # Output image_split (right)
+  - output_image_url
+  - output_title
+  - output_body
+  - output_link
+  # CTAs
+  - blog_link                # "Read the full case study"
+  - sample_link              # "Request a sample"
+
+target_segments:
+  - potential_domestic
+  - international_email
+
+status: READY
+
+description: |
+  B2B social proof. Third-person narrative + customer pull quote +
+  before/after stats + 2 workshop photos. Mid-funnel content for
+  prospects who want to see a real-world install before they commit.
+
+  Default content is for a fictional Bhadohi carpet-atelier example;
+  override all 20+ fields with the real customer story before sending.
+  CRITICAL: do not send with default placeholder content — the
+  "Mahesh Singh / Alham Rugs" example is illustrative only.

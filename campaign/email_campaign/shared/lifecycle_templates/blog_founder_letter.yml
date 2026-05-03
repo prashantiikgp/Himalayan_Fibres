@@ -1,0 +1,42 @@
+# Email template metadata — Blog variant 3: quarterly founder letter.
+# HTML at hf_dashboard/templates/emails/blog_founder_letter.html.
+
+name: blog_founder_letter
+tier: lifecycle
+voice: founder_warm
+
+subject: "{{ quarter or 'Q4 2026' }}: a note from Prashant"
+preview_text: "A longer note than usual — no product pitch, no sample ask. Just where we are."
+
+html_template_file: "blog_founder_letter.html"
+
+required_variables:
+  - first_name
+
+optional_variables:
+  - quarter                  # default: 'Q4 2026'
+  - letter_title             # default: '{quarter}: a note from Prashant'
+  - lead_paragraph
+  - body_para_1              # state of the work
+  - body_para_2              # what we learned
+  - body_para_3              # where we go next
+  - hero_image_url           # default: brand-hero
+  - hero_caption
+  - quote_text               # founder voice
+  - quote_attribution
+  - blog_link                # adds "Read the full letter" CTA
+
+target_segments:
+  - existing_clients
+  - potential_domestic
+  - international_email
+
+status: READY
+
+description: |
+  Long-form quarterly founder letter. Personal, reflective, no product
+  pitch. Sparse imagery (1 hero shot inline). Single soft CTA at end
+  ("Read the full letter") — no sample/catalog asks.
+
+  Typical cadence: once per quarter. Milestone moments only otherwise.
+  This is a brand-voice slot, not a marketing slot.

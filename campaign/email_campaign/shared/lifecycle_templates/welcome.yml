@@ -1,7 +1,7 @@
 # Email template metadata — welcome email.
 #
 # The HTML body lives at hf_dashboard/templates/emails/welcome.html.
-# This file is the side-car: subject line, voice, audience, variables.
+# Multi-category template type (uses 3 info_cards for the 3 fibre families).
 
 name: welcome
 tier: lifecycle
@@ -15,11 +15,29 @@ html_template_file: "welcome.html"
 required_variables:
   - first_name
 
+# All overrides have defaults baked into the template; campaigns can swap
+# any one without editing HTML.
+optional_variables:
+  # The 3 fibre family info_cards (titles + bodies)
+  - card_1_title           # default: "🌿 Himalayan Stinging Nettle"
+  - card_1_body            # default: nettle blurb
+  - card_2_title           # default: "🌱 Himalayan Hemp"
+  - card_2_body            # default: hemp blurb
+  - card_3_title           # default: "🐑 Tibetan Wool"
+  - card_3_body            # default: wool blurb
+  # Primary CTA
+  - cta_label              # default: "🧶 Explore Our Products"
+  - cta_link               # default: https://www.himalayanfibres.com
+
 target_segments:
   - existing_clients
   - potential_domestic
   - international_email
 
+status: READY
+
 description: |
   Sent on first email signup. Sets the brand tone (sustainable, hand-spun,
-  founder-led) and invites the recipient to engage.
+  founder-led) and invites the recipient to engage. Multi-category type
+  with text-only info_cards (no per-card hero image — kept light for the
+  first touch).

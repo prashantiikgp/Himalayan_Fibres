@@ -1,0 +1,35 @@
+# Email template metadata — Harvest announcement (P2 seasonal).
+
+name: harvest_announcement
+tier: seasonal
+voice: founder_warm
+
+subject: "Fresh {{ fibre_name }} just arrived from {{ region_name }}"
+preview_text: "First lot of the season, hand-spun, ready to ship."
+
+html_template_file: "harvest_announcement.html"
+
+required_variables:
+  - first_name
+  - fibre_name
+  - region_name
+
+optional_variables:
+  - batch_size              # default: 'a fresh batch'
+  - available_date          # default: 'next week'
+  - sku_image_url
+  - sku_link
+  - sample_form_link        # adds "Get a free swatch" CTA
+  - catalog_link            # adds "Browse the catalog" CTA
+
+target_segments:
+  - existing_clients
+  - potential_domestic
+  - international_email
+
+status: READY
+
+description: |
+  Sent 3-4× per year when a fresh fibre batch lands in inventory.
+  Lightweight, single image_split, region + fibre dynamic.
+  Soft sample CTA.

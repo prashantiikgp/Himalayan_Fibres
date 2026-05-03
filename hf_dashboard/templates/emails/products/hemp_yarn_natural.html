@@ -1,0 +1,66 @@
+{#-
+  PRODUCT SKU — Natural hemp yarn (catalog otgmx28zqr, ₹275).
+  Single-product spotlight.
+
+  Per-send variables:
+    first_name*
+    sku_image_url           default: hemp-natural-yarn
+    sku_link                default: /product-page/himalayan-hemp-yarn
+    price_label             default: '₹275 / kg'
+    moq_label               default: 'MOQ 50 kg'
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/image_split.html' import image_split with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% set _img = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category' %}
+{% set _wix = 'https://www.himalayanfibres.com/product-page' %}
+
+{% set _sku_img = sku_image_url or (_img + '/hemp-natural-yarn-42b9dfe4.jpg') %}
+{% set _sku_link = sku_link or (_wix + '/himalayan-hemp-yarn') %}
+
+{% block content %}
+
+{{ heading('Himalayan Hemp Yarn, Natural', emoji='🌱') }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph("Our flagship natural hemp yarn &mdash; cultivated by partner farmers in the Himalayan foothills, hand-spun in artisan homes. The natural undyed colour is what you get straight off the wheel: warm beige with subtle grain.") }}
+
+{{ image_split(
+     image_url=_sku_img,
+     title='Antimicrobial by nature',
+     body="Cannabis sativa cultivated with no pesticides and minimal water. Naturally antimicrobial and breathable. Strong enough for canvas-weight applications, soft enough to wear next to skin after a few washes. Pairs well with our nettle for breathable summer fabrics.",
+     link=_sku_link,
+     image_side='left',
+     image_size=300
+) }}
+
+<tr>
+  <td style="padding:14px 24px;background-color:#ffffff;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid {{ color_card_border }};border-radius:6px;">
+      <tr>
+        <td valign="middle" style="padding:18px 22px;font-family:{{ font_stack }};">
+          <div style="font-size:11px;color:{{ color_link }};letter-spacing:1.5px;text-transform:uppercase;font-weight:600;">Order specs</div>
+          <div style="font-size:20px;color:{{ color_text }};font-weight:700;margin:4px 0 6px;">{{ price_label or '₹275 / kg' }}</div>
+          <div style="font-size:13px;color:{{ color_body }};line-height:1.6;">
+            Hand-spun &nbsp;·&nbsp; Natural undyed &nbsp;·&nbsp; {{ moq_label or 'MOQ 50 kg' }} &nbsp;·&nbsp; Lead time 2-3 weeks
+          </div>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
+{{ paragraph("Where it's used: bedding, towels, drawstring trousers, lightweight summer apparel, canvas blends, accessory bags. Also available in white (bleach-processed) for colour-receptive applications.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{{ cta_button('See on the product page', _sku_link) }}
+
+{{ whatsapp_help_button('Hi Himalayan Fibres — I would like to order natural hemp yarn.') }}
+
+{% endblock %}

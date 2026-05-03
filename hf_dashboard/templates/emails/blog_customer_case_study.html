@@ -1,0 +1,119 @@
+{#-
+  BLOG VARIANT 4 — Customer Case Study.
+
+  B2B social proof: a third-person narrative about how a specific customer
+  uses our yarn, with their pull quote and 2-3 photos of their work.
+  Mid-funnel content for prospects who need to see a real-world install
+  before they commit.
+
+  Per-send variables (most overrideable):
+    first_name*
+
+    -- Header --
+    customer_name            e.g. 'Mahesh Singh'
+    customer_business        e.g. 'Alham Rugs, Bhadohi'
+    case_title               default: 'How {{ customer_name }} switched from imported wool'
+
+    -- Lead + before/after --
+    lead_paragraph           default: case-study intro
+    before_after_stat_1_v/l  e.g. ('4 years', 'On Himalayan Fibres yarn')
+    before_after_stat_2_v/l  e.g. ('40%', 'Lower input cost vs. imports')
+    before_after_stat_3_v/l  e.g. ('200+', 'Carpets shipped to EU')
+
+    -- Story image_split #1 (left) --
+    workshop_image_url, workshop_title, workshop_body, workshop_link
+
+    -- Customer pull quote --
+    customer_quote, customer_quote_attribution
+
+    -- Story image_split #2 (right) --
+    output_image_url, output_title, output_body, output_link
+
+    -- Closing + CTAs --
+    blog_link                "Read the full case study" CTA
+    sample_link              "Request a sample" CTA
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/stats_row.html' import stats_row with context %}
+{% from 'partials/middle/image_split.html' import image_split with context %}
+{% from 'partials/middle/pull_quote.html' import pull_quote with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% set _img = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category' %}
+{% set _field = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field' %}
+
+{% set _name = customer_name or 'Mahesh Singh' %}
+{% set _biz = customer_business or 'Alham Rugs, Bhadohi' %}
+{% set _title = case_title or ('How ' + _name + ' switched from imported wool') %}
+{% set _lead = lead_paragraph or (_name + " runs a hand-knotted carpet atelier in Bhadohi, exporting to galleries and trade shows in Europe and the US. Four years ago, his ateliers were running on imported European wool. Today, they run on Himalayan Fibres Tibetan wool. Here's why he switched, and what changed.") %}
+
+{% set _s1_v = before_after_stat_1_v or '4 years' %}
+{% set _s1_l = before_after_stat_1_l or 'On Himalayan Fibres yarn' %}
+{% set _s2_v = before_after_stat_2_v or '40%' %}
+{% set _s2_l = before_after_stat_2_l or 'Lower input cost vs. imports' %}
+{% set _s3_v = before_after_stat_3_v or '200+' %}
+{% set _s3_l = before_after_stat_3_l or 'Carpets shipped to EU' %}
+
+{% set _w_img = workshop_image_url or (_field + '/field-artisan2-6d81e6bb.jpg') %}
+{% set _w_title = workshop_title or 'The atelier, mid-knot' %}
+{% set _w_body = workshop_body or ("Twelve looms, eighteen weavers, three shifts. " + _name + "'s atelier produces 50-60 carpets a month, each one hand-knotted in counts ranging from 100 to 300 knots per square inch. The wool sits in colour-sorted bundles along one wall &mdash; over 200 dye lots in active rotation.") %}
+{% set _w_link = workshop_link or '' %}
+
+{% set _quote = customer_quote or "We tested mill wool, Indian wool, imported European fleece. The Himalayan Fibres Tibetan wool retains colour through four wet processes. None of the others made it past two." %}
+{% set _quote_attr = customer_quote_attribution or ('— ' + _name + ', ' + _biz) %}
+
+{% set _o_img = output_image_url or (_img + '/burberry-detail-618346bb.jpg') %}
+{% set _o_title = output_title or 'The output' %}
+{% set _o_body = output_body or "What ships out the door: hand-knotted carpets bound for galleries in Berlin, London, and New York. The wool is the constant; the design varies project to project. Three of " + _name + "'s designs from this year are running in a major Manhattan gallery this December." %}
+{% set _o_link = output_link or '' %}
+
+{% block content %}
+
+{{ heading(_title) }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph(_lead) }}
+
+{{ stats_row([
+     {'value': _s1_v, 'label': _s1_l},
+     {'value': _s2_v, 'label': _s2_l},
+     {'value': _s3_v, 'label': _s3_l},
+]) }}
+
+{{ paragraph("<strong>Why he switched.</strong> European wool was the industry default for hand-knotted carpets &mdash; consistent supply, predictable pricing, well-known dye behaviour. The break came in 2022 when shipping costs from EU suppliers tripled, and " + _name + " started looking domestically. Most Indian wool sources couldn't match the loft and dye-retention his EU customers expected. Tibetan wool from us could.") }}
+
+{{ image_split(
+     image_url=_w_img, title=_w_title, body=_w_body, link=_w_link,
+     image_side='left', image_size=300
+) }}
+
+{{ pull_quote(_quote, attribution=_quote_attr) }}
+
+{{ paragraph("<strong>What changed in the workshop.</strong> The transition wasn't just a yarn swap. " + _name + "'s team had to recalibrate dye lots (Tibetan wool absorbs dye more deeply than EU fleece), adjust knot tension, and run a season of test pieces before they were confident shipping to long-standing buyers. By the end of year one, customer feedback had shifted from \"different\" to \"better.\"") }}
+
+{{ image_split(
+     image_url=_o_img, title=_o_title, body=_o_body, link=_o_link,
+     image_side='right', image_size=300
+) }}
+
+{{ paragraph("<strong>What's next.</strong> " + _name + " is now a multi-site operation. He's also become one of our largest custom-blend buyers &mdash; pieces using nettle warps and Tibetan wool wefts that we developed jointly. The next test: a fully traceable carpet line where each piece carries the name of the artisan who spun the yarn AND the artisan who knotted the carpet.") }}
+
+{{ paragraph("If your operation is in a similar place &mdash; weighing imports against domestic specialty fibre, or just curious how the cost-quality tradeoff actually shakes out &mdash; reply and we'll send you the full case study + a sample pack.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{% if blog_link %}
+{{ cta_button('Read the full case study', blog_link) }}
+{% endif %}
+
+{% if sample_link %}
+{{ cta_button('Request a sample', sample_link) }}
+{% endif %}
+
+{{ whatsapp_help_button(('Hi Himalayan Fibres — I read the ' + _name + ' case study and would like to know more.')) }}
+
+{% endblock %}

@@ -1,0 +1,65 @@
+{#-
+  SEASONAL — Harvest announcement.
+  Sent when a new fibre batch arrives in inventory (3-4× per year).
+
+  Per-send variables:
+    first_name*
+    fibre_name*               e.g. 'Himalayan nettle' / 'Tibetan wool'
+    region_name*              e.g. 'Gorkha' / 'Almora'
+    batch_size                e.g. '300 kg' (default 'a fresh batch')
+    available_date            e.g. 'Monday, 15 November' (default 'next week')
+    sku_image_url             default: nettle-thick-yarn
+    sku_link                  default: /product-page/nettle-blend-yarn
+    sample_form_link          adds "Get a free swatch" CTA
+    catalog_link              adds "Browse catalog" CTA
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/image_split.html' import image_split with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% set _img = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category' %}
+{% set _wix = 'https://www.himalayanfibres.com/product-page' %}
+{% set _field = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field' %}
+
+{% set _fibre = fibre_name or 'Himalayan nettle' %}
+{% set _region = region_name or 'Gorkha' %}
+{% set _size = batch_size or 'a fresh batch' %}
+{% set _date = available_date or 'next week' %}
+{% set _sku_img = sku_image_url or (_img + '/nettle-thick-yarn-975912fa.jpg') %}
+{% set _sku_link = sku_link or (_wix + '/nettle-blend-yarn') %}
+
+{% block content %}
+
+{{ heading('Fresh harvest from ' + _region) }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph("Quick note &mdash; <strong>" + _size + " of " + _fibre + " just landed</strong> in inventory from our partner artisans in " + _region + ". This is the first lot of the season, hand-spun and ready to ship from " + _date + ".") }}
+
+{{ image_split(
+     image_url=_sku_img,
+     title='What just arrived',
+     body=("Hand-spun in " + _region + " by partner artisans. Same fibre family, same hands, same wheels you'd expect from us &mdash; just a fresh season. If you've been waiting on stock for a project, now's a good moment."),
+     link=_sku_link,
+     image_side='left',
+     image_size=300
+) }}
+
+{{ paragraph("As always: free samples on request &mdash; reply with your address and we'll dispatch within 2-3 days. Lead time on full orders is 2-3 weeks from confirmed PO. MOQ 50 kg per fibre type.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{% if sample_form_link %}
+{{ cta_button('Get a free swatch', sample_form_link) }}
+{% endif %}
+
+{% if catalog_link %}
+{{ cta_button('Browse the catalog', catalog_link) }}
+{% endif %}
+
+{{ whatsapp_help_button('Hi Prashant — about the fresh ' + _fibre + ' batch...') }}
+
+{% endblock %}

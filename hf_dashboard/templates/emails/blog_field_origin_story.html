@@ -1,0 +1,116 @@
+{#-
+  BLOG VARIANT 2 — Field / Origin story.
+
+  Region- or harvest-specific photojournalism. Lead with location +
+  trip date, multi-paragraph narrative with field-shot image_splits,
+  optional contributor credit. Same skeleton as the canonical sustainability
+  template; different defaults make this a "trip dispatch" feel.
+
+  Per-send variables (most overrideable; defaults assume Almora/Gorkha trip):
+    first_name*
+
+    -- Header / lead --
+    region_name              e.g. 'Almora'
+    trip_date                e.g. 'November 2026'
+    heading_text             default: '{{ region_name }}: a week in the field'
+    lead_paragraph           default: trip-recap intro
+
+    -- Stats row (optional) --
+    stat_1_value/label       e.g. ('600 km', 'Distance covered')
+    stat_2_value/label       e.g. ('40+', 'Artisan partners visited')
+    stat_3_value/label       e.g. ('120 kg', 'Harvest collected')
+
+    -- Story image_split #1 (left) --
+    story1_image_url, story1_title, story1_body, story1_link
+
+    -- Pull quote --
+    quote_text, quote_attribution
+
+    -- Story image_split #2 (right) --
+    story2_image_url, story2_title, story2_body, story2_link
+
+    -- Contributor + CTAs --
+    contributor_name         e.g. 'Photos: Mira Bhatt'
+    blog_link                "See the full gallery" CTA
+    catalog_link             "Browse the catalog" CTA
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/stats_row.html' import stats_row with context %}
+{% from 'partials/middle/image_split.html' import image_split with context %}
+{% from 'partials/middle/pull_quote.html' import pull_quote with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% set _field = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field' %}
+{% set _img = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category' %}
+
+{% set _region = region_name or 'Almora' %}
+{% set _trip = trip_date or 'October 2026' %}
+{% set _heading = heading_text or (_region + ': a week in the field') %}
+{% set _lead = lead_paragraph or ("We just got back from a week in " + _region + " &mdash; visiting our partner artisans, watching the harvest start, and shooting a lot of photographs we'll be sharing over the next month. Here's the short version of what we saw.") %}
+
+{% set _stat1_v = stat_1_value or '600 km' %}
+{% set _stat1_l = stat_1_label or 'Distance covered' %}
+{% set _stat2_v = stat_2_value or '40+' %}
+{% set _stat2_l = stat_2_label or 'Artisan partners visited' %}
+{% set _stat3_v = stat_3_value or '120 kg' %}
+{% set _stat3_l = stat_3_label or 'Harvest collected' %}
+
+{% set _s1_img = story1_image_url or (_field + '/field-artisan1-3bd5ca62.jpg') %}
+{% set _s1_title = story1_title or 'The harvest, mid-cut' %}
+{% set _s1_body = story1_body or "The first cut of the season happens when the stems have lignified but before the autumn frost. The women time it precisely &mdash; too early and the fibre is weak, too late and the bundle splits during retting. We watched four cuts in three days." %}
+{% set _s1_link = story1_link or '' %}
+
+{% set _quote = quote_text or "We've been doing this for forty years. Every season, the question is the same — who buys, and who buys fairly." %}
+{% set _quote_attr = quote_attribution or '— Anita Devi, partner artisan' %}
+
+{% set _s2_img = story2_image_url or (_field + '/field-artisan2-6d81e6bb.jpg') %}
+{% set _s2_title = story2_title or 'The retting tank, week two' %}
+{% set _s2_body = story2_body or "After cutting, the bundles are weighted down in mountain streams for two to three weeks. The cold water rotting breaks down the pectin holding the fibre to the stem. We've yet to find a faster way to do this without losing the fibre quality." %}
+{% set _s2_link = story2_link or '' %}
+
+{% block content %}
+
+{{ heading(_heading) }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph(_lead) }}
+
+{{ stats_row([
+     {'value': _stat1_v, 'label': _stat1_l},
+     {'value': _stat2_v, 'label': _stat2_l},
+     {'value': _stat3_v, 'label': _stat3_l},
+]) }}
+
+{{ paragraph("Three days in, three things stood out: the harvest is happening on time despite the late monsoon, the new artisan partnerships in the south of " + _region + " are now ready to ship, and we've identified a fresh source of natural dyes from the same hills the fibre comes from. More on each below.") }}
+
+{{ image_split(
+     image_url=_s1_img, title=_s1_title, body=_s1_body, link=_s1_link,
+     image_side='left', image_size=300
+) }}
+
+{{ pull_quote(_quote, attribution=_quote_attr) }}
+
+{{ image_split(
+     image_url=_s2_img, title=_s2_title, body=_s2_body, link=_s2_link,
+     image_side='right', image_size=300
+) }}
+
+{{ paragraph("We'll have the full gallery up on the blog by next week &mdash; about 40 photographs and a longer breakdown of what each artisan partner is shipping this season. If any of this is relevant to a project you're working on, reply and we'll get you on the priority sample-pack list.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres' + (contributor_name and ('<br>' + contributor_name) or '') + '</span>') }}
+
+{% if blog_link %}
+{{ cta_button('See the full gallery', blog_link) }}
+{% endif %}
+
+{% if catalog_link %}
+{{ cta_button('Browse the catalog', catalog_link) }}
+{% endif %}
+
+{{ whatsapp_help_button('Hi Himalayan Fibres — I would like to know more about this trip.') }}
+
+{% endblock %}

@@ -1,0 +1,47 @@
+{#-
+  LIFECYCLE — Post-sample follow-up. Sent 5-7 days after sample dispatch.
+  Asks "how did it feel?" and offers a soft path forward (more samples,
+  proforma, or a call). Keep it short and human; not editorial.
+
+  Per-send variables (all optional except first_name + fibre_sent):
+    first_name*
+    fibre_sent*               e.g. 'nettle yarn' / 'all four' / 'Burberry blend'
+    sample_dispatched_at      e.g. 'last Friday'  (defaults to 'last week')
+    proforma_link             optional; renders "Generate a proforma" CTA
+    book_call_link            optional; renders "Book a 15-min call" CTA
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% set _when = sample_dispatched_at or 'last week' %}
+
+{% block content %}
+
+{{ heading('How did the sample feel?', emoji='🌿') }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph("Quick note &mdash; we shipped your <strong>" + fibre_sent + "</strong> sample " + _when + ", and I wanted to check in. Did it arrive in good shape? More importantly &mdash; did the fibre feel right for what you're working on?") }}
+
+{{ paragraph("Three things people usually want next, in case any are useful:") }}
+
+{{ paragraph("• <strong>A different fibre.</strong> If the one we sent isn't quite right, reply with what you'd swap it for and we'll dispatch another sample.<br>• <strong>A larger trial.</strong> Some folks want 1-2 kg before placing a full order. Reply and we'll work it out.<br>• <strong>A proforma.</strong> If you've already decided, we can send a proforma invoice with shipping estimate &mdash; just tell us the quantity.") }}
+
+{{ paragraph("No pressure either way. If now isn't the right time, that's fine; we'll be here when it is.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{% if proforma_link %}
+{{ cta_button('Generate a proforma', proforma_link) }}
+{% endif %}
+
+{% if book_call_link %}
+{{ cta_button('Book a 15-min call', book_call_link) }}
+{% endif %}
+
+{{ whatsapp_help_button('Hi Prashant — about the ' + fibre_sent + ' sample…') }}
+
+{% endblock %}

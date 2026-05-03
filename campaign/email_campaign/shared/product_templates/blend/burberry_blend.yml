@@ -1,0 +1,38 @@
+# Email template metadata — SKU spotlight: Burberry Series Blend.
+# Catalog reference: retailer_id hf_burberry_series.
+
+name: burberry_blend
+tier: product
+product_category: collections
+voice: founder_warm
+
+subject: "Burberry Series Blend — ₹1200/kg, hand-spun, ready to ship"
+preview_text: "Single-product spotlight. Hand-spun by Himalayan artisans. MOQ 50kg, lead time 2-3 weeks."
+
+html_template_file: "products/burberry_blend.html"
+
+required_variables:
+  - first_name
+
+optional_variables:
+  - sku_image_url
+  - sku_link
+  - price_label
+  - moq_label
+
+target_segments:
+  - existing_clients
+  - potential_domestic
+  - international_email
+
+status: READY
+
+description: |
+  Single-SKU spotlight for Burberry Series Blend. Mirrors the wool_focus pattern
+  but compressed for a single product: 1 image_split + 1 spec card +
+  1 CTA. Used in Phase 4 lifecycle (post-sample re-engagement when
+  prospect's interest is this specific SKU) and as a standalone for
+  active-customer reorder reminders.
+
+  Catalog: retailer_id hf_burberry_series (₹1200).
+  Wix: /product-page/burberry-series

@@ -1,24 +1,37 @@
 # Email template metadata — winback for clients silent 60+ days.
-# HTML to be built.
+# HTML at hf_dashboard/templates/emails/winback_60d_silent.html.
 
 name: winback_60d_silent
 tier: lifecycle
-voice: founder_warm   # for international/English audiences
+voice: founder_warm
 
 subject: "{{ first_name }}, what's new at Himalayan Fibres since you last visited"
 preview_text: "A short note — no pitch, just an update on what's changed since we last spoke."
 
-html_template_file: "winback_60d_silent.html"  # TO BE BUILT
+html_template_file: "winback_60d_silent.html"
 
 required_variables:
   - first_name
 
+optional_variables:
+  - last_engagement_at     # human phrase e.g. "your last order in October"
+  - whats_new_html         # safe HTML bullet list of recent changes
+                           # default: 3-bullet baked into template
+  - hero_image_url         # default: burberry-27f4a1b3.jpg
+
+hero_image: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/burberry-27f4a1b3.jpg"
+
+alternates:
+  - "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/wool-millspun-cfdf995d.jpg"
+  - "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/nettle-thick-yarn-975912fa.jpg"
+
 target_segments:
   - churned_clients
+
+status: READY
 
 description: |
   Single-touch reactivation, sent 60 days after last engagement (any channel).
   Honest tone (no "we miss you"). Lead with what's NEW since they left:
-  certifications, new SKUs, new colors. Soft CTA: free fresh sample pack.
-
-status: PLANNED
+  certifications, new SKUs, new colors. Soft CTA: free fresh sample pack via
+  WhatsApp button.

@@ -1,0 +1,68 @@
+# Email template metadata — Signature collections range focus (editorial blog).
+# HTML at hf_dashboard/templates/emails/collections_focus.html.
+
+name: collections_focus
+tier: category
+product_category: collections
+voice: founder_warm
+
+subject: "Signature collections — hand-spun in named recipes"
+preview_text: "Burberry, Noor, Seriry, Snow White. Stable fibre ratios, stable dye palettes, batch-to-batch consistency."
+
+html_template_file: "collections_focus.html"
+
+required_variables:
+  - first_name
+
+optional_variables:
+  # Texture image_split
+  - texture_image_url        # default: burberry
+  - texture_title            # default: 'Curated, not catalogued'
+  - texture_body
+  - texture_link             # default: /product-page/burberry-series
+  # Pull quote
+  - quote_text               # default: atelier partner, Mirzapur
+  - quote_attribution
+  # Process image_split
+  - process_image_url        # default: burberry-detail
+  - process_title            # default: 'How a collection is born'
+  - process_body
+  - process_link
+  # Variant grid (each cell = one named collection)
+  - variant_1_image_url      # default: burberry
+  - variant_1_caption        # default: 'Burberry — earthy, autumn tones'
+  - variant_1_link           # default: /product-page/burberry-series
+  - variant_2_image_url      # default: noor
+  - variant_2_caption        # default: 'Noor — soft, neutral palette'
+  - variant_2_link           # default: /product-page/noor-series
+  - variant_3_image_url      # default: burberry-detail (placeholder for Snow White)
+  - variant_3_caption        # default: 'Snow White — pure, undyed natural'
+  - variant_3_link           # default: /product-page/snow-white-series
+  # Footer CTA
+  - catalog_link
+
+hero_image: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/burberry-27f4a1b3.jpg"
+
+alternates:
+  - "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/noor-840a12e8.jpg"
+  - "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/burberry-detail-618346bb.jpg"
+
+target_segments:
+  - existing_clients
+  - potential_domestic
+  - international_email
+
+status: READY
+
+description: |
+  Editorial blog-format email for the 4 named signature collections
+  (Burberry, Noor, Seriry, Snow White). Same skeleton as wool_focus.
+
+  IMAGE GAP: Snow White and Seriry don't have dedicated Supabase
+  images yet (Drive has 4-9MB raws too big for MCP). The variant_3
+  cell currently uses burberry-detail as a placeholder. When small
+  webp variants are uploaded, swap variant_3_image_url to the real
+  Snow White / Seriry asset.
+
+  Voice: founder_warm. Story angle: how a named collection earns its
+  place (stable ratio + stable dye + active demand).

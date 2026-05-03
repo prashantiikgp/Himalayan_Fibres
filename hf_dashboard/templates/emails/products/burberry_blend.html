@@ -1,0 +1,65 @@
+{#-
+  PRODUCT SKU — Burberry Series blend (catalog hf_burberry_series, ₹1200).
+
+  Per-send variables:
+    first_name*
+    sku_image_url           default: burberry
+    sku_link                default: /product-page/burberry-series
+    price_label             default: '₹1,200 / kg'
+    moq_label               default: 'MOQ 50 kg'
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/image_split.html' import image_split with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% set _img = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category' %}
+{% set _wix = 'https://www.himalayanfibres.com/product-page' %}
+
+{% set _sku_img = sku_image_url or (_img + '/burberry-27f4a1b3.jpg') %}
+{% set _sku_link = sku_link or (_wix + '/burberry-series') %}
+
+{% block content %}
+
+{{ heading('Burberry Series — signature blend') }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph("Our most-requested signature blend. Earthy autumn-tone yarn made from a fixed recipe of Himalayan nettle and Tibetan wool, naturally dyed in our partner workshops in Almora. Same fibre ratio, same dye palette, batch after batch.") }}
+
+{{ image_split(
+     image_url=_sku_img,
+     title='Curated, not catalogued',
+     body="A fixed recipe earned its place after three batches of consistent demand. The colour palette is locked &mdash; browns, ambers, terracotta, rust &mdash; and we keep at least 50 kg in active inventory at any time. Designers can repeat-order months apart and the next shipment will look like the last.",
+     link=_sku_link,
+     image_side='left',
+     image_size=300
+) }}
+
+<tr>
+  <td style="padding:14px 24px;background-color:#ffffff;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid {{ color_card_border }};border-radius:6px;">
+      <tr>
+        <td valign="middle" style="padding:18px 22px;font-family:{{ font_stack }};">
+          <div style="font-size:11px;color:{{ color_link }};letter-spacing:1.5px;text-transform:uppercase;font-weight:600;">Order specs</div>
+          <div style="font-size:20px;color:{{ color_text }};font-weight:700;margin:4px 0 6px;">{{ price_label or '₹1,200 / kg' }}</div>
+          <div style="font-size:13px;color:{{ color_body }};line-height:1.6;">
+            Nettle + Tibetan wool blend &nbsp;·&nbsp; Naturally dyed &nbsp;·&nbsp; {{ moq_label or 'MOQ 50 kg' }} &nbsp;·&nbsp; Lead time 2-3 weeks
+          </div>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
+{{ paragraph("Where it's used: hand-knotted carpet collections shipping to Berlin, London, and New York. Also picked up by furniture makers for upholstery accent yarn and by a handful of high-end shawl designers. Pairs in custom projects with our Snow White natural for tonal contrast.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{{ cta_button('See on the product page', _sku_link) }}
+
+{{ whatsapp_help_button('Hi Himalayan Fibres — I would like to order Burberry Series blend.') }}
+
+{% endblock %}
