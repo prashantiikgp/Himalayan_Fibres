@@ -106,6 +106,14 @@ def upsert_rows(rows: list[dict]) -> tuple[int, str]:
     (the model declares it but `create_all` never ALTERs existing
     tables), so PostgREST on_conflict won't work. Delete-then-insert
     is idempotent and works without the constraint.
+
+    Bug fix 2026-05-03: previously deleted only is_draft=true rows,
+    which left an orphan if the row had been submitted to Meta and
+    flipped is_draft=false between sync runs. Now deletes ALL rows
+    matching name OR meta_template_id collision, then re-inserts.
+    Submitted Meta-tracked rows (with meta_template_id) are preserved
+    by skipping them in the input list — caller's responsibility to
+    not include already-submitted templates in `rows`.
     """
     headers = {
         "apikey": SUPABASE_KEY,
@@ -115,6 +123,9 @@ def upsert_rows(rows: list[dict]) -> tuple[int, str]:
     }
     names = [r["name"] for r in rows]
     in_clause = ",".join(f'"{n}"' for n in names)
+    # Delete only DRAFT rows for these names — submitted rows (is_draft=false,
+    # has meta_template_id) stay put and the caller must not re-sync them
+    # under the same name.
     del_url = (
         f"{SUPABASE_URL}/rest/v1/wa_templates"
         f"?name=in.({in_clause})&is_draft=eq.true"
@@ -122,8 +133,25 @@ def upsert_rows(rows: list[dict]) -> tuple[int, str]:
     dr = httpx.delete(del_url, headers=headers, timeout=30)
     if dr.status_code >= 300:
         return dr.status_code, f"DELETE failed: {dr.text}"
+
+    # Filter input: skip names that already exist as submitted (is_draft=false)
+    # to avoid creating duplicate rows alongside the submitted version.
+    check_url = (
+        f"{SUPABASE_URL}/rest/v1/wa_templates"
+        f"?name=in.({in_clause})&is_draft=eq.false&select=name"
+    )
+    cr = httpx.get(check_url, headers=headers, timeout=30)
+    submitted_names = {row["name"] for row in (cr.json() if cr.status_code < 300 else [])}
+    rows_to_insert = [r for r in rows if r["name"] not in submitted_names]
+    skipped = len(rows) - len(rows_to_insert)
+    if skipped:
+        print(f"  Skipping {skipped} already-submitted: {sorted(submitted_names & set(names))}")
+
+    if not rows_to_insert:
+        return 200, "[]"
+
     ins_url = f"{SUPABASE_URL}/rest/v1/wa_templates"
-    ir = httpx.post(ins_url, headers=headers, content=json.dumps(rows), timeout=30)
+    ir = httpx.post(ins_url, headers=headers, content=json.dumps(rows_to_insert), timeout=30)
     return ir.status_code, ir.text
 
 
