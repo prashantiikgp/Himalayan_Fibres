@@ -226,12 +226,14 @@ def _seed_contacts(db: Session):
     count = 0
     for _, row in df.iterrows():
         phone = str(row.get("phone", "")).strip()
-        # Normalize phone → wa_id (add 91 prefix for Indian numbers)
-        wa_id = None
-        if phone and len(phone) == 10 and phone.isdigit():
-            wa_id = f"91{phone}"
-        elif phone and len(phone) > 10:
-            wa_id = phone.lstrip("+")
+
+        # Prefer wa_id from CSV if present; otherwise derive from phone.
+        wa_id = str(row.get("wa_id", "")).strip() or None
+        if not wa_id and phone:
+            if len(phone) == 10 and phone.isdigit():
+                wa_id = f"91{phone}"
+            elif len(phone) > 10:
+                wa_id = phone.lstrip("+")
 
         tags_raw = str(row.get("tags", "")).strip()
         tags = [t.strip() for t in tags_raw.split(",") if t.strip()] if tags_raw else []
@@ -242,6 +244,13 @@ def _seed_contacts(db: Session):
             continue
         if wa_id and db.query(Contact).filter(Contact.wa_id == wa_id).first():
             wa_id = None  # Clear duplicate wa_id, keep contact
+
+        # Lifecycle: use CSV value when present, fall back to derivation.
+        lifecycle = str(row.get("lifecycle", "")).strip() or _compute_lifecycle(
+            row.get("customer_type", ""),
+            row.get("consent_status", "pending"),
+            int(row.get("total_emails_sent", 0) or 0),
+        )
 
         contact = Contact(
             id=row.get("id", str(uuid.uuid4())[:8]),
@@ -263,11 +272,7 @@ def _seed_contacts(db: Session):
             tags=tags,
             consent_status=row.get("consent_status", "pending"),
             consent_source=row.get("consent_source", ""),
-            lifecycle=_compute_lifecycle(
-                row.get("customer_type", ""),
-                row.get("consent_status", "pending"),
-                int(row.get("total_emails_sent", 0) or 0),
-            ),
+            lifecycle=lifecycle,
             total_emails_sent=int(row.get("total_emails_sent", 0) or 0),
             total_emails_opened=int(row.get("total_emails_opened", 0) or 0),
             total_emails_clicked=int(row.get("total_emails_clicked", 0) or 0),
@@ -278,6 +283,8 @@ def _seed_contacts(db: Session):
             source=row.get("source", ""),
             notes=row.get("notes", ""),
             wa_id=wa_id,
+            wa_consent_status=row.get("wa_consent_status", "unknown") or "unknown",
+            wa_profile_name=row.get("wa_profile_name", ""),
         )
         db.add(contact)
         count += 1
