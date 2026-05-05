@@ -621,6 +621,213 @@ def test_list_templates_tier_filter(
         assert t["tier"] == "utility"
 
 
+# ─── Phase 4.1a — Template draft CRUD ────────────────────────────────────
+
+
+def test_create_template_returns_draft(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    stamp = int(time.time() * 1000)
+    name = f"phase41_create_{stamp}"
+    res = client.post(
+        "/api/v2/wa/templates",
+        json={
+            "name": name,
+            "category": "MARKETING",
+            "body_text": "Hi {{1}}",
+            "buttons": [],
+        },
+        headers=auth_headers,
+    )
+    assert res.status_code == 201, res.text
+    body = res.json()
+    assert body["name"] == name
+    assert body["is_draft"] is True
+    assert body["status"] is None
+    assert body["body_text"] == "Hi {{1}}"
+
+
+def test_create_template_duplicate_name_409(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    stamp = int(time.time() * 1000)
+    name = f"phase41_dup_{stamp}"
+    body = {"name": name, "category": "MARKETING", "body_text": "x"}
+    first = client.post("/api/v2/wa/templates", json=body, headers=auth_headers)
+    assert first.status_code == 201
+    second = client.post("/api/v2/wa/templates", json=body, headers=auth_headers)
+    assert second.status_code == 409
+
+
+def test_create_template_missing_name_400(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    res = client.post(
+        "/api/v2/wa/templates",
+        json={"name": "   ", "body_text": "x"},
+        headers=auth_headers,
+    )
+    assert res.status_code == 400
+
+
+def test_save_draft_in_place(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """Save on a draft mutates the same row, no clone."""
+    stamp = int(time.time() * 1000)
+    name = f"phase41_save_draft_{stamp}"
+    create = client.post(
+        "/api/v2/wa/templates",
+        json={"name": name, "body_text": "first"},
+        headers=auth_headers,
+    )
+    tid = create.json()["id"]
+
+    save = client.post(
+        f"/api/v2/wa/templates/{tid}/save",
+        json={"body_text": "edited"},
+        headers=auth_headers,
+    )
+    assert save.status_code == 200, save.text
+    body = save.json()
+    assert body["id"] == tid  # SAME row — in-place edit
+    assert body["body_text"] == "edited"
+    assert body["is_draft"] is True
+
+
+def test_save_approved_clones_with_v2_suffix(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """Saving an APPROVED template creates a `<base>_v2` draft clone
+    instead of mutating the original (audit-mandated clone-on-edit)."""
+    from services.database import get_db  # type: ignore[import-not-found]
+    from services.models import WATemplate  # type: ignore[import-not-found]
+
+    stamp = int(time.time() * 1000)
+    base = f"phase41_approved_{stamp}"
+    db = get_db()
+    try:
+        t = WATemplate(
+            name=base, language="en_US", category="MARKETING", status="APPROVED",
+            body_text="Original body", buttons=[], variables=[], is_draft=False,
+        )
+        db.add(t)
+        db.commit()
+        db.refresh(t)
+        original_id = t.id
+    finally:
+        db.close()
+
+    save = client.post(
+        f"/api/v2/wa/templates/{original_id}/save",
+        json={"body_text": "Edited body"},
+        headers=auth_headers,
+    )
+    assert save.status_code == 200, save.text
+    clone = save.json()
+    assert clone["id"] != original_id, "expected a NEW row, not in-place edit"
+    assert clone["name"] == f"{base}_v2"
+    assert clone["is_draft"] is True
+    assert clone["body_text"] == "Edited body"
+    assert clone["status"] is None
+
+    # Original is untouched.
+    orig_res = client.get(
+        f"/api/v2/wa/templates/{original_id}", headers=auth_headers
+    )
+    assert orig_res.json()["body_text"] == "Original body"
+    assert orig_res.json()["status"] == "APPROVED"
+
+
+def test_save_approved_picks_next_available_clone_index(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """If `<base>_v2` already exists, saving the original creates `_v3`."""
+    from services.database import get_db  # type: ignore[import-not-found]
+    from services.models import WATemplate  # type: ignore[import-not-found]
+
+    stamp = int(time.time() * 1000)
+    base = f"phase41_clone_idx_{stamp}"
+    db = get_db()
+    try:
+        original = WATemplate(
+            name=base, language="en_US", category="MARKETING", status="APPROVED",
+            body_text="orig", buttons=[], variables=[], is_draft=False,
+        )
+        existing_v2 = WATemplate(
+            name=f"{base}_v2", language="en_US", category="MARKETING",
+            status=None, body_text="prev clone",
+            buttons=[], variables=[], is_draft=True,
+        )
+        db.add_all([original, existing_v2])
+        db.commit()
+        db.refresh(original)
+        oid = original.id
+    finally:
+        db.close()
+
+    save = client.post(
+        f"/api/v2/wa/templates/{oid}/save",
+        json={"body_text": "newer"},
+        headers=auth_headers,
+    )
+    assert save.json()["name"] == f"{base}_v3"
+
+
+def test_delete_draft(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    stamp = int(time.time() * 1000)
+    name = f"phase41_del_{stamp}"
+    create = client.post(
+        "/api/v2/wa/templates",
+        json={"name": name, "body_text": "x"},
+        headers=auth_headers,
+    )
+    tid = create.json()["id"]
+
+    res = client.delete(f"/api/v2/wa/templates/{tid}", headers=auth_headers)
+    assert res.status_code == 204
+
+    # Subsequent GET → 404
+    assert (
+        client.get(f"/api/v2/wa/templates/{tid}", headers=auth_headers).status_code
+        == 404
+    )
+
+
+def test_delete_approved_409(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """Submitted (APPROVED) templates are immutable; delete returns 409."""
+    from services.database import get_db  # type: ignore[import-not-found]
+    from services.models import WATemplate  # type: ignore[import-not-found]
+
+    stamp = int(time.time() * 1000)
+    db = get_db()
+    try:
+        t = WATemplate(
+            name=f"phase41_immutable_{stamp}", language="en_US",
+            category="MARKETING", status="APPROVED",
+            body_text="cant delete", buttons=[], variables=[], is_draft=False,
+        )
+        db.add(t)
+        db.commit()
+        db.refresh(t)
+        tid = t.id
+    finally:
+        db.close()
+
+    res = client.delete(f"/api/v2/wa/templates/{tid}", headers=auth_headers)
+    assert res.status_code == 409
+
+
+def test_template_writes_require_auth(client: TestClient) -> None:
+    assert client.post("/api/v2/wa/templates", json={"name": "x"}).status_code == 401
+    assert client.post("/api/v2/wa/templates/1/save", json={}).status_code == 401
+    assert client.delete("/api/v2/wa/templates/1").status_code == 401
+
+
 def test_sse_stream_route_registered(client: TestClient) -> None:
     """The SSE stream endpoint exists at /wa/stream (Phase 2.2). Path is
     /stream rather than /conversations/stream so it can't collide with

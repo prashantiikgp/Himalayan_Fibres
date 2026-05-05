@@ -29,6 +29,7 @@ from api_v2.schemas.wa import (
     ConversationListResponse,
     SendMessageRequest,
     SendTemplateRequest,
+    TemplateUpsert,
     WAMessageOut,
     WATemplateOut,
     WATemplatesResponse,
@@ -639,3 +640,171 @@ async def stream_conversations(request: Request) -> StreamingResponse:
             "Connection": "keep-alive",
         },
     )
+
+
+# ─── Template Studio CRUD (Phase 4.1a) ───────────────────────────────────
+
+
+def _next_clone_name(db, base_name: str) -> str:
+    """Find the next available `<base>_vN` suffix for clone-on-edit.
+
+    Strips any existing `_vN` from `base_name` first so editing a
+    template that's already a clone (e.g. `welcome_message_v2`) creates
+    `welcome_message_v3`, not `welcome_message_v2_v2`. Mirrors v1's
+    studio behavior.
+    """
+    bare = re.sub(r"_v\d+$", "", base_name or "")
+    existing = {
+        row[0]
+        for row in db.query(WATemplate.name)
+        .filter(WATemplate.name.like(f"{bare}_v%"))
+        .all()
+    }
+    n = 2
+    while f"{bare}_v{n}" in existing:
+        n += 1
+    return f"{bare}_v{n}"
+
+
+def _apply_template_fields(t: WATemplate, body: TemplateUpsert) -> None:
+    """Mutate `t` from a TemplateUpsert payload. Used by both create and
+    save paths so the field list stays in one place."""
+    t.language = body.language or "en_US"
+    t.category = body.category or "MARKETING"
+    t.body_text = body.body_text or ""
+    t.header_format = body.header_format
+    t.header_text = body.header_text
+    t.header_asset_url = body.header_asset_url
+    t.footer_text = body.footer_text
+    t.buttons = list(body.buttons or [])
+
+
+@router.post(
+    "/templates",
+    response_model=WATemplateOut,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_template(body: TemplateUpsert) -> WATemplateOut:
+    """Create a new draft template. `name` must be unique."""
+    if not body.name or not body.name.strip():
+        raise HTTPException(status_code=400, detail="name is required")
+    name = body.name.strip()
+
+    db = get_db()
+    try:
+        existing = db.query(WATemplate).filter(WATemplate.name == name).first()
+        if existing is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Template name {name!r} already exists",
+            )
+
+        t = WATemplate(name=name, status=None, is_draft=True, variables=[])
+        _apply_template_fields(t, body)
+        db.add(t)
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        db.refresh(t)
+        return _template_to_out(t)
+    except HTTPException:
+        raise
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+
+@router.post("/templates/{template_id}/save", response_model=WATemplateOut)
+def save_template(template_id: int, body: TemplateUpsert) -> WATemplateOut:
+    """Save edits to a template.
+
+    Clone-on-edit policy: if the target template is APPROVED (or in any
+    Meta-acknowledged state — PENDING / APPROVED / REJECTED), saving
+    creates a fresh DRAFT clone with name `<base>_vN` instead of
+    mutating the immutable submitted record. This protects a sent
+    template from accidental edits.
+
+    A draft is mutated in place.
+    """
+    db = get_db()
+    try:
+        t = db.query(WATemplate).filter(WATemplate.id == template_id).first()
+        if t is None:
+            raise HTTPException(status_code=404, detail="Template not found")
+
+        if t.is_draft and not t.status:
+            # Draft path: in-place edit.
+            _apply_template_fields(t, body)
+            try:
+                db.commit()
+            except Exception:
+                db.rollback()
+                raise
+            db.refresh(t)
+            return _template_to_out(t)
+
+        # Clone-on-edit path: original is immutable.
+        clone_name = _next_clone_name(db, t.name)
+        clone = WATemplate(name=clone_name, status=None, is_draft=True, variables=[])
+        # Start from the original's fields, then overlay the request body.
+        clone.language = t.language or "en_US"
+        clone.category = t.category or "MARKETING"
+        clone.body_text = t.body_text or ""
+        clone.header_format = t.header_format
+        clone.header_text = t.header_text
+        clone.header_asset_url = t.header_asset_url
+        clone.footer_text = t.footer_text
+        clone.buttons = list(t.buttons or [])
+        _apply_template_fields(clone, body)
+        db.add(clone)
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        db.refresh(clone)
+        return _template_to_out(clone)
+    except HTTPException:
+        raise
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+
+@router.delete(
+    "/templates/{template_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_template(template_id: int) -> None:
+    """Delete a draft template. Submitted templates (PENDING / APPROVED
+    / REJECTED) are immutable — deletion would orphan Meta's record.
+    """
+    db = get_db()
+    try:
+        t = db.query(WATemplate).filter(WATemplate.id == template_id).first()
+        if t is None:
+            raise HTTPException(status_code=404, detail="Template not found")
+        if not t.is_draft or t.status:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Submitted templates cannot be deleted; create a new draft instead",
+            )
+        db.delete(t)
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+    except HTTPException:
+        raise
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()

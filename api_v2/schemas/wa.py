@@ -135,6 +135,27 @@ class SendMessageRequest(BaseModel):
     text: str
 
 
+class TemplateUpsert(BaseModel):
+    """Body for POST /wa/templates and POST /wa/templates/{id}/save.
+
+    Includes only the fields the Studio editor exposes. `name` is
+    required on create; on save it's optional and ignored if provided
+    (templates can't be renamed after creation — Meta uses the name as
+    the identifier).
+    """
+
+    name: str | None = None
+    language: str = "en_US"
+    category: str = "MARKETING"
+    body_text: str = ""
+    header_format: str | None = None
+    """TEXT / IMAGE / DOCUMENT / VIDEO. None = no header."""
+    header_text: str | None = None
+    header_asset_url: str | None = None
+    footer_text: str | None = None
+    buttons: list[dict] = []
+
+
 class SendTemplateRequest(BaseModel):
     """POST /wa/template-sends — template send (works outside the window)."""
 

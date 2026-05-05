@@ -68,6 +68,13 @@ export type WATemplateOut = {
   header_text: string | null;
   footer_text: string | null;
   variables: string[];
+  // Phase 4.0 additions
+  is_draft: boolean;
+  tier: string;
+  rejection_reason: string;
+  submitted_at: string | null;
+  quality_score: string | null;
+  buttons: unknown[];
 };
 
 export type WATemplatesResponse = {
@@ -110,12 +117,28 @@ export function useConversationDetail(contactId: string | null) {
   });
 }
 
-export function useWaTemplates(category?: string) {
-  const qs = category ? `?category=${encodeURIComponent(category)}` : "";
+export type TemplatesQuery = {
+  category?: string;
+  status?: string;
+  tier?: string;
+  search?: string;
+  include_drafts?: boolean;
+};
+
+export function useWaTemplates(q: TemplatesQuery | string = {}) {
+  // Backwards-compat: useWaTemplates("MARKETING") is still supported.
+  const query: TemplatesQuery = typeof q === "string" ? { category: q } : q;
+  const params = new URLSearchParams();
+  if (query.category) params.set("category", query.category);
+  if (query.status) params.set("status", query.status);
+  if (query.tier) params.set("tier", query.tier);
+  if (query.search) params.set("search", query.search);
+  if (query.include_drafts) params.set("include_drafts", "true");
+  const qs = params.toString() ? `?${params.toString()}` : "";
   return useQuery({
-    queryKey: ["wa", "templates", category ?? "all"],
+    queryKey: ["wa", "templates", query],
     queryFn: () => apiFetch<WATemplatesResponse>(`/api/v2/wa/templates${qs}`),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000,
   });
 }
 
@@ -169,6 +192,68 @@ export function useSendTemplate() {
     onSuccess: (_msg, variables) => {
       qc.invalidateQueries({ queryKey: ["wa", "conversation", variables.contact_id] });
       qc.invalidateQueries({ queryKey: ["wa", "conversations"] });
+    },
+  });
+}
+
+/* ── Template Studio (Phase 4.1a) ─────────────────────────────────────── */
+
+export type TemplateUpsert = {
+  name?: string;
+  language?: string;
+  category?: string;
+  body_text?: string;
+  header_format?: string | null;
+  header_text?: string | null;
+  header_asset_url?: string | null;
+  footer_text?: string | null;
+  buttons?: unknown[];
+};
+
+export function useWaTemplate(templateId: number | null) {
+  return useQuery({
+    queryKey: ["wa", "template", templateId],
+    enabled: templateId !== null,
+    queryFn: () => apiFetch<WATemplateOut>(`/api/v2/wa/templates/${templateId}`),
+  });
+}
+
+export function useCreateTemplate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: TemplateUpsert) =>
+      apiFetch<WATemplateOut>("/api/v2/wa/templates", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["wa", "templates"] });
+    },
+  });
+}
+
+export function useSaveTemplate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: number; body: TemplateUpsert }) =>
+      apiFetch<WATemplateOut>(`/api/v2/wa/templates/${id}/save`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["wa", "templates"] });
+      qc.invalidateQueries({ queryKey: ["wa", "template"] });
+    },
+  });
+}
+
+export function useDeleteTemplate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) =>
+      apiFetch<void>(`/api/v2/wa/templates/${id}`, { method: "DELETE" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["wa", "templates"] });
     },
   });
 }
