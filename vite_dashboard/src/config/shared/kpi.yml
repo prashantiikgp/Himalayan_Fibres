@@ -52,3 +52,14 @@ kpis:
     label: "WA Campaigns"
     color: "#22c55e"
     api_field: "wa_campaigns"
+
+  # B12 fix — counted from the DB (was hardcoded "7 email, 13 WA" in v1).
+  - id: email_templates
+    label: "Email Templates"
+    color: "#6366f1"
+    api_field: "email_template_count"
+
+  - id: wa_templates
+    label: "WA Templates"
+    color: "#22c55e"
+    api_field: "wa_template_count"

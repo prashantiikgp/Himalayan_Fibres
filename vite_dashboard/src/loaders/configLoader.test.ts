@@ -38,7 +38,8 @@ describe("configLoader", () => {
   it("getPage('home') has the structure HomePage expects", () => {
     configLoader.bootstrap();
     const home = configLoader.getPage("home");
-    expect(home.page.sections.kpi_rows).toHaveLength(2);
+    // Phase 5.1 added a third row for the B12 template-count KPIs.
+    expect(home.page.sections.kpi_rows.length).toBeGreaterThanOrEqual(2);
     expect(home.page.sections.kpi_rows[0]?.ids.length).toBeGreaterThan(0);
   });
 });

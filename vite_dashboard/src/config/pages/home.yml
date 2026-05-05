@@ -10,6 +10,7 @@ page:
     kpi_rows:
       - ids: ["emails_today", "wa_today", "total_contacts", "wa_24h_window"]
       - ids: ["opted_in", "pending", "wa_ready", "email_campaigns", "wa_campaigns"]
+      - ids: ["email_templates", "wa_templates"]
     lifecycle:
       title: "Lifecycle"
       limit: 20

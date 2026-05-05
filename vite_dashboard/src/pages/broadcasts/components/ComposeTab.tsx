@@ -6,7 +6,8 @@
  * B10 fix (type-SEND-to-confirm) are wired here.
  */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +28,21 @@ import { SendConfirmDialog } from "./SendConfirmDialog";
 import { SendProgress } from "./SendProgress";
 
 export function ComposeTab() {
-  const [channel, setChannel] = useState<BroadcastChannel>("whatsapp");
+  const [params, setParams] = useSearchParams();
+  // B11: sidebar deep-links pass `?channel=...` to pre-select the
+  // channel toggle. Default WhatsApp when omitted.
+  const channelParam = params.get("channel");
+  const initialChannel: BroadcastChannel =
+    channelParam === "email" ? "email" : "whatsapp";
+  const [channel, setChannel] = useState<BroadcastChannel>(initialChannel);
+
+  // Keep the toggle in sync if the URL changes (navigating between
+  // sidebar entries while the page is mounted).
+  useEffect(() => {
+    if (channelParam === "email" && channel !== "email") setChannel("email");
+    if (channelParam === "whatsapp" && channel !== "whatsapp") setChannel("whatsapp");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [channelParam]);
   const [name, setName] = useState("");
   const [segmentId, setSegmentId] = useState<string>("all_opted_in");
   const [templateName, setTemplateName] = useState<string>("");
@@ -165,6 +180,9 @@ export function ComposeTab() {
                   onClick={() => {
                     setChannel(c);
                     setTemplateName("");
+                    const next = new URLSearchParams(params);
+                    next.set("channel", c);
+                    setParams(next, { replace: true });
                   }}
                   className={
                     channel === c

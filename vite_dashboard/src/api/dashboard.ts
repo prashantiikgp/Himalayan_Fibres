@@ -17,6 +17,8 @@ export type HomeData = {
   wa_campaigns: number;
   total_flows: number;
   active_runs: number;
+  email_template_count: number;
+  wa_template_count: number;
   lifecycle: { id: string; label: string; icon: string; color: string; count: number }[];
   activity: {
     timestamp: string;

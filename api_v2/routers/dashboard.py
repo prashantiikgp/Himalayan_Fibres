@@ -26,6 +26,11 @@ from services.home_metrics import (  # type: ignore[import-not-found]
     lifecycle_counts_cached as _lifecycle_counts_cached,
 )
 from services.contact_schema import get_lifecycle_stages  # type: ignore[import-not-found]
+from services.database import get_db  # type: ignore[import-not-found]
+from services.models import (  # type: ignore[import-not-found]
+    EmailTemplate,
+    WATemplate,
+)
 
 router = APIRouter()
 
@@ -56,6 +61,11 @@ class HomeData(BaseModel):
     wa_campaigns: int
     total_flows: int
     active_runs: int
+    email_template_count: int
+    """Active EmailTemplate rows. **B12 fix** — v1's home.py hardcoded
+    'Templates: 7 email, 13 WA'; v2 reads from the DB."""
+    wa_template_count: int
+    """Approved, non-draft WATemplate rows."""
     lifecycle: list[LifecycleEntry]
     activity: list[ActivityEntry]
 
@@ -70,6 +80,23 @@ async def dashboard_home(_auth: Annotated[None, Depends(require_auth)]) -> HomeD
     counts = _home_counters_cached()
     lifecycle_map = _lifecycle_counts_cached()
     raw_activities = _activity_feed_cached(20)
+
+    # **B12 fix**: count templates from the DB instead of the v1
+    # hardcoded "7 email, 13 WA" pair. Cheap query — runs on every
+    # /dashboard/home call but the table is tiny (~30 rows).
+    db = get_db()
+    try:
+        email_tpl_count = (
+            db.query(EmailTemplate).filter(EmailTemplate.is_active.is_(True)).count()
+        )
+        wa_tpl_count = (
+            db.query(WATemplate)
+            .filter(WATemplate.is_draft.is_(False))
+            .filter(WATemplate.status == "APPROVED")
+            .count()
+        )
+    finally:
+        db.close()
 
     stages = get_lifecycle_stages()
     lifecycle = [
@@ -105,6 +132,8 @@ async def dashboard_home(_auth: Annotated[None, Depends(require_auth)]) -> HomeD
         wa_campaigns=counts["wa_campaigns"],
         total_flows=counts["total_flows"],
         active_runs=counts["active_runs"],
+        email_template_count=email_tpl_count,
+        wa_template_count=wa_tpl_count,
         lifecycle=lifecycle,
         activity=activity,
     )

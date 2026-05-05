@@ -29,16 +29,31 @@ sidebar:
           icon: "MessageSquare"
           landed_phase: 2
           channel: "whatsapp"
-        - id: broadcasts
+        - id: broadcasts_wa
           label: "Broadcasts"
           icon: "Send"
+          path: "/broadcasts?tab=compose&channel=whatsapp"
           landed_phase: 3
-          channel: "mixed"
+          channel: "whatsapp"
         - id: wa_templates
           label: "Templates"
           icon: "FileText"
           landed_phase: 4
           channel: "whatsapp"
+
+    # Audit B11 — split Broadcasts into its two channels under their
+    # respective sections so users navigate by intent, not by feature.
+    # Both links route to /broadcasts; the channel toggle on Compose
+    # is preset by the path's `?channel=...` query param.
+    - id: email
+      label: "Email"
+      items:
+        - id: broadcasts_email
+          label: "Broadcasts"
+          icon: "Mail"
+          path: "/broadcasts?tab=compose&channel=email"
+          landed_phase: 3
+          channel: "email"
 
     - id: shared
       label: ""
