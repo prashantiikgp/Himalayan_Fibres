@@ -133,8 +133,9 @@ class ThemeEngine:
             button_primary_background_fill_hover_dark=colors.PRIMARY_HOVER,
             button_primary_text_color="#ffffff",
             button_primary_text_color_dark="#ffffff",
-            button_primary_shadow=comp.button.primary_shadow,
-            button_primary_shadow_dark=comp.button.primary_shadow,
+            # button_primary_shadow / _dark removed — newer Gradio Base.set()
+            # rejects these keys. Cosmetic only; CSS shadow can be re-added
+            # via custom CSS if needed.
             button_secondary_background_fill=colors.PRIMARY_SUBTLE,
             button_secondary_background_fill_dark=colors.PRIMARY_SUBTLE,
             button_secondary_text_color=colors.LABEL,
