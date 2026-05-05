@@ -520,6 +520,30 @@ def test_send_text_meta_failure_502(
         db.close()
 
 
+def test_sse_stream_route_registered(client: TestClient) -> None:
+    """The SSE stream endpoint exists at /wa/stream (Phase 2.2). Path is
+    /stream rather than /conversations/stream so it can't collide with
+    the dynamic /conversations/{contact_id} route. We assert the route
+    is registered + auth-gated; consuming the actual EventSource body
+    is covered by Playwright in the live deploy verify step.
+
+    Note: TestClient + an async generator with `await
+    request.is_disconnected()` + asyncio.sleep keeps the request open
+    after the test breaks out of iter_text(); attempting to consume
+    the body in-process hangs the suite. The hello event has been
+    smoke-tested via curl against the running api_v2 dev server.
+    """
+    # Without auth → 401 (proves dependency wired).
+    assert client.get("/api/v2/wa/stream").status_code == 401
+
+    # With auth → check OpenAPI lists the route. Avoids opening a
+    # streaming connection that the in-process TestClient can't tear
+    # down cleanly.
+    schema = client.get("/openapi.json").json()
+    assert "/api/v2/wa/stream" in schema["paths"]
+    assert "get" in schema["paths"]["/api/v2/wa/stream"]
+
+
 def test_list_templates_extracts_variables(
     client: TestClient, auth_headers: dict[str, str]
 ) -> None:

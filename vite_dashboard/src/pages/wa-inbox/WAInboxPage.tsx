@@ -16,13 +16,16 @@
 import { useState } from "react";
 import { configLoader } from "@/loaders/configLoader";
 import { useSearchParams } from "react-router-dom";
-import { useConversations } from "@/api/wa";
+import { useConversations, useWaLiveStream } from "@/api/wa";
 import { ConversationList } from "./components/ConversationList";
 import { ChatPanel } from "./components/ChatPanel";
 import { TemplateSheet } from "./components/TemplateSheet";
 
 export function WAInboxPage() {
   const cfg = configLoader.getPage("wa_inbox");
+  // Phase 2.2: subscribe to the SSE live stream while this page is
+  // mounted. Effect-only — invalidates query keys on inbound events.
+  useWaLiveStream();
   const [params, setParams] = useSearchParams();
   const selected = params.get("contact");
   const [templateSheetOpen, setTemplateSheetOpen] = useState(false);

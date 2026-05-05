@@ -4,8 +4,10 @@
  * Read-only endpoints to start. Send endpoints + SSE land in 2.1+.
  */
 
+import { useEffect } from "react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "./client";
+import { openSseStream } from "@/lib/sse";
 
 export type ConversationListItem = {
   contact_id: string;
@@ -95,8 +97,7 @@ export function useConversations(q: ConversationsQuery = {}) {
     ],
     queryFn: () => apiFetch<ConversationListResponse>(`/api/v2/wa/conversations${qs}`),
     placeholderData: keepPreviousData,
-    // Light polling for now — Phase 2.1 swaps this for SSE.
-    refetchInterval: 30_000,
+    // Phase 2.2: SSE drives invalidation, no polling needed.
   });
 }
 
@@ -105,7 +106,7 @@ export function useConversationDetail(contactId: string | null) {
     queryKey: ["wa", "conversation", contactId],
     enabled: contactId !== null,
     queryFn: () => apiFetch<ConversationDetail>(`/api/v2/wa/conversations/${contactId}`),
-    refetchInterval: 15_000,
+    // Phase 2.2: SSE drives invalidation, no polling needed.
   });
 }
 
@@ -170,4 +171,38 @@ export function useSendTemplate() {
       qc.invalidateQueries({ queryKey: ["wa", "conversations"] });
     },
   });
+}
+
+/**
+ * Subscribe to live conversation events via SSE. Each `message` event
+ * invalidates the affected conversation's detail query plus the list,
+ * so React Query refetches them on demand. No polling.
+ *
+ * Phase 2.2: replaces the previous 30s/15s refetchInterval pattern.
+ */
+export function useWaLiveStream() {
+  const qc = useQueryClient();
+
+  useEffect(() => {
+    const dispose = openSseStream("/api/v2/wa/stream", {
+      onEvent: (e) => {
+        if (e.event !== "message") return;
+        try {
+          const payload = JSON.parse(e.data) as { contact_id?: string };
+          if (payload.contact_id) {
+            qc.invalidateQueries({
+              queryKey: ["wa", "conversation", payload.contact_id],
+            });
+          }
+          qc.invalidateQueries({ queryKey: ["wa", "conversations"] });
+        } catch {
+          // ignore malformed payloads
+        }
+      },
+      // Errors are non-fatal: openSseStream auto-reconnects with
+      // exponential backoff. We don't surface them to the UI.
+      onError: () => {},
+    });
+    return dispose;
+  }, [qc]);
 }

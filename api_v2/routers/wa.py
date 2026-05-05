@@ -14,10 +14,12 @@ from __future__ import annotations
 
 import json
 import re
+import asyncio
 from datetime import datetime, timedelta, timezone
-from typing import Annotated
+from typing import Annotated, AsyncIterator
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy import or_
 
 from api_v2.deps import require_auth
@@ -476,3 +478,93 @@ def send_template_message(req: SendTemplateRequest) -> WAMessageOut:
         raise
     finally:
         db.close()
+
+
+# ─── SSE inbound stream (Phase 2.2) ──────────────────────────────────────
+
+
+_SSE_POLL_SECONDS = 5
+"""How often the SSE loop checks the DB for new wa_messages rows. Picked
+to be unobtrusive on Postgres while still feeling live to the user
+(previous client-side polling was 15-30s)."""
+
+
+def _serialize_sse_event(kind: str, payload: dict) -> str:
+    """Format a Server-Sent Event chunk per the EventSource spec."""
+    import json as _json
+
+    return f"event: {kind}\ndata: {_json.dumps(payload, default=str)}\n\n"
+
+
+@router.get("/stream")
+async def stream_conversations(request: Request) -> StreamingResponse:
+    """Server-Sent Events feed for live conversation updates.
+
+    The endpoint polls wa_messages every few seconds for rows newer
+    than the per-connection watermark and emits one event per affected
+    contact. The frontend invalidates the matching React Query keys
+    instead of continuing to poll on a timer (Phase 2.2).
+
+    Why DB polling instead of pub/sub: the WhatsApp webhook lives on
+    v1's process, not api_v2. Both share the same Postgres, so the
+    only cross-process signal we have is the wa_messages table itself.
+    Phase 5 (after v1 retires) can move to in-process asyncio queues
+    when the webhook lands in api_v2 directly.
+    """
+
+    async def event_gen() -> AsyncIterator[str]:
+        # Initial watermark: only stream events that arrive AFTER the
+        # connection opens. Existing messages are already on the page.
+        watermark = datetime.now(timezone.utc)
+        # Send a hello event so the client can confirm the stream is alive.
+        yield _serialize_sse_event("hello", {"server_time": watermark.isoformat()})
+
+        while True:
+            if await request.is_disconnected():
+                break
+
+            db = get_db()
+            try:
+                rows = (
+                    db.query(WAMessage.contact_id, WAMessage.direction, WAMessage.created_at)
+                    .filter(WAMessage.created_at > watermark)
+                    .order_by(WAMessage.created_at.asc())
+                    .all()
+                )
+            finally:
+                db.close()
+
+            for contact_id, direction, created_at in rows:
+                yield _serialize_sse_event(
+                    "message",
+                    {
+                        "contact_id": contact_id,
+                        "direction": direction if direction in {"in", "out"} else direction,
+                        "created_at": created_at,
+                    },
+                )
+                if created_at and created_at.replace(
+                    tzinfo=created_at.tzinfo or timezone.utc
+                ) > watermark:
+                    watermark = created_at.replace(
+                        tzinfo=created_at.tzinfo or timezone.utc
+                    )
+
+            # Heartbeat keeps proxies (HF reverse proxy) from idling
+            # the connection out at 30-60s.
+            yield ": heartbeat\n\n"
+
+            try:
+                await asyncio.sleep(_SSE_POLL_SECONDS)
+            except asyncio.CancelledError:
+                break
+
+    return StreamingResponse(
+        event_gen(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",  # nginx/HF proxy: don't buffer
+            "Connection": "keep-alive",
+        },
+    )
