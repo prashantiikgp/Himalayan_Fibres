@@ -309,6 +309,120 @@ def test_jobs_endpoint_requires_auth(client: TestClient) -> None:
     )
 
 
+# ─── Phase 3.1b.3 — Detail + recipient pagination ────────────────────────
+
+
+def test_get_broadcast_email(client: TestClient, auth_headers: dict[str, str]) -> None:
+    _wa_id, em_id = _seed_one_of_each()
+    res = client.get(f"/api/v2/broadcasts/em-{em_id}", headers=auth_headers)
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert body["id"] == f"em-{em_id}"
+    assert body["channel"] == "email"
+
+
+def test_get_broadcast_invalid_prefix_400(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    res = client.get("/api/v2/broadcasts/xx-1", headers=auth_headers)
+    assert res.status_code == 400
+
+
+def test_get_broadcast_404(client: TestClient, auth_headers: dict[str, str]) -> None:
+    res = client.get("/api/v2/broadcasts/em-9999999", headers=auth_headers)
+    assert res.status_code == 404
+
+
+def test_recipients_pagination_email(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """Cursor pagination on EmailSend rows scoped to a campaign.
+    B16 fix: no silent 100-row cap; page_size + cursor is the contract."""
+    from services.database import get_db  # type: ignore[import-not-found]
+    from services.models import (  # type: ignore[import-not-found]
+        Campaign,
+        EmailSend,
+    )
+
+    _wa_id, em_id = _seed_one_of_each()
+    # Insert 7 EmailSend rows for that campaign.
+    db = get_db()
+    try:
+        for i in range(7):
+            db.add(
+                EmailSend(
+                    contact_id=f"recip_{em_id}_{i}",
+                    contact_email=f"to+{i}@example.com",
+                    campaign_id=em_id,
+                    subject="hi",
+                    status="sent",
+                    sent_at=datetime.now(timezone.utc),
+                )
+            )
+        db.commit()
+    finally:
+        db.close()
+
+    page1 = client.get(
+        f"/api/v2/broadcasts/em-{em_id}/recipients?page_size=3",
+        headers=auth_headers,
+    ).json()
+    assert page1["total"] == 7
+    assert len(page1["recipients"]) == 3
+    assert page1["next_cursor"] is not None
+
+    page2 = client.get(
+        f"/api/v2/broadcasts/em-{em_id}/recipients?page_size=3&cursor={page1['next_cursor']}",
+        headers=auth_headers,
+    ).json()
+    assert len(page2["recipients"]) == 3
+    assert page2["next_cursor"] is not None
+    # No overlap between pages
+    page1_ids = {r["id"] for r in page1["recipients"]}
+    page2_ids = {r["id"] for r in page2["recipients"]}
+    assert page1_ids.isdisjoint(page2_ids)
+
+    page3 = client.get(
+        f"/api/v2/broadcasts/em-{em_id}/recipients?page_size=3&cursor={page2['next_cursor']}",
+        headers=auth_headers,
+    ).json()
+    assert len(page3["recipients"]) == 1
+    assert page3["next_cursor"] is None  # end
+
+
+def test_recipients_status_filter(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    from services.database import get_db  # type: ignore[import-not-found]
+    from services.models import EmailSend  # type: ignore[import-not-found]
+
+    _wa_id, em_id = _seed_one_of_each()
+    db = get_db()
+    try:
+        db.add_all([
+            EmailSend(contact_id=f"f_{em_id}", contact_email="f@x.com",
+                      campaign_id=em_id, status="failed",
+                      error_message="bounce"),
+            EmailSend(contact_id=f"s_{em_id}", contact_email="s@x.com",
+                      campaign_id=em_id, status="sent",
+                      sent_at=datetime.now(timezone.utc)),
+        ])
+        db.commit()
+    finally:
+        db.close()
+
+    failed = client.get(
+        f"/api/v2/broadcasts/em-{em_id}/recipients?status=failed",
+        headers=auth_headers,
+    ).json()
+    assert all(r["status"] == "failed" for r in failed["recipients"])
+    assert any(r["error_message"] == "bounce" for r in failed["recipients"])
+
+
+def test_recipients_require_auth(client: TestClient) -> None:
+    assert client.get("/api/v2/broadcasts/em-1/recipients").status_code == 401
+
+
 def test_compose_endpoints_require_auth(client: TestClient) -> None:
     assert (
         client.post("/api/v2/broadcasts/audience-preview", json={"channel": "email"}).status_code

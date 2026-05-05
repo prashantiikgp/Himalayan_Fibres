@@ -23,12 +23,15 @@ from api_v2.schemas.broadcasts import (
     AudienceBreakdownItem,
     AudiencePreviewRequest,
     AudiencePreviewResponse,
+    BroadcastDetail,
     BroadcastListItem,
     BroadcastListResponse,
     CostBreakdownItem,
     CostEstimateRequest,
     CostEstimateResponse,
     QueueEmailBroadcastResponse,
+    RecipientItem,
+    RecipientsResponse,
     SendBroadcastRequest,
     SendBroadcastResponse,
     SendEmailBroadcastRequest,
@@ -36,7 +39,13 @@ from api_v2.schemas.broadcasts import (
 from api_v2.services.job_store import get_job_store
 
 from services.database import get_db  # type: ignore[import-not-found]
-from services.models import Broadcast, Campaign  # type: ignore[import-not-found]
+from services.models import (  # type: ignore[import-not-found]
+    Broadcast,
+    Campaign,
+    Contact,
+    EmailSend,
+    WAMessage,
+)
 from services.broadcast_engine import (  # type: ignore[import-not-found]
     BroadcastFilters,
     estimate_cost,
@@ -373,3 +382,150 @@ def queue_email_broadcast(
         job_id=job_id,
         estimated_recipients=recipients,
     )
+
+
+# ─── Phase 3.1b.3 — Detail + recipient pagination (B16 fix) ──────────────
+
+
+def _parse_broadcast_id(prefixed: str) -> tuple[str, int]:
+    """Split a prefixed broadcast id (e.g. `wa-12`) into (channel, db_id).
+    Raises 400 on malformed input."""
+    if "-" not in prefixed:
+        raise HTTPException(status_code=400, detail="id must be 'wa-N' or 'em-N'")
+    prefix, _, raw_id = prefixed.partition("-")
+    if prefix == "wa":
+        channel = "whatsapp"
+    elif prefix == "em":
+        channel = "email"
+    else:
+        raise HTTPException(status_code=400, detail="id prefix must be 'wa-' or 'em-'")
+    if not raw_id.isdigit():
+        raise HTTPException(status_code=400, detail="id suffix must be numeric")
+    return channel, int(raw_id)
+
+
+@router.get("/broadcasts/{broadcast_id}", response_model=BroadcastDetail)
+def get_broadcast(broadcast_id: str) -> BroadcastDetail:
+    """Detail for a unified broadcast row. `broadcast_id` is prefixed
+    (`wa-N` or `em-N`) to disambiguate the two underlying tables."""
+    channel, db_id = _parse_broadcast_id(broadcast_id)
+
+    db = get_db()
+    try:
+        if channel == "whatsapp":
+            b = db.query(Broadcast).filter(Broadcast.id == db_id).first()
+            if b is None:
+                raise HTTPException(status_code=404, detail="Broadcast not found")
+            return BroadcastDetail(
+                id=f"wa-{b.id}",
+                channel="whatsapp",
+                name=b.name,
+                template_id=b.template_id or "",
+                segment_id=b.segment_id,
+                status=b.status or "draft",
+                total_recipients=b.total_recipients or 0,
+                total_sent=b.total_sent or 0,
+                total_failed=b.total_failed or 0,
+                sent_at=b.sent_at,
+                scheduled_at=None,
+                created_at=b.created_at,
+                subject="",
+            )
+        else:
+            c = db.query(Campaign).filter(Campaign.id == db_id).first()
+            if c is None:
+                raise HTTPException(status_code=404, detail="Broadcast not found")
+            return BroadcastDetail(
+                id=f"em-{c.id}",
+                channel="email",
+                name=c.name,
+                template_id=c.template_slug or "",
+                segment_id=c.segment_id,
+                status=c.status or "draft",
+                total_recipients=c.total_recipients or 0,
+                total_sent=c.total_sent or 0,
+                total_failed=c.total_failed or 0,
+                sent_at=c.sent_at,
+                scheduled_at=c.scheduled_at,
+                created_at=c.created_at,
+                subject=c.subject or "",
+            )
+    finally:
+        db.close()
+
+
+@router.get("/broadcasts/{broadcast_id}/recipients", response_model=RecipientsResponse)
+def list_recipients(
+    broadcast_id: str,
+    cursor: Annotated[int | None, Query(ge=0)] = None,
+    page_size: Annotated[int, Query(ge=1, le=500)] = 100,
+    status_filter: Annotated[str | None, Query(alias="status")] = None,
+) -> RecipientsResponse:
+    """Per-broadcast recipient list, cursor-paginated by row id ASC.
+
+    **B16 fix.** v1's per-broadcast detail capped recipient rows at
+    100 silently — large campaigns lost visibility past row 100. This
+    endpoint paginates by primary key with no implicit cap; clients
+    fetch as many pages as they need.
+    """
+    channel, db_id = _parse_broadcast_id(broadcast_id)
+
+    db = get_db()
+    try:
+        if channel == "whatsapp":
+            base = db.query(WAMessage).filter(WAMessage.wa_batch_id == str(db_id))
+            if status_filter:
+                base = base.filter(WAMessage.status == status_filter)
+            total = base.count()
+            q = base
+            if cursor is not None:
+                q = q.filter(WAMessage.id > cursor)
+            rows = q.order_by(WAMessage.id.asc()).limit(page_size).all()
+            # Contact lookup for display address (wa_id or phone).
+            cids = list({r.contact_id for r in rows})
+            contacts: dict[str, Contact] = {
+                c.id: c
+                for c in db.query(Contact).filter(Contact.id.in_(cids)).all()
+            }
+            items = [
+                RecipientItem(
+                    id=r.id,
+                    contact_id=r.contact_id,
+                    address=(contacts.get(r.contact_id).wa_id if contacts.get(r.contact_id) else "")
+                    or (contacts.get(r.contact_id).phone if contacts.get(r.contact_id) else "")
+                    or "",
+                    status=r.status or "",
+                    error_message=r.error_detail or "",
+                    sent_at=r.created_at if (r.status or "") == "sent" else None,
+                    created_at=r.created_at,
+                )
+                for r in rows
+            ]
+        else:
+            base = db.query(EmailSend).filter(EmailSend.campaign_id == db_id)
+            if status_filter:
+                base = base.filter(EmailSend.status == status_filter)
+            total = base.count()
+            q = base
+            if cursor is not None:
+                q = q.filter(EmailSend.id > cursor)
+            rows = q.order_by(EmailSend.id.asc()).limit(page_size).all()
+            items = [
+                RecipientItem(
+                    id=r.id,
+                    contact_id=r.contact_id,
+                    address=r.contact_email or "",
+                    status=r.status or "",
+                    error_message=r.error_message or "",
+                    sent_at=r.sent_at,
+                    created_at=r.created_at,
+                )
+                for r in rows
+            ]
+
+        next_cursor = items[-1].id if len(items) == page_size else None
+        return RecipientsResponse(
+            recipients=items, total=total, next_cursor=next_cursor,
+        )
+    finally:
+        db.close()

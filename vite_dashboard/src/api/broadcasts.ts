@@ -193,6 +193,66 @@ export function useSendWaBroadcast() {
   });
 }
 
+/* ── Detail + recipient pagination (Phase 3.1b.3) ─────────────────────── */
+
+export type BroadcastDetail = {
+  id: string;
+  channel: BroadcastChannel;
+  name: string;
+  template_id: string;
+  segment_id: string | null;
+  status: string;
+  total_recipients: number;
+  total_sent: number;
+  total_failed: number;
+  sent_at: string | null;
+  scheduled_at: string | null;
+  created_at: string;
+  subject: string;
+};
+
+export type RecipientItem = {
+  id: number;
+  contact_id: string;
+  address: string;
+  status: string;
+  error_message: string;
+  sent_at: string | null;
+  created_at: string;
+};
+
+export type RecipientsResponse = {
+  recipients: RecipientItem[];
+  total: number;
+  next_cursor: number | null;
+};
+
+export function useBroadcastDetail(id: string | null) {
+  return useQuery({
+    queryKey: ["broadcasts", "detail", id],
+    enabled: id !== null,
+    queryFn: () => apiFetch<BroadcastDetail>(`/api/v2/broadcasts/${id}`),
+  });
+}
+
+export function useBroadcastRecipients(
+  id: string | null,
+  cursor: number | null = null,
+  pageSize = 100,
+  status?: string,
+) {
+  const params = new URLSearchParams();
+  if (cursor !== null) params.set("cursor", String(cursor));
+  params.set("page_size", String(pageSize));
+  if (status && status !== "all") params.set("status", status);
+  const qs = params.toString() ? `?${params.toString()}` : "";
+  return useQuery({
+    queryKey: ["broadcasts", "recipients", id, cursor, pageSize, status ?? "all"],
+    enabled: id !== null,
+    queryFn: () => apiFetch<RecipientsResponse>(`/api/v2/broadcasts/${id}/recipients${qs}`),
+  });
+}
+
 export function useBroadcastsList(q: BroadcastsQuery = {}) {
   const params = new URLSearchParams();
   if (q.channel) params.set("channel", q.channel);

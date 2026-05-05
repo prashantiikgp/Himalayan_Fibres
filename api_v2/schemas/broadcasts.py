@@ -151,3 +151,49 @@ class QueueEmailBroadcastResponse(BaseModel):
     estimated_recipients: int
     """Upfront count so the UI can render a progress bar denominator
     before the background task starts."""
+
+
+# ─── Phase 3.1b.3 — Detail + recipient pagination (B16 fix) ──────────────
+
+
+class BroadcastDetail(BaseModel):
+    """Detail payload for the Performance tab — composes the list-item
+    fields plus a few stats not shown in the table."""
+
+    id: str
+    channel: Literal["whatsapp", "email"]
+    name: str
+    template_id: str
+    segment_id: str | None
+    status: str
+    total_recipients: int
+    total_sent: int
+    total_failed: int
+    sent_at: datetime | None
+    scheduled_at: datetime | None
+    created_at: datetime
+    subject: str = ""
+    """Email-only; empty for WA."""
+
+
+class RecipientItem(BaseModel):
+    """One row in the per-broadcast recipient table."""
+
+    id: int
+    contact_id: str
+    address: str
+    """Email address for email; phone/wa_id for WhatsApp."""
+    status: str
+    error_message: str = ""
+    sent_at: datetime | None
+    created_at: datetime
+
+
+class RecipientsResponse(BaseModel):
+    recipients: list[RecipientItem]
+    total: int
+    next_cursor: int | None
+    """Pass back as `?cursor=` to fetch the next page. Null when the
+    end is reached. Cursor is the opaque `last id` so pagination is
+    stable under inserts (B16 fix — v1's table silently capped at 100;
+    this paginates without losing rows)."""

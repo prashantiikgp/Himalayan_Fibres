@@ -148,6 +148,12 @@ export function HistoryTab() {
         isLoading={isLoading}
         error={error}
         getRowId={(row) => row.id}
+        onRowClick={(row) => {
+          const next = new URLSearchParams(params);
+          next.set("tab", "performance");
+          next.set("broadcast_id", row.id);
+          setParams(next, { replace: true });
+        }}
         emptyMessage="No broadcasts match these filters."
       />
 

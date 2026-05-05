@@ -1,8 +1,10 @@
 /**
  * <BroadcastsPage> — entry component for /broadcasts.
  *
- * Phase 3.0 (this commit) ships the **History tab** functional. Compose
- * + Performance ship in Phase 3.1+.
+ * As of Phase 3.1b.3 all three tabs are functional:
+ *   - Compose: WhatsApp send (sync) + Email queue (async via JobStore)
+ *   - History: unified WA + Email list (B6 fix)
+ *   - Performance: per-broadcast KPIs + paginated recipient table (B16 fix)
  */
 
 import { useSearchParams } from "react-router-dom";
@@ -10,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { configLoader } from "@/loaders/configLoader";
 import { ComposeTab } from "./components/ComposeTab";
 import { HistoryTab } from "./components/HistoryTab";
+import { PerformanceTab } from "./components/PerformanceTab";
 
 const TAB_VALUES = ["compose", "history", "performance"] as const;
 type TabValue = (typeof TAB_VALUES)[number];
@@ -52,21 +55,9 @@ export function BroadcastsPage() {
         </TabsContent>
 
         <TabsContent value="performance">
-          <ComingSoon
-            phase="3.2"
-            text="Performance tab — per-broadcast KPIs + paginated recipient table (B16 fix: no more 100-row silent cap)."
-          />
+          <PerformanceTab />
         </TabsContent>
       </Tabs>
-    </div>
-  );
-}
-
-function ComingSoon({ phase, text }: { phase: string; text: string }) {
-  return (
-    <div className="m-card rounded-lg border border-dashed border-border bg-card/40 p-card text-sm text-text-muted">
-      <p className="mb-1 font-semibold text-text">Phase {phase} — coming soon</p>
-      <p>{text}</p>
     </div>
   );
 }
