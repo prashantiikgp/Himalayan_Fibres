@@ -39,22 +39,62 @@ def _add_column(engine, table: str, column: str, ddl_type: dict[str, str]) -> No
         conn.execute(text(sql))
 
 
-def run_all() -> None:
-    """Apply every known additive fix. Called from api_v2/main.py."""
+def run_all() -> dict:
+    """Apply every known additive fix. Called from api_v2/main.py.
+
+    Returns a dict of {column_path: status} where status is one of
+    "ok" / "already_present" / "failed:<reason>". Caller logs this and
+    surfaces failures (review fix #5: was silent before)."""
     from services.database import get_engine  # type: ignore[import-not-found]
 
     engine = get_engine()
-    try:
+    results: dict[str, str] = {}
+
+    fixes = [
         # Phase 3.1b.2 — Broadcast.scheduled_at
-        _add_column(
-            engine,
-            table="broadcasts",
-            column="scheduled_at",
-            ddl_type={
+        {
+            "path": "broadcasts.scheduled_at",
+            "table": "broadcasts",
+            "column": "scheduled_at",
+            "ddl_type": {
                 "postgresql": "TIMESTAMP WITH TIME ZONE",
                 "sqlite": "DATETIME",
                 "default": "TIMESTAMP NULL",
             },
-        )
-    except Exception:
-        log.exception("auto-migration failed; continuing without it")
+        },
+    ]
+
+    for fix in fixes:
+        path = str(fix["path"])
+        try:
+            if _column_exists(engine, str(fix["table"]), str(fix["column"])):
+                results[path] = "already_present"
+                continue
+            _add_column(engine, fix["table"], fix["column"], fix["ddl_type"])  # type: ignore[arg-type]
+            results[path] = "ok"
+        except Exception as e:
+            results[path] = f"failed:{e!s}"
+            log.exception("auto-migration %s failed", path)
+            # Review fix #5: forward to Sentry so the team sees it
+            # even when nobody's tailing logs.
+            try:
+                import sentry_sdk  # type: ignore[import-not-found]
+
+                sentry_sdk.capture_exception(e)
+            except ImportError:
+                pass
+
+    return results
+
+
+def required_columns_present() -> tuple[bool, list[str]]:
+    """Check whether the columns the scheduler depends on actually
+    exist in the live DB. Returns (all_present, missing_paths)."""
+    from services.database import get_engine  # type: ignore[import-not-found]
+
+    engine = get_engine()
+    required = [("broadcasts", "scheduled_at")]
+    missing = [
+        f"{t}.{c}" for t, c in required if not _column_exists(engine, t, c)
+    ]
+    return (not missing, missing)

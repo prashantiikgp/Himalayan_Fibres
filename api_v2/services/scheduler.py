@@ -42,98 +42,124 @@ def _is_due(scheduled_at) -> bool:  # type: ignore[no-untyped-def]
     return s <= datetime.now(timezone.utc)
 
 
-def _fire_wa(b: Broadcast) -> None:
-    """Run a scheduled WA broadcast. Synchronous — small batches OK."""
+def _claim_due_rows(db, model):  # type: ignore[no-untyped-def]
+    """Atomically claim every due 'scheduled' row of `model`.
+
+    Single transaction:
+      1. SELECT ... WHERE status='scheduled' FOR UPDATE SKIP LOCKED
+      2. flip claimed rows to status='sending'
+      3. commit
+
+    SKIP LOCKED ensures two concurrent ticks (or future replicas) never
+    fight over the same row — review fix #1. SQLite ignores the FOR
+    UPDATE clause but the surrounding BEGIN..COMMIT still serializes
+    writes, which is sufficient for the single-threaded SQLite case.
+
+    Returns the list of (id, name, template_id, segment_id, ...)
+    snapshots — caller iterates without holding the session open.
+    """
+    from sqlalchemy.exc import OperationalError
+
+    is_sqlite = db.bind.dialect.name == "sqlite" if db.bind else False
+
+    try:
+        q = db.query(model).filter(model.status == "scheduled")
+        if not is_sqlite:
+            q = q.with_for_update(skip_locked=True)
+        rows = q.all()
+    except OperationalError:
+        # SQLite without WAL or some other lock issue — fall back to
+        # a plain SELECT. The single-threaded scheduler doesn't have
+        # the contention this guards against anyway.
+        rows = db.query(model).filter(model.status == "scheduled").all()
+
+    claimed: list[dict] = []
+    for r in rows:
+        if not _is_due(getattr(r, "scheduled_at", None)):
+            continue
+        r.status = "sending"
+        # Snapshot the columns we'll need outside the session.
+        snap = {
+            "id": r.id,
+            "name": r.name,
+            "segment_id": r.segment_id,
+        }
+        if model is Broadcast:
+            snap["template_id"] = r.template_id or ""
+        else:
+            snap["template_slug"] = r.template_slug or ""
+            snap["subject"] = r.subject or ""
+        claimed.append(snap)
+    db.commit()
+    return claimed
+
+
+def _fire_wa(snap: dict) -> None:
+    """Run a claimed WA broadcast (already in status='sending')."""
     db = get_db()
     try:
-        # Re-read with fresh session and double-check status.
-        live = db.query(Broadcast).filter(Broadcast.id == b.id).first()
-        if live is None or (live.status or "").lower() != "scheduled":
-            return
-        live.status = "sending"
-        db.commit()
-
         try:
             send_broadcast(
                 db=db,
-                name=live.name,
+                name=snap["name"],
                 channel="whatsapp",
-                template_id=live.template_id or "",
-                filters=BroadcastFilters(segment_id=live.segment_id),
+                template_id=snap["template_id"],
+                filters=BroadcastFilters(segment_id=snap["segment_id"]),
                 subject="",
             )
-            # send_broadcast updates status itself; no further action.
         except Exception as e:
-            _log.exception("scheduled WA broadcast %s failed: %s", live.id, e)
-            live.status = "failed"
-            db.commit()
+            _log.exception("scheduled WA broadcast %s failed: %s", snap["id"], e)
+            live = db.query(Broadcast).filter(Broadcast.id == snap["id"]).first()
+            if live is not None:
+                live.status = "failed"
+                db.commit()
     finally:
         db.close()
 
 
-def _fire_email(c: Campaign) -> None:
-    """Run a scheduled email broadcast. Synchronous within the
-    scheduler tick — small batches finish in seconds; large ones run
-    inside the same handler thread until completion. If we need
-    truly async dispatch we'd hand off to BackgroundTasks via the same
-    JobStore the email queue endpoint uses, but for the scheduler
-    one-tick lag on big sends is acceptable."""
+def _fire_email(snap: dict) -> None:
+    """Run a claimed email broadcast (already in status='sending')."""
     db = get_db()
     try:
-        live = db.query(Campaign).filter(Campaign.id == c.id).first()
-        if live is None or (live.status or "").lower() != "scheduled":
-            return
-        live.status = "sending"
-        db.commit()
-
         try:
             send_broadcast(
                 db=db,
-                name=live.name,
+                name=snap["name"],
                 channel="email",
-                template_id=live.template_slug or "",
-                filters=BroadcastFilters(segment_id=live.segment_id),
-                subject=live.subject or "",
+                template_id=snap["template_slug"],
+                filters=BroadcastFilters(segment_id=snap["segment_id"]),
+                subject=snap["subject"],
             )
         except Exception as e:
-            _log.exception("scheduled email broadcast %s failed: %s", live.id, e)
-            live.status = "failed"
-            db.commit()
+            _log.exception("scheduled email broadcast %s failed: %s", snap["id"], e)
+            live = db.query(Campaign).filter(Campaign.id == snap["id"]).first()
+            if live is not None:
+                live.status = "failed"
+                db.commit()
     finally:
         db.close()
 
 
 def tick_once() -> dict:
     """Single scheduler pass — fire any due rows. Returns counts so the
-    test suite can assert behavior without spawning the loop."""
-    fired_wa = 0
-    fired_email = 0
+    test suite can assert behavior without spawning the loop.
+
+    Review fix #1: claims are atomic per-row (FOR UPDATE SKIP LOCKED on
+    Postgres). Two concurrent ticks would each pick up disjoint rows.
+    """
     db = get_db()
     try:
-        wa_due = (
-            db.query(Broadcast)
-            .filter(Broadcast.status == "scheduled")
-            .all()
-        )
-        em_due = (
-            db.query(Campaign)
-            .filter(Campaign.status == "scheduled")
-            .all()
-        )
+        wa_claimed = _claim_due_rows(db, Broadcast)
+        em_claimed = _claim_due_rows(db, Campaign)
     finally:
         db.close()
 
-    for b in wa_due:
-        if _is_due(getattr(b, "scheduled_at", None)):
-            _fire_wa(b)
-            fired_wa += 1
+    for snap in wa_claimed:
+        _fire_wa(snap)
+    for snap in em_claimed:
+        _fire_email(snap)
 
-    for c in em_due:
-        if _is_due(c.scheduled_at):
-            _fire_email(c)
-            fired_email += 1
-
-    return {"fired_wa": fired_wa, "fired_email": fired_email}
+    return {"fired_wa": len(wa_claimed), "fired_email": len(em_claimed)}
 
 
 async def scheduler_loop() -> None:

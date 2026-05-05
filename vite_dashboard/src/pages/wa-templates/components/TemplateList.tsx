@@ -14,6 +14,7 @@ import { useDebouncedValue } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 import { useSyncTemplates, useWaTemplates, type WATemplateOut } from "@/api/wa";
 import { useJobProgress } from "@/api/broadcasts";
+import { ConfirmDialog } from "@/components/feedback/ConfirmDialog";
 
 const STATUS_OPTIONS = [
   { value: "all", label: "All" },
@@ -45,11 +46,22 @@ export function TemplateList({
   const [tier, setTier] = useState<string>("all");
   const debounced = useDebouncedValue(search, 250);
   const [syncJobId, setSyncJobId] = useState<string | null>(null);
+  const [confirmSync, setConfirmSync] = useState(false);
   const syncMutation = useSyncTemplates();
   const { data: syncJob } = useJobProgress(syncJobId);
   const syncing =
     syncMutation.isPending ||
     (syncJob && (syncJob.status === "queued" || syncJob.status === "running"));
+
+  function performSync() {
+    syncMutation.mutate(undefined, {
+      onSuccess: (res) => {
+        setSyncJobId(res.job_id);
+        setConfirmSync(false);
+      },
+      onError: () => setConfirmSync(false),
+    });
+  }
 
   const isDraftView = statusFilter === "DRAFT";
   const { data, isLoading, error } = useWaTemplates({
@@ -78,17 +90,7 @@ export function TemplateList({
             <Button
               size="sm"
               variant="outline"
-              onClick={() => {
-                if (syncing) return;
-                if (!confirm(
-                  "Sync templates from Meta? This pulls the latest status, " +
-                  "category, and components from your WABA. Drafts are " +
-                  "preserved.",
-                )) return;
-                syncMutation.mutate(undefined, {
-                  onSuccess: (res) => setSyncJobId(res.job_id),
-                });
-              }}
+              onClick={() => !syncing && setConfirmSync(true)}
               disabled={!!syncing}
               title="Sync from Meta"
             >
@@ -167,6 +169,16 @@ export function TemplateList({
           />
         ))}
       </ul>
+
+      <ConfirmDialog
+        open={confirmSync}
+        onOpenChange={setConfirmSync}
+        title="Sync templates from Meta?"
+        description="Pulls the latest status, category, and components from your WhatsApp Business Account. Drafts are preserved. This calls Meta's API in the background — usually completes in seconds."
+        confirmLabel="Sync"
+        isPending={syncMutation.isPending}
+        onConfirm={performSync}
+      />
     </div>
   );
 }

@@ -112,8 +112,30 @@ async def lifespan(_app: FastAPI):  # noqa: ANN001
 
     task = None
     if scheduler_enabled():
-        task = _asyncio.create_task(scheduler_loop())
-        log.info("Phase 3.1b.2 scheduler started")
+        # Review fix #5: refuse to start the scheduler if a required
+        # column is missing — it would crash every tick otherwise.
+        from api_v2.services.auto_migrations import required_columns_present
+
+        ok, missing = required_columns_present()
+        if not ok:
+            log.error(
+                "Scheduler disabled — required columns missing: %s. "
+                "Run scripts/migrations/2026_05_05_add_broadcast_scheduled_at.py "
+                "or check the auto-migration logs.",
+                missing,
+            )
+            try:
+                import sentry_sdk  # type: ignore[import-not-found]
+
+                sentry_sdk.capture_message(
+                    f"v2 scheduler disabled — missing columns: {missing}",
+                    level="error",
+                )
+            except ImportError:
+                pass
+        else:
+            task = _asyncio.create_task(scheduler_loop())
+            log.info("Phase 3.1b.2 scheduler started")
     else:
         log.info("Scheduler disabled by HF_SCHEDULER_ENABLED=false")
 

@@ -195,17 +195,33 @@ function KpiStrip({
   status: string;
   channel: string;
 }) {
-  const successRate = recipients ? Math.round((sent / recipients) * 100) : 0;
+  // Review fix #2: report sent/failed/pending against `recipients`
+  // honestly. Previous version was `100 - successRate` which conflated
+  // "not yet sent" with "failed" — misleading mid-broadcast.
+  const pending = Math.max(0, recipients - sent - failed);
+  const pct = (n: number) =>
+    recipients ? `${Math.round((n / recipients) * 100)}%` : "—";
+
   return (
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
       <KpiCard label="Status" value={status} />
       <KpiCard label="Channel" value={channel} />
-      <KpiCard label="Recipients" value={String(recipients)} />
-      <KpiCard label="Sent" value={String(sent)} success />
+      <KpiCard
+        label="Sent"
+        value={`${sent} / ${recipients}`}
+        sublabel={pct(sent)}
+        success={sent > 0}
+      />
       <KpiCard
         label="Failed"
-        value={`${failed} (${100 - successRate}%)`}
+        value={String(failed)}
+        sublabel={pct(failed)}
         danger={failed > 0}
+      />
+      <KpiCard
+        label="Pending"
+        value={String(pending)}
+        sublabel={pct(pending)}
       />
     </div>
   );
@@ -214,11 +230,13 @@ function KpiStrip({
 function KpiCard({
   label,
   value,
+  sublabel,
   success,
   danger,
 }: {
   label: string;
   value: string;
+  sublabel?: string;
   success?: boolean;
   danger?: boolean;
 }) {
@@ -242,6 +260,9 @@ function KpiCard({
       >
         {value}
       </span>
+      {sublabel && (
+        <span className="text-[10px] text-text-muted">{sublabel}</span>
+      )}
     </div>
   );
 }

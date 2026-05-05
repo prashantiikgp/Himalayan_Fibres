@@ -382,6 +382,10 @@ def queue_email_broadcast(
                 status_code=400,
                 detail="scheduled_at must be in the future; use Send Now to fire immediately",
             )
+        # Review fix #3: pass the tz-aware datetime through to
+        # SQLAlchemy. Postgres TIMESTAMPTZ stores it correctly; SQLite
+        # silently strips tzinfo on insert but converts back from naive
+        # UTC consistently because every read site assumes UTC.
         db = get_db()
         try:
             c = Campaign(
@@ -390,7 +394,7 @@ def queue_email_broadcast(
                 segment_id=req.filters.segment_id,
                 subject=req.subject or "",
                 status="scheduled",
-                scheduled_at=sched.replace(tzinfo=None),
+                scheduled_at=sched,
                 total_recipients=recipients,
             )
             db.add(c)
@@ -633,7 +637,10 @@ def patch_broadcast(broadcast_id: str, req: SchedulePatch) -> BroadcastDetail:
                     status_code=400,
                     detail="scheduled_at must be in the future; use Send Now to fire immediately",
                 )
-            row.scheduled_at = sched.replace(tzinfo=None)  # store naive UTC
+            # Review fix #3: keep tz-aware. Postgres TIMESTAMPTZ stores
+            # it correctly; SQLite normalizes by stripping tzinfo and
+            # all readers assume UTC.
+            row.scheduled_at = sched
             row.status = "scheduled"
 
         try:

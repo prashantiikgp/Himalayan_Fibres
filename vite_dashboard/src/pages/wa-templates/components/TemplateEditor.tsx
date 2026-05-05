@@ -22,6 +22,7 @@ import {
 } from "@/api/wa";
 import { ApprovedBanner } from "./ApprovedBanner";
 import { WaPhonePreview } from "./WaPhonePreview";
+import { ConfirmDialog } from "@/components/feedback/ConfirmDialog";
 
 const CATEGORY_OPTIONS = ["MARKETING", "UTILITY", "AUTHENTICATION"];
 const LANGUAGE_OPTIONS = ["en_US", "en_GB", "en", "hi", "hi_IN"];
@@ -70,6 +71,8 @@ export function TemplateEditor({
   const saveMutation = useSaveTemplate();
   const deleteMutation = useDeleteTemplate();
   const submitMutation = useSubmitTemplate();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmSubmit, setConfirmSubmit] = useState(false);
 
   // Hydrate the form when the loaded template arrives or mode changes.
   useEffect(() => {
@@ -132,26 +135,29 @@ export function TemplateEditor({
     }
   }
 
-  function handleDelete() {
+  function performDelete() {
     if (templateId === null) return;
-    if (!confirm("Delete this draft? This can't be undone.")) return;
     deleteMutation.mutate(templateId, {
-      onSuccess: () => onDeleted(),
-      onError: (err) =>
-        setSaveError(err instanceof Error ? err.message : "Delete failed"),
+      onSuccess: () => {
+        setConfirmDelete(false);
+        onDeleted();
+      },
+      onError: (err) => {
+        setConfirmDelete(false);
+        setSaveError(err instanceof Error ? err.message : "Delete failed");
+      },
     });
   }
 
-  function handleSubmitToMeta() {
+  function performSubmitToMeta() {
     if (templateId === null) return;
-    if (!confirm(
-      "Submit this draft to Meta for approval? Submitted templates are " +
-      "immutable; further edits will create a clone (e.g. _v2).",
-    )) return;
     setSaveError(null);
     submitMutation.mutate(templateId, {
-      onError: (err) =>
-        setSaveError(err instanceof Error ? err.message : "Submit failed"),
+      onSuccess: () => setConfirmSubmit(false),
+      onError: (err) => {
+        setConfirmSubmit(false);
+        setSaveError(err instanceof Error ? err.message : "Submit failed");
+      },
     });
   }
 
@@ -287,7 +293,7 @@ export function TemplateEditor({
               type="button"
               variant="outline"
               size="sm"
-              onClick={handleDelete}
+              onClick={() => setConfirmDelete(true)}
               disabled={deleteMutation.isPending}
             >
               {deleteMutation.isPending ? "Deleting…" : "Delete draft"}
@@ -306,7 +312,7 @@ export function TemplateEditor({
             <Button
               type="button"
               size="sm"
-              onClick={handleSubmitToMeta}
+              onClick={() => setConfirmSubmit(true)}
               disabled={submitMutation.isPending}
             >
               {submitMutation.isPending ? "Submitting…" : "Submit to Meta"}
@@ -314,6 +320,26 @@ export function TemplateEditor({
           )}
         </div>
       </footer>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title="Delete draft?"
+        description="This template will be permanently removed. Submitted templates are immutable; this only works on drafts."
+        confirmLabel="Delete"
+        destructive
+        isPending={deleteMutation.isPending}
+        onConfirm={performDelete}
+      />
+      <ConfirmDialog
+        open={confirmSubmit}
+        onOpenChange={setConfirmSubmit}
+        title="Submit to Meta for approval?"
+        description="Submitted templates are immutable. Further edits will create a clone (e.g. <name>_v2). Meta usually approves within a few minutes; check the Sync button to refresh status."
+        confirmLabel="Submit"
+        isPending={submitMutation.isPending}
+        onConfirm={performSubmitToMeta}
+      />
     </div>
   );
 }
