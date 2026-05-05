@@ -1,0 +1,148 @@
+components:
+
+  kpi_card:
+    background: "#1e293b"
+    border_radius: "10px"
+    padding: "14px 18px"
+    value_font_size: "24px"
+    value_font_weight: "700"
+    label_font_size: "11px"
+    label_color: "#94a3b8"
+    label_transform: "uppercase"
+    label_spacing: "0.5px"
+
+  table:
+    header_bg: "rgba(15,23,42,.95)"
+    header_font_size: "10px"
+    header_font_weight: "700"
+    header_transform: "uppercase"
+    header_color: "#94a3b8"
+    header_padding: "8px 10px"
+    cell_padding: "6px 10px"
+    cell_font_size: "12px"
+    row_border: "1px solid rgba(255,255,255,.04)"
+    row_hover: "rgba(99,102,241,.04)"
+    border: "1px solid rgba(255,255,255,.06)"
+    border_radius: "8px"
+    max_height: "60vh"
+    footer_font_size: "11px"
+    footer_padding: "8px 10px"
+
+  chat_bubble:
+    inbound_bg: "rgba(99,102,241,.12)"
+    outbound_bg: "#1e293b"
+    border_radius: "12px"
+    padding: "8px 12px"
+    inbound_margin: "0 60px 4px 0"
+    outbound_margin: "0 0 4px 60px"
+    font_size: "12px"
+    timestamp_size: "9px"
+    timestamp_color: "#64748b"
+
+  badge:
+    padding: "2px 8px"
+    border_radius: "10px"
+    font_size: "10px"
+    font_weight: "600"
+
+  channel_badge:
+    email_bg: "rgba(99,102,241,.15)"
+    email_color: "#818cf8"
+    wa_bg: "rgba(34,197,94,.15)"
+    wa_color: "#22c55e"
+    padding: "1px 5px"
+    border_radius: "3px"
+    font_size: "9px"
+
+  section_card:
+    background: "#1e293b"
+    border_radius: "8px"
+    padding: "12px 16px"
+    accent_width: "4px"
+
+  empty_state:
+    padding: "40px"
+    icon_size: "32px"
+    font_size: "13px"
+    color: "#64748b"
+
+  progress_bar:
+    height: "8px"
+    border_radius: "4px"
+    background: "rgba(255,255,255,.06)"
+    label_size: "11px"
+    count_size: "12px"
+    count_weight: "600"
+
+  nav_sidebar:
+    background: "rgba(15,23,42,.45)"
+    border: "1px solid rgba(255,255,255,.06)"
+    border_radius: "12px"
+    button_font_size: "13px"
+    button_padding: "10px 14px"
+    button_radius: "8px"
+    active_bg: "rgba(99,102,241,.12)"
+    active_border_color: "#6366f1"
+    active_border_width: "3px"
+    active_color: "#e7eaf3"
+    inactive_color: "#94a3b8"
+
+  page_left_col:
+    background: "rgba(15,23,42,.50)"
+    border: "1px solid rgba(255,255,255,.06)"
+    border_radius: "8px"
+    padding: "10px"
+
+  activity_feed:
+    item_padding: "6px 0"
+    item_border: "1px solid rgba(255,255,255,.03)"
+    timestamp_width: "50px"
+    timestamp_size: "10px"
+    timestamp_color: "#64748b"
+    text_size: "11px"
+    text_color: "#e7eaf3"
+
+  tools_panel:
+    section_title_size: "10px"
+    section_title_color: "#64748b"
+    section_title_weight: "700"
+    section_title_transform: "uppercase"
+    section_gap: "10px"
+    divider: "1px solid rgba(255,255,255,.06)"
+    preview_bg: "rgba(15,23,42,.60)"
+    preview_border: "1px solid rgba(255,255,255,.06)"
+    preview_radius: "8px"
+    preview_padding: "10px"
+    contact_name_size: "12px"
+    contact_name_color: "#e7eaf3"
+    contact_detail_size: "10px"
+    contact_detail_color: "#64748b"
+
+    # Filter dropdown size variants. CSS classes .wa-filter-sm /
+    # .wa-filter-md / .wa-filter-lg in shared/theme_css.py mirror these
+    # values — keep them in sync. Apply via elem_classes on the
+    # gr.Dropdown component to pick a variant. The WA Inbox uses "small"
+    # because Panel 3 needs to fit Activity + 2 dropdowns + 5 var inputs
+    # + Preview + Send Template button inside one viewport height.
+    filter_sizes:
+      small:
+        input_height: "26px"
+        font_size: "10px"
+        padding_y: "2px"
+        padding_x: "8px"
+        label_size: "9px"
+        label_margin: "1px"
+      medium:
+        input_height: "32px"
+        font_size: "11px"
+        padding_y: "4px"
+        padding_x: "10px"
+        label_size: "10px"
+        label_margin: "3px"
+      large:
+        input_height: "40px"
+        font_size: "13px"
+        padding_y: "8px"
+        padding_x: "12px"
+        label_size: "11px"
+        label_margin: "5px"

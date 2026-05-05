@@ -1,0 +1,25 @@
+# TTL cache bucket durations (seconds).
+#
+# Each key names a logical cache bucket used by @ttl_cache() decorators
+# in services/ttl_cache.py. The decorator looks the bucket up at call
+# time so tuning a TTL only requires editing this file and restarting
+# the HF Space — no Python edits.
+#
+# Plan D Phase 2 offender coverage:
+#   segments_list_seconds   — services/segments.py::get_active_segments_cached
+#   home_activity_seconds   — pages/home.py::_activity_feed_cached
+#   home_counts_seconds     — pages/home.py::_contact_counts_cached
+#   wa_templates_seconds    — pages/wa_template_studio.py, for the Sync list
+#   lifecycle_counts_seconds — pages/home.py lifecycle-bar group_by result
+#
+# Rule of thumb:
+#   - 60s for "recent activity" style data the user might expect fresh
+#   - 300s (5 min) for slow-moving lookups (segments, templates)
+#   - 600s (10 min) for very slow lookups (rarely)
+
+ttl_cache:
+  segments_list_seconds: 300
+  home_activity_seconds: 60
+  home_counts_seconds: 60
+  wa_templates_seconds: 300
+  lifecycle_counts_seconds: 60

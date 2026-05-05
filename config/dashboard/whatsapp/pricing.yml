@@ -1,0 +1,67 @@
+# WhatsApp Business Platform — conversation-based pricing (2025 rates)
+#
+# Meta charges per 24h "conversation" window opened, categorised as:
+#   - MARKETING: promotional messages (highest rate)
+#   - UTILITY: account updates, notifications
+#   - AUTHENTICATION: OTPs, verification codes
+#   - SERVICE: customer-initiated support (free if within 24h window)
+#
+# Rates are rounded for UI display. Update when Meta changes them.
+# Source: Meta pricing docs — https://developers.facebook.com/docs/whatsapp/pricing
+
+currency:
+  default: "INR"
+  symbols:
+    INR: "₹"
+    USD: "$"
+    GBP: "£"
+    EUR: "€"
+    BRL: "R$"
+
+# Conversation rates by country.
+# Key = ISO country code or lower-case country name that matches Contact.country.
+rates:
+  India:
+    currency: "INR"
+    marketing: 0.80
+    utility: 0.12
+    authentication: 0.12
+    service: 0.35
+    notes: "Default market for Himalayan Fibres."
+
+  US:
+    currency: "USD"
+    marketing: 0.025
+    utility: 0.004
+    authentication: 0.004
+    service: 0.008
+
+  UK:
+    currency: "GBP"
+    marketing: 0.06
+    utility: 0.01
+    authentication: 0.01
+    service: 0.02
+
+  Brazil:
+    currency: "BRL"
+    marketing: 0.46
+    utility: 0.06
+    authentication: 0.06
+    service: 0.12
+
+  Germany:
+    currency: "EUR"
+    marketing: 0.12
+    utility: 0.04
+    authentication: 0.04
+    service: 0.08
+
+# Fallback used when the contact's country isn't in the rates table.
+# Set to India rates so estimates are still useful for the default use case.
+fallback_country: "India"
+
+# Email cost model — SMTP is free for this deployment.
+email:
+  cost_per_message: 0.0
+  currency: "INR"

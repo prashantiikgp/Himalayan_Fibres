@@ -1,0 +1,16 @@
+template:
+  slug: b2b_introduction
+  name: "B2B Introduction — Carpet Exporters"
+  category: campaign
+  subject_template: "Premium Himalayan Fibers for {{ company_name }}"
+  is_active: true
+  required_variables:
+    - company_name
+  optional_variables: []
+  variables:
+    - name: company_name
+      label: "Recipient company"
+      type: text
+      placeholder: "Acme Carpets Pvt. Ltd."
+      example: "Acme Carpets Pvt. Ltd."
+      required: true

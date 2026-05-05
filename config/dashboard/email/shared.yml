@@ -1,0 +1,33 @@
+shared:
+  banner_url: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/sign/wa-media/Whatsapp%20email%20Banner.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83OTM3MzgzNi1iZDQyLTQ0M2EtOTA5My03NzA5MTI3YjNjODAiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJ3YS1tZWRpYS9XaGF0c2FwcCBlbWFpbCBCYW5uZXIuanBnIiwiaWF0IjoxNzc2MTU4Nzg1LCJleHAiOjE4MDc2OTQ3ODV9.EhETsKEVvW8IkODIf9M3l9SFJ5mbCOB68Qi8d-o2sUc"
+  banner_alt: "Himalayan Fibres"
+
+  company_name: "Himalayan Fibres"
+  address: "S.K. Complex, Khurje Wala Mohalla, Daulat Ganj, Lashkar, Gwalior 474001"
+  company_email: "info@himalayanfibres.com"
+  company_phone: "+91 8582952074"
+
+  whatsapp_url: "https://wa.me/918582952074"
+  whatsapp_icon_url: "https://img.icons8.com/color/48/whatsapp--v1.png"
+  instagram_url: "https://www.instagram.com/himalayan_fibres/"
+  instagram_icon_url: "https://img.icons8.com/color/48/instagram-new--v1.png"
+  facebook_url: "https://www.facebook.com/Himalayanfibres"
+  facebook_icon_url: "https://img.icons8.com/color/48/facebook-new.png"
+
+  privacy_url: "https://www.himalayanfibres.com/privacy-policy"
+  terms_url: "https://www.himalayanfibres.com/terms-conditions"
+  refund_url: "https://www.himalayanfibres.com/refund-cancellation"
+  unsubscribe_mailto: "info@himalayanfibres.com?subject=Unsubscribe"
+
+  copyright_line: "© 2025 Himalayan Fibres. All rights reserved."
+
+  color_text: "#222222"
+  color_body: "#444444"
+  color_accent: "#2c3e50"
+  color_button_bg: "#232323"
+  color_button_text: "#ffffff"
+  color_link: "#c38513"
+  color_footer_bg: "#f5f5f5"
+  color_card_bg: "#f5f5f5"
+  color_card_border: "#e8e8e8"
+  font_stack: "'Amiri', Georgia, serif"

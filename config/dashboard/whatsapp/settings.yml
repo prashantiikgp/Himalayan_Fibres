@@ -1,0 +1,102 @@
+# WhatsApp Business API Settings
+# API credentials are loaded from .env — this file controls behavior and defaults.
+
+api:
+  version: "v21.0"
+  graph_base: "https://graph.facebook.com"
+  timeout_seconds: 30
+  media_timeout_seconds: 60
+
+business_profile:
+  verified_name: "Himalayan Fibres"
+  display_phone: "+91 80886 32822"
+  about: "Eco-friendly yarns & textiles"
+  description: >
+    Eco-friendly yarns & textiles. Stinging Himalayan nettle and
+    Wild Himalayan Hemp Blended Yarns and textiles. Chat to order.
+  vertical: "RETAIL"
+  website: "https://himalayanfibres.com/"
+  email: "info@himalayanfibres.com"
+
+messaging:
+  # Default language for templates
+  default_language: "en"
+
+  # 24-hour messaging window
+  window_hours: 24
+
+  # Footer text appended to outbound messages (optional)
+  default_footer: "Team Himalayan Fibres"
+
+  # Auto-reply when contact sends first message (empty = disabled)
+  welcome_auto_reply: ""
+
+  # Greeting message when user initiates from click-to-chat (empty = disabled)
+  greeting_message: ""
+
+rate_limits:
+  # Per-second throughput (Meta Cloud API standard tier)
+  messages_per_second: 80
+
+  # Daily template message limits (varies by tier)
+  template_messages_daily: 1000
+
+  # Delay between batch sends (seconds)
+  batch_delay_seconds: 1
+
+  # Maximum batch size per campaign send
+  batch_size: 100
+
+  # Maximum retries on transient failures
+  max_retries: 3
+  retry_delay_seconds: 60
+
+media:
+  # Local directory for downloaded inbound media
+  download_dir: "media/whatsapp"
+
+  # Maximum file size for uploads (bytes) — WhatsApp limits
+  max_upload_size_bytes: 16777216  # 16 MB
+
+  # Supported MIME types for upload
+  supported_types:
+    image: ["image/jpeg", "image/png", "image/webp"]
+    document: ["application/pdf", "application/msword",
+               "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+               "application/vnd.ms-excel",
+               "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]
+    audio: ["audio/aac", "audio/mp4", "audio/mpeg", "audio/ogg"]
+    video: ["video/mp4", "video/3gpp"]
+
+  # Cleanup policy for downloaded media
+  cleanup:
+    enabled: false
+    retention_days: 90
+
+webhook:
+  # Signature verification (requires WA_APP_SECRET in .env)
+  verify_signature: true
+
+  # Log raw webhook payloads for debugging
+  log_payloads: false
+
+  # Status events to track
+  track_statuses:
+    - "sent"
+    - "delivered"
+    - "read"
+    - "failed"
+
+sync:
+  # Template sync schedule
+  templates:
+    auto_sync: true
+    sync_interval_seconds: 3600  # 1 hour
+    sync_on_startup: true
+
+testing:
+  # Test recipient phone number (for development)
+  test_phone: "918582952074"
+
+  # Sandbox mode — if true, all sends go to test_phone only
+  sandbox_mode: false

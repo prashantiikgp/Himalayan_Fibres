@@ -1,0 +1,112 @@
+page:
+  title: "Contacts"
+
+  search:
+    placeholder: "Search by name, email, company..."
+
+  filters:
+    - id: segment
+      label: "Segment"
+      source: "schema.segments"
+      include_all: true
+    - id: lifecycle
+      label: "Lifecycle"
+      source: "schema.lifecycle_stages"
+      include_all: true
+    - id: country
+      label: "Country"
+      source: "distinct_countries"
+      include_all: true
+    - id: channel
+      label: "Channel"
+      options: ["All", "Email Only", "WhatsApp Only", "Both"]
+    - id: tags
+      label: "Tags"
+      source: "distinct_tags"
+      multiselect: true
+      info: "Empty = any tag. Pick one or more to narrow."
+
+  table:
+    page_size: 50
+    columns:
+      - field: name
+        label: "Name"
+        width: "13%"
+      - field: company
+        label: "Company"
+        width: "11%"
+      - field: channels
+        label: "Channel"
+        width: "6%"
+      - field: lifecycle
+        label: "Lifecycle"
+        width: "8%"
+      - field: segments
+        label: "Segments"
+        width: "10%"
+      - field: email
+        label: "Email"
+        width: "14%"
+        font: "monospace"
+      - field: phone
+        label: "Phone"
+        width: "9%"
+      - field: city
+        label: "City"
+        width: "7%"
+      - field: country
+        label: "Country"
+        width: "7%"
+      - field: tags
+        label: "Tags"
+        width: "10%"
+      - field: actions
+        label: ""
+        width: "5%"
+
+  add_contact:
+    title: "Add New Contact"
+    tabs:
+      - "Single Contact"
+      - "Import CSV"
+    import_instructions: "CSV must have: email (required), first_name, last_name, phone, company"
+    import_modal_title: "Import Contacts"
+
+  top_bar:
+    search_scale: 2
+    button_size: "md"
+    add_label: "+ Add Contact"
+    import_label: "Import"
+    legend_label: "ℹ Legend"
+
+  missing_label: "Missing"
+
+  pagination:
+    prev_label: "‹"
+    next_label: "›"
+    page_label: "Page"
+    range_template: "Showing {start}–{end} of {total}"
+    info_template: "{start}–{end} of {total}"
+
+  legend:
+    summary: "Legend — Customer Types, Segments & Tags"
+    customer_types:
+      heading: "Customer Types"
+      intro: "A contact's primary business relationship category. Set when the contact is created and rarely changes. These are the built-in system segments."
+    segments:
+      heading: "Segments"
+      intro: "<strong>Named saved filters</strong> over tags and fields. Broadcasts target segments, not raw tags — so you always know who you're sending to."
+      note: "Right now the only segments are the <em>Customer Types</em> on the left. In Phase 2 you'll be able to create your own, e.g. <em>\"Premium wool buyers in India\"</em>, with a live member count."
+    tags:
+      heading: "Tags"
+      intro: "Raw, free-form labels. A contact can have many. Custom tags are allowed — just type a new one. Predefined:"
+
+  kpi_cards:
+    - id: total
+      label: "Total"
+    - id: opted_in
+      label: "Opted In"
+    - id: pending
+      label: "Pending"
+    - id: wa_ready
+      label: "WA Ready"

@@ -1,0 +1,38 @@
+template:
+  slug: operational_update
+  name: "Operational Update"
+  category: announcement
+  subject_template: "{{ update_title }} — Himalayan Fibres"
+  is_active: true
+  required_variables:
+    - first_name
+    - update_title
+    - update_body_html
+  optional_variables:
+    - update_cta_label
+    - update_cta_url
+  variables:
+    - name: update_title
+      label: "Update title"
+      type: text
+      placeholder: "A quick update from Himalayan Fibres"
+      example: "A quick update from Himalayan Fibres"
+      required: true
+    - name: update_cta_label
+      label: "CTA button label"
+      type: text
+      placeholder: "Read more"
+      example: ""
+      required: false
+    - name: update_cta_url
+      label: "CTA button URL"
+      type: url
+      placeholder: "https://www.himalayanfibres.com/blog/update"
+      example: ""
+      required: false
+    - name: update_body_html
+      label: "Update body (HTML)"
+      type: textarea
+      placeholder: "<p>We wanted to let you know about a small change coming next week.</p><p>Thanks for being with us.</p>"
+      example: "<p>We wanted to let you know about a small change coming next week.</p><p>Thanks for being with us.</p>"
+      required: true

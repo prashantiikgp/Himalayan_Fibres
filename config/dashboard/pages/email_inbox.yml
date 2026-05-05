@@ -1,0 +1,30 @@
+page:
+  title: "Email Inbox"
+
+  column_1:
+    title: "Sent Emails"
+    search_placeholder: "Search..."
+    empty_message: "No emails sent yet"
+
+  column_2:
+    empty_message: "Select a contact to view email history"
+    message_input:
+      placeholder: "Type subject..."
+
+  column_3:
+    sections:
+      - id: contact_mini
+        title: "Contact"
+        fields: [name, email]
+      - id: activity
+        title: "Activity"
+        limit: 8
+      - id: templates
+        title: "Templates"
+        source: "email_templates"
+        show_preview: true
+        send_button: "Send Email"
+        extra_fields: [subject]
+      - id: edit
+        fields: [lifecycle_dropdown, tags_input]
+    empty_message: "Select a contact to see tools"

@@ -1,0 +1,67 @@
+template:
+  slug: order_confirmation
+  name: "Order Confirmation"
+  category: transactional
+  subject_template: "Order confirmed — thank you, {{ first_name }}!"
+  is_active: true
+  required_variables:
+    - first_name
+    - order_number
+    - order_date
+    - items_html
+    - total
+  optional_variables:
+    - ship_to_html
+    - subtotal
+    - shipping
+    - payment_method
+    - invoice_url
+  variables:
+    - name: order_number
+      label: "Order number"
+      type: text
+      placeholder: "10014"
+      example: "10014"
+      required: true
+    - name: order_date
+      label: "Order date"
+      type: date
+      placeholder: "30-Aug-2025"
+      example: "30-Aug-2025"
+      required: true
+    - name: subtotal
+      label: "Subtotal"
+      type: text
+      placeholder: "Rs 750"
+      example: "Rs 750"
+      required: false
+    - name: shipping
+      label: "Shipping"
+      type: text
+      placeholder: "Rs 200"
+      example: "Rs 200"
+      required: false
+    - name: total
+      label: "Total"
+      type: text
+      placeholder: "Rs 950"
+      example: "Rs 950"
+      required: true
+    - name: payment_method
+      label: "Payment method"
+      type: text
+      placeholder: "UPI"
+      example: "UPI"
+      required: false
+    - name: ship_to_html
+      label: "Ship to (HTML)"
+      type: textarea
+      placeholder: "Mrs. Alisha Panda<br>Brahmapur, Odisha 760004"
+      example: "Mrs. Alisha Panda<br>Brahmapur, Odisha 760004"
+      required: false
+    - name: items_html
+      label: "Items (HTML)"
+      type: textarea
+      placeholder: '<p style="margin:4px 0;">Himalayan Woollen Yarn × 500 g</p>'
+      example: '<p style="margin:4px 0;">Himalayan Woollen Yarn × 500 g</p>'
+      required: true

@@ -1,0 +1,89 @@
+contact_schema:
+
+  segments:
+    - id: potential_b2b
+      label: "Potential B2B"
+      color: "#6366f1"
+      description: "Prospective exporter, handicraft and textile-manufacturer customers we're actively nurturing."
+      subtypes: [carpet_exporter, handicraft_exporter, textile_manufacturer]
+    - id: existing_client
+      label: "Existing Client"
+      color: "#22c55e"
+      description: "Current paying customers — both VIP accounts and regular repeat buyers."
+      subtypes: [vip, regular]
+    - id: yarn_store
+      label: "Yarn Store"
+      color: "#f59e0b"
+      description: "Retail and wholesale yarn shops stocking Himalayan Fibres yarn."
+      subtypes: [retail_store, wholesale]
+    - id: other
+      label: "Other"
+      color: "#64748b"
+      description: "Everything else — press contacts, partners, miscellaneous leads."
+      subtypes: []
+
+  lifecycle_stages:
+    - id: new_lead
+      label: "New Lead"
+      color: "#6366f1"
+      icon: "\U0001F535"
+    - id: contacted
+      label: "Contacted"
+      color: "#f59e0b"
+      icon: "\U0001F7E1"
+    - id: interested
+      label: "Interested"
+      color: "#22c55e"
+      icon: "\U0001F7E2"
+    - id: customer
+      label: "Customer"
+      color: "#14b8a6"
+      icon: "\U00002B50"
+    - id: churned
+      label: "Churned"
+      color: "#ef4444"
+      icon: "\U0001F534"
+
+  tags:
+    predefined:
+      - wool
+      - hemp
+      - nettle
+      - yarn
+      - carpet
+      - silk
+      - premium
+      - samples_sent
+      - samples_received
+      - quoted
+      - order_placed
+    allow_custom: true
+
+  fields:
+    first_name:
+      type: text
+      required: true
+      placeholder: "First name"
+    last_name:
+      type: text
+      required: false
+      placeholder: "Last name"
+    phone:
+      type: phone
+      required: true
+      prefix: "+91"
+      placeholder: "10 digit mobile"
+      validation: "^[0-9]{10}$"
+    email:
+      type: email
+      required: false
+      placeholder: "name@company.com"
+    company:
+      type: text
+      required: false
+      placeholder: "Company name"
+    country:
+      type: dropdown
+      required: false
+      default: "India"
+      options: [India, US, UK, Canada, Australia, Germany, France, Nepal, Other]

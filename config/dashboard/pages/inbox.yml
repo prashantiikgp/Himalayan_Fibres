@@ -1,0 +1,46 @@
+page:
+  title: "Inbox"
+
+  column_1:
+    title: "Conversations"
+    search_placeholder: "Search by name..."
+    min_search_chars: 2
+    filters:
+      - id: lifecycle
+        label: "Lifecycle"
+        source: "schema.lifecycle_stages"
+        include_all: true
+
+  column_2:
+    channels:
+      - id: whatsapp
+        label: "WhatsApp"
+        icon: "\U0001F4AC"
+      - id: email
+        label: "Email"
+        icon: "\u2709"
+    message_input:
+      placeholder: "Type a message..."
+    window_warning:
+      title: "WhatsApp's customer service window closed"
+      detail: "WhatsApp doesn't allow sending messages after 24 hours since the last Contact reply. To continue, send an approved Message Template."
+
+  column_3:
+    title: "Contact Details"
+    sections:
+      - id: channels
+        label: "Channels"
+      - id: fields
+        label: "Contact Fields"
+      - id: lifecycle
+        label: "Lifecycle"
+        editable: true
+      - id: segment
+        label: "Segment"
+        editable: true
+      - id: tags
+        label: "Tags"
+        editable: true
+      - id: activity
+        label: "Activity Log"
+        limit: 20

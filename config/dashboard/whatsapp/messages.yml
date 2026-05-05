@@ -1,0 +1,147 @@
+# WhatsApp Message Presets & Auto-Responses
+# Quick replies, canned messages, and automation rules.
+
+quick_replies:
+  greeting:
+    label: "Greeting"
+    text: >
+      Namaste! Welcome to Himalayan Fibres.
+      How can I help you today?
+    tags: ["greeting", "general"]
+
+  product_inquiry:
+    label: "Product Inquiry Response"
+    text: >
+      Thank you for your interest in our products!
+      We offer premium Nettle, Hemp, Woollen and Blend yarns.
+      Which product would you like to know more about?
+    tags: ["products", "inquiry"]
+
+  price_request:
+    label: "Price List Request"
+    text: >
+      Thank you for asking about our prices.
+      Our current price list has been shared with you.
+      For bulk orders (100kg+), we offer special wholesale pricing.
+      Please let me know the quantity you're interested in.
+    tags: ["pricing", "inquiry"]
+
+  order_status:
+    label: "Order Status Check"
+    text: >
+      Let me check your order status.
+      Could you please share your order number or the phone number
+      used while placing the order?
+    tags: ["order", "support"]
+
+  shipping_info:
+    label: "Shipping Information"
+    text: >
+      We ship across India and internationally.
+      Domestic orders: 5-7 business days
+      International orders: 10-15 business days
+      All orders include tracking details via WhatsApp.
+    tags: ["shipping", "info"]
+
+  sample_request:
+    label: "Sample Request"
+    text: >
+      We'd be happy to send you yarn samples!
+      Please share your shipping address and the yarn types
+      you're interested in (Nettle, Hemp, Wool, or Blends).
+      Sample packs are complimentary for B2B customers.
+    tags: ["samples", "b2b"]
+
+  bulk_order:
+    label: "Bulk Order Inquiry"
+    text: >
+      Thank you for your bulk order inquiry!
+      For orders above 100kg, we offer:
+      - 10-15% wholesale discount
+      - Custom color dyeing
+      - Dedicated account manager
+      Please share the quantities and specifications you need.
+    tags: ["bulk", "b2b", "pricing"]
+
+  follow_up:
+    label: "Follow-Up"
+    text: >
+      Hi! Just following up on our previous conversation.
+      Is there anything else I can help you with regarding
+      our yarns and textiles?
+    tags: ["follow-up"]
+
+  thank_you:
+    label: "Thank You"
+    text: >
+      Thank you for choosing Himalayan Fibres!
+      We appreciate your business and look forward to
+      serving you again. Feel free to reach out anytime.
+    tags: ["thank-you", "closing"]
+
+  out_of_office:
+    label: "Out of Office"
+    text: >
+      Thank you for your message. Our team is currently
+      unavailable. We'll respond within 24 hours during
+      business hours (Mon-Sat, 9 AM - 6 PM IST).
+    tags: ["auto", "ooo"]
+
+auto_responses:
+  # Auto-response rules (triggered by keyword matching)
+  enabled: false
+
+  rules:
+    - name: "Business hours OOO"
+      trigger: "first_message_outside_hours"
+      business_hours:
+        timezone: "Asia/Kolkata"
+        start: "09:00"
+        end: "18:00"
+        days: ["mon", "tue", "wed", "thu", "fri", "sat"]
+      response_preset: "out_of_office"
+      cooldown_hours: 12  # Don't re-send within 12 hours
+
+    - name: "Keyword: price"
+      trigger: "keyword"
+      keywords: ["price", "rate", "cost", "quotation", "quote"]
+      response_preset: "price_request"
+      cooldown_hours: 24
+
+    - name: "Keyword: sample"
+      trigger: "keyword"
+      keywords: ["sample", "swatch", "try"]
+      response_preset: "sample_request"
+      cooldown_hours: 24
+
+contact_labels:
+  # Auto-assign labels based on message content or behavior
+  auto_label_rules:
+    - label: "New Lead"
+      condition: "first_message"
+      color: "#22c55e"
+
+    - label: "Active"
+      condition: "message_in_last_7_days"
+      color: "#3b82f6"
+
+    - label: "Dormant"
+      condition: "no_message_in_30_days"
+      color: "#94a3b8"
+
+  # Predefined labels for manual tagging
+  preset_labels:
+    - name: "VIP Customer"
+      color: "#eab308"
+    - name: "B2B Lead"
+      color: "#8b5cf6"
+    - name: "Sample Sent"
+      color: "#06b6d4"
+    - name: "Order Pending"
+      color: "#f97316"
+    - name: "Payment Done"
+      color: "#22c55e"
+    - name: "Carpet Exporter"
+      color: "#ec4899"
+    - name: "Yarn Store"
+      color: "#14b8a6"

@@ -1,0 +1,32 @@
+page:
+  title: "Broadcasts"
+
+  steps:
+    - label: "1. Channel"
+      type: dropdown
+      choices: ["whatsapp", "email"]
+      default: "whatsapp"
+    - label: "2. Segment"
+      type: dropdown
+      source: "segments"
+    - label: "3. Template"
+      type: dropdown
+      source: "dynamic"  # filtered by channel
+
+  actions:
+    send: "Send Broadcast"
+    test: "Test (1 message)"
+
+  history:
+    title: "Past Broadcasts"
+    columns:
+      - field: status
+        label: "Status"
+      - field: name
+        label: "Name"
+      - field: channel
+        label: "Channel"
+      - field: total_sent
+        label: "Sent"
+      - field: sent_at
+        label: "Date"
