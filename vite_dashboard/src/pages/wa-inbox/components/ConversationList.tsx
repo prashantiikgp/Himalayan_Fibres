@@ -18,10 +18,14 @@ export function ConversationList({
   selectedContactId,
   onSelect,
   searchPlaceholder,
+  onNewConversation,
+  newConversationLabel,
 }: {
   selectedContactId: string | null;
   onSelect: (contactId: string) => void;
   searchPlaceholder: string;
+  onNewConversation?: () => void;
+  newConversationLabel?: string;
 }) {
   const [search, setSearch] = useState("");
   const debounced = useDebouncedValue(search, 250);
@@ -63,6 +67,15 @@ export function ConversationList({
   return (
     <div className="flex h-full flex-col">
       <div className="border-b border-border p-card">
+        {onNewConversation && (
+          <button
+            type="button"
+            onClick={onNewConversation}
+            className="mb-2 w-full rounded-md border border-border bg-card px-2 py-1.5 text-xs font-medium text-text hover:bg-card/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            {newConversationLabel ?? "+ New conversation"}
+          </button>
+        )}
         <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-text-muted" />
           <Input

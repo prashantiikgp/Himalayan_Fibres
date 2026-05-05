@@ -194,33 +194,39 @@ body { font-size: 12px !important; }
     min-width: 1100px !important;
     table-layout: auto !important;
 }
-/* Email cell wraps instead of ellipsis — long addresses (40+ chars)
-   were either truncated invisibly or pushed neighbour columns off
-   screen. word-break:break-all handles both 'long.local-part@host'
-   and unbroken garbage strings. */
+/* Wrapping cells for the Contacts table.
+   These cells override table_cell()'s inline `white-space:nowrap` so long
+   values flow onto a second line within their own column instead of
+   clipping with an ellipsis. We deliberately do NOT set `display:-webkit-box`
+   on the <td> — that would override `display:table-cell` and break the
+   <colgroup> column alignment. Each row sizes itself to its tallest cell. */
 .contacts-right-col .contacts-table-host td.contact-email-cell,
 .contacts-right-col .contacts-table-host td.contact-name-cell,
-.contacts-right-col .contacts-table-host td.contact-company-cell {
+.contacts-right-col .contacts-table-host td.contact-company-cell,
+.contacts-right-col .contacts-table-host td.contact-segments-cell,
+.contacts-right-col .contacts-table-host td.contact-tags-cell {
     white-space: normal !important;
+    overflow: visible !important;
     line-height: 1.35 !important;
     padding-top: 8px !important;
     padding-bottom: 8px !important;
-    /* Cap at 2 lines, then ellipsize. -webkit-line-clamp is supported
-       in every Chromium-based browser (HF Spaces serve via Chrome). */
-    display: -webkit-box !important;
-    -webkit-line-clamp: 2 !important;
-    -webkit-box-orient: vertical !important;
-    overflow: hidden !important;
+    vertical-align: middle !important;
 }
 /* Emails are one unbroken token, so they must break mid-character;
    names and companies break on word/space boundaries naturally. */
 .contacts-right-col .contacts-table-host td.contact-email-cell {
     word-break: break-all !important;
-    max-width: 200px !important;
 }
 .contacts-right-col .contacts-table-host td.contact-name-cell,
 .contacts-right-col .contacts-table-host td.contact-company-cell {
     word-break: break-word !important;
+}
+/* Segments and tags wrap their pill spans onto a new line when the row
+   width is exceeded. Slightly looser line-height so two pill rows feel
+   balanced against the text cells. */
+.contacts-right-col .contacts-table-host td.contact-segments-cell,
+.contacts-right-col .contacts-table-host td.contact-tags-cell {
+    line-height: 1.6 !important;
 }
 /* Filters in .page-left-col use the wa-filter-lg variant. Add
    breathing room between them so the column reads as the primary

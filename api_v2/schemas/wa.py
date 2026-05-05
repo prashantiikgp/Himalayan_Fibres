@@ -163,7 +163,10 @@ class SendTemplateRequest(BaseModel):
     template_name: str
     language: str = "en_US"
     variables: list[str] = []
-    """Positional ({{1}}, {{2}}…) values. The wa sender currently only
-    consumes positional in this endpoint; named-variable templates are
-    a Phase 2.2 follow-up since the frontend variables form already
-    knows the variable order from the templates endpoint."""
+    """Positional body params ({{1}}, {{2}}…). For named-param templates
+    the frontend supplies values in declaration order from the templates
+    endpoint."""
+    header_variables: list[str] = []
+    """Positional header params for templates that declare a TEXT header
+    with placeholders. Empty for body-only templates. Meta rejects sends
+    that omit header params with code 132000."""

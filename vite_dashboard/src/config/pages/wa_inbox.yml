@@ -28,6 +28,10 @@ page:
     conversations:
       min_width: 240
       search_placeholder: "Search active chats..."
+      new_conversation_button: "+ New conversation"
+      new_conversation_dialog_title: "Start a new WhatsApp conversation"
+      new_conversation_dialog_help: "Pick a contact who has a WhatsApp number. Only contacts with a wa_id are shown."
+      new_conversation_hide_existing_label: "Hide existing conversations"
     chat:
       min_width: 380
       compose_placeholder: "Type a message..."

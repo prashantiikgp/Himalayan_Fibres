@@ -10,11 +10,19 @@ Input is a dict with these optional keys:
     body:   {text, example?}
     footer: {text}
     buttons: [{type: URL|QUICK_REPLY|PHONE_NUMBER, text, url?, phone_number?}]
+
+The reverse mapping (Meta components → flat WATemplate columns) lives in
+`decompose_components` below — co-located so forward and inverse cannot
+drift. Phase 7.4 added it so `WhatsAppSender.sync_templates_from_meta`
+can populate body_text / header_text / etc. on every sync.
 """
 
 from __future__ import annotations
 
+import logging
 from typing import Any
+
+log = logging.getLogger(__name__)
 
 
 def build_components(template: dict[str, Any]) -> list[dict[str, Any]]:
@@ -62,3 +70,88 @@ def build_components(template: dict[str, Any]) -> list[dict[str, Any]]:
             components.append({"type": "BUTTONS", "buttons": buttons})
 
     return components
+
+
+def decompose_components(components: list[dict[str, Any]] | None) -> dict[str, Any]:
+    """Inverse of `build_components` — Meta components shape → flat fields.
+
+    Returns a dict with the keys WATemplate stores as flat columns:
+        body_text:        str          (empty string if no BODY)
+        header_format:    str | None   ("TEXT" | "IMAGE" | "VIDEO" | "DOCUMENT")
+        header_text:      str | None   (only set when format == TEXT)
+        header_asset_url: str | None   (only set for media headers)
+        footer_text:      str | None
+        buttons:          list[dict]   (empty list if no BUTTONS component)
+
+    Designed to be safe to call on whatever Meta returns from the
+    Graph API `/{waba_id}/message_templates` endpoint:
+
+      - Components missing `type` are skipped.
+      - Multiple HEADER or BODY entries (Meta should never return this)
+        take the first; subsequent ones are logged and ignored.
+      - Buttons with unknown `type` are preserved verbatim so future
+        button kinds don't get silently dropped.
+      - Header IMAGE/VIDEO/DOCUMENT URLs come from
+        `example.header_handle[0]`. These are short-lived Meta CDN
+        handles — fine for preview persistence but the actual send
+        re-uploads media at send time.
+    """
+    out: dict[str, Any] = {
+        "body_text": "",
+        "header_format": None,
+        "header_text": None,
+        "header_asset_url": None,
+        "footer_text": None,
+        "buttons": [],
+    }
+    if not components:
+        return out
+
+    seen_header = False
+    seen_body = False
+
+    for comp in components:
+        if not isinstance(comp, dict):
+            continue
+        ctype = comp.get("type")
+        if not isinstance(ctype, str):
+            continue
+        ctype = ctype.upper()
+
+        if ctype == "HEADER":
+            if seen_header:
+                log.warning("decompose_components: duplicate HEADER component, ignoring")
+                continue
+            seen_header = True
+            fmt = (comp.get("format") or "TEXT").upper()
+            out["header_format"] = fmt
+            if fmt == "TEXT":
+                out["header_text"] = comp.get("text") or ""
+            elif fmt in ("IMAGE", "VIDEO", "DOCUMENT"):
+                example = comp.get("example") or {}
+                handles = example.get("header_handle") or []
+                if isinstance(handles, list) and handles:
+                    first = handles[0]
+                    out["header_asset_url"] = first if isinstance(first, str) else ""
+                else:
+                    out["header_asset_url"] = ""
+
+        elif ctype == "BODY":
+            if seen_body:
+                log.warning("decompose_components: duplicate BODY component, ignoring")
+                continue
+            seen_body = True
+            out["body_text"] = comp.get("text") or ""
+
+        elif ctype == "FOOTER":
+            out["footer_text"] = comp.get("text") or ""
+
+        elif ctype == "BUTTONS":
+            buttons = comp.get("buttons")
+            if isinstance(buttons, list):
+                out["buttons"] = [b for b in buttons if isinstance(b, dict)]
+
+        else:
+            log.info("decompose_components: skipping unsupported component type %r", ctype)
+
+    return out

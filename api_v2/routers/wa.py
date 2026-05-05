@@ -502,6 +502,7 @@ def send_template_message(req: SendTemplateRequest) -> WAMessageOut:
             template_name=req.template_name,
             lang=req.language or tmpl.language or "en_US",
             variables=list(req.variables or []),
+            header_variables=list(req.header_variables or []),
         )
 
         # Build a preview from the template body so the conversation list

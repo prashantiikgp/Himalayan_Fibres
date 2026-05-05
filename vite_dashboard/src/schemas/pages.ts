@@ -97,6 +97,10 @@ export const WaInboxPageConfig = z
             .object({
               min_width: NonNegInt,
               search_placeholder: NonEmptyString,
+              new_conversation_button: NonEmptyString,
+              new_conversation_dialog_title: NonEmptyString,
+              new_conversation_dialog_help: NonEmptyString,
+              new_conversation_hide_existing_label: NonEmptyString,
             })
             .strict(),
           chat: z

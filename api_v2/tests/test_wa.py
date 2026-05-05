@@ -320,12 +320,20 @@ def stub_sender(monkeypatch: pytest.MonkeyPatch) -> dict[str, object]:
             return calls["result"]
         return (True, _next_id(), None)
 
-    def _send_template(self, to_phone: str, template_name, lang="en_US", variables=None):  # noqa: ANN001
+    def _send_template(  # noqa: ANN001
+        self,
+        to_phone: str,
+        template_name,
+        lang="en_US",
+        variables=None,
+        header_variables=None,
+    ):
         calls["template"] = {
             "to_phone": to_phone,
             "template_name": template_name,
             "lang": lang,
             "variables": list(variables or []),
+            "header_variables": list(header_variables or []),
         }
         if calls["result"] is not None:
             return calls["result"]

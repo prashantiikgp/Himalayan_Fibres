@@ -154,6 +154,7 @@ export type SendTemplateRequest = {
   template_name: string;
   language?: string;
   variables?: string[];
+  header_variables?: string[];
 };
 
 /**

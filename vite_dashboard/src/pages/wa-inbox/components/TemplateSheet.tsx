@@ -1,19 +1,23 @@
 /**
  * <TemplateSheet> — slide-over for picking + sending a WA template.
  *
- * The B1 fix lives here: the variables form renders **exactly N inputs**
- * (one per declared variable) in a non-scrolling vertical stack. v1's
- * Email Broadcast template editor pre-allocated 8 visible slots; this
- * version only renders what the template actually declares, in
- * first-appearance order, with no padding.
+ * Phase 7.5: preview + variables-form logic extracted to the shared
+ * <TemplatePreview> component (consumed by Studio too). This file owns
+ * the contact-aware prefill (the only caller that has a contact in
+ * scope), template picker dropdown, send mutation, and submit gating.
  */
 
 import { useEffect, useMemo, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { TemplatePreview } from "@/components/wa/TemplatePreview";
 import {
+  extractPlaceholders,
+  resolveVariableForContact,
+} from "@/lib/wa-template-vars";
+import {
+  useConversationDetail,
   useSendTemplate,
   useWaTemplates,
   type WATemplateOut,
@@ -38,47 +42,80 @@ export function TemplateSheet({
   labels: Labels;
 }) {
   const { data, isLoading, error } = useWaTemplates();
+  const { data: convData } = useConversationDetail(contactId);
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const selected: WATemplateOut | null = useMemo(
     () => data?.templates.find((t) => t.name === selectedName) ?? null,
     [data, selectedName],
   );
-  const [vars, setVars] = useState<Record<string, string>>({});
+  const [bodyVars, setBodyVars] = useState<Record<string, string>>({});
+  const [headerVars, setHeaderVars] = useState<Record<string, string>>({});
   const sendMutation = useSendTemplate();
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Header placeholders are derived from header_text by scanning {{N}}
+  // tokens — the DB doesn't store them separately. Body placeholders use
+  // the `variables` field the API derives server-side at render time.
+  const headerVarNames = useMemo(
+    () => extractPlaceholders(selected?.header_text ?? ""),
+    [selected?.header_text],
+  );
+  const bodyVarNames = useMemo(() => selected?.variables ?? [], [selected]);
 
   // Reset when the sheet closes or the contact changes.
   useEffect(() => {
     if (!open) {
       setSelectedName(null);
-      setVars({});
+      setBodyVars({});
+      setHeaderVars({});
       setSubmitError(null);
       sendMutation.reset();
     }
-    // sendMutation.reset is stable; including it would loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, contactId]);
 
-  // Reset variable values when the chosen template changes.
+  // Auto-prefill variables when a template is picked, mirroring the
+  // broadcast engine's _resolve_wa_variable map. User can still edit.
   useEffect(() => {
-    setVars({});
+    if (!selected) {
+      setBodyVars({});
+      setHeaderVars({});
+      setSubmitError(null);
+      return;
+    }
+    const ctx = convData
+      ? { contact_name: convData.contact_name, contact_company: convData.contact_company }
+      : null;
+    const nextBody: Record<string, string> = {};
+    for (const name of bodyVarNames) {
+      nextBody[name] = resolveVariableForContact(name, ctx);
+    }
+    const nextHeader: Record<string, string> = {};
+    for (const name of headerVarNames) {
+      nextHeader[name] = resolveVariableForContact(name, ctx);
+    }
+    setBodyVars(nextBody);
+    setHeaderVars(nextHeader);
     setSubmitError(null);
-  }, [selectedName]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedName, convData?.contact_id]);
 
-  const variableNames = selected?.variables ?? [];
-  const allFilled = variableNames.every((v) => (vars[v] ?? "").trim().length > 0);
+  const allFilled =
+    bodyVarNames.every((v) => (bodyVars[v] ?? "").trim().length > 0) &&
+    headerVarNames.every((v) => (headerVars[v] ?? "").trim().length > 0);
 
   function handleSend() {
     if (!contactId || !selected) return;
     setSubmitError(null);
-    // Collect values in the same order the API extracted them.
-    const values = variableNames.map((v) => (vars[v] ?? "").trim());
+    const bodyValues = bodyVarNames.map((v) => (bodyVars[v] ?? "").trim());
+    const headerValues = headerVarNames.map((v) => (headerVars[v] ?? "").trim());
     sendMutation.mutate(
       {
         contact_id: contactId,
         template_name: selected.name,
         language: selected.language || "en_US",
-        variables: values,
+        variables: bodyValues,
+        header_variables: headerValues.length > 0 ? headerValues : undefined,
       },
       {
         onSuccess: () => onOpenChange(false),
@@ -93,9 +130,7 @@ export function TemplateSheet({
         <SheetHeader>
           <SheetTitle>{labels.title}</SheetTitle>
           <SheetDescription>
-            {contactId
-              ? `Sending to ${contactName}`
-              : "Pick a contact first."}
+            {contactId ? `Sending to ${contactName}` : "Pick a contact first."}
           </SheetDescription>
         </SheetHeader>
 
@@ -121,44 +156,24 @@ export function TemplateSheet({
 
           {selected && (
             <>
-              <section>
-                <h3 className="mb-1 text-xs font-semibold uppercase tracking-wider text-text-muted">
-                  Body
-                </h3>
-                <div className="rounded-md border border-border bg-card/40 p-3 text-sm text-text whitespace-pre-wrap">
-                  {selected.body_text || "(empty body)"}
-                </div>
-                {selected.footer_text && (
-                  <p className="mt-1 text-xs italic text-text-muted">{selected.footer_text}</p>
-                )}
-              </section>
-
-              {/* B1 fix: render EXACTLY one input per declared variable, */}
-              {/* in declaration order, in a non-scrolling stack. No */}
-              {/* placeholder slots, no padding. */}
-              {variableNames.length > 0 && (
-                <section>
-                  <h3 className="mb-1 text-xs font-semibold uppercase tracking-wider text-text-muted">
-                    Variables ({variableNames.length})
-                  </h3>
-                  <div className="flex flex-col gap-2">
-                    {variableNames.map((name) => (
-                      <div key={name} className="flex flex-col gap-1">
-                        <Label htmlFor={`tpl-var-${name}`} className="text-xs text-text-muted">
-                          {/* Numeric placeholders ({{1}}) get a friendlier label */}
-                          {/^\d+$/.test(name) ? `Variable ${name}` : name}
-                        </Label>
-                        <Input
-                          id={`tpl-var-${name}`}
-                          value={vars[name] ?? ""}
-                          onChange={(e) => setVars({ ...vars, [name]: e.target.value })}
-                          placeholder={/^\d+$/.test(name) ? `value for {{${name}}}` : `value for {{${name}}}`}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </section>
+              {!selected.body_text && (
+                <p className="rounded-md border border-warning/40 bg-warning/5 p-2 text-xs text-warning">
+                  Body not synced from Meta. Run sync on the Templates page,
+                  or this send will fail with "expected N parameters".
+                </p>
               )}
+
+              <TemplatePreview
+                template={selected}
+                headerVariables={headerVars}
+                bodyVariables={bodyVars}
+                headerVarNames={headerVarNames}
+                bodyVarNames={bodyVarNames}
+                onHeaderVarsChange={setHeaderVars}
+                onBodyVarsChange={setBodyVars}
+                style="card"
+                inputIdPrefix="tplsheet"
+              />
 
               {submitError && (
                 <p role="alert" className="text-sm text-danger">{submitError}</p>

@@ -21,6 +21,7 @@ import { useConversations, useWaLiveStream } from "@/api/wa";
 import { ConversationList } from "./components/ConversationList";
 import { ChatPanel } from "./components/ChatPanel";
 import { TemplateSheet } from "./components/TemplateSheet";
+import { NewConversationDialog } from "./components/NewConversationDialog";
 
 export function WAInboxPage() {
   const cfg = configLoader.getPage("wa_inbox");
@@ -30,13 +31,21 @@ export function WAInboxPage() {
   const [params, setParams] = useSearchParams();
   const selected = params.get("contact");
   const [templateSheetOpen, setTemplateSheetOpen] = useState(false);
+  const [newConvOpen, setNewConvOpen] = useState(false);
+  // Names supplied by the new-conversation picker for contacts that
+  // don't yet appear in the conversations list. Keyed by contact_id so
+  // multiple successive picks each land with the right header label.
+  const [pickedNames, setPickedNames] = useState<Record<string, string>>({});
 
   // Look up the selected contact's display name from the conversation
   // list (cheap — the list query is already in the cache from the left
-  // panel) so the TemplateSheet header reads "Sending to <name>".
+  // panel) so the TemplateSheet header reads "Sending to <name>". Falls
+  // back to the picker's name (no WAChat row yet) and finally the id.
   const { data: convList } = useConversations({ page_size: 200 });
   const selectedName = selected
-    ? convList?.conversations.find((c) => c.contact_id === selected)?.contact_name ?? selected
+    ? convList?.conversations.find((c) => c.contact_id === selected)?.contact_name
+      ?? pickedNames[selected]
+      ?? selected
     : "";
 
   function selectContact(contactId: string) {
@@ -62,6 +71,8 @@ export function WAInboxPage() {
           selectedContactId={selected}
           onSelect={selectContact}
           searchPlaceholder={cfg.page.panels.conversations.search_placeholder}
+          onNewConversation={() => setNewConvOpen(true)}
+          newConversationLabel={cfg.page.panels.conversations.new_conversation_button}
         />
       </section>
 
@@ -104,6 +115,26 @@ export function WAInboxPage() {
         contactId={selected}
         contactName={selectedName}
         labels={cfg.page.panels.template_sheet}
+      />
+
+      <NewConversationDialog
+        open={newConvOpen}
+        onOpenChange={setNewConvOpen}
+        onPick={(contactId, displayName) => {
+          // D9: auto-open TemplateSheet — the only useful next action
+          // for a brand-new conversation is sending a template. Stash
+          // the name so the sheet header reads "Sending to <name>"
+          // before any conversation row exists for this contact.
+          setPickedNames((prev) => ({ ...prev, [contactId]: displayName }));
+          selectContact(contactId);
+          setTemplateSheetOpen(true);
+        }}
+        labels={{
+          title: cfg.page.panels.conversations.new_conversation_dialog_title,
+          help: cfg.page.panels.conversations.new_conversation_dialog_help,
+          hide_existing_label: cfg.page.panels.conversations.new_conversation_hide_existing_label,
+          search_placeholder: cfg.page.panels.conversations.search_placeholder,
+        }}
       />
       </div>
     </div>

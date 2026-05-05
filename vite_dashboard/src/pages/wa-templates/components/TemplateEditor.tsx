@@ -7,7 +7,7 @@
  * exercises the create + save (with clone-on-edit) + delete paths.
  */
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +21,8 @@ import {
   type WATemplateOut,
 } from "@/api/wa";
 import { ApprovedBanner } from "./ApprovedBanner";
-import { WaPhonePreview } from "./WaPhonePreview";
+import { TemplatePreview } from "@/components/wa/TemplatePreview";
+import { extractPlaceholders } from "@/lib/wa-template-vars";
 import { ConfirmDialog } from "@/components/feedback/ConfirmDialog";
 
 const CATEGORY_OPTIONS = ["MARKETING", "UTILITY", "AUTHENTICATION"];
@@ -74,10 +75,29 @@ export function TemplateEditor({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmSubmit, setConfirmSubmit] = useState(false);
 
+  // Variable values for the preview pane. Studio has no contact in
+  // scope (D4 decision: blank, not pre-filled from Meta examples), so
+  // these start empty and the input renders `{{varName}}` as a hint.
+  const [headerVars, setHeaderVars] = useState<Record<string, string>>({});
+  const [bodyVars, setBodyVars] = useState<Record<string, string>>({});
+
+  const headerVarNames = useMemo(
+    () => extractPlaceholders(form.header_text ?? ""),
+    [form.header_text],
+  );
+  const bodyVarNames = useMemo(
+    () => extractPlaceholders(form.body_text ?? ""),
+    [form.body_text],
+  );
+
   // Hydrate the form when the loaded template arrives or mode changes.
+  // Variable values reset alongside the form so picks don't carry over
+  // when switching between templates.
   useEffect(() => {
     if (mode === "create") {
       setForm({ ...EMPTY_FORM });
+      setHeaderVars({});
+      setBodyVars({});
       setSaveError(null);
       return;
     }
@@ -93,6 +113,8 @@ export function TemplateEditor({
         footer_text: loaded.footer_text,
         buttons: loaded.buttons,
       });
+      setHeaderVars({});
+      setBodyVars({});
       setSaveError(null);
     }
   }, [mode, loaded]);
@@ -279,10 +301,24 @@ export function TemplateEditor({
         </form>
 
         <aside className="flex flex-col gap-3">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-            Preview
-          </h3>
-          <WaPhonePreview template={form as unknown as WATemplateOut} />
+          <TemplatePreview
+            template={{
+              header_format: form.header_format,
+              header_text: form.header_text,
+              header_asset_url: form.header_asset_url,
+              body_text: form.body_text,
+              footer_text: form.footer_text,
+              buttons: form.buttons,
+            }}
+            headerVariables={headerVars}
+            bodyVariables={bodyVars}
+            headerVarNames={headerVarNames}
+            bodyVarNames={bodyVarNames}
+            onHeaderVarsChange={setHeaderVars}
+            onBodyVarsChange={setBodyVars}
+            style="phone"
+            inputIdPrefix="studio"
+          />
         </aside>
       </div>
 

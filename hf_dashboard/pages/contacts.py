@@ -178,16 +178,20 @@ def _build_table(db, segment="All", lifecycle="All", country="All", channel="All
             if field == "name":
                 raw_name = f"{contact.first_name or ''} {contact.last_name or ''}".strip()
                 name = raw_name or missing
-                company_line = contact.company or ""
-                tip = html.escape(f"{raw_name} · {company_line}".strip(" ·")) if (raw_name or company_line) else ""
+                tip = html.escape(raw_name) if raw_name else ""
+                # Wraps to max 2 lines via .contact-name-cell in theme_css.py.
                 cells += (
-                    f'<td style="{table_cell()}" title="{tip}">'
-                    f'<div style="font-weight:600; color:#e7eaf3;">{name}</div>'
-                    f'<div style="font-size:10px; color:#64748b;">{company_line}</div></td>'
+                    f'<td class="contact-name-cell" '
+                    f'style="{table_cell()}; font-weight:600; color:#e7eaf3;" '
+                    f'title="{tip}">{name}</td>'
                 )
             elif field == "company":
                 tip = html.escape(contact.company or "")
-                cells += f'<td style="{table_cell()}" title="{tip}">{_display_or_missing(contact.company)}</td>'
+                # Wraps to max 2 lines via .contact-company-cell in theme_css.py.
+                cells += (
+                    f'<td class="contact-company-cell" '
+                    f'style="{table_cell()}" title="{tip}">{_display_or_missing(contact.company)}</td>'
+                )
             elif field == "channels":
                 ch = ""
                 if _is_real_email(contact.email):
@@ -219,10 +223,12 @@ def _build_table(db, segment="All", lifecycle="All", country="All", channel="All
                 seg_ids = contact_segments_map.get(contact.id, [])
                 if seg_ids:
                     pills_html = []
-                    for sid in seg_ids[:2]:
+                    seg_names = []
+                    for sid in seg_ids:
                         seg = segments_by_id.get(sid)
                         if not seg:
                             continue
+                        seg_names.append(seg.name)
                         color = segment_color(sid)
                         pills_html.append(
                             f'<span style="background:{color}22; color:{color}; '
@@ -230,11 +236,12 @@ def _build_table(db, segment="All", lifecycle="All", country="All", channel="All
                             f'border-radius:10px; font-size:9px; font-weight:600; '
                             f'margin-right:3px; display:inline-block;">{seg.name}</span>'
                         )
-                    if len(seg_ids) > 2:
-                        pills_html.append(
-                            f'<span style="color:#64748b; font-size:9px;">+{len(seg_ids)-2}</span>'
-                        )
-                    cells += f'<td style="{table_cell()}">{"".join(pills_html)}</td>'
+                    seg_tip = html.escape(", ".join(seg_names))
+                    cells += (
+                        f'<td class="contact-segments-cell" '
+                        f'style="{table_cell()}" title="{seg_tip}">'
+                        f'{"".join(pills_html)}</td>'
+                    )
                 else:
                     cells += f'<td style="{table_cell()}">{missing}</td>'
             elif field == "tags":
@@ -243,12 +250,13 @@ def _build_table(db, segment="All", lifecycle="All", country="All", channel="All
                     pills = " ".join(
                         f'<span style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); '
                         f'padding:1px 5px; border-radius:3px; font-size:9px; color:#94a3b8;">{t}</span>'
-                        for t in tags_val[:3]
+                        for t in tags_val
                     )
-                    if len(tags_val) > 3:
-                        pills += f' <span style="color:#64748b; font-size:9px;">+{len(tags_val)-3}</span>'
                     tip = html.escape(", ".join(tags_val))
-                    cells += f'<td style="{table_cell()}" title="{tip}">{pills}</td>'
+                    cells += (
+                        f'<td class="contact-tags-cell" '
+                        f'style="{table_cell()}" title="{tip}">{pills}</td>'
+                    )
                 else:
                     cells += f'<td style="{table_cell()}">{missing}</td>'
             elif field == "actions":

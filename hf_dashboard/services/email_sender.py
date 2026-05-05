@@ -244,9 +244,15 @@ class EmailSender:
         return render_template_string(template_content, variables)
 
     def _preprocess_html(self, html_content: str) -> str:
-        """Make HTML email-client friendly."""
-        html_content = re.sub(r"@import\s+url\([^)]+\);?", "", html_content)
-        html_content = re.sub(r"<style[^>]*>[\s\S]*?@import[\s\S]*?</style>", "", html_content, flags=re.IGNORECASE)
+        """Make HTML email-client friendly.
+
+        Strips any ``@import url(...)`` lines from inline ``<style>`` blocks
+        (Gmail strips them anyway, and Outlook chokes on them) BUT keeps
+        the rest of the ``<style>`` block intact so the layout-critical
+        ``img {display:block;border:0}`` and ``table {border-collapse}``
+        rules continue to apply.
+        """
+        html_content = re.sub(r"@import\s+url\([^)]+\);?\s*", "", html_content)
         if not html_content.strip().lower().startswith("<!doctype") and not html_content.strip().lower().startswith("<html"):
             html_content = f"<!DOCTYPE html><html><head><meta charset='UTF-8'></head><body>{html_content}</body></html>"
         return html_content

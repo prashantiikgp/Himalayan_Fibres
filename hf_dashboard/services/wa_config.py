@@ -44,6 +44,8 @@ class TemplateDefinition(BaseModel):
     use_case: str = ""
     has_header_image: bool = False
     header_image_url: str = ""
+    header_text: str = ""
+    header_variables: list[TemplateVariable] = Field(default_factory=list)
     variables: list[TemplateVariable] = Field(default_factory=list)
     buttons: list[TemplateButton] = Field(default_factory=list)
     body_text: str = ""
@@ -52,6 +54,10 @@ class TemplateDefinition(BaseModel):
     @property
     def variable_names(self) -> list[str]:
         return [v.name for v in self.variables]
+
+    @property
+    def header_variable_names(self) -> list[str]:
+        return [v.name for v in self.header_variables]
 
 
 class UseCaseGroup(BaseModel):
@@ -107,7 +113,7 @@ class WAConfigManager:
             return yaml.safe_load(f) or {}
 
     def _load(self):
-        # templates.yml
+        # templates.yml — flat shape (display_name, body_text, variables[]).
         try:
             raw = self._load_yaml("templates.yml")
             for name, tpl_data in raw.get("templates", {}).items():
@@ -116,6 +122,21 @@ class WAConfigManager:
                 self._use_cases[name] = UseCaseGroup(**uc_data)
         except Exception as e:
             log.error("Failed to load templates.yml: %s", e)
+
+        # new_templates.yml — Meta-component shape (header/body/footer/buttons).
+        # Adapt to TemplateDefinition so the broadcast engine can resolve
+        # variables for templates created via the new authoring flow.
+        # First-load wins: a name in templates.yml is NOT clobbered.
+        try:
+            raw_new = self._load_yaml("new_templates.yml")
+            for name, tpl_data in (raw_new.get("templates") or {}).items():
+                if name in self._templates:
+                    continue
+                adapted = self._adapt_component_template(name, tpl_data)
+                if adapted is not None:
+                    self._templates[name] = adapted
+        except Exception as e:
+            log.error("Failed to load new_templates.yml: %s", e)
 
         # messages.yml
         try:
@@ -132,6 +153,85 @@ class WAConfigManager:
             log.error("Failed to load messages.yml: %s", e)
 
         log.info("WA config: %d templates, %d quick replies", len(self._templates), len(self._quick_replies))
+
+    @staticmethod
+    def _extract_placeholders(text: str) -> list[str]:
+        """Pull {{1}}, {{name}} placeholders out of `text` in first-seen order."""
+        import re
+
+        seen: list[str] = []
+        for m in re.finditer(r"\{\{\s*([\w]+)\s*\}\}", text or ""):
+            name = m.group(1)
+            if name not in seen:
+                seen.append(name)
+        return seen
+
+    @classmethod
+    def _adapt_component_template(
+        cls, name: str, tpl_data: dict
+    ) -> TemplateDefinition | None:
+        """Convert a component-shaped row from new_templates.yml into a
+        flat TemplateDefinition. Header + body placeholders are merged
+        in declaration order so the broadcast engine resolves them with
+        the same numeric/named lookup it uses for templates.yml rows."""
+        try:
+            header = tpl_data.get("header") or {}
+            body = tpl_data.get("body") or {}
+            footer = tpl_data.get("footer") or {}
+            header_text = (header.get("text") or "") if isinstance(header, dict) else ""
+            body_text = (body.get("text") or "") if isinstance(body, dict) else ""
+            footer_text = (footer.get("text") or "") if isinstance(footer, dict) else ""
+
+            header_placeholders = cls._extract_placeholders(header_text)
+            body_placeholders = cls._extract_placeholders(body_text)
+            header_variables = [
+                TemplateVariable(name=p, type="text", required=True)
+                for p in header_placeholders
+            ]
+            variables = [
+                TemplateVariable(name=p, type="text", required=True)
+                for p in body_placeholders
+            ]
+
+            buttons_raw = tpl_data.get("buttons") or []
+            buttons: list[TemplateButton] = []
+            for b in buttons_raw:
+                if not isinstance(b, dict):
+                    continue
+                buttons.append(
+                    TemplateButton(
+                        type=str(b.get("type") or "QUICK_REPLY"),
+                        text=str(b.get("text") or ""),
+                        url=b.get("url"),
+                    )
+                )
+
+            return TemplateDefinition(
+                display_name=tpl_data.get("display_name") or name.replace("_", " ").title(),
+                description=tpl_data.get("description") or "",
+                category=str(tpl_data.get("category") or "UTILITY").upper(),
+                language=str(tpl_data.get("language") or "en"),
+                use_case=str(tpl_data.get("use_case") or ""),
+                has_header_image=(
+                    isinstance(header, dict)
+                    and str(header.get("type") or "").upper() == "IMAGE"
+                ),
+                header_image_url=(
+                    str(header.get("example", "") or "")
+                    if isinstance(header, dict)
+                    and str(header.get("type") or "").upper() == "IMAGE"
+                    else ""
+                ),
+                header_text=header_text,
+                header_variables=header_variables,
+                variables=variables,
+                buttons=buttons,
+                body_text=body_text,
+                notes=footer_text,
+            )
+        except Exception as e:
+            log.error("Failed to adapt new_templates.yml row %r: %s", name, e)
+            return None
 
     def reload(self):
         self._templates.clear()
