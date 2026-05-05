@@ -67,6 +67,45 @@ def _is_window_open(expires_at: datetime | None) -> bool:
 _VAR_RE = re.compile(r"\{\{\s*([0-9]+|[a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}")
 
 
+# ─── tier inference (Phase 4.0) ──────────────────────────────────────────
+#
+# Mirrors hf_dashboard/pages/wa_template_studio.py::_infer_tier so api_v2
+# can compute the same tier label without importing gradio. Phase 5+
+# moves these sets to YAML (audit B17). Until then, treat divergence
+# from v1 as a build-time bug — both must update together.
+
+_COMPANY_TIER_NAMES: frozenset[str] = frozenset({
+    "b2b_fiber_intro",
+    "b2b_introduction",
+    "followup_interest",
+    "hello_world",
+    "interactive_whatsap_buttons_new",
+    "thank_you_note",
+    "welcome_message",
+})
+
+_PRODUCT_TIER_NAMES: frozenset[str] = frozenset({
+    "order_confirmation",
+    "order_delivered",
+    "order_tracking",
+    "order_shipped",
+})
+
+
+def _infer_tier(name: str, meta_category: str | None) -> str:
+    """company / category / product / utility. UTILITY beats name lookup."""
+    if (meta_category or "").upper() == "UTILITY":
+        return "utility"
+    nl = re.sub(r"_v\d+$", "", (name or "").lower())
+    if nl in _COMPANY_TIER_NAMES:
+        return "company"
+    if nl in _PRODUCT_TIER_NAMES:
+        return "product"
+    if nl.endswith("_overview") or "_range_overview" in nl:
+        return "category"
+    return "company"
+
+
 def _extract_variables(template: WATemplate) -> list[str]:
     """Pull placeholder names out of every text-bearing field on the
     template — body, header, footer, buttons, AND the `components`
@@ -237,44 +276,76 @@ def get_conversation(
         db.close()
 
 
+def _template_to_out(t: WATemplate) -> WATemplateOut:
+    return WATemplateOut(
+        id=t.id,
+        name=t.name,
+        language=t.language or "en_US",
+        category=t.category,
+        status=t.status,
+        body_text=t.body_text or "",
+        header_format=t.header_format,
+        header_asset_url=t.header_asset_url,
+        header_text=t.header_text,
+        footer_text=t.footer_text,
+        variables=_extract_variables(t),
+        is_draft=bool(t.is_draft),
+        tier=_infer_tier(t.name, t.category),
+        rejection_reason=t.rejection_reason or "",
+        submitted_at=t.submitted_at,
+        quality_score=t.quality_score,
+        buttons=list(t.buttons or []),
+    )
+
+
 @router.get("/templates", response_model=WATemplatesResponse)
 def list_templates(
     category: Annotated[str | None, Query()] = None,
     status_filter: Annotated[str | None, Query(alias="status")] = None,
+    tier: Annotated[str | None, Query()] = None,
+    search: Annotated[str | None, Query()] = None,
+    include_drafts: Annotated[bool, Query()] = False,
 ) -> WATemplatesResponse:
-    """Approved templates available for sending.
+    """Templates list. Defaults match the Send-Template sheet's needs:
+    APPROVED, non-draft only. Phase 4.0 added flags so the Template
+    Studio list can include drafts and filter by tier/search.
 
-    Defaults to `status=APPROVED` and excludes drafts so the inbox UI
-    only shows templates that can actually be sent. Pass an explicit
-    `status` to override (e.g. for a Template Studio preview).
+    Pass `include_drafts=true` to also return draft rows. Pass an
+    explicit `status` to filter by Meta status (APPROVED / PENDING /
+    REJECTED). `tier` filters post-query since tier is computed.
     """
     db = get_db()
     try:
-        q = db.query(WATemplate).filter(WATemplate.is_draft.is_(False))
+        q = db.query(WATemplate)
+        if not include_drafts:
+            q = q.filter(WATemplate.is_draft.is_(False))
         if status_filter:
             q = q.filter(WATemplate.status == status_filter)
-        else:
+        elif not include_drafts:
+            # Original 2.0 behavior: approved-only when drafts excluded.
             q = q.filter(WATemplate.status == "APPROVED")
         if category:
             q = q.filter(WATemplate.category == category)
+        if search:
+            q = q.filter(WATemplate.name.ilike(f"%{search}%"))
         rows = q.order_by(WATemplate.name.asc()).all()
-        out = [
-            WATemplateOut(
-                id=t.id,
-                name=t.name,
-                language=t.language or "en_US",
-                category=t.category,
-                status=t.status,
-                body_text=t.body_text or "",
-                header_format=t.header_format,
-                header_asset_url=t.header_asset_url,
-                header_text=t.header_text,
-                footer_text=t.footer_text,
-                variables=_extract_variables(t),
-            )
-            for t in rows
-        ]
+        out = [_template_to_out(t) for t in rows]
+        if tier:
+            out = [o for o in out if o.tier == tier]
         return WATemplatesResponse(templates=out, total=len(out))
+    finally:
+        db.close()
+
+
+@router.get("/templates/{template_id}", response_model=WATemplateOut)
+def get_template(template_id: int) -> WATemplateOut:
+    """Full template record for the Phase 4 editor."""
+    db = get_db()
+    try:
+        t = db.query(WATemplate).filter(WATemplate.id == template_id).first()
+        if t is None:
+            raise HTTPException(status_code=404, detail="Template not found")
+        return _template_to_out(t)
     finally:
         db.close()
 

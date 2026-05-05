@@ -520,6 +520,107 @@ def test_send_text_meta_failure_502(
         db.close()
 
 
+# ─── Phase 4.0 — Template Studio read endpoints ──────────────────────────
+
+
+def test_get_template_by_id(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """GET /wa/templates/{id} returns the full record incl. is_draft + tier."""
+    from services.database import get_db  # type: ignore[import-not-found]
+    from services.models import WATemplate  # type: ignore[import-not-found]
+
+    stamp = int(time.time() * 1000)
+    db = get_db()
+    try:
+        t = WATemplate(
+            name=f"phase4_get_test_{stamp}",
+            language="en_US",
+            category="MARKETING",
+            status="APPROVED",
+            body_text="Body with {{1}}",
+            buttons=[],
+            variables=[],
+            is_draft=False,
+        )
+        db.add(t)
+        db.commit()
+        tid = t.id
+    finally:
+        db.close()
+
+    res = client.get(f"/api/v2/wa/templates/{tid}", headers=auth_headers)
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert body["id"] == tid
+    assert body["is_draft"] is False
+    assert body["tier"] in {"company", "category", "product", "utility"}
+    assert "rejection_reason" in body
+    assert "buttons" in body
+
+
+def test_get_template_404(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    res = client.get("/api/v2/wa/templates/9999999", headers=auth_headers)
+    assert res.status_code == 404
+
+
+def test_list_templates_include_drafts(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """include_drafts=true returns draft rows that the default call hides
+    (Phase 4.0 — Template Studio needs to see drafts)."""
+    from services.database import get_db  # type: ignore[import-not-found]
+    from services.models import WATemplate  # type: ignore[import-not-found]
+
+    stamp = int(time.time() * 1000)
+    name = f"phase4_draft_{stamp}"
+    db = get_db()
+    try:
+        db.add(
+            WATemplate(
+                name=name,
+                language="en_US",
+                category="MARKETING",
+                status=None,
+                body_text="draft body",
+                buttons=[],
+                variables=[],
+                is_draft=True,
+            )
+        )
+        db.commit()
+    finally:
+        db.close()
+
+    # Default call: draft is hidden.
+    default = client.get("/api/v2/wa/templates", headers=auth_headers).json()
+    assert all(t["name"] != name for t in default["templates"])
+
+    # include_drafts=true: draft is visible.
+    res = client.get(
+        "/api/v2/wa/templates?include_drafts=true", headers=auth_headers
+    )
+    body = res.json()
+    found = [t for t in body["templates"] if t["name"] == name]
+    assert len(found) == 1
+    assert found[0]["is_draft"] is True
+
+
+def test_list_templates_tier_filter(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """`?tier=utility` returns only UTILITY-category rows after tier
+    inference (Phase 4.0)."""
+    res = client.get(
+        "/api/v2/wa/templates?tier=utility", headers=auth_headers
+    )
+    assert res.status_code == 200
+    for t in res.json()["templates"]:
+        assert t["tier"] == "utility"
+
+
 def test_sse_stream_route_registered(client: TestClient) -> None:
     """The SSE stream endpoint exists at /wa/stream (Phase 2.2). Path is
     /stream rather than /conversations/stream so it can't collide with

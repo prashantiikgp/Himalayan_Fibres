@@ -89,7 +89,8 @@ class ConversationDetail(BaseModel):
 
 
 class WATemplateOut(BaseModel):
-    """A template visible in the Send-Template sheet."""
+    """A template visible in the Send-Template sheet AND the Template
+    Studio list (Phase 4.0 expanded the shape)."""
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -107,6 +108,19 @@ class WATemplateOut(BaseModel):
     """Names of {{ }} placeholders in body/header/footer/buttons/components.
     First-appearance order so the variables form renders inputs in the
     same sequence as the template body (B1 fix consumer)."""
+
+    # Phase 4.0 additions — needed by Template Studio list + editor.
+    is_draft: bool = False
+    tier: str = "company"
+    """Computed tier: company/category/product/utility. Inferred from
+    name + category server-side. Mirrors v1's _infer_tier."""
+    rejection_reason: str = ""
+    submitted_at: datetime | None = None
+    quality_score: str | None = None
+    buttons: list[dict] = []
+    """Raw Meta-format buttons array; empty list when none. Editor uses
+    this to populate the buttons FieldArray; sender ignores it (the
+    Meta API derives behavior from the approved template by name)."""
 
 
 class WATemplatesResponse(BaseModel):
