@@ -78,6 +78,12 @@ from services.database import ensure_db_ready  # type: ignore[import-not-found] 
 
 ensure_db_ready()
 
+# Apply additive auto-migrations (Phase 3.1b.2 onward) — only safe
+# `ADD COLUMN nullable` ALTERs that fit STANDARDS §2's "Allowed" list.
+from api_v2.services.auto_migrations import run_all as run_auto_migrations  # noqa: E402
+
+run_auto_migrations()
+
 # Sentry — production observability per STANDARDS §3.
 _SENTRY_DSN = os.getenv("SENTRY_DSN", "")
 if _SENTRY_DSN:
@@ -91,6 +97,37 @@ if _SENTRY_DSN:
 else:
     log.warning("SENTRY_DSN not set — error reporting disabled")
 
+from contextlib import asynccontextmanager  # noqa: E402
+
+from api_v2.services.scheduler import (  # noqa: E402
+    enabled_in_env as scheduler_enabled,
+    scheduler_loop,
+)
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):  # noqa: ANN001
+    """Start the scheduler loop on app startup, cancel on shutdown."""
+    import asyncio as _asyncio
+
+    task = None
+    if scheduler_enabled():
+        task = _asyncio.create_task(scheduler_loop())
+        log.info("Phase 3.1b.2 scheduler started")
+    else:
+        log.info("Scheduler disabled by HF_SCHEDULER_ENABLED=false")
+
+    try:
+        yield
+    finally:
+        if task is not None:
+            task.cancel()
+            try:
+                await task
+            except Exception:
+                pass
+
+
 app = FastAPI(
     title="Himalayan Fibres Dashboard API v2",
     version="2.0.0-phase0",
@@ -98,6 +135,7 @@ app = FastAPI(
         "JSON API for the Vite + Shadcn dashboard at vite_dashboard/. "
         "Reuses domain logic from hf_dashboard/services/."
     ),
+    lifespan=lifespan,
 )
 
 # CORS — local dev only; in prod the SPA is served from the same origin.

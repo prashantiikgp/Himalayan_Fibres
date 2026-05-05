@@ -8,7 +8,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Send } from "lucide-react";
+import { Calendar, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +24,7 @@ import {
 } from "@/api/broadcasts";
 import { AudienceFunnel } from "./AudienceFunnel";
 import { CostEstimateCards } from "./CostEstimateCards";
+import { ScheduleSheet } from "./ScheduleSheet";
 import { SendConfirmDialog } from "./SendConfirmDialog";
 import { SendProgress } from "./SendProgress";
 
@@ -55,6 +56,8 @@ export function ComposeTab() {
     failed: number;
   } | null>(null);
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [scheduledOk, setScheduledOk] = useState<string | null>(null);
 
   const { data: segData } = useSegments();
   const { data: tplData } = useWaTemplates({ status: "APPROVED" });
@@ -153,6 +156,16 @@ export function ComposeTab() {
           className="rounded-md border border-success/40 bg-success/10 p-3 text-sm text-success"
         >
           Sent <code>{completed.name}</code> — {completed.sent} delivered, {completed.failed} failed.
+        </div>
+      )}
+
+      {scheduledOk && (
+        <div
+          role="status"
+          className="rounded-md border border-warning/40 bg-warning/10 p-3 text-sm text-warning"
+        >
+          Scheduled — fires at {new Date(scheduledOk).toLocaleString()}. The scheduler
+          checks every minute. Cancel from the History tab while it's still pending.
         </div>
       )}
 
@@ -268,6 +281,19 @@ export function ComposeTab() {
           )}
 
           <div className="flex justify-end gap-2 pt-2">
+            {channel === "email" && (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!canOpenConfirm || isSending}
+                onClick={() => {
+                  setSubmitError(null);
+                  setScheduleOpen(true);
+                }}
+              >
+                <Calendar className="mr-1 h-4 w-4" /> Schedule
+              </Button>
+            )}
             <Button
               type="submit"
               disabled={!canOpenConfirm || isSending}
@@ -298,6 +324,37 @@ export function ComposeTab() {
         isPending={isSending}
         errorMessage={submitError}
         onConfirm={handleConfirm}
+      />
+
+      <ScheduleSheet
+        open={scheduleOpen}
+        onOpenChange={setScheduleOpen}
+        recipientCount={audience?.final_recipients ?? 0}
+        templateName={templateName}
+        isPending={queueEmailMutation.isPending}
+        errorMessage={submitError}
+        onConfirm={(iso) => {
+          setSubmitError(null);
+          queueEmailMutation.mutate(
+            {
+              name: name.trim(),
+              template_id: templateName,
+              subject: subject.trim() || undefined,
+              filters,
+              scheduled_at: iso,
+            },
+            {
+              onSuccess: () => {
+                setScheduleOpen(false);
+                setScheduledOk(iso);
+                setName("");
+                setTemplateName("");
+              },
+              onError: (err) =>
+                setSubmitError(err instanceof Error ? err.message : "Schedule failed"),
+            },
+          );
+        }}
       />
     </div>
   );

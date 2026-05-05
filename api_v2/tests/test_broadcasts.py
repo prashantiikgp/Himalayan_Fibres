@@ -423,6 +423,203 @@ def test_recipients_require_auth(client: TestClient) -> None:
     assert client.get("/api/v2/broadcasts/em-1/recipients").status_code == 401
 
 
+# ─── Phase 3.1b.2 — Schedule + scheduler tick ───────────────────────────
+
+
+def _seed_draft_campaign() -> int:
+    """Seed a Campaign in `draft` status so PATCH /schedule can act on
+    it. `_seed_one_of_each` produces a `sent` row, which 409s correctly."""
+    from services.database import get_db  # type: ignore[import-not-found]
+    from services.models import Campaign  # type: ignore[import-not-found]
+
+    stamp = int(time.time() * 1000)
+    db = get_db()
+    try:
+        c = Campaign(
+            name=f"sched_draft_{stamp}",
+            status="draft",
+            template_slug="b2b_introduction",
+        )
+        db.add(c)
+        db.commit()
+        db.refresh(c)
+        return c.id
+    finally:
+        db.close()
+
+
+def test_patch_broadcast_schedule_future(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    em_id = _seed_draft_campaign()
+    future = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+    res = client.patch(
+        f"/api/v2/broadcasts/em-{em_id}",
+        json={"scheduled_at": future},
+        headers=auth_headers,
+    )
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert body["status"] == "scheduled"
+    assert body["scheduled_at"] is not None
+
+
+def test_patch_broadcast_cancel_schedule(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """scheduled_at=null reverts to draft."""
+    em_id = _seed_draft_campaign()
+    future = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+    schedule_res = client.patch(
+        f"/api/v2/broadcasts/em-{em_id}",
+        json={"scheduled_at": future},
+        headers=auth_headers,
+    )
+    assert schedule_res.status_code == 200, schedule_res.text
+    res = client.patch(
+        f"/api/v2/broadcasts/em-{em_id}",
+        json={"scheduled_at": None},
+        headers=auth_headers,
+    )
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert body["status"] == "draft"
+    assert body["scheduled_at"] is None
+
+
+def test_patch_broadcast_past_400(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    em_id = _seed_draft_campaign()
+    past = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+    res = client.patch(
+        f"/api/v2/broadcasts/em-{em_id}",
+        json={"scheduled_at": past},
+        headers=auth_headers,
+    )
+    assert res.status_code == 400
+
+
+def test_patch_broadcast_already_sent_409(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """Sent broadcasts cannot be rescheduled."""
+    from services.database import get_db  # type: ignore[import-not-found]
+    from services.models import Campaign  # type: ignore[import-not-found]
+
+    db = get_db()
+    try:
+        c = Campaign(
+            name=f"sent_{int(time.time() * 1000)}",
+            status="sent",
+            sent_at=datetime.now(timezone.utc),
+        )
+        db.add(c)
+        db.commit()
+        db.refresh(c)
+        em_id = c.id
+    finally:
+        db.close()
+
+    future = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+    res = client.patch(
+        f"/api/v2/broadcasts/em-{em_id}",
+        json={"scheduled_at": future},
+        headers=auth_headers,
+    )
+    assert res.status_code == 409
+
+
+def test_scheduler_tick_fires_due_email(
+    client: TestClient,
+    auth_headers: dict[str, str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """tick_once() fires Campaign rows whose scheduled_at is in the past."""
+    from services.database import get_db  # type: ignore[import-not-found]
+    from services.models import Campaign  # type: ignore[import-not-found]
+    from services.broadcast_engine import BroadcastResult  # type: ignore[import-not-found]
+    from api_v2.services import scheduler
+
+    # Stub send_broadcast — we don't actually want to hit SMTP.
+    def _stub(db, name, channel, template_id, filters, subject=""):  # noqa: ANN001
+        # Reflect on the DB directly: mark the matching Campaign sent.
+        c = (
+            db.query(Campaign)
+            .filter(Campaign.name == name)
+            .order_by(Campaign.id.desc())
+            .first()
+        )
+        if c is not None:
+            c.status = "sent"
+            c.sent_at = datetime.now(timezone.utc)
+            db.commit()
+        return BroadcastResult(broadcast_id=c.id if c else 0, sent=1, failed=0, total=1, errors=[])
+
+    monkeypatch.setattr(scheduler, "send_broadcast", _stub)
+
+    stamp = int(time.time() * 1000)
+    db = get_db()
+    try:
+        c = Campaign(
+            name=f"sched_{stamp}",
+            status="scheduled",
+            scheduled_at=datetime.now(timezone.utc) - timedelta(minutes=1),
+            template_slug="b2b_introduction",
+        )
+        db.add(c)
+        db.commit()
+        db.refresh(c)
+        cid = c.id
+    finally:
+        db.close()
+
+    result = scheduler.tick_once()
+    assert result["fired_email"] >= 1
+
+    # Status flipped to sent (stub side effect).
+    db = get_db()
+    try:
+        live = db.query(Campaign).filter(Campaign.id == cid).first()
+        assert live.status == "sent"
+    finally:
+        db.close()
+
+
+def test_scheduler_tick_skips_future(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """Rows whose scheduled_at is in the future stay scheduled."""
+    from services.database import get_db  # type: ignore[import-not-found]
+    from services.models import Campaign  # type: ignore[import-not-found]
+    from api_v2.services import scheduler
+
+    stamp = int(time.time() * 1000)
+    db = get_db()
+    try:
+        c = Campaign(
+            name=f"future_{stamp}",
+            status="scheduled",
+            scheduled_at=datetime.now(timezone.utc) + timedelta(hours=2),
+            template_slug="b2b_introduction",
+        )
+        db.add(c)
+        db.commit()
+        db.refresh(c)
+        cid = c.id
+    finally:
+        db.close()
+
+    scheduler.tick_once()
+
+    db = get_db()
+    try:
+        live = db.query(Campaign).filter(Campaign.id == cid).first()
+        assert live.status == "scheduled"
+    finally:
+        db.close()
+
+
 def test_compose_endpoints_require_auth(client: TestClient) -> None:
     assert (
         client.post("/api/v2/broadcasts/audience-preview", json={"channel": "email"}).status_code

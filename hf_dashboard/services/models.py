@@ -309,11 +309,14 @@ class Broadcast(Base):
     channel = Column(String(32), nullable=False)  # "email" or "whatsapp"
     template_id = Column(String(128), default="")  # email slug or WA template name
     segment_id = Column(String(64), nullable=True)
-    status = Column(String(32), default="draft")  # draft / sending / sent / failed
+    status = Column(String(32), default="draft")  # draft / scheduled / sending / sent / failed
     total_recipients = Column(Integer, default=0)
     total_sent = Column(Integer, default=0)
     total_failed = Column(Integer, default=0)
     sent_at = Column(DateTime, nullable=True)
+    # Phase 3.1b.2 — broadcast scheduling.
+    # Migration: scripts/migrations/2026_05_05_add_broadcast_scheduled_at.py
+    scheduled_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=_utcnow)
     updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)
 

@@ -152,6 +152,10 @@ export function useQueueEmailBroadcast() {
       template_id: string;
       subject?: string;
       filters: BroadcastFiltersIn;
+      /** Phase 3.1b.2 — ISO datetime string. If set + future, the
+       * backend creates a Campaign in `status='scheduled'` instead of
+       * dispatching now. The scheduler loop fires it. */
+      scheduled_at?: string;
     }) =>
       apiFetch<QueueEmailBroadcastResponse>("/api/v2/broadcasts/email", {
         method: "POST",
@@ -175,6 +179,22 @@ export function useJobProgress(jobId: string | null) {
       if (!data) return 1000;
       return data.status === "done" || data.status === "failed" ? false : 1000;
     },
+  });
+}
+
+export function useScheduleBroadcast() {
+  return useMutation({
+    mutationFn: ({
+      id,
+      scheduledAt,
+    }: {
+      id: string;
+      scheduledAt: string | null;
+    }) =>
+      apiFetch<BroadcastDetail>(`/api/v2/broadcasts/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ scheduled_at: scheduledAt }),
+      }),
   });
 }
 

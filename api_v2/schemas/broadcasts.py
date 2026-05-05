@@ -115,13 +115,18 @@ class CostEstimateResponse(BaseModel):
 
 class SendBroadcastRequest(BaseModel):
     """POST /broadcasts/wa body — synchronous send for now (small
-    batches; v1's loop is fine for <100 recipients)."""
+    batches; v1's loop is fine for <100 recipients).
+
+    `scheduled_at` (Phase 3.1b.2): if set in the future, the row is
+    created in `status='scheduled'` instead of being sent immediately.
+    The scheduler loop fires it at that time."""
 
     name: str
     channel: Literal["whatsapp"] = "whatsapp"
     template_id: str
     filters: BroadcastFiltersIn = BroadcastFiltersIn()
     subject: str = ""
+    scheduled_at: datetime | None = None
 
 
 class SendBroadcastResponse(BaseModel):
@@ -134,7 +139,12 @@ class SendBroadcastResponse(BaseModel):
 
 
 class SendEmailBroadcastRequest(BaseModel):
-    """POST /broadcasts/email — queues via BackgroundTasks."""
+    """POST /broadcasts/email — queues via BackgroundTasks.
+
+    `scheduled_at` (Phase 3.1b.2): if set in the future, the request
+    creates a Campaign in `status='scheduled'` and returns a synthetic
+    job_id pointing at the scheduled row instead of an immediate
+    BackgroundTask."""
 
     name: str
     template_id: str
@@ -142,6 +152,7 @@ class SendEmailBroadcastRequest(BaseModel):
     subject: str = ""
     """Override the template's subject_template. Empty = use default."""
     filters: BroadcastFiltersIn = BroadcastFiltersIn()
+    scheduled_at: datetime | None = None
 
 
 class QueueEmailBroadcastResponse(BaseModel):
@@ -187,6 +198,17 @@ class RecipientItem(BaseModel):
     error_message: str = ""
     sent_at: datetime | None
     created_at: datetime
+
+
+class SchedulePatch(BaseModel):
+    """PATCH /broadcasts/{id} body — schedule or cancel.
+
+    `scheduled_at=None` cancels a previously scheduled broadcast (status
+    flips back to draft). Otherwise the broadcast is marked
+    `status=scheduled` and the scheduler loop fires it at that time.
+    """
+
+    scheduled_at: datetime | None = None
 
 
 class RecipientsResponse(BaseModel):

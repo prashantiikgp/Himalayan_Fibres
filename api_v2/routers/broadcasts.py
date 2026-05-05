@@ -14,6 +14,7 @@ that the History tab needs.
 from __future__ import annotations
 
 import logging
+from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
@@ -32,6 +33,7 @@ from api_v2.schemas.broadcasts import (
     QueueEmailBroadcastResponse,
     RecipientItem,
     RecipientsResponse,
+    SchedulePatch,
     SendBroadcastRequest,
     SendBroadcastResponse,
     SendEmailBroadcastRequest,
@@ -69,8 +71,9 @@ def _wa_to_item(b: Broadcast) -> BroadcastListItem:
         total_sent=b.total_sent or 0,
         total_failed=b.total_failed or 0,
         sent_at=b.sent_at,
-        # Broadcast doesn't have scheduled_at yet (Phase 3.1 migration).
-        scheduled_at=None,
+        # Phase 3.1b.2 — populated once the migration has run.
+        # Old DBs without the column return None thanks to nullable.
+        scheduled_at=getattr(b, "scheduled_at", None),
         created_at=b.created_at,
         updated_at=b.updated_at,
     )
@@ -365,6 +368,58 @@ def queue_email_broadcast(
     finally:
         db.close()
 
+    # **Phase 3.1b.2** — if scheduled_at is in the future, create a
+    # Campaign in status='scheduled' instead of dispatching now. The
+    # scheduler loop fires it at the chosen time. We return a synthetic
+    # JobStore entry pointing at the scheduled row so the UI shape is
+    # unchanged for the caller.
+    if req.scheduled_at is not None:
+        sched = req.scheduled_at
+        if sched.tzinfo is None:
+            sched = sched.replace(tzinfo=timezone.utc)
+        if sched <= datetime.now(timezone.utc):
+            raise HTTPException(
+                status_code=400,
+                detail="scheduled_at must be in the future; use Send Now to fire immediately",
+            )
+        db = get_db()
+        try:
+            c = Campaign(
+                name=req.name.strip(),
+                template_slug=req.template_id.strip(),
+                segment_id=req.filters.segment_id,
+                subject=req.subject or "",
+                status="scheduled",
+                scheduled_at=sched.replace(tzinfo=None),
+                total_recipients=recipients,
+            )
+            db.add(c)
+            db.commit()
+            db.refresh(c)
+            scheduled_id = c.id
+        finally:
+            db.close()
+        store = get_job_store()
+        job_id = store.create(
+            job_type="email_broadcast_scheduled",
+            message=f"Scheduled for {sched.isoformat()} ({recipients} recipient(s))",
+        )
+        store.update(
+            job_id,
+            status="done",
+            progress=100,
+            result={
+                "scheduled": True,
+                "campaign_id": scheduled_id,
+                "scheduled_at": sched.isoformat(),
+                "estimated_recipients": recipients,
+            },
+        )
+        return QueueEmailBroadcastResponse(
+            job_id=job_id,
+            estimated_recipients=recipients,
+        )
+
     store = get_job_store()
     job_id = store.create(
         job_type="email_broadcast",
@@ -427,7 +482,7 @@ def get_broadcast(broadcast_id: str) -> BroadcastDetail:
                 total_sent=b.total_sent or 0,
                 total_failed=b.total_failed or 0,
                 sent_at=b.sent_at,
-                scheduled_at=None,
+                scheduled_at=getattr(b, "scheduled_at", None),
                 created_at=b.created_at,
                 subject="",
             )
@@ -526,6 +581,98 @@ def list_recipients(
         next_cursor = items[-1].id if len(items) == page_size else None
         return RecipientsResponse(
             recipients=items, total=total, next_cursor=next_cursor,
+        )
+    finally:
+        db.close()
+
+
+# ─── Phase 3.1b.2 — Schedule / cancel ────────────────────────────────────
+
+
+@router.patch("/broadcasts/{broadcast_id}", response_model=BroadcastDetail)
+def patch_broadcast(broadcast_id: str, req: SchedulePatch) -> BroadcastDetail:
+    """Schedule a broadcast for future delivery, or cancel a scheduled
+    one.
+
+    - `scheduled_at` in the future → status='scheduled' + scheduled_at set
+    - `scheduled_at=null` → status flips back to 'draft' + scheduled_at
+      cleared
+    - `scheduled_at` in the past → 400 (use Send Now instead)
+
+    The scheduler loop in api_v2/services/scheduler.py picks up due
+    rows once per minute and fires them via the same paths as Send Now.
+    Currently sent / failed broadcasts cannot be re-scheduled.
+    """
+    channel, db_id = _parse_broadcast_id(broadcast_id)
+
+    db = get_db()
+    try:
+        if channel == "whatsapp":
+            row = db.query(Broadcast).filter(Broadcast.id == db_id).first()
+        else:
+            row = db.query(Campaign).filter(Campaign.id == db_id).first()
+        if row is None:
+            raise HTTPException(status_code=404, detail="Broadcast not found")
+
+        if (row.status or "").lower() in {"sent", "completed", "sending", "failed"}:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Cannot reschedule a {row.status!r} broadcast",
+            )
+
+        if req.scheduled_at is None:
+            row.scheduled_at = None
+            row.status = "draft"
+        else:
+            now = datetime.now(timezone.utc)
+            sched = req.scheduled_at
+            if sched.tzinfo is None:
+                sched = sched.replace(tzinfo=timezone.utc)
+            if sched <= now:
+                raise HTTPException(
+                    status_code=400,
+                    detail="scheduled_at must be in the future; use Send Now to fire immediately",
+                )
+            row.scheduled_at = sched.replace(tzinfo=None)  # store naive UTC
+            row.status = "scheduled"
+
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+
+        # Re-emit as the unified detail.
+        if channel == "whatsapp":
+            return BroadcastDetail(
+                id=f"wa-{row.id}",
+                channel="whatsapp",
+                name=row.name,
+                template_id=row.template_id or "",
+                segment_id=row.segment_id,
+                status=row.status or "draft",
+                total_recipients=row.total_recipients or 0,
+                total_sent=row.total_sent or 0,
+                total_failed=row.total_failed or 0,
+                sent_at=row.sent_at,
+                scheduled_at=getattr(row, "scheduled_at", None),
+                created_at=row.created_at,
+                subject="",
+            )
+        return BroadcastDetail(
+            id=f"em-{row.id}",
+            channel="email",
+            name=row.name,
+            template_id=row.template_slug or "",
+            segment_id=row.segment_id,
+            status=row.status or "draft",
+            total_recipients=row.total_recipients or 0,
+            total_sent=row.total_sent or 0,
+            total_failed=row.total_failed or 0,
+            sent_at=row.sent_at,
+            scheduled_at=row.scheduled_at,
+            created_at=row.created_at,
+            subject=row.subject or "",
         )
     finally:
         db.close()
