@@ -113,13 +113,13 @@ export function EmailRenderPreview({
             </div>
           ) : null}
 
-          <div className="flex flex-1 justify-center overflow-auto rounded-md border border-border bg-white">
+          <div className="flex min-h-[720px] flex-1 justify-center overflow-auto rounded-md border border-border bg-white">
             <iframe
               title="Email render preview"
               className={
                 viewport === "mobile"
-                  ? "h-full w-[412px] max-w-full"
-                  : "h-full w-full"
+                  ? "min-h-[720px] w-[412px] max-w-full"
+                  : "h-full min-h-[720px] w-full"
               }
               srcDoc={html || "<p style='color:#999;font-family:sans-serif;padding:24px'>(empty body)</p>"}
               sandbox=""

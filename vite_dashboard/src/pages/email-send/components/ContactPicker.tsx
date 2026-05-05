@@ -8,7 +8,7 @@
  * Phase 7.1 (Day_4_improvememt/PLAN_email.md).
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useContacts, type ContactRow } from "@/api/contacts";
@@ -25,7 +25,14 @@ export function ContactPicker({
   onClear: () => void;
 }) {
   const [search, setSearch] = useState("");
+  const [pickerOpen, setPickerOpen] = useState(selected === null);
   const debounced = useDebouncedValue(search, 250);
+
+  // Auto-collapse the search list when a contact is picked, auto-expand
+  // when the founder clicks Clear (selected → null).
+  useEffect(() => {
+    setPickerOpen(selected === null);
+  }, [selected]);
 
   const { data, isLoading, error } = useContacts({
     search: debounced || undefined,
@@ -39,7 +46,7 @@ export function ContactPicker({
   const rows = (data?.contacts ?? []).filter((c) => (c.email || "").trim().length > 0);
 
   return (
-    <div className="flex h-full flex-col gap-2">
+    <div className="flex flex-col gap-2">
       {selected && (
         <div
           aria-label="Selected contact"
@@ -55,73 +62,86 @@ export function ContactPicker({
               <div className="truncate text-xs text-text-muted">{selected.company}</div>
             )}
           </div>
-          <button
-            type="button"
-            onClick={onClear}
-            className="text-xs text-text-muted hover:text-danger"
-          >
-            Clear
-          </button>
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            <button
+              type="button"
+              onClick={() => setPickerOpen((v) => !v)}
+              className="text-xs text-primary hover:underline"
+            >
+              {pickerOpen ? "Hide list" : "Change"}
+            </button>
+            <button
+              type="button"
+              onClick={onClear}
+              className="text-xs text-text-muted hover:text-danger"
+            >
+              Clear
+            </button>
+          </div>
         </div>
       )}
 
-      <div className="relative">
-        <Search className="absolute left-2 top-2.5 h-4 w-4 text-text-muted" />
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name, email, company"
-          className="pl-8"
-          aria-label="Search contacts"
-        />
-      </div>
+      {pickerOpen && (
+        <>
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-text-muted" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name, email, company"
+              className="pl-8"
+              aria-label="Search contacts"
+            />
+          </div>
 
-      <ul
-        role="listbox"
-        aria-label="Contacts with email"
-        className="max-h-72 overflow-auto rounded-md border border-border"
-      >
-        {isLoading && (
-          <li className="p-2 text-xs text-text-muted">Searching…</li>
-        )}
-        {error && (
-          <li className="p-2 text-xs text-danger" role="alert">
-            {error.message}
-          </li>
-        )}
-        {!isLoading && rows.length === 0 && (
-          <li className="p-2 text-xs text-text-muted">
-            {debounced
-              ? "No contacts match your search."
-              : "Start typing to find a contact."}
-          </li>
-        )}
-        {rows.map((c) => {
-          const isActive = selected?.id === c.id;
-          const display =
-            [c.first_name, c.last_name].filter(Boolean).join(" ") || c.email;
-          return (
-            <li key={c.id} role="option" aria-selected={isActive}>
-              <button
-                type="button"
-                onClick={() => onSelect(c)}
-                className={cn(
-                  "flex w-full flex-col items-start gap-0 px-2 py-1.5 text-left text-sm transition-colors",
-                  isActive
-                    ? "bg-primary/10 text-text"
-                    : "text-text hover:bg-card",
-                )}
-              >
-                <span className="truncate font-medium">{display}</span>
-                <span className="truncate text-xs text-text-muted">{c.email}</span>
-                {c.company && (
-                  <span className="truncate text-xs text-text-muted">{c.company}</span>
-                )}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+          <ul
+            role="listbox"
+            aria-label="Contacts with email"
+            className="max-h-72 overflow-auto rounded-md border border-border"
+          >
+            {isLoading && (
+              <li className="p-2 text-xs text-text-muted">Searching…</li>
+            )}
+            {error && (
+              <li className="p-2 text-xs text-danger" role="alert">
+                {error.message}
+              </li>
+            )}
+            {!isLoading && rows.length === 0 && (
+              <li className="p-2 text-xs text-text-muted">
+                {debounced
+                  ? "No contacts match your search."
+                  : "Start typing to find a contact."}
+              </li>
+            )}
+            {rows.map((c) => {
+              const isActive = selected?.id === c.id;
+              const display =
+                [c.first_name, c.last_name].filter(Boolean).join(" ") || c.email;
+              return (
+                <li key={c.id} role="option" aria-selected={isActive}>
+                  <button
+                    type="button"
+                    onClick={() => onSelect(c)}
+                    className={cn(
+                      "flex w-full flex-col items-start gap-0 px-2 py-1.5 text-left text-sm transition-colors",
+                      isActive
+                        ? "bg-primary/10 text-text"
+                        : "text-text hover:bg-card",
+                    )}
+                  >
+                    <span className="truncate font-medium">{display}</span>
+                    <span className="truncate text-xs text-text-muted">{c.email}</span>
+                    {c.company && (
+                      <span className="truncate text-xs text-text-muted">{c.company}</span>
+                    )}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
     </div>
   );
 }

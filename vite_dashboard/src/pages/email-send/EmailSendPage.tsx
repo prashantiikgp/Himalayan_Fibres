@@ -10,7 +10,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { Send } from "lucide-react";
+import { ExternalLink, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -100,7 +100,7 @@ export function EmailSendPage() {
     <div className="flex flex-col gap-2 p-2">
       <HowToUse pageTitle={cfg.page.title} howTo={cfg.page.how_to_use} />
 
-      <div className="grid h-[calc(100vh-180px)] grid-cols-1 gap-2 lg:grid-cols-[minmax(360px,1fr)_minmax(420px,1.4fr)]">
+      <div className="grid min-h-[calc(100vh-180px)] grid-cols-1 gap-2 lg:grid-cols-[minmax(340px,0.9fr)_minmax(520px,1.6fr)]">
         <section
           aria-label="Send email form"
           className="overflow-auto rounded-lg border border-border bg-card/40 p-card"
@@ -118,9 +118,23 @@ export function EmailSendPage() {
             </div>
 
             <div>
-              <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-text-muted">
-                Template
-              </h2>
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Template
+                </h2>
+                {templateId !== null && (
+                  <a
+                    href={`/email-templates?id=${templateId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                    title="Open this template in the editor (new tab)"
+                  >
+                    Edit template
+                    <ExternalLink className="h-3 w-3" aria-hidden />
+                  </a>
+                )}
+              </div>
               <EmailTemplatePicker
                 value={templateId}
                 onChange={(id) => setTemplateId(id)}
