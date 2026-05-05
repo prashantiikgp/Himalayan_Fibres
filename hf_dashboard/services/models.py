@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from sqlalchemy import (
-    Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Text,
+    Boolean, Column, DateTime, Float, ForeignKey, Index, Integer, String, Text,
     UniqueConstraint, create_engine,
 )
 from sqlalchemy.orm import declarative_base, relationship
@@ -141,6 +141,10 @@ class Campaign(Base):
     name = Column(String(255), nullable=False)
     description = Column(Text, default="")
     subject = Column(String(512), default="")
+    # Phase 7.2b: typed variable values applied to every recipient at fire
+    # time. Persisted on Campaign so scheduled broadcasts don't drop the
+    # values typed at compose time across the schedule-and-fire boundary.
+    variables = Column(JSONType, default=dict, nullable=False)
     html_content = Column(Text, default="")
     template_slug = Column(String(128), default="")
     segment_id = Column(String(64), nullable=True)
@@ -209,14 +213,24 @@ class Flow(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
+    slug = Column(String(64), unique=True, nullable=True, index=True)
     description = Column(Text, default="")
-    channel = Column(String(32), default="email")  # email or whatsapp
-    steps = Column(JSONType, default=list)  # [{day, template_slug, subject}, ...]
+    channel = Column(String(32), default="email")  # email | whatsapp | multi
+    steps = Column(JSONType, default=list)  # [FlowStep dicts; see api_v2/schemas/flows.py]
     is_active = Column(Boolean, default=True)
+    # Phase 7.7: trigger model. trigger_type ∈ {manual, lifecycle, tag, inbound}
+    # trigger_config shape depends on type, e.g. {"to": "sample_requested"}.
+    trigger_type = Column(String(32), nullable=False, default="manual")
+    trigger_config = Column(JSONType, default=dict)
     created_at = Column(DateTime, default=_utcnow)
+    updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)
+
+    __table_args__ = (
+        Index("flows_trigger_idx", "trigger_type", "is_active"),
+    )
 
 
-# -- FlowRun --
+# -- FlowRun (legacy, cohort-based; kept for back-compat with v1 reads) --
 
 class FlowRun(Base):
     __tablename__ = "flow_runs"
@@ -232,6 +246,65 @@ class FlowRun(Base):
     total_sent = Column(Integer, default=0)
     total_failed = Column(Integer, default=0)
     created_at = Column(DateTime, default=_utcnow)
+
+
+# -- FlowMembership (Phase 7.7) --
+# One row per (flow, contact) pair. Replaces the cohort-shaped FlowRun for
+# the Phase 7 model. Status drives the scheduler claim filter.
+
+class FlowMembership(Base):
+    __tablename__ = "flow_memberships"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    flow_id = Column(Integer, ForeignKey("flows.id", ondelete="CASCADE"), nullable=False)
+    contact_id = Column(String(64), ForeignKey("contacts.id", ondelete="CASCADE"), nullable=False)
+    # active | waiting_event | paused | completed | failed | stopped
+    status = Column(String(32), nullable=False, default="active")
+    current_step_index = Column(Integer, nullable=False, default=0)
+    started_at = Column(DateTime, nullable=False, default=_utcnow)
+    last_step_at = Column(DateTime, nullable=True)
+    next_fire_at = Column(DateTime, nullable=True, index=True)
+    trigger_source = Column(String(32), nullable=False, default="manual")
+    trigger_actor = Column(String(64), default="")
+    trigger_payload = Column(JSONType, default=dict)
+    metadata_json = Column("metadata", JSONType, default=dict)
+    error = Column(Text, default="")
+    consecutive_failures = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime, nullable=False, default=_utcnow)
+    updated_at = Column(DateTime, nullable=False, default=_utcnow, onupdate=_utcnow)
+
+    __table_args__ = (
+        Index("fm_due_idx", "status", "next_fire_at"),
+        Index("fm_contact_active_idx", "contact_id", "status"),
+        Index("fm_flow_status_idx", "flow_id", "status"),
+    )
+
+
+# -- FlowStepRun (Phase 7.7) — per-step audit + idempotency --
+
+class FlowStepRun(Base):
+    __tablename__ = "flow_step_runs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    membership_id = Column(
+        Integer,
+        ForeignKey("flow_memberships.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    step_index = Column(Integer, nullable=False)
+    channel = Column(String(16), nullable=False)  # email | whatsapp
+    fired_at = Column(DateTime, nullable=False, default=_utcnow)
+    status = Column(String(16), nullable=False)  # sent | failed | skipped
+    message_ref = Column(String(128), default="")
+    template_slug = Column(String(128), nullable=False, default="")
+    error = Column(Text, default="")
+    # "flowmem_<membership_id>_step_<step_index>_<channel>" — UNIQUE blocks
+    # double-fire across scheduler restarts even if the claim is replayed.
+    idempotency_key = Column(String(96), unique=True, nullable=False)
+
+    __table_args__ = (
+        Index("fsr_membership_idx", "membership_id", "step_index"),
+    )
 
 
 # -- WAChat --

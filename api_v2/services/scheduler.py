@@ -89,6 +89,9 @@ def _claim_due_rows(db, model):  # type: ignore[no-untyped-def]
         else:
             snap["template_slug"] = r.template_slug or ""
             snap["subject"] = r.subject or ""
+            # Phase 7.2b: carry typed variables through to the engine so
+            # scheduled emails render the same as Send Now would have.
+            snap["variables"] = dict(getattr(r, "variables", None) or {})
         claimed.append(snap)
     db.commit()
     return claimed
@@ -129,6 +132,7 @@ def _fire_email(snap: dict) -> None:
                 template_id=snap["template_slug"],
                 filters=BroadcastFilters(segment_id=snap["segment_id"]),
                 subject=snap["subject"],
+                extra_vars=dict(snap.get("variables") or {}),
             )
         except Exception as e:
             _log.exception("scheduled email broadcast %s failed: %s", snap["id"], e)

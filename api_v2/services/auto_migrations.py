@@ -62,6 +62,61 @@ def run_all() -> dict:
                 "default": "TIMESTAMP NULL",
             },
         },
+        # Phase 7.7 — Flow trigger model + slug
+        {
+            "path": "flows.slug",
+            "table": "flows",
+            "column": "slug",
+            "ddl_type": {
+                "postgresql": "VARCHAR(64)",
+                "sqlite": "VARCHAR(64)",
+                "default": "VARCHAR(64) NULL",
+            },
+        },
+        {
+            "path": "flows.trigger_type",
+            "table": "flows",
+            "column": "trigger_type",
+            "ddl_type": {
+                "postgresql": "VARCHAR(32) NOT NULL DEFAULT 'manual'",
+                "sqlite": "VARCHAR(32) NOT NULL DEFAULT 'manual'",
+                "default": "VARCHAR(32) NOT NULL DEFAULT 'manual'",
+            },
+        },
+        {
+            "path": "flows.trigger_config",
+            "table": "flows",
+            "column": "trigger_config",
+            "ddl_type": {
+                "postgresql": "JSONB DEFAULT '{}'::jsonb",
+                "sqlite": "TEXT",
+                "default": "TEXT",
+            },
+        },
+        {
+            "path": "flows.updated_at",
+            "table": "flows",
+            "column": "updated_at",
+            "ddl_type": {
+                "postgresql": "TIMESTAMP WITH TIME ZONE",
+                "sqlite": "DATETIME",
+                "default": "TIMESTAMP NULL",
+            },
+        },
+        # Phase 7.2b — Campaign.variables (typed compose-time vars carried
+        # through schedule-and-fire). Defaults to empty JSON so existing
+        # rows are backfilled implicitly; the engine treats {} as "no
+        # extra vars" and just resolves the per-recipient ones.
+        {
+            "path": "campaigns.variables",
+            "table": "campaigns",
+            "column": "variables",
+            "ddl_type": {
+                "postgresql": "JSONB DEFAULT '{}'::jsonb",
+                "sqlite": "TEXT DEFAULT '{}'",
+                "default": "TEXT",
+            },
+        },
     ]
 
     for fix in fixes:
@@ -93,7 +148,11 @@ def required_columns_present() -> tuple[bool, list[str]]:
     from services.database import get_engine  # type: ignore[import-not-found]
 
     engine = get_engine()
-    required = [("broadcasts", "scheduled_at")]
+    required = [
+        ("broadcasts", "scheduled_at"),
+        ("flows", "trigger_type"),
+        ("flows", "trigger_config"),
+    ]
     missing = [
         f"{t}.{c}" for t, c in required if not _column_exists(engine, t, c)
     ]
