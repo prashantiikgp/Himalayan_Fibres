@@ -12,6 +12,7 @@ import { useHomeData } from "@/api/dashboard";
 import { pageEngine } from "@/engines/pageEngine";
 import { KpiRow } from "@/components/kpi/KpiRow";
 import { Card } from "@/components/ui/card";
+import { HowToUse } from "@/components/layout/HowToUse";
 import { StatusStrip } from "./components/StatusStrip";
 import { LifecycleBars } from "./components/LifecycleBars";
 import { ActivityFeed } from "./components/ActivityFeed";
@@ -24,10 +25,7 @@ export function HomePage() {
 
   return (
     <div className="flex flex-col gap-section" style={pageEngine.getStyleVars("home")}>
-      <header className="flex flex-col gap-1">
-        <h1 className="text-xl font-bold text-text">{meta.title}</h1>
-        <p className="text-sm text-text-muted">{meta.subtitle}</p>
-      </header>
+      <HowToUse pageTitle={meta.title} howTo={cfg.page.how_to_use} />
 
       {cfg.page.sections.status_strip.enabled && <StatusStrip />}
 

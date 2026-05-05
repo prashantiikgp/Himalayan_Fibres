@@ -19,7 +19,7 @@ const PageMeta = z
      * back-compat with pages that haven't migrated their YAML yet. */
     subtitle: z.string().default(""),
     /** Phase this page reaches feature-parity in. <MigrationStatusCard> reads this. */
-    landed_phase: z.number().int().min(0).max(5),
+    landed_phase: z.number().int().min(0).max(10),
     /** Phase 6.2 — replaces title+subtitle with a collapsible accordion.
      * Optional during the rollout; pages without it keep the legacy
      * title-only header. */
@@ -174,9 +174,20 @@ export const FlowsPageConfig = z
 
 export type FlowsPageConfigT = z.infer<typeof FlowsPageConfig>;
 
+/* ── Email Templates (Phase 6.4) ───────────────────────────────────────── */
+
+export const EmailTemplatesPageConfig = z
+  .object({
+    page: PageMeta.strict(),
+  })
+  .strict();
+
+export type EmailTemplatesPageConfigT = z.infer<typeof EmailTemplatesPageConfig>;
+
 /** Map page ID → its config schema. Loader iterates this.
  * Phase 6.3 added wa_broadcasts + email_broadcasts which reuse the
- * BroadcastsPageConfig schema (same shape, different copy). */
+ * BroadcastsPageConfig schema (same shape, different copy).
+ * Phase 6.4 added email_templates. */
 export const PAGE_SCHEMAS = {
   home: HomePageConfig,
   contacts: ContactsPageConfig,
@@ -185,6 +196,7 @@ export const PAGE_SCHEMAS = {
   wa_broadcasts: BroadcastsPageConfig,
   email_broadcasts: BroadcastsPageConfig,
   wa_templates: WaTemplatesPageConfig,
+  email_templates: EmailTemplatesPageConfig,
   flows: FlowsPageConfig,
 } as const;
 
@@ -199,5 +211,6 @@ export type PageConfigByID = {
   wa_broadcasts: BroadcastsPageConfigT;
   email_broadcasts: BroadcastsPageConfigT;
   wa_templates: WaTemplatesPageConfigT;
+  email_templates: EmailTemplatesPageConfigT;
   flows: FlowsPageConfigT;
 };

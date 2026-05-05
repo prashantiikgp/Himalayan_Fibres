@@ -1,8 +1,36 @@
 # WA Template Studio config — lands in Phase 4.
 
 page:
-  title: "Template Studio"
-  subtitle: "Author, submit, and sync WhatsApp templates against Meta"
+  title: "WhatsApp Templates"
+  subtitle: ""
+  how_to_use:
+    summary: "Author, submit, and sync WhatsApp templates against Meta."
+    sections:
+      - title: "Drafts vs submitted"
+        body: |
+          Drafts (local, unsent) can be edited freely. Submitted
+          templates (status PENDING / APPROVED / REJECTED) are
+          immutable per Meta's policy. Saving an edit on a submitted
+          template creates a clone like `<name>_v2` you can revise +
+          re-submit. The original keeps working until its replacement
+          is approved.
+      - title: "Submit to Meta"
+        body: |
+          Once a draft is ready, click "Submit to Meta". Status flips
+          to PENDING. Use the "Sync" button to refresh status from
+          Meta — usually approval comes within a few minutes for
+          MARKETING templates.
+      - title: "Tier inference"
+        body: |
+          Each template gets a tier label (company / category /
+          product / utility) inferred from its name + Meta category.
+          UTILITY category always wins; otherwise the name is checked
+          against built-in name sets. Used for filtering on this page.
+      - title: "Sync from Meta"
+        body: |
+          Sync pulls every template's latest status, category, and
+          components from your WABA. Drafts are preserved; submitted
+          rows update in place.
   landed_phase: 4
   list:
     page_size: 20

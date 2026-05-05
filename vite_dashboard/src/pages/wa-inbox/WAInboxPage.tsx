@@ -16,6 +16,7 @@
 import { useState } from "react";
 import { configLoader } from "@/loaders/configLoader";
 import { useSearchParams } from "react-router-dom";
+import { HowToUse } from "@/components/layout/HowToUse";
 import { useConversations, useWaLiveStream } from "@/api/wa";
 import { ConversationList } from "./components/ConversationList";
 import { ChatPanel } from "./components/ChatPanel";
@@ -46,8 +47,13 @@ export function WAInboxPage() {
 
   // Review fix #12: previously used a CSS var (--shell-topbar-height)
   // that no engine emitted. AppShell topbar is fixed at 56px (h-14).
+  // Phase 6.5: HowToUse accordion sits above the 3-panel grid, ~40px
+  // when collapsed. Subtracting 96 (56 topbar + 40 accordion) keeps
+  // the panels filling the remaining viewport.
   return (
-    <div className="grid h-[calc(100vh-56px)] grid-cols-[minmax(240px,1fr)_minmax(380px,2fr)_minmax(320px,2fr)] gap-2 p-2">
+    <div className="flex flex-col">
+      <HowToUse pageTitle={cfg.page.title} howTo={cfg.page.how_to_use} />
+      <div className="grid h-[calc(100vh-96px)] grid-cols-[minmax(240px,1fr)_minmax(380px,2fr)_minmax(320px,2fr)] gap-2 p-2">
       <section
         aria-label="Conversations"
         className="overflow-hidden rounded-lg border border-border bg-card/40"
@@ -99,6 +105,7 @@ export function WAInboxPage() {
         contactName={selectedName}
         labels={cfg.page.panels.template_sheet}
       />
+      </div>
     </div>
   );
 }

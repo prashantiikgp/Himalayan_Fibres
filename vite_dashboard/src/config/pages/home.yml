@@ -1,8 +1,34 @@
 # Home page config — Phase 0 ships this fully functional.
+# Phase 6.5 added how_to_use.
 
 page:
   title: "Home"
-  subtitle: "Daily snapshot of email + WhatsApp activity"
+  subtitle: ""
+  how_to_use:
+    summary: "Daily snapshot of email + WhatsApp activity. Click to expand."
+    sections:
+      - title: "Status strip"
+        body: |
+          The two pills at the top show whether your Email (Gmail API)
+          and WhatsApp credentials are configured on the Space. If
+          either says "Not configured", broadcasts on that channel
+          will fail at send time — set the relevant secret on the HF
+          Space settings.
+      - title: "Today's KPIs"
+        body: |
+          The first row shows messages-sent counters for today plus
+          your total contact count and the WhatsApp 24h-window count
+          (people who replied in the last 24h, eligible for free-form
+          replies). The second row is consent state (Opted in /
+          Pending) plus campaign + template counts. The third row
+          shows live template counts pulled from the DB (was
+          hardcoded in v1 — fixed in Phase 5.1).
+      - title: "Lifecycle bars + Recent activity"
+        body: |
+          Lifecycle bars break contacts down by stage
+          (new_lead → contacted → interested → customer → churned).
+          Recent activity is a feed of the last 20 email + WhatsApp
+          send events.
   landed_phase: 0
   sections:
     status_strip:

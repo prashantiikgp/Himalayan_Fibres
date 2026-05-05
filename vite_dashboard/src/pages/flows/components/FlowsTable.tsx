@@ -68,7 +68,7 @@ export function FlowsTable() {
   return (
     <div className="flex flex-col gap-3 p-card">
       <div className="flex items-center gap-3">
-        <h1 className="text-lg font-semibold text-text">Flows</h1>
+        {/* Phase 6.5: page title moved to HowToUse accordion above. */}
         <div className="ml-auto flex items-center gap-3">
           <label className="flex items-center gap-2 text-xs text-text-muted">
             <input

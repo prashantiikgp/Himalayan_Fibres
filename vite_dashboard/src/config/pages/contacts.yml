@@ -2,7 +2,33 @@
 
 page:
   title: "Contacts"
-  subtitle: "Browse, edit, and segment your contact base"
+  subtitle: ""
+  how_to_use:
+    summary: "Browse, edit, and segment your contact base."
+    sections:
+      - title: "Filters work as AND"
+        body: |
+          Each filter narrows the result set further: pick a segment,
+          add a lifecycle, restrict to a country, etc. Tag-filter shows
+          contacts that have ANY of the selected tags. Search matches
+          name, email, or company case-insensitively.
+      - title: "Click a row to edit"
+        body: |
+          Clicking any contact opens a drawer with four tabs: Profile
+          (name + contact details + lifecycle + consent), Tags (free
+          tag list, comma-separated), Notes (timestamped append-only
+          thread), Activity (interaction history).
+      - title: "Add or import"
+        body: |
+          "Add Contact" opens a quick form with required fields
+          (first name + phone). "Import" accepts a CSV or .xlsx
+          with `email`, `first_name`, `last_name`, `company`,
+          `phone`, `country` columns; duplicates are skipped.
+      - title: "Download CSV"
+        body: |
+          The full filtered list streams as CSV via the
+          /api/v2/contacts.csv endpoint. Use it for one-off
+          exports or as backup.
   landed_phase: 1
   table:
     page_size: 10

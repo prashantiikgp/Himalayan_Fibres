@@ -1,0 +1,30 @@
+# Email Templates — Phase 6.4. Mirror of WA Templates Studio for the
+# EmailTemplate table.
+
+page:
+  title: "Email Templates"
+  subtitle: ""
+  how_to_use:
+    summary: "Author and edit email templates used by Email Broadcasts."
+    sections:
+      - title: "Slug is the identifier"
+        body: |
+          The slug (e.g. b2b_introduction, order_confirmation) is what
+          you type into the Email Broadcasts Compose page. It's
+          unique + immutable once created — pick it carefully.
+      - title: "Subject + body support {{ }} variables"
+        body: |
+          Use {{first_name}}, {{company_name}}, {{email}} and any other
+          fields you list under Required variables. The send loop
+          renders these per recipient before SMTP delivery.
+      - title: "Preview"
+        body: |
+          The right panel shows the raw HTML in an iframe — exactly what
+          subscribers see in their inbox. Variables render literally in
+          this preview; substitution happens at send time.
+      - title: "Active vs inactive"
+        body: |
+          Inactive templates are hidden from broadcast template pickers
+          but kept in the table so historical sends still resolve their
+          slug. Use this to retire a template without breaking history.
+  landed_phase: 6

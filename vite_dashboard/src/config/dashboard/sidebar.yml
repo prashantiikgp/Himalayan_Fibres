@@ -54,6 +54,12 @@ sidebar:
           path: "/email-broadcasts"
           landed_phase: 3
           channel: "email"
+        - id: email_templates
+          label: "Templates"
+          icon: "FileText"
+          path: "/email-templates"
+          landed_phase: 6
+          channel: "email"
 
     - id: shared
       label: ""

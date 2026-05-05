@@ -5,11 +5,15 @@
  * runs. Phase 5.1+ will add Start / Pause / Cancel and the steps editor.
  */
 
+import { configLoader } from "@/loaders/configLoader";
+import { HowToUse } from "@/components/layout/HowToUse";
 import { FlowsTable } from "./components/FlowsTable";
 
 export function FlowsPage() {
+  const cfg = configLoader.getPage("flows");
   return (
-    <div className="p-2">
+    <div className="flex flex-col p-2">
+      <HowToUse pageTitle={cfg.page.title} howTo={cfg.page.how_to_use} />
       <FlowsTable />
     </div>
   );

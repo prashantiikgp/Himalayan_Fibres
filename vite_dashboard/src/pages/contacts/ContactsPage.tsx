@@ -15,6 +15,7 @@ import { useState, useMemo } from "react";
 import { Download } from "lucide-react";
 import { useContacts, type ContactRow } from "@/api/contacts";
 import { pageEngine } from "@/engines/pageEngine";
+import { HowToUse } from "@/components/layout/HowToUse";
 import { useUrlState } from "@/lib/url-state";
 import { useDebouncedValue } from "@/lib/hooks";
 import { Button } from "@/components/ui/button";
@@ -113,10 +114,7 @@ export function ContactsPage() {
 
   return (
     <div className="flex flex-col gap-section" style={pageEngine.getStyleVars("contacts")}>
-      <header className="flex flex-col gap-1">
-        <h1 className="text-xl font-bold text-text">{meta.title}</h1>
-        <p className="text-sm text-text-muted">{meta.subtitle}</p>
-      </header>
+      <HowToUse pageTitle={meta.title} howTo={cfg.page.how_to_use} />
 
       <div className="flex flex-col gap-section md:flex-row">
         <ContactsFilterBar value={filters} onChange={handleFilterChange} />

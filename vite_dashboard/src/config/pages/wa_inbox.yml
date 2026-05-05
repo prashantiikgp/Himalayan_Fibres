@@ -2,7 +2,27 @@
 
 page:
   title: "WhatsApp Inbox"
-  subtitle: "Active conversations with the 24h customer-service window"
+  subtitle: ""
+  how_to_use:
+    summary: "Active WhatsApp conversations within the 24h window."
+    sections:
+      - title: "Window-open vs window-closed"
+        body: |
+          WhatsApp lets you reply with free text only within 24 hours
+          of the customer's last inbound message. If the green "Window
+          open" pill is showing, you can type a reply directly. If
+          you see "Window closed" or "No conversation yet", the
+          composer is replaced with a "Send a template" button.
+      - title: "Send a template"
+        body: |
+          Templates re-open the conversation. Click "Send a template"
+          → pick a template → fill any variables → Send. After the
+          customer replies, the 24h window opens again.
+      - title: "Conversation list filters"
+        body: |
+          Use the search box to find a contact by name or company.
+          The unread badge on each row shows messages not yet read.
+          Newest activity sorts to the top.
   landed_phase: 2
   panels:
     conversations:

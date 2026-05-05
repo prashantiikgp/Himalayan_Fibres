@@ -32,7 +32,7 @@ export const NavItem = z
     /** Optional URL override; if omitted, route is `/${id}`. */
     path: z.string().optional(),
     /** Phase the page lands in. Used by <MigrationStatusCard>. */
-    landed_phase: z.number().int().min(0).max(5),
+    landed_phase: z.number().int().min(0).max(10),
     /** Channel hint for analytics segmentation. */
     channel: z.enum(["mixed", "email", "whatsapp"]).default("mixed"),
   })

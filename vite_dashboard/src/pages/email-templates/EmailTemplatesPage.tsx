@@ -1,19 +1,15 @@
 /**
- * <WATemplatesPage> — entry component for /wa-templates.
- *
- * Phase 4.1a (this commit) ships the Studio: list + editor with create
- * / save (clone-on-edit) / delete. Submit-to-Meta + Sync-from-Meta
- * land in Phase 4.1b.
+ * <EmailTemplatesPage> — entry component for /email-templates (Phase 6.4).
  */
 
 import { useSearchParams } from "react-router-dom";
 import { configLoader } from "@/loaders/configLoader";
 import { HowToUse } from "@/components/layout/HowToUse";
-import { TemplateList } from "./components/TemplateList";
-import { TemplateEditor } from "./components/TemplateEditor";
+import { EmailTemplateList } from "./components/EmailTemplateList";
+import { EmailTemplateEditor } from "./components/EmailTemplateEditor";
 
-export function WATemplatesPage() {
-  const cfg = configLoader.getPage("wa_templates");
+export function EmailTemplatesPage() {
+  const cfg = configLoader.getPage("email_templates");
   const [params, setParams] = useSearchParams();
   const idParam = params.get("id");
   const isCreate = idParam === "new";
@@ -39,14 +35,15 @@ export function WATemplatesPage() {
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-2 p-2">
       <HowToUse pageTitle={cfg.page.title} howTo={cfg.page.how_to_use} />
-      <div className="grid h-[calc(100vh-96px)] grid-cols-[minmax(280px,1fr)_minmax(420px,3fr)] gap-2 p-2">
+
+      <div className="grid h-[calc(100vh-180px)] grid-cols-[minmax(280px,1fr)_minmax(420px,3fr)] gap-2">
         <section
-          aria-label="Templates list"
+          aria-label="Email templates list"
           className="overflow-hidden rounded-lg border border-border bg-card/40"
         >
-          <TemplateList
+          <EmailTemplateList
             selectedId={selectedId}
             onSelect={setSelected}
             onCreateNew={startCreate}
@@ -54,18 +51,18 @@ export function WATemplatesPage() {
         </section>
 
         <section
-          aria-label="Editor"
+          aria-label="Email template editor"
           className="overflow-hidden rounded-lg border border-border bg-card/40"
         >
           {isCreate ? (
-            <TemplateEditor
+            <EmailTemplateEditor
               templateId={null}
               mode="create"
               onCreated={setSelected}
               onDeleted={clearSelection}
             />
           ) : (
-            <TemplateEditor
+            <EmailTemplateEditor
               templateId={selectedId}
               mode="edit"
               onCreated={setSelected}

@@ -2,7 +2,27 @@
 
 page:
   title: "Flows"
-  subtitle: "Multi-step automated send sequences"
+  subtitle: ""
+  how_to_use:
+    summary: "Multi-step automated send sequences (read-only)."
+    sections:
+      - title: "What flows do"
+        body: |
+          A flow runs a sequence of templated sends spaced by a
+          per-step delay. E.g. "send b2b_introduction on day 0,
+          followup_interest on day 3, sample_offer on day 7" —
+          one row per flow, one row per recipient cohort.
+      - title: "Read-only for now"
+        body: |
+          This page lists existing flows + their recent runs.
+          Starting / pausing / cancelling runs and editing the
+          step list lands in a follow-up phase — for now this
+          surface is for visibility only.
+      - title: "Click a row for runs"
+        body: |
+          Each flow row expands inline to show its last 20 runs:
+          status, current step, total contacts, sent + failed
+          counts, started-at timestamp.
   landed_phase: 5
   runs_limit: 10
   styles:
