@@ -1,9 +1,11 @@
-gradio>=4.44.0
+# Upper bounds on pandas + gradio to avoid HF-build hash-mismatch errors
+# from too-recently-released wheels. Bump these intentionally when needed.
+gradio>=4.44.0,<5.0.0
 fastapi>=0.109.0
 uvicorn>=0.27.0
 sqlalchemy>=2.0.25
 psycopg2-binary>=2.9.9
-pandas>=2.2.0
+pandas>=2.2.0,<3.0.0
 openpyxl>=3.1.2
 jinja2>=3.1.3
 httpx>=0.27.0

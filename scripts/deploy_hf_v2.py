@@ -57,9 +57,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SPACE_REPO_ID = "prashantiitkgp08/himalayan-fibers-dashboard-v2"
+SPACE_REPO_ID = "Prashantiitkgp08/Himalayan_Fibrer_v2"
 SPACE_URL = f"https://huggingface.co/spaces/{SPACE_REPO_ID}"
-LIVE_URL = "https://prashantiitkgp08-himalayan-fibers-dashboard-v2.hf.space/"
+# HF auto-derives the live subdomain from the Space ID by lowercasing and
+# replacing `/` and `_` with `-`. Keep this in sync with SPACE_REPO_ID.
+LIVE_URL = "https://prashantiitkgp08-himalayan-fibrer-v2.hf.space/"
 
 # Files at the v2 Space root come from these locations in this repo.
 # Each entry: (source path inside this repo, target name on the Space).
