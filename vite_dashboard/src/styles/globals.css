@@ -1,0 +1,101 @@
+/**
+ * Global styles. Tailwind base + global resets + CSS custom property defaults.
+ *
+ * The CSS variables here are bootstrap defaults so the page doesn't flash
+ * unstyled before themeEngine.applyToDocument() runs. themeEngine overwrites
+ * them with the YAML values at app boot.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Defaults — overwritten by themeEngine.applyToDocument() at boot.
+       Values mirror config/dashboard/theme/default.yml. */
+    --color-primary: #6366f1;
+    --color-primary-foreground: #ffffff;
+    --color-secondary: #8b5cf6;
+    --color-secondary-foreground: #ffffff;
+    --color-success: #22c55e;
+    --color-success-foreground: #052e16;
+    --color-warning: #f59e0b;
+    --color-warning-foreground: #422006;
+    --color-error: #ef4444;
+    --color-error-foreground: #ffffff;
+
+    --color-bg: #0f172a;
+    --color-card-bg: rgba(30, 41, 59, 0.6);
+    --color-border: rgba(255, 255, 255, 0.06);
+
+    --color-text: #e7eaf3;
+    --color-text-muted: #94a3b8;
+    --color-text-subtle: #cbd5e1;
+
+    --font-xs: 11px;
+    --font-sm: 12px;
+    --font-md: 13px;
+    --font-lg: 16px;
+    --font-xl: 20px;
+
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-card: 10px;
+    --radius-pill: 16px;
+
+    --spacing-card: 14px;
+    --spacing-section: 16px;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-bg text-text;
+    font-family:
+      "Inter",
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      Roboto,
+      "Helvetica Neue",
+      Arial,
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Reduced motion — respect user preference (a11y per STANDARDS §4). */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Focus indicators — 2px ring on every focusable. */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
+  }
+}
+
+@layer components {
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}

@@ -1,0 +1,5 @@
+# Dashboard meta — title, default route, etc.
+
+title: "Himalayan Fibres Dashboard"
+subtitle: "Internal ops surface for email + WhatsApp marketing"
+default_page: home

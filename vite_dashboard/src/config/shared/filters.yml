@@ -1,0 +1,63 @@
+# Reusable filter specs. Pages list filter ids; <FilterBar> hydrates them.
+# choices_endpoint: API to fetch options. null means use static_choices.
+
+filters:
+  - id: segment
+    label: "Segment"
+    type: "select"
+    choices_endpoint: "/api/v2/segments"
+    placeholder: "All segments"
+
+  - id: lifecycle
+    label: "Lifecycle"
+    type: "select"
+    choices_endpoint: null
+    static_choices:
+      - { value: "new_lead", label: "New Lead" }
+      - { value: "engaged_lead", label: "Engaged Lead" }
+      - { value: "customer", label: "Customer" }
+      - { value: "repeat_customer", label: "Repeat Customer" }
+      - { value: "churned", label: "Churned" }
+    placeholder: "All lifecycles"
+
+  - id: country
+    label: "Country"
+    type: "select"
+    choices_endpoint: "/api/v2/contacts/countries"
+    placeholder: "All countries"
+
+  - id: channel
+    label: "Channel"
+    type: "select"
+    choices_endpoint: null
+    static_choices:
+      - { value: "all", label: "All" }
+      - { value: "email", label: "Email Only" }
+      - { value: "whatsapp", label: "WhatsApp Only" }
+      - { value: "both", label: "Both" }
+    placeholder: "All channels"
+
+  - id: tags
+    label: "Tags"
+    type: "multiselect"
+    choices_endpoint: "/api/v2/contacts/tags"
+    placeholder: "Any tag"
+
+  - id: search
+    label: "Search"
+    type: "search"
+    choices_endpoint: null
+    placeholder: "Name, company, email…"
+
+  - id: status_broadcast
+    label: "Status"
+    type: "select"
+    choices_endpoint: null
+    static_choices:
+      - { value: "all", label: "All" }
+      - { value: "draft", label: "Draft" }
+      - { value: "scheduled", label: "Scheduled" }
+      - { value: "sending", label: "In Progress" }
+      - { value: "sent", label: "Completed" }
+      - { value: "failed", label: "Failed" }
+    placeholder: "All statuses"

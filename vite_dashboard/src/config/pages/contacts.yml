@@ -1,0 +1,21 @@
+# Contacts page config — lands in Phase 1.
+
+page:
+  title: "Contacts"
+  subtitle: "Browse, edit, and segment your contact base"
+  landed_phase: 1
+  table:
+    page_size: 50
+    columns:
+      - "name"
+      - "company"
+      - "channels"
+      - "lifecycle"
+      - "email"
+      - "phone"
+      - "segments"
+      - "tags"
+      - "actions"
+  filters: ["segment", "lifecycle", "country", "channel", "tags", "search"]
+  styles:
+    drawer_width: "440px"

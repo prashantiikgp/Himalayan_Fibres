@@ -1,0 +1,16 @@
+# Broadcasts page config — lands in Phase 3.
+# Unifies WA broadcasts, email broadcasts, and history into one tabbed page.
+
+page:
+  title: "Broadcasts"
+  subtitle: "Compose, schedule, and review email + WhatsApp broadcasts"
+  landed_phase: 3
+  tabs:
+    - id: compose
+      label: "Compose"
+    - id: history
+      label: "History"
+    - id: performance
+      label: "Performance"
+  styles:
+    sticky_header_height: "60px"

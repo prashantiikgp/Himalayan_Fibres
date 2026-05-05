@@ -1,0 +1,21 @@
+# Home page config — Phase 0 ships this fully functional.
+
+page:
+  title: "Home"
+  subtitle: "Daily snapshot of email + WhatsApp activity"
+  landed_phase: 0
+  sections:
+    status_strip:
+      enabled: true
+    kpi_rows:
+      - ids: ["emails_today", "wa_today", "total_contacts", "wa_24h_window"]
+      - ids: ["opted_in", "pending", "wa_ready", "email_campaigns", "wa_campaigns"]
+    lifecycle:
+      title: "Lifecycle"
+      limit: 20
+    activity:
+      title: "Recent Activity"
+      limit: 20
+  styles:
+    grid_gap: "12px"
+    card_min_height: "100px"

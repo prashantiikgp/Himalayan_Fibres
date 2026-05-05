@@ -1,0 +1,75 @@
+# Status → label + color canonical map. Used by <StatusBadge>.
+# Domains: broadcast, contact, wa_template, email_send.
+
+domains:
+  broadcast:
+    draft:
+      id: draft
+      label: "Draft"
+      color: "neutral"
+    scheduled:
+      id: scheduled
+      label: "Scheduled"
+      color: "warning"
+    sending:
+      id: sending
+      label: "In Progress"
+      color: "warning"
+    sent:
+      id: sent
+      label: "Completed"
+      color: "success"
+    failed:
+      id: failed
+      label: "Failed"
+      color: "error"
+
+  contact:
+    opted_in:
+      id: opted_in
+      label: "Opted In"
+      color: "success"
+    pending:
+      id: pending
+      label: "Pending"
+      color: "warning"
+    opted_out:
+      id: opted_out
+      label: "Opted Out"
+      color: "neutral"
+
+  wa_template:
+    DRAFT:
+      id: DRAFT
+      label: "Draft"
+      color: "neutral"
+    PENDING:
+      id: PENDING
+      label: "Pending"
+      color: "warning"
+    APPROVED:
+      id: APPROVED
+      label: "Approved"
+      color: "success"
+    REJECTED:
+      id: REJECTED
+      label: "Rejected"
+      color: "error"
+
+  email_send:
+    queued:
+      id: queued
+      label: "Queued"
+      color: "neutral"
+    sent:
+      id: sent
+      label: "Sent"
+      color: "success"
+    delivered:
+      id: delivered
+      label: "Delivered"
+      color: "primary"
+    failed:
+      id: failed
+      label: "Failed"
+      color: "error"

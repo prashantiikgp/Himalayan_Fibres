@@ -1,0 +1,17 @@
+# Per-component style tokens. Consumed by themeEngine to emit scoped CSS
+# variables (e.g. --data-table-header-padding) that page CSS modules read.
+
+data_table:
+  header_padding: "10px 14px"
+  header_font_size: "10px"
+  row_hover_bg: "rgba(255, 255, 255, 0.04)"
+  row_height: "44px"
+
+kpi_card:
+  padding: "14px 16px"
+  title_font_size: "20px"
+  label_font_size: "10px"
+
+status_badge:
+  padding: "3px 8px"
+  radius: "10px"

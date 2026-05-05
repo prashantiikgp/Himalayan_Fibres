@@ -1,0 +1,54 @@
+# Shared KPI definitions. Pages list KPI ids; engines hydrate with API data.
+# api_field maps to the response payload of GET /api/v2/dashboard/home.
+
+kpis:
+  - id: emails_today
+    label: "Emails Today"
+    target: 500
+    color: "#e7eaf3"
+    icon: "Mail"
+    api_field: "emails_today"
+
+  - id: wa_today
+    label: "WA Today"
+    target: 1000
+    color: "#e7eaf3"
+    icon: "MessageSquare"
+    api_field: "wa_today"
+
+  - id: total_contacts
+    label: "Contacts"
+    color: "#6366f1"
+    icon: "Users"
+    api_field: "total"
+
+  - id: wa_24h_window
+    label: "24h Window"
+    color: "#22c55e"
+    icon: "Clock"
+    api_field: "wa_24h"
+
+  - id: opted_in
+    label: "Opted In"
+    color: "#22c55e"
+    api_field: "opted_in"
+
+  - id: pending
+    label: "Pending"
+    color: "#f59e0b"
+    api_field: "pending"
+
+  - id: wa_ready
+    label: "WA Ready"
+    color: "#6366f1"
+    api_field: "wa_ready"
+
+  - id: email_campaigns
+    label: "Email Campaigns"
+    color: "#6366f1"
+    api_field: "email_campaigns"
+
+  - id: wa_campaigns
+    label: "WA Campaigns"
+    color: "#22c55e"
+    api_field: "wa_campaigns"

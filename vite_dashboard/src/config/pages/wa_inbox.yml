@@ -1,0 +1,22 @@
+# WhatsApp Inbox config — lands in Phase 2.
+
+page:
+  title: "WhatsApp Inbox"
+  subtitle: "Active conversations with the 24h customer-service window"
+  landed_phase: 2
+  panels:
+    conversations:
+      min_width: 240
+      search_placeholder: "Search active chats..."
+    chat:
+      min_width: 380
+      compose_placeholder: "Type a message..."
+      window_warning: "WhatsApp's customer service window is closed. Send an approved template to continue."
+      new_conv_warning: "No conversation yet. Sending a template will open a 24-hour window and incur a WhatsApp conversation fee (category-dependent)."
+    template_sheet:
+      title: "Send a template"
+      send_button_label: "Send Template"
+  styles:
+    chat_messages_max_height: "calc(100vh - 260px)"
+    composer_padding: "8px 12px"
+    bubble_max_width: "78%"

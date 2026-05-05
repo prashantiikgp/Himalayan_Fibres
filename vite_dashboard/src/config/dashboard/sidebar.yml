@@ -1,0 +1,50 @@
+# Sidebar nav — channel-grouped (per audit B11 fix).
+# Validated by src/schemas/sidebar.ts. navigationEngine consumes this and
+# produces React Router routes plus the rendered <NavSidebar>.
+#
+# `landed_phase` controls <MigrationStatusCard>'s "lands in Phase N" copy
+# for routes whose feature has not yet shipped in v2.
+
+sidebar:
+  groups:
+    - id: top
+      label: ""
+      items:
+        - id: home
+          label: "Home"
+          icon: "Home"
+          landed_phase: 0
+          channel: "mixed"
+        - id: contacts
+          label: "Contacts"
+          icon: "Users"
+          landed_phase: 1
+          channel: "mixed"
+
+    - id: whatsapp
+      label: "WhatsApp"
+      items:
+        - id: wa_inbox
+          label: "Inbox"
+          icon: "MessageSquare"
+          landed_phase: 2
+          channel: "whatsapp"
+        - id: broadcasts
+          label: "Broadcasts"
+          icon: "Send"
+          landed_phase: 3
+          channel: "mixed"
+        - id: wa_templates
+          label: "Templates"
+          icon: "FileText"
+          landed_phase: 4
+          channel: "whatsapp"
+
+    - id: shared
+      label: ""
+      items:
+        - id: flows
+          label: "Flows"
+          icon: "GitBranch"
+          landed_phase: 5
+          channel: "mixed"

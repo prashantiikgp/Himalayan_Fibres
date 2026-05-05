@@ -1,0 +1,40 @@
+# Theme — single source of truth for colors, fonts, radii, spacing.
+# Validated by src/schemas/theme.ts at boot. themeEngine emits these as
+# CSS custom properties on :root; Tailwind utilities resolve via var().
+
+name: hf-dashboard-dark
+
+colors:
+  primary: "#6366f1"
+  primary_foreground: "#ffffff"
+  secondary: "#8b5cf6"
+  secondary_foreground: "#ffffff"
+  success: "#22c55e"
+  success_foreground: "#052e16"
+  warning: "#f59e0b"
+  warning_foreground: "#422006"
+  error: "#ef4444"
+  error_foreground: "#ffffff"
+  bg: "#0f172a"
+  card_bg: "rgba(30, 41, 59, 0.6)"
+  border: "rgba(255, 255, 255, 0.06)"
+  text: "#e7eaf3"
+  text_muted: "#94a3b8"
+  text_subtle: "#cbd5e1"
+
+fonts:
+  xs: "11px"
+  sm: "12px"
+  md: "13px"
+  lg: "16px"
+  xl: "20px"
+
+radii:
+  sm: "4px"
+  md: "6px"
+  card: "10px"
+  pill: "16px"
+
+spacing:
+  card: "14px"
+  section: "16px"

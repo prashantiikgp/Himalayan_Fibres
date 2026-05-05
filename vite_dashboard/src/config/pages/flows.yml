@@ -1,0 +1,9 @@
+# Flows page config — lands in Phase 5 (read-only).
+
+page:
+  title: "Flows"
+  subtitle: "Multi-step automated send sequences"
+  landed_phase: 5
+  runs_limit: 10
+  styles:
+    step_card_padding: "10px 14px"

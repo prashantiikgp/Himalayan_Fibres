@@ -1,0 +1,51 @@
+# Multi-stage Dockerfile for the v2 HF Space.
+# Stage 1: build the Vite SPA → dist/
+# Stage 2: Python runtime serving FastAPI + the SPA on the same port (7860 — HF default).
+
+# ─── Stage 1: frontend ────────────────────────────────────────────────────
+FROM node:20-alpine AS frontend
+WORKDIR /app/vite_dashboard
+
+# Copy package manifest first — Docker caches the install layer if package.json
+# is unchanged.
+COPY vite_dashboard/package.json vite_dashboard/pnpm-lock.yaml* ./
+RUN corepack enable && corepack prepare pnpm@9.12.3 --activate
+RUN pnpm install --frozen-lockfile || pnpm install
+
+# Copy the rest of the frontend source AND the shared config/dashboard YAMLs
+# (vite-plugin-yaml resolves @domain → ../config/dashboard at build time).
+COPY vite_dashboard ./
+COPY config /app/config
+
+RUN pnpm build  # produces /app/vite_dashboard/dist
+
+# ─── Stage 2: backend + serve ──────────────────────────────────────────────
+FROM python:3.11-slim
+WORKDIR /app
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PORT=7860
+
+# System deps — minimal. SQLite is built into Python; Postgres uses psycopg
+# which needs libpq.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python deps. api_v2/requirements.txt -r-includes hf_dashboard/requirements.txt
+# so a single pip install covers both backends.
+COPY api_v2/requirements.txt /app/api_v2/requirements.txt
+COPY hf_dashboard/requirements.txt /app/hf_dashboard/requirements.txt
+RUN pip install --no-cache-dir -r /app/api_v2/requirements.txt
+
+# Backend code
+COPY api_v2 /app/api_v2
+COPY hf_dashboard /app/hf_dashboard
+COPY config /app/config
+
+# Frontend build output from stage 1
+COPY --from=frontend /app/vite_dashboard/dist /app/vite_dashboard/dist
+
+EXPOSE 7860
+CMD ["uvicorn", "api_v2.main:app", "--host", "0.0.0.0", "--port", "7860"]

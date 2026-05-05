@@ -1,0 +1,11 @@
+# WA Template Studio config — lands in Phase 4.
+
+page:
+  title: "Template Studio"
+  subtitle: "Author, submit, and sync WhatsApp templates against Meta"
+  landed_phase: 4
+  list:
+    page_size: 20
+  styles:
+    editor_min_width: "480px"
+    preview_min_width: "370px"
