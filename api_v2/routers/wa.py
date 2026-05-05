@@ -910,6 +910,7 @@ def sync_templates(background_tasks: BackgroundTasks) -> dict:
 @router.delete(
     "/templates/{template_id}",
     status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None,
 )
 def delete_template(template_id: int) -> None:
     """Delete a draft template. Submitted templates (PENDING / APPROVED
