@@ -53,10 +53,17 @@ contact_schema:
       - carpet
       - silk
       - premium
-      - samples_sent
+      # Granular sample state — Phase 7 flow triggers (PLAN_flows §9.6).
+      # Lives in tags, not lifecycle, so it composes with other state.
+      - samples_requested
+      - samples_shipped
       - samples_received
+      - samples_sent
       - quoted
+      # Granular order state — Phase 7 flow waits (PLAN_flows §7.5).
       - order_placed
+      - order_shipped
+      - order_delivered
     allow_custom: true
 
   fields:

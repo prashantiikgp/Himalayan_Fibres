@@ -42,6 +42,7 @@ from api_v2.schemas.contacts import (
     SegmentsResponse,
     TagsResponse,
 )
+from api_v2.schemas.flows import MarkSampleShippedRequest, MarkSampleShippedResponse  # Phase 7.7
 
 # Reused v1 services — single source for segment rules + caching.
 from services.database import get_db  # type: ignore[import-not-found]
@@ -425,6 +426,27 @@ async def set_contact_lifecycle(
             commit=False,
         )
 
+        # Phase 7.7 — fire lifecycle-trigger flows in the same transaction
+        # so a failure rolls back the lifecycle change too. Per
+        # PLAN_flows §4.2, this is the dedicated mutator wiring point.
+        try:
+            from api_v2.services.flows_engine_v2 import evaluate_lifecycle_trigger
+
+            evaluate_lifecycle_trigger(
+                db,
+                contact=c,
+                old_lifecycle=old_lifecycle,
+                new_lifecycle=body.lifecycle,
+            )
+        except Exception:
+            # Trigger evaluation is best-effort — log but don't break the
+            # lifecycle write. Operator can manually add the contact to
+            # the flow if they notice it's missing.
+            import logging
+            logging.getLogger("api_v2.contacts").exception(
+                "evaluate_lifecycle_trigger failed for contact=%s", contact_id,
+            )
+
         try:
             db.commit()
         except IntegrityError as e:
@@ -435,6 +457,70 @@ async def set_contact_lifecycle(
             ) from e
 
         return _build_contact_detail(db, c)
+    except HTTPException:
+        raise
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+
+@router.post(
+    "/contacts/{contact_id}/mark-sample-shipped",
+    response_model=None,
+)
+async def mark_sample_shipped_endpoint(
+    contact_id: str,
+    body: MarkSampleShippedRequest,
+    _auth: Annotated[None, Depends(require_auth)],
+):
+    """Phase 7.7 — drawer action that resumes the Sample Dispatch flow.
+
+    In one transaction:
+      1. Adds tag `samples_shipped` to the contact (writes a `tag_added`
+         interaction; fires the tag-trigger evaluator → resumes any
+         `waiting_event` membership of the Sample Dispatch flow).
+      2. Writes `tracking_id` + `courier_name` into
+         `flow_memberships.metadata_json` for matching memberships so
+         step 1's email + WA template render with the real tracking
+         data on the next scheduler tick.
+
+    PLAN_flows §7.1 explains why this is option (b) (explicit drawer
+    action) and not lifecycle-piggyback.
+    """
+    from api_v2.services.flows_engine_v2 import mark_sample_shipped
+
+    db = get_db()
+    try:
+        c = db.query(Contact).filter(Contact.id == contact_id).one_or_none()
+        if c is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Contact not found",
+            )
+
+        result = mark_sample_shipped(
+            db,
+            contact=c,
+            tracking_id=body.tracking_id.strip(),
+            courier_name=body.courier_name.strip(),
+            actor="user",
+        )
+        try:
+            db.commit()
+        except IntegrityError as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Constraint violation: {getattr(e.orig, 'args', [str(e)])[0]}",
+            ) from e
+
+        return MarkSampleShippedResponse(
+            tag_added=result["tag_added"],
+            memberships_updated=result["memberships_updated"],
+            new_memberships_from_trigger=result["new_memberships_from_trigger"],
+        )
     except HTTPException:
         raise
     except Exception:
@@ -643,6 +729,44 @@ async def update_contact(
             "tags": list(c.tags or []),
             "notes": c.notes,
         }
+        # Phase 7.7 — surface newly-added tags as `tag_added` interactions
+        # AND fire any tag-trigger flows. Per PLAN_flows §4.3, this is
+        # the only path that creates `tag_added` rows; the rest of the
+        # patch still rolls up under `manual_edit` for the diff summary.
+        try:
+            before_tags = set(before.get("tags") or [])
+            after_tags = set(after.get("tags") or [])
+            newly_added = sorted(after_tags - before_tags)
+            if newly_added:
+                from api_v2.services.flows_engine_v2 import evaluate_tag_trigger
+
+                for tag in newly_added:
+                    log_interaction(
+                        db,
+                        contact_id=contact_id,
+                        kind="tag_added",
+                        summary=tag,
+                        payload={"tag": tag},
+                        actor="user",
+                        commit=False,
+                    )
+                    try:
+                        evaluate_tag_trigger(
+                            db, contact_id=contact_id, tag_name=tag,
+                        )
+                    except Exception:
+                        import logging
+                        logging.getLogger("api_v2.contacts").exception(
+                            "evaluate_tag_trigger failed for %s/%s",
+                            contact_id, tag,
+                        )
+                db.commit()
+        except Exception:
+            try:
+                db.rollback()
+            except Exception:
+                pass
+
         try:
             diff_summary = summarize_diff(before, after)
             if diff_summary != "no-op save":

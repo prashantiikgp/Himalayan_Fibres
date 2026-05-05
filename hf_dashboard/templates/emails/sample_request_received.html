@@ -1,0 +1,42 @@
+{#-
+  SAMPLE DISPATCH — step 0 acknowledgement.
+  Sent the moment a contact is tagged `samples_requested`.
+  Bridges the gap between "I'd like a sample" and shipment;
+  sets the founder voice early so step 1's tracking email lands warm.
+
+  Per-send variables:
+    first_name*       recipient first name
+    fibre_requested?  e.g. 'nettle yarn' / 'hemp blend'; defaults to 'the samples'
+    book_call_link?   optional; renders "Book a 15-min call" CTA
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% set _what = fibre_requested or 'the samples' %}
+
+{% block content %}
+
+{{ heading('We have your sample request', emoji='🌿') }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph("Quick note &mdash; we received your request for <strong>" + _what + "</strong>, and a small batch is being prepared for you. We'll send tracking details the moment it ships.") }}
+
+{{ paragraph("A few things to know while you wait:") }}
+
+{{ paragraph("• <strong>Lead time:</strong> samples typically dispatch within 2&ndash;4 working days. International shipping then takes another 5&ndash;10 days depending on courier and customs.<br>• <strong>What's inside:</strong> a representative spool plus a one-page spec sheet (fibre source, count, twist, dye notes). Big enough to feel and to swatch with.<br>• <strong>What we'll ask afterward:</strong> just whether the fibre felt right. No high-pressure follow-up.") }}
+
+{{ paragraph("If anything's changed about what you'd like to see &mdash; different fibre, different blend, different colour direction &mdash; reply to this email and we'll adjust before it ships.") }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{% if book_call_link %}
+{{ cta_button('Book a 15-min call', book_call_link) }}
+{% endif %}
+
+{{ whatsapp_help_button('Hi Prashant — about my ' + _what + ' sample request…') }}
+
+{% endblock %}

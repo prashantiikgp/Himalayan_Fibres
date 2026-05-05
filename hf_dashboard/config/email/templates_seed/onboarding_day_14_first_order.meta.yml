@@ -1,0 +1,31 @@
+template:
+  slug: onboarding_day_14_first_order
+  name: "Onboarding Day 14 — First Order Nudge"
+  category: nurture
+  subject_template: "Still on the fence, {{ first_name }}?"
+  is_active: true
+  required_variables:
+    - first_name
+  optional_variables:
+    - signup_at
+    - sample_form_link
+    - catalog_link
+  variables:
+    - name: signup_at
+      label: "Signup-at (human)"
+      type: text
+      placeholder: "two weeks ago"
+      example: "two weeks ago"
+      required: false
+    - name: sample_form_link
+      label: "Sample request link"
+      type: url
+      placeholder: "https://www.himalayanfibres.com/samples"
+      example: ""
+      required: false
+    - name: catalog_link
+      label: "Catalog link"
+      type: url
+      placeholder: "https://www.himalayanfibres.com/catalog"
+      example: ""
+      required: false

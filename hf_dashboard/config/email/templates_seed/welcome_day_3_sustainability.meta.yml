@@ -1,0 +1,25 @@
+template:
+  slug: welcome_day_3_sustainability
+  name: "Welcome Day 3 — Sustainability Story"
+  category: nurture
+  subject_template: "Why we farm wild — Himalayan Fibres"
+  is_active: true
+  required_variables:
+    - first_name
+  optional_variables:
+    - stat_1_value
+    - stat_1_label
+    - stat_2_value
+    - stat_2_label
+    - stat_3_value
+    - stat_3_label
+    - story1_image_url
+    - story1_title
+    - story1_body
+    - story1_link
+    - quote_text
+    - quote_attribution
+    - story2_image_url
+    - story2_title
+    - story2_body
+    - story2_link

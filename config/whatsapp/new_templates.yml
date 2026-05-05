@@ -94,6 +94,25 @@ templates:
     footer:
       text: "Himalayan Fibres"
 
+  # -- Phase 7.7 Sample Dispatch step 0 — request acknowledgement --
+  # 24h-window-safe (UTILITY) so it can fire from the tag-trigger
+  # evaluator outside any active conversation.
+  sample_request_received:
+    category: UTILITY
+    language: en
+    body:
+      text: >
+        Hi {{1}},
+
+        We've received your sample request for {{2}}.
+        A small batch is being prepared and will dispatch within 2-4 working days.
+        We'll share tracking the moment it ships.
+
+        — Prashant, Himalayan Fibres
+      example: ["Prashant", "nettle yarn"]
+    footer:
+      text: "Himalayan Fibres"
+
   # -- Example 4: Price List --
   price_list_share:
     category: MARKETING

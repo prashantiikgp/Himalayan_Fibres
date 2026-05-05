@@ -1,0 +1,24 @@
+template:
+  slug: sample_request_received
+  name: "Sample Request — Acknowledgement"
+  category: transactional
+  subject_template: "We have your sample request, {{ first_name }} 🌿"
+  is_active: true
+  required_variables:
+    - first_name
+  optional_variables:
+    - fibre_requested
+    - book_call_link
+  variables:
+    - name: fibre_requested
+      label: "Fibre requested"
+      type: text
+      placeholder: "nettle yarn"
+      example: "nettle yarn"
+      required: false
+    - name: book_call_link
+      label: "Book-a-call link"
+      type: url
+      placeholder: "https://cal.com/himalayanfibres/intro"
+      example: ""
+      required: false

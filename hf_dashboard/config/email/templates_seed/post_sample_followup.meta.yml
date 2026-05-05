@@ -1,0 +1,38 @@
+template:
+  slug: post_sample_followup
+  name: "Post-Sample Follow-up — How did it feel?"
+  category: nurture
+  subject_template: "How did the {{ fibre_sent }} sample feel, {{ first_name }}?"
+  is_active: true
+  required_variables:
+    - first_name
+    - fibre_sent
+  optional_variables:
+    - sample_dispatched_at
+    - proforma_link
+    - book_call_link
+  variables:
+    - name: fibre_sent
+      label: "Fibre sent"
+      type: text
+      placeholder: "nettle yarn"
+      example: "nettle yarn"
+      required: true
+    - name: sample_dispatched_at
+      label: "When was it dispatched (human)"
+      type: text
+      placeholder: "last week"
+      example: "last Friday"
+      required: false
+    - name: proforma_link
+      label: "Proforma link"
+      type: url
+      placeholder: "https://www.himalayanfibres.com/proforma/abc"
+      example: ""
+      required: false
+    - name: book_call_link
+      label: "Book-a-call link"
+      type: url
+      placeholder: "https://cal.com/himalayanfibres/intro"
+      example: ""
+      required: false

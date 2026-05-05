@@ -362,12 +362,15 @@ def _seed_default_templates(db: Session):
 
 
 def _seed_default_flows(db: Session):
-    """Create pre-defined automation flows."""
+    """Create pre-defined automation flows. Runs once on first seed."""
     flows = [
         Flow(
             name="B2B Introduction Flow",
+            slug="b2b_introduction_flow",
             description="3-step email sequence for new B2B carpet exporter leads",
             channel="email",
+            trigger_type="manual",
+            trigger_config={},
             steps=[
                 {"day": 0, "template_slug": "b2b_introduction", "subject": "Premium Himalayan Fibers for {{company_name}}"},
                 {"day": 3, "template_slug": "sustainability", "subject": "Meet EU & US Sustainability Standards"},
@@ -376,8 +379,11 @@ def _seed_default_flows(db: Session):
         ),
         Flow(
             name="Welcome & Nurture Flow",
+            slug="welcome_nurture_flow",
             description="2-step welcome email sequence for new contacts",
             channel="email",
+            trigger_type="manual",
+            trigger_config={},
             steps=[
                 {"day": 0, "template_slug": "welcome_production", "subject": "Welcome to Himalayan Fibers"},
                 {"day": 5, "template_slug": "welcome_final", "subject": "Discover Our Product Range"},
@@ -385,8 +391,11 @@ def _seed_default_flows(db: Session):
         ),
         Flow(
             name="WhatsApp Welcome Flow",
+            slug="whatsapp_welcome_flow",
             description="2-step WhatsApp template sequence for new leads",
             channel="whatsapp",
+            trigger_type="manual",
+            trigger_config={},
             steps=[
                 {"day": 0, "wa_template": "welcome_message", "variables": ["{{first_name}}"]},
                 {"day": 3, "wa_template": "snow_white", "variables": []},
@@ -399,6 +408,85 @@ def _seed_default_flows(db: Session):
 
     db.flush()
     log.info("Seeded %d flows", len(flows))
+
+
+# Sample Dispatch flow definition (PLAN_flows §7.1). Defined as a module
+# constant so the seeder is idempotent and the test suite can import it
+# without round-tripping through the DB.
+SAMPLE_DISPATCH_FLOW_DEF = {
+    "name": "Sample Dispatch",
+    "slug": "sample_dispatch",
+    "description": (
+        "Triggered when a contact is tagged `samples_requested`. "
+        "Acknowledges the request immediately (email + WA), parks for "
+        "the operator to mark the sample shipped (which adds tag "
+        "`samples_shipped` and resumes step 1), then follows up T+7 "
+        "after dispatch."
+    ),
+    "channel": "multi",
+    "trigger_type": "tag",
+    "trigger_config": {"tag": "samples_requested"},
+    "steps": [
+        {
+            "step_index": 0,
+            "channel": "both",
+            "template_slug": "sample_request_received",
+            "wa_template": "sample_request_received",
+            "wa_variables": ["{{first_name}}", "{{fibre_sent}}"],
+            "wa_template_lang": "en",
+            "delay_after_prev": {"value": 0, "unit": "days"},
+            "conditions": [
+                {"field": "consent_status", "op": "in", "values": ["opted_in", "pending"]},
+            ],
+        },
+        {
+            "step_index": 1,
+            "channel": "both",
+            "template_slug": "sample_shipped",
+            "wa_template": "sample_shipped",
+            "wa_variables": ["{{first_name}}", "{{tracking_id}}", "{{delivery_eta}}"],
+            "wa_template_lang": "en",
+            "trigger_event": {"type": "tag", "value": "samples_shipped"},
+        },
+        {
+            "step_index": 2,
+            "channel": "email",
+            "template_slug": "post_sample_followup",
+            "delay_after_prev": {"value": 7, "unit": "days"},
+            "conditions": [{"field": "email", "op": "exists"}],
+        },
+    ],
+}
+
+
+def seed_phase7_flows(db: Session) -> dict:
+    """Idempotently seed Phase 7.7 flows. Called from ensure_db_ready
+    on every boot so prod DBs picked up the new flow without resetting.
+
+    Skips any slug that already exists; never overwrites — operator
+    edits via the (Phase 7.9) flow editor must survive a redeploy.
+    """
+    inserted, skipped = 0, 0
+    for flow_def in [SAMPLE_DISPATCH_FLOW_DEF]:
+        existing = db.query(Flow).filter(Flow.slug == flow_def["slug"]).first()
+        if existing:
+            skipped += 1
+            continue
+        db.add(
+            Flow(
+                name=flow_def["name"],
+                slug=flow_def["slug"],
+                description=flow_def["description"],
+                channel=flow_def["channel"],
+                trigger_type=flow_def["trigger_type"],
+                trigger_config=flow_def["trigger_config"],
+                steps=flow_def["steps"],
+                is_active=True,
+            )
+        )
+        inserted += 1
+    db.commit()
+    return {"inserted": inserted, "skipped": skipped}
 
 
 def ensure_db_ready():
@@ -423,3 +511,16 @@ def ensure_db_ready():
             db.close()
     except Exception:
         log.exception("Email template seed failed (non-fatal)")
+
+    # Phase 7.7 — Sample Dispatch and other tag/lifecycle-triggered
+    # flows. Idempotent: skip slugs that already exist so operator edits
+    # survive redeploys.
+    try:
+        db = get_db()
+        try:
+            summary = seed_phase7_flows(db)
+            log.info("Phase 7 flow seed: %s", summary)
+        finally:
+            db.close()
+    except Exception:
+        log.exception("Phase 7 flow seed failed (non-fatal)")

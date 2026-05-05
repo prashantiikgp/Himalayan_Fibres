@@ -1,0 +1,64 @@
+{#-
+  SAMPLE DISPATCH — step 1 shipment notification.
+  Sent when the contact is tagged `samples_shipped` (which the operator
+  triggers via the "Mark sample shipped" drawer action). Distinct from
+  `order_shipped.html` because the language and CTA are sample-specific
+  (no invoice, no order number, free trial framing).
+
+  Per-send variables:
+    first_name*       recipient first name
+    fibre_sent?       e.g. 'nettle yarn'; defaults to 'your samples'
+    courier_name?     e.g. 'BlueDart'
+    tracking_id?      e.g. 'BD123456789'
+    tracking_url?     full URL; if absent, only the ID is rendered
+    dispatch_date?    e.g. '02-Sep-2026'
+    delivery_eta?     e.g. '5-10 working days' (default)
+-#}
+{% extends 'layout/base.html' %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% set _what = fibre_sent or 'your samples' %}
+{% set _eta  = delivery_eta or '5-10 working days' %}
+
+{% block content %}
+
+{{ heading('Your samples are on the way', emoji='📦') }}
+
+{{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
+
+{{ paragraph('Good news &mdash; <strong>' + _what + '</strong> shipped today. Below are the tracking details.') }}
+
+{% if courier_name or tracking_id or dispatch_date %}
+<tr>
+  <td style="padding:12px 24px 20px;background-color:#ffffff;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid {{ color_card_border }};border-radius:8px;font-family:{{ font_stack }};">
+      <tr>
+        <td style="padding:16px 18px;color:{{ color_text }};">
+          <h3 style="margin:0 0 10px;font-size:20px;font-weight:bold;letter-spacing:0.5px;">📦 Shipment Details</h3>
+          {% if courier_name %}<p style="margin:8px 0;font-size:14px;color:{{ color_accent }};"><strong>Courier:</strong> {{ courier_name }}</p>{% endif %}
+          {% if tracking_id %}<p style="margin:8px 0;font-size:14px;color:{{ color_accent }};"><strong>Tracking ID:</strong> <span style="letter-spacing:0.4px;">{{ tracking_id }}</span></p>{% endif %}
+          {% if dispatch_date %}<p style="margin:8px 0;font-size:14px;color:{{ color_accent }};"><strong>Dispatched:</strong> {{ dispatch_date }}</p>{% endif %}
+          <p style="margin:8px 0 0;font-size:14px;color:{{ color_accent }};"><strong>Estimated arrival:</strong> {{ _eta }}</p>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+{% endif %}
+
+{% if tracking_url %}
+{{ cta_button('Track shipment', tracking_url) }}
+{% endif %}
+
+{{ paragraph("When it arrives, give the fibre a real test drive &mdash; swatch it, blend it, knit a small piece. We'll be in touch about a week later just to ask how it felt. No hard pitch.") }}
+
+{{ paragraph('If anything looks off in the package, reply to this email or ping us on WhatsApp and we&rsquo;ll sort it out the same day.') }}
+
+{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{{ whatsapp_help_button('Hi Prashant — my ' + _what + ' shipment…') }}
+
+{% endblock %}

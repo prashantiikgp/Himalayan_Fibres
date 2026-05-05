@@ -150,6 +150,11 @@ def tick_once() -> dict:
 
     Review fix #1: claims are atomic per-row (FOR UPDATE SKIP LOCKED on
     Postgres). Two concurrent ticks would each pick up disjoint rows.
+
+    Phase 7.7: also drives the flows engine — `tick_flows` claims due
+    `flow_memberships` rows (limit 20/tick per PLAN_flows §5.6) and
+    fires their next step. Failures inside `tick_flows` are logged and
+    swallowed so a flow-engine bug never starves broadcasts/campaigns.
     """
     db = get_db()
     try:
@@ -163,20 +168,46 @@ def tick_once() -> dict:
     for snap in em_claimed:
         _fire_email(snap)
 
-    return {"fired_wa": len(wa_claimed), "fired_email": len(em_claimed)}
+    flow_result = {"claimed": 0, "fired": 0}
+    try:
+        from api_v2.services.flows_engine_v2 import tick_flows
+
+        flow_result = tick_flows()
+    except Exception:
+        _log.exception("flow tick failed; broadcasts/campaigns continue")
+
+    return {
+        "fired_wa": len(wa_claimed),
+        "fired_email": len(em_claimed),
+        "fired_flows": flow_result.get("fired", 0),
+        "claimed_flows": flow_result.get("claimed", 0),
+    }
 
 
 async def scheduler_loop() -> None:
     """Once-per-minute scheduler tick. Keeps running until the task is
-    cancelled (handled by main.py's lifespan)."""
+    cancelled (handled by main.py's lifespan).
+
+    `tick_once` is dispatched via `asyncio.to_thread` so the
+    `time.sleep(3)` per email send and `time.sleep(1)` per WA send
+    inside the engines don't pin the event loop. With the Phase 7.7
+    `tick_flows()` integration this matters more — at TICK_LIMIT=20
+    flow memberships × 3s/email = up to 60s of blocking work.
+    """
     _log.info("scheduler loop started — tick every %ds", _TICK_SECONDS)
     while True:
         try:
-            result = tick_once()
-            if result["fired_wa"] or result["fired_email"]:
+            result = await asyncio.to_thread(tick_once)
+            if (
+                result["fired_wa"]
+                or result["fired_email"]
+                or result.get("fired_flows", 0)
+            ):
                 _log.info(
-                    "scheduler fired wa=%s email=%s",
-                    result["fired_wa"], result["fired_email"],
+                    "scheduler fired wa=%s email=%s flows=%s",
+                    result["fired_wa"],
+                    result["fired_email"],
+                    result.get("fired_flows", 0),
                 )
         except Exception:
             _log.exception("scheduler tick failed; continuing")

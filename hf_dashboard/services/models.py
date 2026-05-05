@@ -12,7 +12,7 @@ from typing import Any
 
 from sqlalchemy import (
     Boolean, Column, DateTime, Float, ForeignKey, Index, Integer, String, Text,
-    UniqueConstraint, create_engine,
+    UniqueConstraint, create_engine, text,
 )
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.types import TypeDecorator
@@ -277,6 +277,22 @@ class FlowMembership(Base):
         Index("fm_due_idx", "status", "next_fire_at"),
         Index("fm_contact_active_idx", "contact_id", "status"),
         Index("fm_flow_status_idx", "flow_id", "status"),
+        # Partial unique index: a contact can only have ONE live
+        # membership per flow at a time. Lets the same contact re-enter
+        # a flow after completion / stop. Postgres and SQLite (3.8+)
+        # both support partial indexes natively. PLAN_flows §3.4.
+        Index(
+            "fm_contact_flow_uniq",
+            "contact_id",
+            "flow_id",
+            unique=True,
+            postgresql_where=text(
+                "status IN ('active', 'waiting_event', 'paused')"
+            ),
+            sqlite_where=text(
+                "status IN ('active', 'waiting_event', 'paused')"
+            ),
+        ),
     )
 
 

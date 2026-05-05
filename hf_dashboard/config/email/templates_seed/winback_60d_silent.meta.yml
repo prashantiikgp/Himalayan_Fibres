@@ -1,0 +1,31 @@
+template:
+  slug: winback_60d_silent
+  name: "Winback — 60 Day Silent"
+  category: nurture
+  subject_template: "What's new at Himalayan Fibres"
+  is_active: true
+  required_variables:
+    - first_name
+  optional_variables:
+    - last_engagement_at
+    - whats_new_html
+    - hero_image_url
+  variables:
+    - name: last_engagement_at
+      label: "Last-engagement (human)"
+      type: text
+      placeholder: "your last order in October"
+      example: "your last order in October"
+      required: false
+    - name: whats_new_html
+      label: "What's new (HTML bullet list)"
+      type: textarea
+      placeholder: "<ul><li>New nettle batch from Uttarkashi</li><li>EU-compliant lab certs ready</li></ul>"
+      example: ""
+      required: false
+    - name: hero_image_url
+      label: "Hero image URL"
+      type: url
+      placeholder: "https://example.com/hero.jpg"
+      example: ""
+      required: false

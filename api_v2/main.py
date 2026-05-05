@@ -136,6 +136,22 @@ async def lifespan(_app: FastAPI):  # noqa: ANN001
             except ImportError:
                 pass
         else:
+            # Phase 7.7 — re-arm any flow membership whose claim was
+            # interrupted by a previous Space restart (status='active'
+            # AND next_fire_at IS NULL). Runs once before the scheduler
+            # starts so the first tick picks them up. Idempotent.
+            try:
+                from api_v2.services.flows_engine_v2 import reap_stranded_memberships
+
+                reap_result = reap_stranded_memberships()
+                if reap_result.get("reaped"):
+                    log.info(
+                        "Reaper: re-armed %d stranded flow membership(s)",
+                        reap_result["reaped"],
+                    )
+            except Exception:
+                log.exception("Stranded-membership reaper failed (non-fatal)")
+
             task = _asyncio.create_task(scheduler_loop())
             log.info("Phase 3.1b.2 scheduler started")
     else:
@@ -180,6 +196,9 @@ app.include_router(contacts.router, prefix="/api/v2", tags=["contacts"])
 app.include_router(wa.router, prefix="/api/v2/wa", tags=["wa"])
 app.include_router(broadcasts.router, prefix="/api/v2", tags=["broadcasts"])
 app.include_router(flows.router, prefix="/api/v2", tags=["flows"])
+# Phase 7.7 — flow membership endpoints (POST /flow-memberships/{id}/stop +
+# GET /contacts/{id}/flow-memberships) live alongside flows under /api/v2.
+app.include_router(flows.membership_router, prefix="/api/v2")
 app.include_router(jobs.router, prefix="/api/v2", tags=["jobs"])
 app.include_router(
     email_templates.router, prefix="/api/v2", tags=["email_templates"]
