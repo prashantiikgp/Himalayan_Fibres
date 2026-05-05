@@ -25,9 +25,20 @@ class LoginResponse(BaseModel):
 
 @router.post("/login", response_model=LoginResponse)
 async def login(req: LoginRequest) -> LoginResponse:
-    expected = os.getenv("APP_PASSWORD", "")
-    # When APP_PASSWORD is unset, accept any non-empty password — matches v1's
-    # open-access behavior. Setting APP_PASSWORD enforces the gate.
+    """Issue a Bearer token = APP_PASSWORD on a successful password check.
+
+    Fail-closed by default (review fix M1). When APP_OPEN_ACCESS=true and
+    APP_PASSWORD is unset, any non-empty password is accepted and echoed back
+    as the token. Otherwise the password must match APP_PASSWORD exactly.
+    """
+    expected = os.getenv("APP_PASSWORD", "").strip()
+    open_access = os.getenv("APP_OPEN_ACCESS", "").strip().lower() in {"1", "true", "yes"}
+    if not expected and not open_access:
+        # Should be unreachable — main.py refuses to start in this state.
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Auth misconfigured",
+        )
     if expected and req.password != expected:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

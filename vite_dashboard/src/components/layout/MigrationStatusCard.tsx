@@ -18,13 +18,16 @@ const V1_BASE_URL =
   import.meta.env["VITE_V1_BASE_URL"] ??
   "https://prashantiitkgp08-himalayan-fibers-dashboard.hf.space";
 
-const V1_PATH_BY_ID: Record<string, string> = {
-  home: "/",
-  contacts: "/?contacts",
-  wa_inbox: "/?wa_inbox",
-  broadcasts: "/?broadcasts",
-  wa_templates: "/?wa_template_studio",
-  flows: "/?flows",
+// v1 is a Gradio single-page app — query params don't navigate to a specific
+// page (review fix M4). Linking to root + telling the user where to click
+// inside v1 is the honest UX.
+const V1_NAV_HINT_BY_ID: Record<string, string> = {
+  home: "Home tab",
+  contacts: "the Contacts tab",
+  wa_inbox: "the WhatsApp tab",
+  broadcasts: "WhatsApp Broadcasts (or Email Broadcast)",
+  wa_templates: "the Template Studio tab",
+  flows: "the Flows tab",
 };
 
 export function MigrationStatusCard({
@@ -36,8 +39,8 @@ export function MigrationStatusCard({
   pageName: string;
   landedPhase: number;
 }) {
-  const v1Path = V1_PATH_BY_ID[pageId] ?? "/";
-  const v1Href = `${V1_BASE_URL}${v1Path}`;
+  const v1Href = V1_BASE_URL;
+  const navHint = V1_NAV_HINT_BY_ID[pageId] ?? "the relevant tab";
 
   return (
     <div className="mx-auto mt-12 w-full max-w-2xl">
@@ -67,7 +70,10 @@ export function MigrationStatusCard({
               {STRINGS.migrationCard.openV1}
             </a>
           </Button>
-          <p className="mt-3 text-xs text-text-muted">{STRINGS.migrationCard.sharedDb}</p>
+          <p className="mt-2 text-xs text-text-muted">
+            Once v1 loads, click <strong>{navHint}</strong> in the left sidebar.
+          </p>
+          <p className="mt-1 text-xs text-text-muted">{STRINGS.migrationCard.sharedDb}</p>
         </CardContent>
       </Card>
     </div>

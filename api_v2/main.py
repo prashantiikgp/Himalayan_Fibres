@@ -44,6 +44,26 @@ from api_v2.routers import auth, contacts, dashboard, health  # noqa: E402
 
 log = logging.getLogger(__name__)
 
+# Fail-closed by default (review fix M1): APP_PASSWORD must be set, OR
+# APP_OPEN_ACCESS=true must be explicitly opted into. Refusing to silently
+# expose the API is the safe default — v1's open-by-default was inherited
+# accidentally and shouldn't carry into v2.
+_APP_PASSWORD = os.getenv("APP_PASSWORD", "").strip()
+_OPEN_ACCESS = os.getenv("APP_OPEN_ACCESS", "").strip().lower() in {"1", "true", "yes"}
+if not _APP_PASSWORD and not _OPEN_ACCESS:
+    raise SystemExit(
+        "ERROR: APP_PASSWORD is unset and APP_OPEN_ACCESS is not enabled.\n"
+        "  -> Set APP_PASSWORD as a Space Secret (recommended), OR\n"
+        "  -> Set APP_OPEN_ACCESS=true to explicitly opt into open access.\n"
+        "Refusing to start with a silently-unauthenticated API."
+    )
+if _OPEN_ACCESS and not _APP_PASSWORD:
+    log.warning(
+        "API IS OPEN - APP_OPEN_ACCESS=true and APP_PASSWORD is unset. "
+        "All /api/v2/* routes are world-readable. Set APP_PASSWORD before "
+        "exposing this Space publicly."
+    )
+
 # Initialize shared DB (creates tables if missing — same call v1 makes).
 from services.database import ensure_db_ready  # type: ignore[import-not-found]  # noqa: E402
 

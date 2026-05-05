@@ -112,6 +112,8 @@ export function ContactsTable({
             variant="ghost"
             size="icon"
             aria-label={`Edit ${row.original.first_name || row.original.id}`}
+            disabled={!onEdit}
+            title={onEdit ? undefined : "Edit drawer ships in the next release"}
             onClick={(e) => {
               e.stopPropagation();
               onEdit?.(row.original);

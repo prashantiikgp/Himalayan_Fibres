@@ -11,13 +11,41 @@
  * Bug fixes shipped: B19 (URL routing — every filter/page in the URL).
  */
 
-import { useState, useMemo, useDeferredValue } from "react";
-import { useContacts } from "@/api/contacts";
+import { useState, useMemo } from "react";
+import { Download } from "lucide-react";
+import { useContacts, type ContactRow } from "@/api/contacts";
 import { pageEngine } from "@/engines/pageEngine";
 import { useUrlState } from "@/lib/url-state";
+import { useDebouncedValue } from "@/lib/hooks";
+import { Button } from "@/components/ui/button";
 import { ContactsTable } from "./components/ContactsTable";
 import { ContactsFilterBar, DEFAULT_FILTERS, type ContactFilters } from "./components/ContactsFilterBar";
+import { ContactDrawer } from "./components/ContactDrawer";
+import { AddContactDialog } from "./components/AddContactDialog";
+import { ImportContactsDialog } from "./components/ImportContactsDialog";
 import { Pagination } from "@/components/tables/Pagination";
+import { apiBase } from "@/lib/env";
+import { getToken } from "@/lib/auth";
+
+async function downloadContactsCsv() {
+  const token = getToken();
+  const res = await fetch(`${apiBase()}/api/v2/contacts.csv`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  if (!res.ok) {
+    alert(`CSV download failed: ${res.status}`);
+    return;
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "contacts.csv";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
 
 export function ContactsPage() {
   const meta = pageEngine.getMeta("contacts");
@@ -36,6 +64,7 @@ export function ContactsPage() {
   );
 
   const [page, setPage] = useState(() => Math.max(0, parseInt(url.get("page", "0"), 10) || 0));
+  const [drawerContact, setDrawerContact] = useState<ContactRow | null>(null);
 
   const handleFilterChange = (next: Partial<ContactFilters>) => {
     url.set({ ...next, page: null });
@@ -47,16 +76,17 @@ export function ContactsPage() {
     url.set({ page: nextPage > 0 ? String(nextPage) : null });
   };
 
-  // Debounce-lite: defer search-driven refetches by one paint
-  // so typing isn't laggy. TanStack Query's keepPreviousData smooths the rest.
-  const deferredFilters = useDeferredValue(filters);
+  // Debounce the search field by 300ms so each keystroke doesn't fire a
+  // request (review fix M5). Other filters (select dropdowns) update on
+  // discrete change events and don't need debouncing.
+  const debouncedSearch = useDebouncedValue(filters.search, 300);
 
   const { data, isLoading, error } = useContacts({
-    segment: deferredFilters.segment,
-    lifecycle: deferredFilters.lifecycle,
-    country: deferredFilters.country,
-    channel: deferredFilters.channel,
-    search: deferredFilters.search,
+    segment: filters.segment,
+    lifecycle: filters.lifecycle,
+    country: filters.country,
+    channel: filters.channel,
+    search: debouncedSearch,
     page,
     page_size: cfg.page.table.page_size,
   });
@@ -72,16 +102,24 @@ export function ContactsPage() {
         <ContactsFilterBar value={filters} onChange={handleFilterChange} />
 
         <div className="min-w-0 flex-1 flex flex-col gap-2">
-          <div className="flex items-center justify-between text-xs text-text-muted">
+          <div className="flex items-center justify-between gap-2 text-xs text-text-muted">
             <span>
               {data ? `${data.total.toLocaleString()} contacts` : "Loading contacts…"}
             </span>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={downloadContactsCsv}>
+                <Download className="mr-1 h-4 w-4" /> CSV
+              </Button>
+              <ImportContactsDialog />
+              <AddContactDialog />
+            </div>
           </div>
 
           <ContactsTable
             data={data?.contacts ?? []}
             isLoading={isLoading}
             error={error instanceof Error ? error : null}
+            onEdit={setDrawerContact}
           />
 
           {data && data.total > 0 && (
@@ -95,6 +133,14 @@ export function ContactsPage() {
           )}
         </div>
       </div>
+
+      <ContactDrawer
+        contact={drawerContact}
+        open={drawerContact !== null}
+        onOpenChange={(open) => {
+          if (!open) setDrawerContact(null);
+        }}
+      />
     </div>
   );
 }

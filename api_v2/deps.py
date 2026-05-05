@@ -23,13 +23,24 @@ def require_auth(
 ) -> None:
     """Validate the Bearer token equals APP_PASSWORD.
 
-    APP_PASSWORD unset = open access (matches v1 behavior). Set it via
-    HF Space Secrets to gate the API.
+    Fail-closed by default (review fix M1). The startup gate in api_v2/main.py
+    refuses to boot if APP_PASSWORD is unset AND APP_OPEN_ACCESS is not
+    explicitly true — so by the time this dependency runs, either:
+      (a) APP_PASSWORD is set → token must match, or
+      (b) APP_OPEN_ACCESS=true and APP_PASSWORD is unset → open access.
     """
-    expected = os.getenv("APP_PASSWORD", "")
-    if not expected:
-        # Open access — v1 also runs this way until APP_PASSWORD is set.
+    expected = os.getenv("APP_PASSWORD", "").strip()
+    open_access = os.getenv("APP_OPEN_ACCESS", "").strip().lower() in {"1", "true", "yes"}
+    if not expected and open_access:
+        # Explicitly opted into open access. Startup logged a warning.
         return
+    if not expected:
+        # Should be unreachable — main.py refuses to start in this state —
+        # but defense in depth.
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Auth misconfigured (APP_PASSWORD unset, APP_OPEN_ACCESS not enabled)",
+        )
     if credentials is None or credentials.credentials != expected:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
