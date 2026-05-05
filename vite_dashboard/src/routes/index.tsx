@@ -33,11 +33,19 @@ export function buildRoutes(): RouteObject[] {
       children: [
         { index: true, element: <Navigate to={defaultPath} replace /> },
         { path: "home", element: <HomePage /> },
-        // Phases 1-5: replace <MigrationPage /> with the real page component
-        // when it ships.
         { path: "contacts", element: <ContactsPage /> },
         { path: "wa-inbox", element: <WAInboxPage /> },
-        { path: "broadcasts", element: <BroadcastsPage /> },
+        // Phase 6.3: channel-split Broadcasts. /broadcasts redirects
+        // to /wa-broadcasts so any saved bookmark still works.
+        { path: "broadcasts", element: <Navigate to="/wa-broadcasts" replace /> },
+        {
+          path: "wa-broadcasts",
+          element: <BroadcastsPage channel="whatsapp" pageId="wa_broadcasts" />,
+        },
+        {
+          path: "email-broadcasts",
+          element: <BroadcastsPage channel="email" pageId="email_broadcasts" />,
+        },
         { path: "wa-templates", element: <WATemplatesPage /> },
         { path: "flows", element: <FlowsPage /> },
       ],

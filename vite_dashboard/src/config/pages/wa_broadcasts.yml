@@ -1,0 +1,40 @@
+# WhatsApp Broadcasts page (Phase 6.3) — channel-locked Compose +
+# History + Performance for the WA channel only.
+
+page:
+  title: "WhatsApp Broadcasts"
+  subtitle: ""
+  how_to_use:
+    summary: "Send an approved WhatsApp template to a contact segment."
+    sections:
+      - title: "Pick the audience"
+        body: |
+          Select a segment from the Audience dropdown. The sticky banner
+          at the top updates live as you change filters — it tells you
+          how many people will actually receive the message after segment
+          rules + WhatsApp eligibility (must have a wa_id) filter apply.
+      - title: "Pick a template"
+        body: |
+          Only APPROVED WhatsApp templates can be sent. Templates come
+          from the WhatsApp Templates page; if your draft hasn't been
+          submitted yet, head there first.
+      - title: "Send Now"
+        body: |
+          WhatsApp broadcasts fire synchronously — small batches finish
+          in seconds. Each successful template send opens a fresh 24h
+          customer-service window for that contact, so subsequent text
+          replies become possible until that window closes.
+      - title: "History + Performance"
+        body: |
+          History shows every WA broadcast you've sent. Click a row to
+          see per-recipient delivery status and any error messages.
+  landed_phase: 3
+  tabs:
+    - id: compose
+      label: "Compose"
+    - id: history
+      label: "History"
+    - id: performance
+      label: "Performance"
+  styles:
+    sticky_header_height: "60px"

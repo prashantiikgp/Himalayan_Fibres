@@ -28,22 +28,35 @@ import { ScheduleSheet } from "./ScheduleSheet";
 import { SendConfirmDialog } from "./SendConfirmDialog";
 import { SendProgress } from "./SendProgress";
 
-export function ComposeTab() {
+export function ComposeTab({
+  lockedChannel,
+}: {
+  /** Phase 6.3: when set, hides the channel toggle and locks Compose
+   * to one channel. /wa-broadcasts and /email-broadcasts pass this so
+   * each page is single-purpose. The legacy /broadcasts page leaves
+   * this undefined and keeps the URL-driven toggle. */
+  lockedChannel?: BroadcastChannel;
+} = {}) {
   const [params, setParams] = useSearchParams();
   // B11: sidebar deep-links pass `?channel=...` to pre-select the
   // channel toggle. Default WhatsApp when omitted.
   const channelParam = params.get("channel");
   const initialChannel: BroadcastChannel =
-    channelParam === "email" ? "email" : "whatsapp";
+    lockedChannel ??
+    (channelParam === "email" ? "email" : "whatsapp");
   const [channel, setChannel] = useState<BroadcastChannel>(initialChannel);
 
   // Keep the toggle in sync if the URL changes (navigating between
-  // sidebar entries while the page is mounted).
+  // sidebar entries while the page is mounted). Skip when locked.
   useEffect(() => {
+    if (lockedChannel) {
+      if (channel !== lockedChannel) setChannel(lockedChannel);
+      return;
+    }
     if (channelParam === "email" && channel !== "email") setChannel("email");
     if (channelParam === "whatsapp" && channel !== "whatsapp") setChannel("whatsapp");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [channelParam]);
+  }, [channelParam, lockedChannel]);
   const [name, setName] = useState("");
   const [segmentId, setSegmentId] = useState<string>("all_opted_in");
   const [templateName, setTemplateName] = useState<string>("");
@@ -184,30 +197,35 @@ export function ComposeTab() {
           }}
           className="flex flex-col gap-3"
         >
-          <Field label="Channel" id="bc-channel">
-            <div className="inline-flex rounded-md border border-border bg-card p-0.5">
-              {(["whatsapp", "email"] as BroadcastChannel[]).map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => {
-                    setChannel(c);
-                    setTemplateName("");
-                    const next = new URLSearchParams(params);
-                    next.set("channel", c);
-                    setParams(next, { replace: true });
-                  }}
-                  className={
-                    channel === c
-                      ? "rounded px-3 py-1 text-xs font-medium bg-primary text-white"
-                      : "rounded px-3 py-1 text-xs text-text-muted hover:text-text"
-                  }
-                >
-                  {c === "whatsapp" ? "WhatsApp" : "Email"}
-                </button>
-              ))}
-            </div>
-          </Field>
+          {/* Phase 6.3: when channel is locked by the parent route,
+              hide the toggle entirely. Each /wa-broadcasts and
+              /email-broadcasts page sets lockedChannel. */}
+          {!lockedChannel && (
+            <Field label="Channel" id="bc-channel">
+              <div className="inline-flex rounded-md border border-border bg-card p-0.5">
+                {(["whatsapp", "email"] as BroadcastChannel[]).map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => {
+                      setChannel(c);
+                      setTemplateName("");
+                      const next = new URLSearchParams(params);
+                      next.set("channel", c);
+                      setParams(next, { replace: true });
+                    }}
+                    className={
+                      channel === c
+                        ? "rounded px-3 py-1 text-xs font-medium bg-primary text-white"
+                        : "rounded px-3 py-1 text-xs text-text-muted hover:text-text"
+                    }
+                  >
+                    {c === "whatsapp" ? "WhatsApp" : "Email"}
+                  </button>
+                ))}
+              </div>
+            </Field>
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <Field label="Broadcast name" id="bc-name">

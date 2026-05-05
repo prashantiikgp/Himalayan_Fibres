@@ -1,0 +1,44 @@
+# Email Broadcasts page (Phase 6.3) — channel-locked Compose +
+# History + Performance for the Email channel only.
+
+page:
+  title: "Email Broadcasts"
+  subtitle: ""
+  how_to_use:
+    summary: "Send a templated email to a contact segment, or schedule it."
+    sections:
+      - title: "Pick the audience"
+        body: |
+          Select a segment from the Audience dropdown. The sticky banner
+          at the top updates live as you change filters — it tells you
+          how many people will actually receive the email after segment
+          rules + email eligibility (must have a real email address)
+          filter apply.
+      - title: "Pick a template"
+        body: |
+          Type the email template slug (e.g. b2b_introduction,
+          order_confirmation). Templates live on the Email Templates
+          page; the Subject field is optional and overrides the
+          template's default subject when set.
+      - title: "Send Now vs Schedule"
+        body: |
+          Send Now queues the broadcast in the background and shows a
+          progress bar on this page. Schedule opens a datetime picker;
+          the scheduler checks every minute and fires due broadcasts
+          within ~60s of their target time. Cancel a scheduled
+          broadcast from the History tab while it's still pending.
+      - title: "History + Performance"
+        body: |
+          History shows every email broadcast. Click a row for
+          per-recipient delivery status, sent timestamps, and any
+          bounce or send-error messages.
+  landed_phase: 3
+  tabs:
+    - id: compose
+      label: "Compose"
+    - id: history
+      label: "History"
+    - id: performance
+      label: "Performance"
+  styles:
+    sticky_header_height: "60px"

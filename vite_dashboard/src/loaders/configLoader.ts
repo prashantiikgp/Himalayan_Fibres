@@ -23,6 +23,8 @@ import homePageYaml from "@/config/pages/home.yml";
 import contactsPageYaml from "@/config/pages/contacts.yml";
 import waInboxPageYaml from "@/config/pages/wa_inbox.yml";
 import broadcastsPageYaml from "@/config/pages/broadcasts.yml";
+import waBroadcastsPageYaml from "@/config/pages/wa_broadcasts.yml";
+import emailBroadcastsPageYaml from "@/config/pages/email_broadcasts.yml";
 import waTemplatesPageYaml from "@/config/pages/wa_templates.yml";
 import flowsPageYaml from "@/config/pages/flows.yml";
 
@@ -113,6 +115,8 @@ class ConfigLoader {
       contacts: contactsPageYaml,
       wa_inbox: waInboxPageYaml,
       broadcasts: broadcastsPageYaml,
+      wa_broadcasts: waBroadcastsPageYaml,
+      email_broadcasts: emailBroadcastsPageYaml,
       wa_templates: waTemplatesPageYaml,
       flows: flowsPageYaml,
     };

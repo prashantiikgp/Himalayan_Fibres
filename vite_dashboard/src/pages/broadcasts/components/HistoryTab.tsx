@@ -39,9 +39,16 @@ const STATUS_OPTIONS = [
   { value: "failed", label: "Failed" },
 ];
 
-export function HistoryTab() {
+export function HistoryTab({
+  lockedChannel,
+}: {
+  /** Phase 6.3: when set, hides the channel filter and locks the
+   * History list to one channel. */
+  lockedChannel?: BroadcastChannel;
+} = {}) {
   const [params, setParams] = useSearchParams();
-  const channel = (params.get("channel") as BroadcastChannel | "all" | null) ?? "all";
+  const urlChannel = (params.get("channel") as BroadcastChannel | "all" | null) ?? "all";
+  const channel: BroadcastChannel | "all" = lockedChannel ?? urlChannel;
   const statusFilter = params.get("status") ?? "all";
   const [search, setSearch] = useState(params.get("search") ?? "");
   const debouncedSearch = useDebouncedValue(search, 250);
@@ -115,7 +122,13 @@ export function HistoryTab() {
 
   return (
     <div className="flex flex-col gap-3 p-card">
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-[2fr_1fr_1fr]">
+      <div
+        className={
+          lockedChannel
+            ? "grid grid-cols-1 gap-2 sm:grid-cols-[3fr_1fr]"
+            : "grid grid-cols-1 gap-2 sm:grid-cols-[2fr_1fr_1fr]"
+        }
+      >
         <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-text-muted" />
           <Input
@@ -128,12 +141,14 @@ export function HistoryTab() {
             className="pl-8"
           />
         </div>
-        <Select
-          label="Channel"
-          value={channel}
-          options={CHANNEL_OPTIONS}
-          onChange={(v) => setUrl("channel", v)}
-        />
+        {!lockedChannel && (
+          <Select
+            label="Channel"
+            value={channel}
+            options={CHANNEL_OPTIONS}
+            onChange={(v) => setUrl("channel", v)}
+          />
+        )}
         <Select
           label="Status"
           value={statusFilter}

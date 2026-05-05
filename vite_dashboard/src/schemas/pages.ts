@@ -8,16 +8,22 @@
  */
 
 import { z } from "zod";
-import { CssLength, NonEmptyString, NonNegInt, PosInt } from "./_common";
+import { CssLength, HowToUse, NonEmptyString, NonNegInt, PosInt } from "./_common";
 
 /** Common page-level metadata that every page YAML carries. */
 const PageMeta = z
   .object({
     title: NonEmptyString,
-    /** A 1-2 sentence description shown in the page header. */
+    /** A 1-2 sentence description shown in the page header.
+     * Phase 6.2 superseded by `how_to_use.summary`; left optional for
+     * back-compat with pages that haven't migrated their YAML yet. */
     subtitle: z.string().default(""),
     /** Phase this page reaches feature-parity in. <MigrationStatusCard> reads this. */
     landed_phase: z.number().int().min(0).max(5),
+    /** Phase 6.2 — replaces title+subtitle with a collapsible accordion.
+     * Optional during the rollout; pages without it keep the legacy
+     * title-only header. */
+    how_to_use: HowToUse.optional(),
   })
   .strict();
 
@@ -168,12 +174,16 @@ export const FlowsPageConfig = z
 
 export type FlowsPageConfigT = z.infer<typeof FlowsPageConfig>;
 
-/** Map page ID → its config schema. Loader iterates this. */
+/** Map page ID → its config schema. Loader iterates this.
+ * Phase 6.3 added wa_broadcasts + email_broadcasts which reuse the
+ * BroadcastsPageConfig schema (same shape, different copy). */
 export const PAGE_SCHEMAS = {
   home: HomePageConfig,
   contacts: ContactsPageConfig,
   wa_inbox: WaInboxPageConfig,
   broadcasts: BroadcastsPageConfig,
+  wa_broadcasts: BroadcastsPageConfig,
+  email_broadcasts: BroadcastsPageConfig,
   wa_templates: WaTemplatesPageConfig,
   flows: FlowsPageConfig,
 } as const;
@@ -186,6 +196,8 @@ export type PageConfigByID = {
   contacts: ContactsPageConfigT;
   wa_inbox: WaInboxPageConfigT;
   broadcasts: BroadcastsPageConfigT;
+  wa_broadcasts: BroadcastsPageConfigT;
+  email_broadcasts: BroadcastsPageConfigT;
   wa_templates: WaTemplatesPageConfigT;
   flows: FlowsPageConfigT;
 };

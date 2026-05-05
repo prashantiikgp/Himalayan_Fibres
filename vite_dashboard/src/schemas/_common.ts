@@ -36,3 +36,26 @@ export const SemanticColor = z.enum([
 ]);
 
 export type SemanticColorT = z.infer<typeof SemanticColor>;
+
+/* ── HowToUse (Phase 6.2) ─────────────────────────────────────────────── */
+
+/** One section inside a HowToUse accordion. */
+export const HowToUseSection = z
+  .object({
+    title: NonEmptyString,
+    body: NonEmptyString,
+  })
+  .strict();
+
+export type HowToUseSectionT = z.infer<typeof HowToUseSection>;
+
+/** Replaces the per-page `<h1>title</h1><p>subtitle</p>` header. The
+ * accordion is collapsed by default; the summary is visible above it. */
+export const HowToUse = z
+  .object({
+    summary: NonEmptyString,
+    sections: z.array(HowToUseSection).default([]),
+  })
+  .strict();
+
+export type HowToUseT = z.infer<typeof HowToUse>;

@@ -1,15 +1,22 @@
 /**
- * <BroadcastsPage> — entry component for /broadcasts.
+ * <BroadcastsPage> — Compose / History / Performance for one or both channels.
  *
- * As of Phase 3.1b.3 all three tabs are functional:
- *   - Compose: WhatsApp send (sync) + Email queue (async via JobStore)
- *   - History: unified WA + Email list (B6 fix)
- *   - Performance: per-broadcast KPIs + paginated recipient table (B16 fix)
+ * Phase 6.3 made channel-locking explicit. Two wrapper routes consume
+ * this with `channel` set:
+ *   - /wa-broadcasts → channel="whatsapp"
+ *   - /email-broadcasts → channel="email"
+ *
+ * The legacy /broadcasts route mounts this without `channel`, keeping
+ * the URL-driven channel toggle in Compose for any saved bookmarks.
+ * It redirects to /wa-broadcasts in routes/index.tsx as the default
+ * landing.
  */
 
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { configLoader } from "@/loaders/configLoader";
+import { HowToUse } from "@/components/layout/HowToUse";
+import type { BroadcastChannel } from "@/api/broadcasts";
 import { ComposeTab } from "./components/ComposeTab";
 import { HistoryTab } from "./components/HistoryTab";
 import { PerformanceTab } from "./components/PerformanceTab";
@@ -17,8 +24,16 @@ import { PerformanceTab } from "./components/PerformanceTab";
 const TAB_VALUES = ["compose", "history", "performance"] as const;
 type TabValue = (typeof TAB_VALUES)[number];
 
-export function BroadcastsPage() {
-  const cfg = configLoader.getPage("broadcasts");
+export function BroadcastsPage({
+  channel,
+  pageId = "broadcasts",
+}: {
+  channel?: BroadcastChannel;
+  /** Which page YAML to read (broadcasts / wa_broadcasts / email_broadcasts).
+   * Defaults to the unified config for back-compat. */
+  pageId?: "broadcasts" | "wa_broadcasts" | "email_broadcasts";
+} = {}) {
+  const cfg = configLoader.getPage(pageId);
   const [params, setParams] = useSearchParams();
   const raw = params.get("tab");
   const active: TabValue =
@@ -32,12 +47,7 @@ export function BroadcastsPage() {
 
   return (
     <div className="flex flex-col gap-3 p-2">
-      <header className="px-card pt-card">
-        <h1 className="text-lg font-semibold text-text">{cfg.page.title}</h1>
-        {cfg.page.subtitle && (
-          <p className="text-xs text-text-muted">{cfg.page.subtitle}</p>
-        )}
-      </header>
+      <HowToUse pageTitle={cfg.page.title} howTo={cfg.page.how_to_use} />
 
       <Tabs value={active} onValueChange={setTab}>
         <TabsList>
@@ -47,11 +57,11 @@ export function BroadcastsPage() {
         </TabsList>
 
         <TabsContent value="compose">
-          <ComposeTab />
+          <ComposeTab lockedChannel={channel} />
         </TabsContent>
 
         <TabsContent value="history">
-          <HistoryTab />
+          <HistoryTab lockedChannel={channel} />
         </TabsContent>
 
         <TabsContent value="performance">

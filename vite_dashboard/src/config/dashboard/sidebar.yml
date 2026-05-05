@@ -32,7 +32,7 @@ sidebar:
         - id: broadcasts_wa
           label: "Broadcasts"
           icon: "Send"
-          path: "/broadcasts?tab=compose&channel=whatsapp"
+          path: "/wa-broadcasts"
           landed_phase: 3
           channel: "whatsapp"
         - id: wa_templates
@@ -51,7 +51,7 @@ sidebar:
         - id: broadcasts_email
           label: "Broadcasts"
           icon: "Mail"
-          path: "/broadcasts?tab=compose&channel=email"
+          path: "/email-broadcasts"
           landed_phase: 3
           channel: "email"
 
