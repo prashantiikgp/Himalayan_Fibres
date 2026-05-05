@@ -16,6 +16,7 @@ import { WAInboxPage } from "@/pages/wa-inbox/WAInboxPage";
 import { BroadcastsPage } from "@/pages/broadcasts/BroadcastsPage";
 import { WATemplatesPage } from "@/pages/wa-templates/WATemplatesPage";
 import { EmailTemplatesPage } from "@/pages/email-templates/EmailTemplatesPage";
+import { EmailSendPage } from "@/pages/email-send/EmailSendPage";
 import { FlowsPage } from "@/pages/flows/FlowsPage";
 import { navigationEngine } from "@/engines/navigationEngine";
 
@@ -49,6 +50,7 @@ export function buildRoutes(): RouteObject[] {
         },
         { path: "wa-templates", element: <WATemplatesPage /> },
         { path: "email-templates", element: <EmailTemplatesPage /> },
+        { path: "email-send", element: <EmailSendPage /> },
         { path: "flows", element: <FlowsPage /> },
       ],
     },

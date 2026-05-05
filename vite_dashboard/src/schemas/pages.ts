@@ -184,10 +184,21 @@ export const EmailTemplatesPageConfig = z
 
 export type EmailTemplatesPageConfigT = z.infer<typeof EmailTemplatesPageConfig>;
 
+/* ── Send Email (Phase 7.1) ────────────────────────────────────────────── */
+
+export const EmailSendPageConfig = z
+  .object({
+    page: PageMeta.strict(),
+  })
+  .strict();
+
+export type EmailSendPageConfigT = z.infer<typeof EmailSendPageConfig>;
+
 /** Map page ID → its config schema. Loader iterates this.
  * Phase 6.3 added wa_broadcasts + email_broadcasts which reuse the
  * BroadcastsPageConfig schema (same shape, different copy).
- * Phase 6.4 added email_templates. */
+ * Phase 6.4 added email_templates.
+ * Phase 7.1 added email_send. */
 export const PAGE_SCHEMAS = {
   home: HomePageConfig,
   contacts: ContactsPageConfig,
@@ -197,6 +208,7 @@ export const PAGE_SCHEMAS = {
   email_broadcasts: BroadcastsPageConfig,
   wa_templates: WaTemplatesPageConfig,
   email_templates: EmailTemplatesPageConfig,
+  email_send: EmailSendPageConfig,
   flows: FlowsPageConfig,
 } as const;
 
@@ -212,5 +224,6 @@ export type PageConfigByID = {
   email_broadcasts: BroadcastsPageConfigT;
   wa_templates: WaTemplatesPageConfigT;
   email_templates: EmailTemplatesPageConfigT;
+  email_send: EmailSendPageConfigT;
   flows: FlowsPageConfigT;
 };

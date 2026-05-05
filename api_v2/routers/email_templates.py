@@ -14,6 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.exc import IntegrityError
 
 from api_v2.deps import require_auth
+from api_v2.schemas.email_send import EmailVariableSpec
 from api_v2.schemas.email_templates import (
     EmailTemplateOut,
     EmailTemplatesResponse,
@@ -22,9 +23,47 @@ from api_v2.schemas.email_templates import (
 
 from services.database import get_db  # type: ignore[import-not-found]
 from services.models import EmailTemplate  # type: ignore[import-not-found]
+from services.template_seed import get_template_meta  # type: ignore[import-not-found]
 
 
 router = APIRouter(tags=["email_templates"], dependencies=[Depends(require_auth)])
+
+
+def _resolve_variable_spec(t: EmailTemplate) -> list[EmailVariableSpec]:
+    """Lift per-variable metadata from the template's `.meta.yml`.
+
+    For DB-only templates (no YAML companion file) we synthesize a
+    minimal text-input spec from `required_variables` so the Studio
+    + Compose UI still renders typed inputs.
+    """
+    meta = get_template_meta(t.slug or "")
+    if meta and meta.variables:
+        return [
+            EmailVariableSpec(
+                name=v.name,
+                label=v.label or "",
+                type=v.type or "text",  # type: ignore[arg-type]
+                placeholder=v.placeholder or "",
+                example=v.example or "",
+                required=bool(v.required),
+            )
+            for v in meta.variables
+        ]
+
+    required = set(meta.required_variables) if meta else set()
+    fallback: list[EmailVariableSpec] = []
+    for name in list(t.required_variables or []):
+        fallback.append(
+            EmailVariableSpec(
+                name=name,
+                label=name.replace("_", " ").title(),
+                type="text",
+                placeholder="",
+                example="",
+                required=name in required or True,
+            )
+        )
+    return fallback
 
 
 def _to_out(t: EmailTemplate) -> EmailTemplateOut:
@@ -39,6 +78,7 @@ def _to_out(t: EmailTemplate) -> EmailTemplateOut:
         category=t.category or "",
         is_active=bool(t.is_active),
         created_at=t.created_at,
+        variable_spec=_resolve_variable_spec(t),
     )
 
 

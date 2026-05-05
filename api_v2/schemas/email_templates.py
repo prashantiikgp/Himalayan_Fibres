@@ -6,6 +6,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
+from api_v2.schemas.email_send import EmailVariableSpec
+
 
 class EmailTemplateOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -20,6 +22,10 @@ class EmailTemplateOut(BaseModel):
     category: str
     is_active: bool
     created_at: datetime
+    variable_spec: list[EmailVariableSpec] | None = None
+    """Phase 7.1: rich per-variable spec from `.meta.yml`. Falls back to
+    a synthesized list (text inputs) for DB-only templates without a
+    YAML companion. None means we couldn't determine a spec."""
 
 
 class EmailTemplatesResponse(BaseModel):

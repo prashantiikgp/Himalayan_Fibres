@@ -1,0 +1,43 @@
+# Send Email page (Phase 7.1) — fire one templated email at one contact,
+# now, from a focused two-pane surface.
+
+page:
+  title: "Send Email"
+  subtitle: ""
+  how_to_use:
+    summary: "Send one templated email to one contact, with a live preview before you click Send."
+    sections:
+      - title: "Pick the recipient"
+        body: |
+          Search by name, email, or company on the left. Only contacts
+          with a non-empty email address are shown. Click a row to pin
+          them as the recipient — the preview rebuilds with their first
+          name, company, and other auto-resolved variables filled in.
+      - title: "Pick a template"
+        body: |
+          The dropdown lists active email templates from the Email
+          Templates page. Switching templates resets the variable form
+          to that template's defaults so you don't accidentally carry
+          over old values.
+      - title: "Edit the variables"
+        body: |
+          Variables that come from the contact (first name, email,
+          company) are pre-filled and editable. Other variables (order
+          number, tracking ID, etc.) are blank until you type them in.
+          Required ones are marked with a red asterisk; the Send button
+          stays disabled until all of them have a value.
+      - title: "Subject override"
+        body: |
+          The Subject field is optional — leave it empty to use the
+          template's default. Type to override per-send.
+      - title: "Preview is live"
+        body: |
+          The right panel re-renders ~200 ms after each keystroke. Use
+          the Desktop / Mobile toggle to check small-screen layout.
+      - title: "Idempotency"
+        body: |
+          Clicking Send twice for the same (template, contact) within
+          one UTC day is a no-op — the second click returns the existing
+          send id without re-sending. To force a resend, change a
+          variable or wait until tomorrow.
+  landed_phase: 7

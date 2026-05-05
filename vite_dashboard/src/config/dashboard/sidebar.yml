@@ -48,6 +48,12 @@ sidebar:
     - id: email
       label: "Email"
       items:
+        - id: email_send
+          label: "Send Email"
+          icon: "MailPlus"
+          path: "/email-send"
+          landed_phase: 7
+          channel: "email"
         - id: broadcasts_email
           label: "Broadcasts"
           icon: "Mail"

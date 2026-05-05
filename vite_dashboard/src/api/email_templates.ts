@@ -5,6 +5,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "./client";
 
+export type EmailVariableType = "text" | "textarea" | "url" | "date";
+
+export type EmailVariableSpec = {
+  name: string;
+  label: string;
+  type: EmailVariableType;
+  placeholder: string;
+  example: string;
+  required: boolean;
+};
+
 export type EmailTemplateOut = {
   id: number;
   name: string;
@@ -16,6 +27,10 @@ export type EmailTemplateOut = {
   category: string;
   is_active: boolean;
   created_at: string;
+  /** Phase 7.1: rich per-variable spec from the template's `.meta.yml`,
+   * with a synthesized fallback for DB-only templates. May be null when
+   * the backend can't determine a spec. */
+  variable_spec?: EmailVariableSpec[] | null;
 };
 
 export type EmailTemplatesResponse = {

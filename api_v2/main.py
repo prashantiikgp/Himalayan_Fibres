@@ -45,6 +45,7 @@ from api_v2.routers import (  # noqa: E402
     broadcasts,
     contacts,
     dashboard,
+    email_send,
     email_templates,
     flows,
     health,
@@ -183,6 +184,7 @@ app.include_router(jobs.router, prefix="/api/v2", tags=["jobs"])
 app.include_router(
     email_templates.router, prefix="/api/v2", tags=["email_templates"]
 )
+app.include_router(email_send.router, prefix="/api/v2", tags=["email_send"])
 
 # Static SPA mount — built dist/ from vite_dashboard.
 # In dev (where dist/ doesn't exist), this is skipped silently.

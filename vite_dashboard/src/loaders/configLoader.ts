@@ -27,6 +27,7 @@ import waBroadcastsPageYaml from "@/config/pages/wa_broadcasts.yml";
 import emailBroadcastsPageYaml from "@/config/pages/email_broadcasts.yml";
 import waTemplatesPageYaml from "@/config/pages/wa_templates.yml";
 import emailTemplatesPageYaml from "@/config/pages/email_templates.yml";
+import emailSendPageYaml from "@/config/pages/email_send.yml";
 import flowsPageYaml from "@/config/pages/flows.yml";
 
 import {
@@ -120,6 +121,7 @@ class ConfigLoader {
       email_broadcasts: emailBroadcastsPageYaml,
       wa_templates: waTemplatesPageYaml,
       email_templates: emailTemplatesPageYaml,
+      email_send: emailSendPageYaml,
       flows: flowsPageYaml,
     };
 
