@@ -40,7 +40,7 @@ from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from fastapi.responses import FileResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
 
-from api_v2.routers import auth, dashboard, health  # noqa: E402
+from api_v2.routers import auth, contacts, dashboard, health  # noqa: E402
 
 log = logging.getLogger(__name__)
 
@@ -85,6 +85,7 @@ if os.getenv("APP_ENV", "development") != "production":
 app.include_router(health.router, prefix="/api/v2")
 app.include_router(auth.router, prefix="/api/v2/auth", tags=["auth"])
 app.include_router(dashboard.router, prefix="/api/v2", tags=["dashboard"])
+app.include_router(contacts.router, prefix="/api/v2", tags=["contacts"])
 
 # Static SPA mount — built dist/ from vite_dashboard.
 # In dev (where dist/ doesn't exist), this is skipped silently.

@@ -12,6 +12,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { LoginPage } from "@/pages/login/LoginPage";
 import { HomePage } from "@/pages/home/HomePage";
+import { ContactsPage } from "@/pages/contacts/ContactsPage";
 import { MigrationPage } from "@/pages/migration/MigrationPage";
 import { navigationEngine } from "@/engines/navigationEngine";
 import type { PageId } from "@/schemas/pages";
@@ -33,7 +34,7 @@ export function buildRoutes(): RouteObject[] {
         { path: "home", element: <HomePage /> },
         // Phases 1-5: replace <MigrationPage /> with the real page component
         // when it ships.
-        { path: "contacts", element: <MigrationPage pageId={"contacts" as PageId} /> },
+        { path: "contacts", element: <ContactsPage /> },
         { path: "wa-inbox", element: <MigrationPage pageId={"wa_inbox" as PageId} /> },
         { path: "broadcasts", element: <MigrationPage pageId={"broadcasts" as PageId} /> },
         { path: "wa-templates", element: <MigrationPage pageId={"wa_templates" as PageId} /> },
