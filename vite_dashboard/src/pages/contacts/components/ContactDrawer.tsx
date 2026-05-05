@@ -195,10 +195,10 @@ function LifecycleQuickActions({
   const [error, setError] = useState<string | null>(null);
 
   const ACTIONS: { value: LifecycleValue; label: string; icon: string }[] = [
-    { value: "contacted", label: t.replied, icon: "✉️" },
-    { value: "interested", label: t.interested, icon: "⭐" },
-    { value: "customer", label: t.converted, icon: "✅" },
-    { value: "churned", label: t.notInterested, icon: "❌" },
+    { value: "contacted", label: t.replied, icon: t.icons.replied },
+    { value: "interested", label: t.interested, icon: t.icons.interested },
+    { value: "customer", label: t.converted, icon: t.icons.converted },
+    { value: "churned", label: t.notInterested, icon: t.icons.notInterested },
   ];
 
   async function handleClick(value: LifecycleValue) {

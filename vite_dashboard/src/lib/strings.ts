@@ -140,6 +140,12 @@ export const STRINGS = {
         notInterested: "Not interested",
         savingPrefix: "Saving ",
         failedPrefix: "Failed to update lifecycle: ",
+        icons: {
+          replied: "✉️",
+          interested: "⭐",
+          converted: "✅",
+          notInterested: "❌",
+        },
       },
     },
   },

@@ -48,7 +48,7 @@ export type ContactsQuery = {
   page_size?: number;
 };
 
-function toQueryString(q: ContactsQuery): string {
+export function toQueryString(q: ContactsQuery): string {
   const sp = new URLSearchParams();
   if (q.segment && q.segment !== "all") sp.set("segment", q.segment);
   if (q.lifecycles && q.lifecycles.length > 0) {

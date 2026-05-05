@@ -60,11 +60,13 @@ function NativeSelect({
   value,
   options,
   onChange,
+  disabled = false,
 }: {
   label: string;
   value: string;
   options: { value: string; label: string }[];
   onChange: (v: string) => void;
+  disabled?: boolean;
 }) {
   const id = `filter-${label.toLowerCase().replace(/\W+/g, "-")}`;
   return (
@@ -75,8 +77,9 @@ function NativeSelect({
       <select
         id={id}
         value={value}
+        disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
-        className="h-9 rounded-md border border-border bg-card px-2 text-sm text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="h-9 rounded-md border border-border bg-card px-2 text-sm text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -152,6 +155,7 @@ export function ContactsFilterBar({
           value={value.needsFollowup ? "all" : value.lifecycle}
           options={LIFECYCLES}
           onChange={(v) => onChange({ lifecycle: v })}
+          disabled={value.needsFollowup}
         />
         <NativeSelect
           label="Country"
