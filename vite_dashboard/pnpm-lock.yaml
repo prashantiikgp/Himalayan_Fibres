@@ -78,6 +78,9 @@ importers:
       '@axe-core/react':
         specifier: ^4.10.1
         version: 4.11.3
+      '@eslint/js':
+        specifier: ^9.39.4
+        version: 9.39.4
       '@modyfi/vite-plugin-yaml':
         specifier: ^1.1.0
         version: 1.1.1(rollup@4.60.3)(vite@5.4.21(@types/node@22.19.17))
@@ -132,6 +135,9 @@ importers:
       eslint-plugin-react-refresh:
         specifier: ^0.4.14
         version: 0.4.26(eslint@9.39.4(jiti@1.21.7))
+      globals:
+        specifier: ^17.6.0
+        version: 17.6.0
       husky:
         specifier: ^9.1.6
         version: 9.1.7
@@ -2053,6 +2059,10 @@ packages:
 
   globals@14.0.0:
     resolution: {integrity: sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==}
+    engines: {node: '>=18'}
+
+  globals@17.6.0:
+    resolution: {integrity: sha512-sepffkT8stwnIYbsMBpoCHJuJM5l98FUF2AnE07hfvE0m/qp3R586hw4jF4uadbhvg1ooIdzuu7CsfD2jzCaNA==}
     engines: {node: '>=18'}
 
   globalthis@1.0.4:
@@ -5317,6 +5327,8 @@ snapshots:
       is-glob: 4.0.3
 
   globals@14.0.0: {}
+
+  globals@17.6.0: {}
 
   globalthis@1.0.4:
     dependencies:

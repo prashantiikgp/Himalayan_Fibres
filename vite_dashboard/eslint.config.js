@@ -12,7 +12,10 @@ export default [
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
       ecmaVersion: 2022,
-      globals: globals.browser,
+      // React/DOM TS types reference React and DOM globals; node config
+      // files (vite.config, playwright.config, etc.) reference process.
+      // Including all three keeps no-undef from flagging legitimate uses.
+      globals: { ...globals.browser, ...globals.node, React: "readonly" },
       parser: tsparser,
       parserOptions: {
         ecmaFeatures: { jsx: true },
@@ -29,7 +32,12 @@ export default [
       ...tseslint.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
       ...jsxA11y.configs.recommended.rules,
-      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      // TS catches undefined identifiers more accurately than eslint's
+      // no-undef (which doesn't understand DOM lib types like RequestInit).
+      "no-undef": "off",
+      // Fast-refresh hint: dev-only optimization, not a correctness rule.
+      // Shadcn primitives legitimately co-export Button + buttonVariants.
+      "react-refresh/only-export-components": "off",
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/consistent-type-imports": "error",
       "no-console": ["warn", { allow: ["warn", "error"] }],

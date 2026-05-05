@@ -1,0 +1,106 @@
+name: v2-ci
+
+# CI for the v2 stack (vite_dashboard + api_v2). Runs on every push to main
+# and every PR. Path filters keep v1-only edits (hf_dashboard/, scripts/,
+# config/) from triggering — those are deployed via deploy_hf.py and don't
+# touch the v2 contract.
+#
+# Jobs:
+#   - backend: pytest against api_v2/tests (uses SQLite, no real Postgres).
+#   - frontend: typecheck + lint + vitest + build. Boots api_v2 in the
+#     background to regenerate src/api/schema.d.ts (which is git-ignored)
+#     before typecheck so generated types stay accurate.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    paths:
+      - "api_v2/**"
+      - "vite_dashboard/**"
+      - "hf_dashboard/services/**"
+      - "hf_dashboard/requirements.txt"
+      - ".github/workflows/v2-ci.yml"
+
+jobs:
+  backend:
+    name: api_v2 pytest
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install api_v2 deps
+        run: pip install -r api_v2/requirements.txt
+
+      - name: Run pytest
+        env:
+          APP_PASSWORD: test_secret
+        run: python -m pytest api_v2/tests -q
+
+  frontend:
+    name: vite_dashboard typecheck + lint + test + build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install api_v2 deps (needed to boot api_v2 for openapi)
+        run: pip install -r api_v2/requirements.txt
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: vite_dashboard/pnpm-lock.yaml
+
+      - name: pnpm install
+        working-directory: vite_dashboard
+        run: pnpm install --frozen-lockfile
+
+      - name: Boot api_v2 (background) for openapi.json
+        env:
+          APP_PASSWORD: test_secret
+        run: |
+          python -m uvicorn api_v2.main:app --port 7860 --host 127.0.0.1 &
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:7860/openapi.json -o /dev/null && exit 0
+            sleep 1
+          done
+          echo "api_v2 failed to start" >&2
+          exit 1
+
+      - name: Generate API types
+        working-directory: vite_dashboard
+        run: pnpm gen:types
+
+      - name: Typecheck
+        working-directory: vite_dashboard
+        run: pnpm typecheck
+
+      - name: Lint
+        working-directory: vite_dashboard
+        run: pnpm lint
+
+      - name: Test
+        working-directory: vite_dashboard
+        run: pnpm test
+
+      - name: Build
+        working-directory: vite_dashboard
+        run: pnpm build
