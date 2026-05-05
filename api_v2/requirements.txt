@@ -1,0 +1,22 @@
+# api_v2 Python deps. Includes everything api_v2 needs PLUS what hf_dashboard
+# requires (since api_v2 imports services/* from hf_dashboard).
+#
+# Pin versions to match hf_dashboard/requirements.txt where overlap exists.
+
+# Web framework
+fastapi==0.115.4
+uvicorn[standard]==0.32.0
+python-multipart==0.0.17
+
+# Auth + env
+python-dotenv==1.0.1
+
+# Validation
+pydantic==2.9.2
+pydantic-settings==2.6.1
+
+# Observability
+sentry-sdk[fastapi]==2.18.0
+
+# Reuse hf_dashboard requirements via -r (HF Space build will install both).
+-r ../hf_dashboard/requirements.txt
