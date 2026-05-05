@@ -8,6 +8,7 @@
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { configLoader } from "@/loaders/configLoader";
+import { ComposeTab } from "./components/ComposeTab";
 import { HistoryTab } from "./components/HistoryTab";
 
 const TAB_VALUES = ["compose", "history", "performance"] as const;
@@ -18,7 +19,7 @@ export function BroadcastsPage() {
   const [params, setParams] = useSearchParams();
   const raw = params.get("tab");
   const active: TabValue =
-    raw && (TAB_VALUES as readonly string[]).includes(raw) ? (raw as TabValue) : "history";
+    raw && (TAB_VALUES as readonly string[]).includes(raw) ? (raw as TabValue) : "compose";
 
   function setTab(v: string) {
     const next = new URLSearchParams(params);
@@ -43,10 +44,7 @@ export function BroadcastsPage() {
         </TabsList>
 
         <TabsContent value="compose">
-          <ComingSoon
-            phase="3.1"
-            text="Compose tab — channel toggle, recipient picker, audience funnel (B3 fix), live cost estimate, send confirm dialog (B10 fix)."
-          />
+          <ComposeTab />
         </TabsContent>
 
         <TabsContent value="history">

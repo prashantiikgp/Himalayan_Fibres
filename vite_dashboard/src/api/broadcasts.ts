@@ -5,7 +5,7 @@
  * cost-estimate, send, schedule) land in 3.1+.
  */
 
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { apiFetch } from "./client";
 
 export type BroadcastChannel = "whatsapp" | "email";
@@ -41,6 +41,110 @@ export type BroadcastsQuery = {
   page?: number;
   page_size?: number;
 };
+
+/* ── Compose endpoints (Phase 3.1) ────────────────────────────────────── */
+
+export type BroadcastFiltersIn = {
+  segment_id?: string | null;
+  countries?: string[];
+  tags?: string[];
+  lifecycles?: string[];
+  consents?: string[];
+  max_recipients?: number;
+};
+
+export type AudienceBreakdownItem = { label: string; count: number };
+
+export type AudiencePreviewResponse = {
+  total_in_segment: number;
+  eligible_on_channel: number;
+  final_recipients: number;
+  excluded_by_channel: number;
+  excluded_by_filters: number;
+  consent: AudienceBreakdownItem[];
+  geography: AudienceBreakdownItem[];
+  lifecycle: AudienceBreakdownItem[];
+  customer_type: AudienceBreakdownItem[];
+};
+
+export type CostBreakdownItem = {
+  country: string;
+  recipients: number;
+  rate: number;
+  currency: string;
+  symbol: string;
+  subtotal: number;
+  display: string;
+};
+
+export type CostEstimateResponse = {
+  recipients: number;
+  per_message_display: string;
+  total_display: string;
+  currency: string;
+  category: string | null;
+  breakdown: CostBreakdownItem[];
+  est_delivery_seconds: number;
+};
+
+export type SendBroadcastResponse = {
+  broadcast_id: number;
+  name: string;
+  total_recipients: number;
+  total_sent: number;
+  total_failed: number;
+  status: string;
+};
+
+export function useAudiencePreview(
+  channel: BroadcastChannel,
+  filters: BroadcastFiltersIn,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: ["broadcasts", "audience-preview", { channel, filters }],
+    enabled,
+    queryFn: () =>
+      apiFetch<AudiencePreviewResponse>("/api/v2/broadcasts/audience-preview", {
+        method: "POST",
+        body: JSON.stringify({ channel, filters }),
+      }),
+    staleTime: 5_000,
+  });
+}
+
+export function useCostEstimate(
+  channel: BroadcastChannel,
+  category: string,
+  filters: BroadcastFiltersIn,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: ["broadcasts", "cost-estimate", { channel, category, filters }],
+    enabled,
+    queryFn: () =>
+      apiFetch<CostEstimateResponse>("/api/v2/broadcasts/cost-estimate", {
+        method: "POST",
+        body: JSON.stringify({ channel, category, filters }),
+      }),
+    staleTime: 5_000,
+  });
+}
+
+export function useSendWaBroadcast() {
+  return useMutation({
+    mutationFn: (body: {
+      name: string;
+      template_id: string;
+      filters: BroadcastFiltersIn;
+      subject?: string;
+    }) =>
+      apiFetch<SendBroadcastResponse>("/api/v2/broadcasts/wa", {
+        method: "POST",
+        body: JSON.stringify({ ...body, channel: "whatsapp" }),
+      }),
+  });
+}
 
 export function useBroadcastsList(q: BroadcastsQuery = {}) {
   const params = new URLSearchParams();

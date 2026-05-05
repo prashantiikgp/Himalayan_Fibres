@@ -163,3 +163,89 @@ def test_list_broadcasts_invalid_channel_400(
 
 def test_list_broadcasts_requires_auth(client: TestClient) -> None:
     assert client.get("/api/v2/broadcasts").status_code == 401
+
+
+# ─── Phase 3.1 Compose endpoints ─────────────────────────────────────────
+
+
+def test_audience_preview_returns_funnel(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """Audience preview returns the 5-counter funnel + breakdown buckets
+    (B3 fix data source). 'all_opted_in' is v1's universal segment."""
+    res = client.post(
+        "/api/v2/broadcasts/audience-preview",
+        json={
+            "channel": "email",
+            "filters": {"segment_id": "all_opted_in"},
+        },
+        headers=auth_headers,
+    )
+    assert res.status_code == 200, res.text
+    body = res.json()
+    for key in (
+        "total_in_segment",
+        "eligible_on_channel",
+        "final_recipients",
+        "excluded_by_channel",
+        "excluded_by_filters",
+    ):
+        assert key in body
+    # total >= eligible >= final by construction
+    assert body["total_in_segment"] >= body["eligible_on_channel"]
+    assert body["eligible_on_channel"] >= body["final_recipients"]
+    # Breakdown shape
+    for bucket in ("consent", "geography", "lifecycle", "customer_type"):
+        assert isinstance(body[bucket], list)
+
+
+def test_cost_estimate_returns_total(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """Cost estimate returns recipients + per-message + total displays."""
+    res = client.post(
+        "/api/v2/broadcasts/cost-estimate",
+        json={
+            "channel": "whatsapp",
+            "category": "marketing",
+            "filters": {"segment_id": "all_opted_in"},
+        },
+        headers=auth_headers,
+    )
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert "recipients" in body
+    assert "per_message_display" in body
+    assert "total_display" in body
+    assert isinstance(body["breakdown"], list)
+
+
+def test_send_wa_validates_required_fields(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """Empty name → 400 before any DB write or Meta call."""
+    res = client.post(
+        "/api/v2/broadcasts/wa",
+        json={
+            "name": "  ",
+            "template_id": "welcome_message",
+            "filters": {"segment_id": "all_opted_in"},
+        },
+        headers=auth_headers,
+    )
+    assert res.status_code == 400
+
+
+def test_compose_endpoints_require_auth(client: TestClient) -> None:
+    assert (
+        client.post("/api/v2/broadcasts/audience-preview", json={"channel": "email"}).status_code
+        == 401
+    )
+    assert (
+        client.post("/api/v2/broadcasts/cost-estimate", json={"channel": "email"}).status_code
+        == 401
+    )
+    assert (
+        client.post("/api/v2/broadcasts/wa", json={"name": "x", "template_id": "y"}).status_code
+        == 401
+    )

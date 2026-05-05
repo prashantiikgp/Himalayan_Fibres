@@ -15,13 +15,30 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from api_v2.deps import require_auth
-from api_v2.schemas.broadcasts import BroadcastListItem, BroadcastListResponse
+from api_v2.schemas.broadcasts import (
+    AudienceBreakdownItem,
+    AudiencePreviewRequest,
+    AudiencePreviewResponse,
+    BroadcastListItem,
+    BroadcastListResponse,
+    CostBreakdownItem,
+    CostEstimateRequest,
+    CostEstimateResponse,
+    SendBroadcastRequest,
+    SendBroadcastResponse,
+)
 
 from services.database import get_db  # type: ignore[import-not-found]
 from services.models import Broadcast, Campaign  # type: ignore[import-not-found]
+from services.broadcast_engine import (  # type: ignore[import-not-found]
+    BroadcastFilters,
+    estimate_cost,
+    get_audience_breakdown,
+    send_broadcast,
+)
 
 
 router = APIRouter(tags=["broadcasts"], dependencies=[Depends(require_auth)])
@@ -122,6 +139,119 @@ def list_broadcasts(
             page=effective_page,
             page_size=page_size,
             total_pages=total_pages,
+        )
+    finally:
+        db.close()
+
+
+# ─── Phase 3.1 Compose endpoints ─────────────────────────────────────────
+
+
+def _to_filters(req_filters) -> BroadcastFilters:  # type: ignore[no-untyped-def]
+    """Convert the API's BroadcastFiltersIn to v1's dataclass."""
+    return BroadcastFilters(
+        segment_id=req_filters.segment_id,
+        countries=list(req_filters.countries or []),
+        tags=list(req_filters.tags or []),
+        lifecycles=list(req_filters.lifecycles or []),
+        consents=list(req_filters.consents or []),
+        max_recipients=int(req_filters.max_recipients or 0),
+    )
+
+
+def _bucket_to_items(d: dict[str, int]) -> list[AudienceBreakdownItem]:
+    return [AudienceBreakdownItem(label=k or "unknown", count=int(v)) for k, v in d.items()]
+
+
+@router.post("/broadcasts/audience-preview", response_model=AudiencePreviewResponse)
+def audience_preview(req: AudiencePreviewRequest) -> AudiencePreviewResponse:
+    """Return funnel counts + breakdowns for the current filter selection.
+
+    Drives the B3-fix sticky header on the Compose tab. Reuses v1's
+    `get_audience_breakdown` so segment-rule eval stays in one place.
+    """
+    db = get_db()
+    try:
+        raw = get_audience_breakdown(db, req.channel, _to_filters(req.filters))
+        return AudiencePreviewResponse(
+            total_in_segment=int(raw["total_in_segment"]),
+            eligible_on_channel=int(raw["eligible_on_channel"]),
+            final_recipients=int(raw["final_recipients"]),
+            excluded_by_channel=int(raw["excluded_by_channel"]),
+            excluded_by_filters=int(raw["excluded_by_filters"]),
+            consent=_bucket_to_items(raw.get("consent", {})),
+            geography=_bucket_to_items(raw.get("geography", {})),
+            lifecycle=_bucket_to_items(raw.get("lifecycle", {})),
+            customer_type=_bucket_to_items(raw.get("customer_type", {})),
+        )
+    finally:
+        db.close()
+
+
+@router.post("/broadcasts/cost-estimate", response_model=CostEstimateResponse)
+def cost_estimate(req: CostEstimateRequest) -> CostEstimateResponse:
+    """Cost preview cards. Reuses v1's `estimate_cost` for parity."""
+    db = get_db()
+    try:
+        raw = estimate_cost(db, req.channel, req.category, _to_filters(req.filters))
+        breakdown = [
+            CostBreakdownItem(**b) for b in raw.get("breakdown", [])
+        ]
+        return CostEstimateResponse(
+            recipients=int(raw["recipients"]),
+            per_message_display=str(raw["per_message_display"]),
+            total_display=str(raw["total_display"]),
+            currency=str(raw.get("currency", "INR")),
+            category=raw.get("category"),
+            breakdown=breakdown,
+            est_delivery_seconds=int(raw.get("est_delivery_seconds", 0)),
+        )
+    finally:
+        db.close()
+
+
+@router.post(
+    "/broadcasts/wa",
+    response_model=SendBroadcastResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def send_wa_broadcast(req: SendBroadcastRequest) -> SendBroadcastResponse:
+    """Send a WhatsApp broadcast synchronously.
+
+    For Phase 3.1 we keep this synchronous — small batches finish in
+    seconds. Email broadcasts will queue via BackgroundTasks (Phase
+    3.1b) because their 3s/recipient rate limit means a 100-row
+    broadcast would block this handler for 5+ min.
+
+    Returns the persisted Broadcast row plus aggregated send counts.
+    The B10 fix lives client-side: SendConfirmDialog gates this call
+    behind a recipient + cost summary that the user must confirm.
+    """
+    if not req.name.strip():
+        raise HTTPException(status_code=400, detail="name is required")
+    if not req.template_id.strip():
+        raise HTTPException(status_code=400, detail="template_id is required")
+
+    db = get_db()
+    try:
+        result = send_broadcast(
+            db=db,
+            name=req.name.strip(),
+            channel="whatsapp",
+            template_id=req.template_id.strip(),
+            filters=_to_filters(req.filters),
+            subject=req.subject or "",
+        )
+        # v1's BroadcastResult has sent/failed/total + a list of errors;
+        # post-send we re-read the persisted row for the canonical status.
+        b = db.query(Broadcast).filter(Broadcast.id == result.broadcast_id).first()
+        return SendBroadcastResponse(
+            broadcast_id=int(result.broadcast_id),
+            name=req.name.strip(),
+            total_recipients=int(result.total),
+            total_sent=int(result.sent),
+            total_failed=int(result.failed),
+            status=(b.status if b else "unknown") or "unknown",
         )
     finally:
         db.close()
