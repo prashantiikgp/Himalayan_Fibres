@@ -14,6 +14,7 @@ import { LoginPage } from "@/pages/login/LoginPage";
 import { HomePage } from "@/pages/home/HomePage";
 import { ContactsPage } from "@/pages/contacts/ContactsPage";
 import { WAInboxPage } from "@/pages/wa-inbox/WAInboxPage";
+import { BroadcastsPage } from "@/pages/broadcasts/BroadcastsPage";
 import { MigrationPage } from "@/pages/migration/MigrationPage";
 import { navigationEngine } from "@/engines/navigationEngine";
 import type { PageId } from "@/schemas/pages";
@@ -37,7 +38,7 @@ export function buildRoutes(): RouteObject[] {
         // when it ships.
         { path: "contacts", element: <ContactsPage /> },
         { path: "wa-inbox", element: <WAInboxPage /> },
-        { path: "broadcasts", element: <MigrationPage pageId={"broadcasts" as PageId} /> },
+        { path: "broadcasts", element: <BroadcastsPage /> },
         { path: "wa-templates", element: <MigrationPage pageId={"wa_templates" as PageId} /> },
         { path: "flows", element: <MigrationPage pageId={"flows" as PageId} /> },
       ],
