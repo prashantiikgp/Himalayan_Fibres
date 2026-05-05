@@ -1,15 +1,15 @@
 /**
  * <EmailTemplateEditor> — right panel of /email-templates.
  *
- * Email templates: name, slug (immutable post-create), subject_template,
- * html_content (textarea + iframe HTML preview), email_type, category,
- * required_variables (comma list), is_active.
- *
- * No Meta-style immutability — saving edits in place. No phone preview;
- * the iframe renders the actual HTML so you see what subscribers see.
+ * Phase 7.3: the raw HTML body is hidden behind an "Advanced" toggle.
+ * The default surface is rendered preview + typed variable inputs so the
+ * founder isn't forced to read HTML to verify a template. Editing a
+ * variable updates the preview live; editing the HTML in Advanced mode
+ * also updates the preview live (in-memory override; saving still
+ * persists the textarea content as before).
  */
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,7 +20,13 @@ import {
   useEmailTemplate,
   useSaveEmailTemplate,
   type EmailTemplateUpsert,
+  type EmailVariableSpec,
 } from "@/api/email_templates";
+import {
+  EmailVariablesForm,
+  buildDefaultValues,
+} from "@/components/email/EmailVariablesForm";
+import { EmailRenderPreview } from "@/components/email/EmailRenderPreview";
 
 const EMAIL_TYPES = ["campaign", "transactional", "automation", "test"];
 
@@ -36,6 +42,20 @@ const EMPTY: EmailTemplateUpsert & { name: string; slug: string } = {
 };
 
 type Mode = "create" | "edit";
+
+/** Synthesize a basic variable spec from a comma-separated `required`
+ * field — for newly-created templates that don't have `variable_spec`
+ * from the backend yet. */
+function synthSpecFromRequired(names: string[]): EmailVariableSpec[] {
+  return names.map((n) => ({
+    name: n,
+    label: n.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+    type: "text",
+    placeholder: `Sample ${n}`,
+    example: "",
+    required: true,
+  }));
+}
 
 export function EmailTemplateEditor({
   templateId,
@@ -53,6 +73,7 @@ export function EmailTemplateEditor({
   );
   const [form, setForm] = useState<typeof EMPTY>(EMPTY);
   const [variablesText, setVariablesText] = useState("");
+  const [previewVars, setPreviewVars] = useState<Record<string, string>>({});
   const [saveError, setSaveError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -64,6 +85,7 @@ export function EmailTemplateEditor({
     if (mode === "create") {
       setForm({ ...EMPTY });
       setVariablesText("");
+      setPreviewVars({});
       setSaveError(null);
       return;
     }
@@ -79,9 +101,25 @@ export function EmailTemplateEditor({
         is_active: loaded.is_active,
       });
       setVariablesText(loaded.required_variables.join(", "));
+      setPreviewVars(buildDefaultValues(loaded.variable_spec ?? null, "studio"));
       setSaveError(null);
     }
   }, [mode, loaded]);
+
+  // Effective spec: prefer the backend-supplied one (rich, with example
+  // values), fall back to a synth from the comma-separated `required`
+  // field so the form still renders inputs while the user types.
+  const effectiveSpec: EmailVariableSpec[] | null = useMemo(() => {
+    if (loaded?.variable_spec && loaded.variable_spec.length > 0) {
+      return loaded.variable_spec;
+    }
+    const names = variablesText
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (names.length === 0) return null;
+    return synthSpecFromRequired(names);
+  }, [loaded?.variable_spec, variablesText]);
 
   function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -107,8 +145,6 @@ export function EmailTemplateEditor({
           setSaveError(err instanceof Error ? err.message : "Create failed"),
       });
     } else if (templateId !== null) {
-      // slug + name immutable on save in this version (Meta-style discipline);
-      // could relax later. Re-send slug for parity but the backend ignores it.
       saveMutation.mutate(
         { id: templateId, body },
         {
@@ -154,6 +190,11 @@ export function EmailTemplateEditor({
       </div>
     );
   }
+
+  // Pass the in-memory HTML to the preview so users see unsaved edits live.
+  // For create mode (no saved template id yet) we can't render via
+  // /render-preview, so the preview pane just shows a hint.
+  const previewTemplateId = mode === "edit" ? templateId : null;
 
   return (
     <div className="grid h-full grid-rows-[1fr_auto]">
@@ -211,17 +252,6 @@ export function EmailTemplateEditor({
             />
           </Field>
 
-          <Field label="HTML body" id="et-html">
-            <textarea
-              id="et-html"
-              value={form.html_content}
-              onChange={(e) => set("html_content", e.target.value)}
-              rows={14}
-              className="rounded-md border border-border bg-card p-2 font-mono text-xs text-text placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-              placeholder="<p>Hi {{first_name}}, ...</p>"
-            />
-          </Field>
-
           <Field
             label="Required variables (comma-separated)"
             id="et-vars"
@@ -244,25 +274,63 @@ export function EmailTemplateEditor({
             Active (uncheck to hide from broadcast template pickers)
           </label>
 
+          <details className="rounded-md border border-border bg-card/40">
+            <summary className="cursor-pointer select-none px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Advanced — edit HTML
+            </summary>
+            <div className="p-2">
+              <textarea
+                id="et-html"
+                value={form.html_content}
+                onChange={(e) => set("html_content", e.target.value)}
+                rows={14}
+                className="w-full rounded-md border border-border bg-card p-2 font-mono text-xs text-text placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                placeholder="<p>Hi {{first_name}}, ...</p>"
+              />
+              <p className="mt-1 text-[10px] text-text-muted">
+                Edits here update the live preview before you save. Save to persist.
+              </p>
+            </div>
+          </details>
+
+          <div>
+            <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Sample variable values
+            </h2>
+            {effectiveSpec === null ? (
+              <p className="text-xs text-text-muted">
+                Add variable names in the field above to drive the preview.
+              </p>
+            ) : (
+              <EmailVariablesForm
+                spec={effectiveSpec}
+                values={previewVars}
+                onChange={setPreviewVars}
+                mode="studio"
+              />
+            )}
+          </div>
+
           {saveError && (
             <p role="alert" className="text-sm text-danger">{saveError}</p>
           )}
         </form>
 
         <aside className="flex flex-col gap-2">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-            Preview (raw HTML)
-          </h3>
-          <iframe
-            title="Email preview"
-            className="h-[600px] w-full rounded-md border border-border bg-white"
-            srcDoc={form.html_content || "<p style='color:#999;font-family:sans-serif;padding:24px'>(empty body)</p>"}
-            sandbox=""
-          />
-          <p className="text-[10px] text-text-muted">
-            Variables like <code>{"{{first_name}}"}</code> render literally
-            in this preview. Substitution happens at send time, per recipient.
-          </p>
+          {previewTemplateId !== null ? (
+            <EmailRenderPreview
+              templateId={previewTemplateId}
+              variables={previewVars}
+              htmlContentOverride={form.html_content || null}
+              subjectTemplateOverride={form.subject_template || null}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center rounded-md border border-dashed border-border bg-card/40 p-card text-center text-xs text-text-muted">
+              Save the template to see a rendered preview. The render preview
+              uses the saved Jinja shell layout and can't run on an unsaved
+              template id.
+            </div>
+          )}
         </aside>
       </div>
 

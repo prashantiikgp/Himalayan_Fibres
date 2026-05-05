@@ -5,26 +5,38 @@ page:
   title: "Email Templates"
   subtitle: ""
   how_to_use:
-    summary: "Author and edit email templates used by Email Broadcasts."
+    summary: "Author and edit email templates used by Email Broadcasts and Send Email."
     sections:
       - title: "Slug is the identifier"
         body: |
           The slug (e.g. b2b_introduction, order_confirmation) is what
-          you type into the Email Broadcasts Compose page. It's
+          the broadcast and single-send pages reference. It's
           unique + immutable once created — pick it carefully.
       - title: "Subject + body support {{ }} variables"
         body: |
           Use {{first_name}}, {{company_name}}, {{email}} and any other
           fields you list under Required variables. The send loop
-          renders these per recipient before SMTP delivery.
+          renders these per recipient before delivery.
       - title: "Preview"
         body: |
-          The right panel shows the raw HTML in an iframe — exactly what
-          subscribers see in their inbox. Variables render literally in
-          this preview; substitution happens at send time.
+          The right panel shows a fully rendered preview using the
+          sample variable values you type below the form — exactly what
+          subscribers see in their inbox after merge. Toggle Desktop /
+          Mobile to check responsive layout.
+      - title: "Variables"
+        body: |
+          The Sample variable values inputs drive the preview. Required
+          variables (declared in the YAML companion file) are marked.
+          Edit any value to see the preview update within ~500 ms.
+      - title: "Advanced — edit HTML"
+        body: |
+          The raw HTML body lives behind the Advanced disclosure. Open
+          it only when you need to tweak markup; edits update the
+          preview live, and Save persists them.
       - title: "Active vs inactive"
         body: |
-          Inactive templates are hidden from broadcast template pickers
-          but kept in the table so historical sends still resolve their
-          slug. Use this to retire a template without breaking history.
+          Inactive templates are hidden from broadcast and single-send
+          template pickers but kept in the table so historical sends
+          still resolve their slug. Use this to retire a template
+          without breaking history.
   landed_phase: 6
