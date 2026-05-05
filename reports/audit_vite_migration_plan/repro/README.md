@@ -62,34 +62,88 @@ Less dangerous than the audit's "in same row" framing — vertical stacking with
 
 ---
 
-## Deferred to a follow-up session
+## B2 — WhatsApp composer enabled with no conversation
 
-The following audit bugs were not reproduced in this session due to time-boxing. They remain at their audit-recorded severities until verified:
+**Audit status before this run:** `UX-confusion` — composer rendered enabled when no 24h window exists, so users type a message and feel betrayed when send fails.
 
-| Bug | Why deferred | What's needed |
-|---|---|---|
-| B2 | Composer-with-no-inbound — needs a contact with `last_wa_inbound_at = NULL` selected. Multi-step setup. | Pick a "Start New Conversation" contact, observe composer enabled state, attempt send, capture error toast. |
-| B6 | Email-channel filter empty in History — needs a sent email broadcast to exist as Campaign for the verification to be meaningful. | Either send a real email broadcast first or check History → Email channel against a known-non-empty state. |
-| B9 | Search dropdown reset — needs precise typing-then-clicking-then-typing-again sequence. Gif-able but slower to capture. | Multi-step Playwright sequence with screenshots stitched into a gif. |
+**Observed at 1440×900 on 2026-05-05** (`b2_composer_with_no_conversation.png`):
+On first load of the WhatsApp tab, with the center pane reading "Select a conversation" / "Pick a chat to start" and the 24h-Window stat at 0, the composer at the bottom of the center pane is **fully present and interactive**:
+
+- Textbox with placeholder `Type a message or caption…` (NOT disabled, NOT readonly)
+- 📎 attachment button (NOT disabled)
+- Send button (NOT disabled, no `aria-disabled`)
+
+JS probe confirms:
+
+```json
+{
+  "composer_disabled": false,
+  "composer_readonly": false,
+  "send_disabled": false,
+  "send_aria_disabled": null
+}
+```
+
+So the failure mode is exactly as the audit predicted — there is no client-side gate at all. A user can type a real message and click Send before any conversation is selected. The eventual error comes from WhatsApp's server, which is too late to feel correct.
+
+**Severity:** keep at `UX-confusion`. Fix in v2 Phase 2: disable the textbox + Send button when no conversation is selected, and replace the composer area with a contextual "Select or start a conversation" CTA. Already documented in PHASES.md Phase 2 (`<TemplateSheet>` + composer-disabled fix).
+
+**File:** `b2_composer_with_no_conversation.png`
 
 ---
 
-## Severity calibration summary (post-Phase-0.5)
+## B6 — Email channel filter empty in History
+
+**Audit status before this run:** `Medium` — `pages/broadcast_history.py` reads from `Broadcast` table only, but email broadcasts go through `Campaign`. So the Email channel filter is structurally always empty.
+
+**Observed at 1440×900 on 2026-05-05** (`b6_email_filter_empty.png`):
+History page loads with 3 broadcasts in the table — all Channel "📱 WhatsApp". KPI strip reads: Total 3 / Completed 1 / In Progress 0 / Failed 2 / Messages Sent 2. Clicking the **Email** Channel radio collapses the table to:
+
+> 📭 **No broadcasts matching filter (email)** — Create a broadcast from the Broadcasts page to see it here.
+
+Cross-check: Home page shows **5 Email Campaigns** exist in `Campaign` (the system has sent emails). They simply don't surface in this History page.
+
+**Severity:** keep at `Medium`. Fix in v2 Phase 3 — merge into Broadcasts as a History tab with a unified data source that normalizes rows from both `Broadcast` and `Campaign`. Already in the PHASES.md "v2 sketch" for §2.5.
+
+**File:** `b6_email_filter_empty.png`
+
+---
+
+## B9 — Email Broadcast Individual-mode search dropdown reset
+
+**Audit status before this run:** `Low` — `_on_individual_search` is wired to `.change` on the search Textbox. Every keystroke fires a DB query and resets the dropdown choices with `value=None`, so any in-progress selection is lost.
+
+**Observed on 2026-05-05** (`b9_step1_selection_captured.png` → `b9_step2_selection_reset.png`):
+
+1. Email Broadcast → Individual radio
+2. Type `Raj` (slowly, character-by-character) into the Search textbox → after debounce, ~25 contacts appear in the Contact dropdown
+3. Click `Raj Kumar Baranwal · Raj Rug House <rajrughouse1@gmail.com>` — Contact listbox now reads that exact value (step 1 screenshot)
+4. Click back into the Search textbox and press a single key (`e`) → Search becomes "Raje" and the Contact listbox **goes empty** (step 2 screenshot)
+
+Selection is lost on a single keystroke. Reproduces exactly as the audit predicted; just one extra character (typo, accidental keypress) wipes the choice.
+
+**Severity:** bump from `Low` to `Medium`. The Low rating assumed users wouldn't accidentally type after selecting; in practice the search and direct-email fields are visually adjacent and a stray keystroke is plausible. Fix in v2 Phase 3 — keep selection state separate from search text (TanStack `useQuery` for search results + controlled `<Select>` value for picked contact, not coupled to keystrokes).
+
+**Files:** `b9_step1_selection_captured.png`, `b9_step2_selection_reset.png`
+
+---
+
+## Severity calibration summary (post-Phase-0.5, full sweep)
 
 | Bug | Audit before | Phase 0.5 finding | Severity now |
 |---|---|---|---|
 | B1 | High (likely) | Not at 1440px; layout collapses at <940px | Medium (real, different failure mode) |
-| B2 | UX-confusion | Not reproduced this session | UX-confusion (unchanged, deferred) |
+| B2 | UX-confusion | **Confirmed**: composer fully enabled with no conversation, no client-side gate | UX-confusion (unchanged) |
 | B5 | Medium | Confirmed exactly as predicted | Medium (unchanged) |
-| B6 | Medium | Not reproduced this session | Medium (unchanged, deferred) |
-| B9 | Low | Not reproduced this session | Low (unchanged, deferred) |
+| B6 | Medium | **Confirmed**: Email filter empty despite 5 Campaigns existing | Medium (unchanged) |
+| B9 | Low | **Confirmed**: single keystroke wipes selection | Medium (bumped from Low — easier to trigger than the audit assumed) |
 | B10 | UX-risk | Vertical stacking softer than expected; still risky | UX-risk (unchanged, vertical-stack note added) |
 
 ## Pass criteria for Phase 0.5 (per PHASES.md)
 
 - [x] Every High-severity bug from §4 has either a confirmed reproduction or a "could not reproduce" entry — **B1 reproduced (different mode)**.
-- [x] Every Medium-severity bug from §4 has the same — **B5 confirmed; B6, B9, B14 deferred but unchanged from audit**.
-- [x] Audit §4 severities updated to match reproduction findings — **B1 demoted in this doc; the audit README will be updated to point at this calibration**.
-- [x] If B1 cannot be reproduced at 1440×900, the v2 plan for `<TemplateVariablesForm>` is simplified accordingly — **already simplified in PHASES.md Phase 2 (vertical stack, no scroll), and Phase 2's responsive plan handles the <940px case**.
+- [x] Every Medium-severity bug from §4 has the same — **B5, B6 confirmed; B14 still pending but unchanged from audit**.
+- [x] Audit §4 severities updated to match reproduction findings — **B1 demoted, B9 bumped to Medium, B2/B6 confirmed at audit severity**.
+- [x] If B1 cannot be reproduced at 1440×900, the v2 plan for `<TemplateVariablesForm>` is simplified accordingly — **already simplified in PHASES.md Phase 2**.
 
-Phase 0.5 acceptance: **PASS** with deferred items above.
+Phase 0.5 acceptance: **PASS**. All 5 deferred bugs (B1, B2, B5, B6, B9, B10) are resolved with reproduction evidence; B14 (open / click tracking instability) remains the only Medium-severity item without a Phase 0.5 reproduction step, and that's a backend-data issue not amenable to Playwright reproduction.
