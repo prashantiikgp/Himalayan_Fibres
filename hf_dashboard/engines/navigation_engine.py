@@ -55,16 +55,12 @@ def _resolve_page_module(page_id: str) -> Any:
     return None
 
 
-def build_app_with_sidebar(
-    title: str = "Himalayan Fibers",
-    theme=None,
-    css: str | None = None,
-) -> gr.Blocks:
+def build_app_with_sidebar(title: str = "Himalayan Fibers") -> gr.Blocks:
     """Build the full Gradio app with sidebar navigation.
 
     Returns a gr.Blocks instance ready for mounting on FastAPI.
-    Theme + CSS go on the Blocks constructor — works on both Gradio 4
-    (where mount_gradio_app does not accept them) and Gradio 6.
+    Theme + CSS are passed to mount_gradio_app in app.py — Gradio 6 ignores
+    them when set on the Blocks instance directly.
     """
     loader = get_config_loader()
     sidebar_config = loader.load_sidebar()
@@ -74,13 +70,7 @@ def build_app_with_sidebar(
     default_page = dashboard_config.dashboard.default_page
     subtitle = dashboard_config.dashboard.subtitle
 
-    blocks_kwargs: dict = {"title": title}
-    if theme is not None:
-        blocks_kwargs["theme"] = theme
-    if css is not None:
-        blocks_kwargs["css"] = css
-
-    with gr.Blocks(**blocks_kwargs) as app:
+    with gr.Blocks(title=title) as app:
         # -- Auth gate --
         from services.config import get_settings
         settings = get_settings()
