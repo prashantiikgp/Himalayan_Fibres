@@ -155,3 +155,211 @@ def test_contacts_pagination_clamps_high_page(
     body = res.json()
     # Page is clamped to total_pages - 1 (or 0 if no rows)
     assert body["page"] < body["total_pages"]
+
+
+# ─── Write-endpoint tests (review fix Mn-new-2) ──────────────────────────
+
+
+def test_create_contact_minimal(client: TestClient, auth_headers: dict[str, str]) -> None:
+    """POST /contacts with required fields returns 201 + the created row."""
+    import time
+
+    stamp = int(time.time() * 1000)
+    unique = f"create_test_{stamp}@example.com"
+    phone = f"998877{stamp % 10000:04d}"
+    res = client.post(
+        "/api/v2/contacts",
+        json={"first_name": "CreateTest", "phone": phone, "email": unique},
+        headers=auth_headers,
+    )
+    assert res.status_code == 201, res.text
+    body = res.json()
+    assert body["first_name"] == "CreateTest"
+    assert body["wa_id"] == f"91{phone}"
+    assert "email" in body["channels"]
+
+
+def test_create_contact_short_phone_400(client: TestClient, auth_headers: dict[str, str]) -> None:
+    """Phone with <10 digits is rejected (review fix Mn-new-3 mirror)."""
+    res = client.post(
+        "/api/v2/contacts",
+        json={"first_name": "Short", "phone": "123"},
+        headers=auth_headers,
+    )
+    assert res.status_code == 400
+    assert "10 digits" in res.json()["detail"]
+
+
+def test_create_contact_duplicate_email_409(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """Second POST with the same email returns 409 (M-new-2 IntegrityError handling).
+
+    Uses a unique phone too — wa_id has a UNIQUE constraint, so reusing a
+    phone from an earlier test would also collide and skew this assertion.
+    """
+    import time
+
+    stamp = int(time.time() * 1000)
+    email = f"dup_test_{stamp}@example.com"
+    phone = f"998877{stamp % 10000:04d}"  # unique 10-digit phone
+    body = {"first_name": "Dup", "phone": phone, "email": email}
+    first = client.post("/api/v2/contacts", json=body, headers=auth_headers)
+    assert first.status_code == 201, first.text
+    second = client.post("/api/v2/contacts", json=body, headers=auth_headers)
+    assert second.status_code == 409, second.text
+
+
+def test_update_contact_short_phone_400(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """PATCH with <10-digit phone is rejected (review fix Mn-new-3)."""
+    import time
+
+    stamp = int(time.time() * 1000)
+    seed = client.post(
+        "/api/v2/contacts",
+        json={
+            "first_name": "PhoneCheck",
+            "phone": f"991122{stamp % 10000:04d}",
+            "email": f"phonecheck_{stamp}@example.com",
+        },
+        headers=auth_headers,
+    )
+    assert seed.status_code == 201, seed.text
+    cid = seed.json()["id"]
+
+    res = client.patch(
+        f"/api/v2/contacts/{cid}",
+        json={"phone": "5"},
+        headers=auth_headers,
+    )
+    assert res.status_code == 400
+
+
+def test_update_contact_round_trip(client: TestClient, auth_headers: dict[str, str]) -> None:
+    """PATCH applies provided fields and round-trips through GET."""
+    import time
+
+    stamp = int(time.time() * 1000)
+    seed = client.post(
+        "/api/v2/contacts",
+        json={
+            "first_name": "Edit",
+            "phone": f"912345{stamp % 10000:04d}",
+            "email": f"edit_{stamp}@example.com",
+        },
+        headers=auth_headers,
+    )
+    assert seed.status_code == 201, seed.text
+    cid = seed.json()["id"]
+
+    upd = client.patch(
+        f"/api/v2/contacts/{cid}",
+        json={"company": "Edited Co", "consent_status": "opted_in"},
+        headers=auth_headers,
+    )
+    assert upd.status_code == 200
+    body = upd.json()
+    assert body["company"] == "Edited Co"
+    assert body["consent_status"] == "opted_in"
+
+    detail = client.get(f"/api/v2/contacts/{cid}", headers=auth_headers)
+    assert detail.json()["company"] == "Edited Co"
+
+
+def test_update_contact_404_unknown(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    res = client.patch(
+        "/api/v2/contacts/does_not_exist",
+        json={"first_name": "Ghost"},
+        headers=auth_headers,
+    )
+    assert res.status_code == 404
+
+
+def test_add_note_round_trip(client: TestClient, auth_headers: dict[str, str]) -> None:
+    """POST /contacts/{id}/notes appends a threaded note visible via GET."""
+    import time
+
+    stamp = int(time.time() * 1000)
+    seed = client.post(
+        "/api/v2/contacts",
+        json={
+            "first_name": "NoteSubject",
+            "phone": f"955511{stamp % 10000:04d}",
+            "email": f"note_{stamp}@example.com",
+        },
+        headers=auth_headers,
+    )
+    assert seed.status_code == 201, seed.text
+    cid = seed.json()["id"]
+
+    note_res = client.post(
+        f"/api/v2/contacts/{cid}/notes",
+        json={"body": "First contact made via cold outreach."},
+        headers=auth_headers,
+    )
+    assert note_res.status_code == 201
+    assert note_res.json()["body"].startswith("First contact")
+
+    detail = client.get(f"/api/v2/contacts/{cid}", headers=auth_headers).json()
+    assert any(n["body"].startswith("First contact") for n in detail["threaded_notes"])
+
+
+def test_csv_download_streams(client: TestClient, auth_headers: dict[str, str]) -> None:
+    """GET /contacts.csv returns CSV with the expected header row."""
+    res = client.get("/api/v2/contacts.csv", headers=auth_headers)
+    assert res.status_code == 200
+    assert res.headers["content-type"].startswith("text/csv")
+    text = res.text
+    first_line = text.splitlines()[0]
+    assert first_line == "email,first_name,last_name,company,phone,country,lifecycle,consent_status,wa_id"
+
+
+def test_import_csv_basic(client: TestClient, auth_headers: dict[str, str]) -> None:
+    """POST /contacts/import with a 2-row CSV imports them; duplicates skipped."""
+    import time
+
+    stamp = int(time.time() * 1000)
+    # Phones must be unique across test runs too — wa_id has a UNIQUE
+    # constraint, and re-running the suite without clearing the DB would
+    # otherwise hit a 409 on the bulk commit (review fix M-new-2).
+    phone_a = f"901111{stamp % 10000:04d}"
+    phone_b = f"901112{stamp % 10000:04d}"
+    csv_body = (
+        "email,first_name,last_name,company,phone,country\n"
+        f"importer_a_{stamp}@example.com,Importer,A,Acme A,{phone_a},India\n"
+        f"importer_b_{stamp}@example.com,Importer,B,Acme B,{phone_b},India\n"
+    )
+    res = client.post(
+        "/api/v2/contacts/import",
+        files={"file": ("test.csv", csv_body.encode(), "text/csv")},
+        headers=auth_headers,
+    )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["imported"] == 2
+    assert body["skipped"] == 0
+
+    # Re-uploading the same file → both skipped as duplicates.
+    res2 = client.post(
+        "/api/v2/contacts/import",
+        files={"file": ("test.csv", csv_body.encode(), "text/csv")},
+        headers=auth_headers,
+    )
+    assert res2.status_code == 200
+    assert res2.json()["imported"] == 0
+    assert res2.json()["skipped"] == 2
+
+
+def test_import_rejects_non_csv_xlsx(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    res = client.post(
+        "/api/v2/contacts/import",
+        files={"file": ("test.txt", b"hello", "text/plain")},
+        headers=auth_headers,
+    )
+    assert res.status_code == 400

@@ -25,6 +25,7 @@ import { Label } from "@/components/ui/label";
 import { createContact, type ContactCreate } from "@/api/contacts";
 import { ApiError } from "@/lib/queryClient";
 import { track } from "@/lib/analytics";
+import { STRINGS } from "@/lib/strings";
 
 const INITIAL: ContactCreate = {
   first_name: "",
@@ -53,10 +54,10 @@ export function AddContactDialog() {
     onError: (err) => {
       setError(
         err instanceof ApiError && err.status === 409
-          ? "A contact with that email already exists."
+          ? STRINGS.contacts.addDialog.duplicateEmail
           : err instanceof Error
             ? err.message
-            : "Failed to create contact",
+            : STRINGS.contacts.addDialog.genericError,
       );
     },
   });
@@ -65,39 +66,50 @@ export function AddContactDialog() {
     e.preventDefault();
     setError(null);
     if (!form.first_name.trim() || !form.phone.trim()) {
-      setError("First name and phone are required.");
+      setError(STRINGS.contacts.addDialog.validationRequired);
       return;
     }
     mutation.mutate(form);
   }
 
+  const t = STRINGS.contacts.addDialog;
+
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setError(null); }}>
       <DialogTrigger asChild>
         <Button size="sm">
-          <Plus className="mr-1 h-4 w-4" /> Add Contact
+          <Plus className="mr-1 h-4 w-4" /> {STRINGS.contacts.addButton}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Contact</DialogTitle>
+          <DialogTitle>{t.title}</DialogTitle>
           <DialogDescription>
-            New contact lands with consent <code>pending</code>. WhatsApp ID is derived from the phone.
+            {(() => {
+              const [before, after] = t.description.split("{pending}");
+              return (
+                <>
+                  {before}
+                  <code>pending</code>
+                  {after}
+                </>
+              );
+            })()}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-3">
-          <Field label="First name *" id="first_name" required value={form.first_name}
+          <Field label={t.firstName} id="first_name" required value={form.first_name}
             onChange={(v) => setForm({ ...form, first_name: v })} />
-          <Field label="Last name" id="last_name" value={form.last_name ?? ""}
+          <Field label={t.lastName} id="last_name" value={form.last_name ?? ""}
             onChange={(v) => setForm({ ...form, last_name: v })} />
-          <Field label="Phone *" id="phone" required value={form.phone} placeholder="10-digit mobile"
+          <Field label={t.phone} id="phone" required value={form.phone} placeholder={t.phonePlaceholder}
             onChange={(v) => setForm({ ...form, phone: v })} />
-          <Field label="Email" id="email" type="email" value={form.email ?? ""}
+          <Field label={t.email} id="email" type="email" value={form.email ?? ""}
             onChange={(v) => setForm({ ...form, email: v })} />
-          <Field label="Company" id="company" className="col-span-2" value={form.company ?? ""}
+          <Field label={t.company} id="company" className="col-span-2" value={form.company ?? ""}
             onChange={(v) => setForm({ ...form, company: v })} />
-          <Field label="Country" id="country" className="col-span-2" value={form.country ?? ""}
+          <Field label={t.country} id="country" className="col-span-2" value={form.country ?? ""}
             onChange={(v) => setForm({ ...form, country: v })} />
 
           {error && (
@@ -109,11 +121,11 @@ export function AddContactDialog() {
           <DialogFooter className="col-span-2 mt-2">
             <DialogClose asChild>
               <Button type="button" variant="outline" disabled={mutation.isPending}>
-                Cancel
+                {t.cancel}
               </Button>
             </DialogClose>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Saving…" : "Save Contact"}
+              {mutation.isPending ? t.saving : t.submit}
             </Button>
           </DialogFooter>
         </form>

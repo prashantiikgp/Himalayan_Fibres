@@ -23,6 +23,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
 
 from api_v2.deps import require_auth
 from api_v2.schemas.contacts import (
@@ -336,6 +337,12 @@ async def create_contact(
 
     Mirrors v1's Add Contact behavior — generates an 8-char UUID id, derives
     wa_id from the phone, defaults consent to 'pending'.
+
+    Concurrency note (review fix M-new-2): the in-band uniqueness check
+    races with another concurrent POST. The DB unique constraint is the
+    real authority; we catch IntegrityError on commit and translate it
+    to 409 so two concurrent requests with the same email both get a
+    clean response.
     """
     db = get_db()
     try:
@@ -371,7 +378,14 @@ async def create_contact(
             consent_status="pending",
         )
         db.add(contact)
-        db.commit()
+        try:
+            db.commit()
+        except IntegrityError as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Constraint violation: {getattr(e.orig, 'args', [str(e)])[0]}",
+            ) from e
 
         try:
             log_interaction(
@@ -408,6 +422,11 @@ async def create_contact(
             segments=seg_ids,
             channels=channels,
         )
+    except HTTPException:
+        raise  # already shaped for the caller
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()
 
@@ -460,8 +479,16 @@ async def update_contact(
         if body.last_name is not None:
             c.last_name = body.last_name.strip()
         if body.phone is not None:
-            c.phone = "".join(ch for ch in body.phone if ch.isdigit())
-            wa_id = _wa_id_from_phone(c.phone)
+            digits = "".join(ch for ch in body.phone if ch.isdigit())
+            # Mirror create_contact validation (review fix Mn-new-3): refuse
+            # to silently accept malformed phone strings on edit.
+            if len(digits) < 10:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Phone must contain at least 10 digits",
+                )
+            c.phone = digits
+            wa_id = _wa_id_from_phone(digits)
             if wa_id:
                 c.wa_id = wa_id
         if body.email is not None:
@@ -479,7 +506,14 @@ async def update_contact(
         if body.notes is not None:
             c.notes = body.notes
 
-        db.commit()
+        try:
+            db.commit()
+        except IntegrityError as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Constraint violation: {getattr(e.orig, 'args', [str(e)])[0]}",
+            ) from e
 
         after = {
             "first_name": c.first_name,
@@ -530,6 +564,11 @@ async def update_contact(
             segments=seg_ids,
             channels=channels,
         )
+    except HTTPException:
+        raise
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()
 
@@ -549,7 +588,14 @@ async def add_contact_note(
 
         note = ContactNote(contact_id=contact_id, body=body.body.strip(), author="user")
         db.add(note)
-        db.commit()
+        try:
+            db.commit()
+        except IntegrityError as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Note constraint violation: {getattr(e.orig, 'args', [str(e)])[0]}",
+            ) from e
         db.refresh(note)
 
         try:
@@ -566,6 +612,11 @@ async def add_contact_note(
         return ContactNoteOut(
             id=note.id, body=note.body, author=note.author, created_at=_iso(note.created_at)
         )
+    except HTTPException:
+        raise
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()
 
@@ -628,12 +679,21 @@ async def import_contacts(
     imported = 0
     skipped = 0
     try:
+        # Review fix M-new-4: read existing emails into a Python set ONCE so
+        # dedup is O(N) lookups instead of N DB round-trips. On a 5k-row
+        # import this is ~10s of chatter -> ~0.5s.
+        existing_emails: set[str] = {
+            row[0]
+            for row in db.query(Contact.email).filter(Contact.email.isnot(None)).all()
+        }
+        seen_in_batch: set[str] = set()
+
         for i, row in enumerate(rows, start=2):  # row 2 = first data row in CSV
             email = (row.get("email") or row.get("e-mail") or "").strip()
             if not email or "@" not in email:
                 skipped += 1
                 continue
-            if db.query(Contact).filter(Contact.email == email).first():
+            if email in existing_emails or email in seen_in_batch:
                 skipped += 1
                 continue
 
@@ -654,11 +714,19 @@ async def import_contacts(
                         lifecycle="new_lead",
                     )
                 )
+                seen_in_batch.add(email)
                 imported += 1
             except Exception as e:
                 errors.append(f"Row {i}: {e}")
                 skipped += 1
-        db.commit()
+        try:
+            db.commit()
+        except IntegrityError as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Import aborted on constraint violation: {getattr(e.orig, 'args', [str(e)])[0]}",
+            ) from e
     finally:
         db.close()
 

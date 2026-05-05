@@ -38,6 +38,7 @@ import {
 } from "@/api/contacts";
 import { formatRelative } from "@/lib/format";
 import { track } from "@/lib/analytics";
+import { STRINGS } from "@/lib/strings";
 
 const LIFECYCLE_OPTIONS = ["new_lead", "contacted", "interested", "customer", "churned"];
 const CONSENT_OPTIONS = ["pending", "opted_in", "opted_out"];
@@ -59,7 +60,7 @@ export function ContactDrawer({
       <SheetContent side="right" className="w-full sm:max-w-md md:max-w-lg">
         <SheetHeader>
           <SheetTitle>
-            {contact ? `${contact.first_name} ${contact.last_name}`.trim() || contact.id : "Contact"}
+            {contact ? `${contact.first_name} ${contact.last_name}`.trim() || contact.id : STRINGS.contacts.drawer.fallbackTitle}
           </SheetTitle>
           <SheetDescription>
             {contact?.company || ""}
@@ -74,21 +75,21 @@ export function ContactDrawer({
         </SheetHeader>
 
         <div className="flex-1 overflow-auto px-card pb-card">
-          {isLoading && <p className="py-6 text-sm text-text-muted">Loading detail…</p>}
+          {isLoading && <p className="py-6 text-sm text-text-muted">{STRINGS.contacts.drawer.loadingDetail}</p>}
           {error && (
             <p className="py-6 text-sm text-danger" role="alert">
-              Failed to load contact: {error.message}
+              {STRINGS.contacts.drawer.loadFailedPrefix}{error.message}
             </p>
           )}
           {detail && contact && (
             <Tabs defaultValue="profile">
               <TabsList className="w-full justify-start">
-                <TabsTrigger value="profile">Profile</TabsTrigger>
-                <TabsTrigger value="tags">Tags</TabsTrigger>
+                <TabsTrigger value="profile">{STRINGS.contacts.drawer.tabProfile}</TabsTrigger>
+                <TabsTrigger value="tags">{STRINGS.contacts.drawer.tabTags}</TabsTrigger>
                 <TabsTrigger value="notes">
-                  Notes {detail.threaded_notes.length > 0 && `(${detail.threaded_notes.length})`}
+                  {STRINGS.contacts.drawer.tabNotes} {detail.threaded_notes.length > 0 && `(${detail.threaded_notes.length})`}
                 </TabsTrigger>
-                <TabsTrigger value="activity">Activity</TabsTrigger>
+                <TabsTrigger value="activity">{STRINGS.contacts.drawer.tabActivity}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="profile">
@@ -128,7 +129,7 @@ export function ContactDrawer({
 
               <TabsContent value="activity">
                 {detail.activity.length === 0 ? (
-                  <p className="text-xs text-text-muted">No recorded activity.</p>
+                  <p className="text-xs text-text-muted">{STRINGS.contacts.drawer.activityEmpty}</p>
                 ) : (
                   <ul className="flex flex-col gap-1">
                     {detail.activity.map((a) => (
@@ -174,7 +175,7 @@ function ProfileForm({ detail, onSaved }: { detail: ContactDetail; onSaved: () =
       onSaved();
     },
     onError: (err) => {
-      setError(err instanceof Error ? err.message : "Save failed");
+      setError(err instanceof Error ? err.message : STRINGS.contacts.drawer.saveFailed);
     },
   });
 
@@ -190,25 +191,28 @@ function ProfileForm({ detail, onSaved }: { detail: ContactDetail; onSaved: () =
     mutation.mutate(form);
   }
 
+  const labels = STRINGS.contacts.drawer.profileFields;
+  const t = STRINGS.contacts.drawer;
+
   return (
     <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-3 pt-2">
-      <FieldInput label="First name" id="first_name" value={effective("first_name", detail.first_name)}
+      <FieldInput label={labels.firstName} id="first_name" value={effective("first_name", detail.first_name)}
         onChange={(v) => setForm({ ...form, first_name: v })} />
-      <FieldInput label="Last name" id="last_name" value={effective("last_name", detail.last_name)}
+      <FieldInput label={labels.lastName} id="last_name" value={effective("last_name", detail.last_name)}
         onChange={(v) => setForm({ ...form, last_name: v })} />
-      <FieldInput label="Phone" id="phone" value={effective("phone", detail.phone)}
+      <FieldInput label={labels.phone} id="phone" value={effective("phone", detail.phone)}
         onChange={(v) => setForm({ ...form, phone: v })} />
-      <FieldInput label="Email" id="email" type="email" value={effective("email", detail.email)}
+      <FieldInput label={labels.email} id="email" type="email" value={effective("email", detail.email)}
         onChange={(v) => setForm({ ...form, email: v })} />
-      <FieldInput label="Company" id="company" className="col-span-2"
+      <FieldInput label={labels.company} id="company" className="col-span-2"
         value={effective("company", detail.company)}
         onChange={(v) => setForm({ ...form, company: v })} />
-      <FieldInput label="Country" id="country" value={effective("country", detail.country)}
+      <FieldInput label={labels.country} id="country" value={effective("country", detail.country)}
         onChange={(v) => setForm({ ...form, country: v })} />
-      <FieldSelect label="Lifecycle" id="lifecycle" options={LIFECYCLE_OPTIONS}
+      <FieldSelect label={labels.lifecycle} id="lifecycle" options={LIFECYCLE_OPTIONS}
         value={effective("lifecycle", detail.lifecycle)}
         onChange={(v) => setForm({ ...form, lifecycle: v })} />
-      <FieldSelect label="Consent" id="consent" options={CONSENT_OPTIONS}
+      <FieldSelect label={labels.consent} id="consent" options={CONSENT_OPTIONS}
         value={effective("consent_status", detail.consent_status)}
         onChange={(v) => setForm({ ...form, consent_status: v })} />
       <div className="col-span-1" />
@@ -219,7 +223,7 @@ function ProfileForm({ detail, onSaved }: { detail: ContactDetail; onSaved: () =
         </p>
       )}
       {mutation.isSuccess && (
-        <p className="col-span-2 text-sm text-success">Saved.</p>
+        <p className="col-span-2 text-sm text-success">{t.saved}</p>
       )}
 
       <div className="col-span-2 flex justify-end gap-2 pt-2">
@@ -229,10 +233,10 @@ function ProfileForm({ detail, onSaved }: { detail: ContactDetail; onSaved: () =
           disabled={mutation.isPending || Object.keys(form).length === 0}
           onClick={() => { setForm({}); setError(null); }}
         >
-          Reset
+          {t.reset}
         </Button>
         <Button type="submit" disabled={mutation.isPending || Object.keys(form).length === 0}>
-          {mutation.isPending ? "Saving…" : "Save changes"}
+          {mutation.isPending ? t.saving : t.saveChanges}
         </Button>
       </div>
     </form>
@@ -254,7 +258,7 @@ function TagsForm({ detail, onSaved }: { detail: ContactDetail; onSaved: () => v
       track("contact_edited", { fields_changed: ["tags"] });
       onSaved();
     },
-    onError: (err) => setError(err instanceof Error ? err.message : "Save failed"),
+    onError: (err) => setError(err instanceof Error ? err.message : STRINGS.contacts.drawer.saveFailed),
   });
 
   const parsed = draft.split(",").map((t) => t.trim()).filter(Boolean);
@@ -266,17 +270,19 @@ function TagsForm({ detail, onSaved }: { detail: ContactDetail; onSaved: () => v
     mutation.mutate(parsed);
   }
 
+  const t = STRINGS.contacts.drawer;
+
   return (
     <div className="flex flex-col gap-3 pt-2">
       <form onSubmit={handleSubmit} className="flex flex-col gap-2">
         <Label htmlFor="tags-input" className="text-xs text-text-muted">
-          Tags (comma-separated)
+          {t.tagsLabel}
         </Label>
         <Input
           id="tags-input"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder="wool, premium, carpet"
+          placeholder={t.tagsPlaceholder}
         />
         {error && <p role="alert" className="text-sm text-danger">{error}</p>}
         <div className="flex justify-end gap-2">
@@ -286,16 +292,16 @@ function TagsForm({ detail, onSaved }: { detail: ContactDetail; onSaved: () => v
             disabled={!dirty || mutation.isPending}
             onClick={() => { setDraft(detail.tags.join(", ")); setError(null); }}
           >
-            Reset
+            {t.reset}
           </Button>
           <Button type="submit" disabled={!dirty || mutation.isPending}>
-            {mutation.isPending ? "Saving…" : "Save tags"}
+            {mutation.isPending ? t.saving : t.saveTags}
           </Button>
         </div>
       </form>
-      <Section title="Matched segments">
+      <Section title={t.matchedSegments}>
         {detail.matched_segments.length === 0 ? (
-          <p className="text-xs text-text-muted">Not matched to any active segment.</p>
+          <p className="text-xs text-text-muted">{t.noSegmentMatches}</p>
         ) : (
           <ul className="flex flex-wrap gap-1">
             {detail.matched_segments.map((s) => (
@@ -328,7 +334,7 @@ function NotesPanel({ detail, onAdded }: { detail: ContactDetail; onAdded: () =>
       setError(null);
       onAdded();
     },
-    onError: (err) => setError(err instanceof Error ? err.message : "Save failed"),
+    onError: (err) => setError(err instanceof Error ? err.message : STRINGS.contacts.drawer.saveFailed),
   });
 
   function handleSubmit(e: FormEvent) {
@@ -338,30 +344,32 @@ function NotesPanel({ detail, onAdded }: { detail: ContactDetail; onAdded: () =>
     mutation.mutate(draft);
   }
 
+  const t = STRINGS.contacts.drawer;
+
   return (
     <div className="flex flex-col gap-3 pt-2">
       <form onSubmit={handleSubmit} className="flex flex-col gap-2">
         <Label htmlFor="note-input" className="text-xs text-text-muted">
-          Add note
+          {t.addNote}
         </Label>
         <textarea
           id="note-input"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           rows={3}
-          placeholder="Append a timestamped note to this contact's thread…"
+          placeholder={t.notePlaceholder}
           className="rounded-md border border-border bg-card p-2 text-sm text-text placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         />
         {error && <p role="alert" className="text-sm text-danger">{error}</p>}
         <div className="flex justify-end">
           <Button type="submit" size="sm" disabled={!draft.trim() || mutation.isPending}>
-            {mutation.isPending ? "Saving…" : "Add note"}
+            {mutation.isPending ? t.saving : t.addNote}
           </Button>
         </div>
       </form>
 
       {detail.threaded_notes.length === 0 && !detail.legacy_notes && (
-        <p className="text-xs text-text-muted">No notes yet.</p>
+        <p className="text-xs text-text-muted">{t.noNotes}</p>
       )}
       {detail.threaded_notes.length > 0 && (
         <ul className="flex flex-col gap-2">
@@ -377,7 +385,7 @@ function NotesPanel({ detail, onAdded }: { detail: ContactDetail; onAdded: () =>
         </ul>
       )}
       {detail.legacy_notes && (
-        <Section title="Legacy notes (read-only)">
+        <Section title={t.legacyNotes}>
           <p className="whitespace-pre-wrap text-xs text-text-muted">{detail.legacy_notes}</p>
         </Section>
       )}
