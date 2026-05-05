@@ -18,7 +18,7 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, AsyncIterator
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy import or_
 
@@ -44,6 +44,8 @@ from services.models import (  # type: ignore[import-not-found]
     WATemplate,
 )
 from services.wa_sender import WhatsAppSender  # type: ignore[import-not-found]
+from services.wa_template_builder import build_components  # type: ignore[import-not-found]
+from api_v2.services.job_store import get_job_store
 
 router = APIRouter(tags=["wa"], dependencies=[Depends(require_auth)])
 """No prefix here — main.py mounts this router at /api/v2/wa to match the
@@ -775,6 +777,134 @@ def save_template(template_id: int, body: TemplateUpsert) -> WATemplateOut:
         raise
     finally:
         db.close()
+
+
+# Note on route ordering: `/templates/sync` is a static path; FastAPI
+# matches static-path routes before dynamic-segment ones registered
+# later in the file. We declare /templates/sync ABOVE the
+# /templates/{template_id}/submit endpoint just to keep the related
+# write paths together, but the path discriminator is unambiguous so
+# order doesn't actually matter here.
+
+
+def _spec_from_template(t: WATemplate) -> dict:
+    """Convert a WATemplate row to v1's build_components spec dict."""
+    spec: dict = {"body": {"text": t.body_text or ""}}
+    fmt = (t.header_format or "").upper()
+    if fmt == "TEXT" and t.header_text:
+        spec["header"] = {"type": "TEXT", "text": t.header_text}
+    elif fmt in {"IMAGE", "DOCUMENT", "VIDEO"} and t.header_asset_url:
+        spec["header"] = {"type": fmt, "url": t.header_asset_url}
+    if t.footer_text:
+        spec["footer"] = {"text": t.footer_text}
+    if t.buttons:
+        spec["buttons"] = list(t.buttons)
+    return spec
+
+
+@router.post("/templates/{template_id}/submit", response_model=WATemplateOut)
+def submit_template_to_meta(template_id: int) -> WATemplateOut:
+    """Submit a draft template to Meta's WABA API for approval.
+
+    On success: flips is_draft=false, sets status to whatever Meta
+    returned (typically PENDING), stores the Meta template id, and
+    stamps submitted_at.
+
+    On Meta error: returns 502 with the error detail. The local row
+    stays a draft so the user can edit and re-submit. Phase 4.1b
+    scope: actual Meta API hits happen here — the user must opt in by
+    clicking Submit in the Studio. Tests stub the WhatsAppSender so
+    we never call live Meta in CI.
+    """
+    db = get_db()
+    try:
+        t = db.query(WATemplate).filter(WATemplate.id == template_id).first()
+        if t is None:
+            raise HTTPException(status_code=404, detail="Template not found")
+        if not t.is_draft:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Template is already submitted; create a new draft to revise",
+            )
+        if not (t.body_text or "").strip():
+            raise HTTPException(status_code=400, detail="body_text is required")
+
+        components = build_components(_spec_from_template(t))
+        sender = WhatsAppSender()
+        ok, data, err = sender.create_template(
+            name=t.name,
+            category=(t.category or "MARKETING").upper(),
+            language=t.language or "en_US",
+            components=components,
+        )
+        if not ok:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=f"Meta rejected: {err}",
+            )
+
+        t.is_draft = False
+        t.status = (data or {}).get("status", "PENDING")
+        t.meta_template_id = str((data or {}).get("id") or "") or None
+        t.submitted_at = datetime.now(timezone.utc)
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        db.refresh(t)
+        return _template_to_out(t)
+    except HTTPException:
+        raise
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+
+def _run_template_sync(job_id: str) -> None:
+    """BackgroundTasks worker for /templates/sync. Wraps v1's
+    sync_templates_from_meta with JobStore status updates."""
+    import logging as _logging
+
+    log = _logging.getLogger("api_v2.wa.sync")
+    store = get_job_store()
+    store.update(job_id, status="running", message="Pulling from Meta…", progress=10)
+
+    db = get_db()
+    try:
+        sender = WhatsAppSender()
+        result = sender.sync_templates_from_meta(db)
+        store.update(
+            job_id,
+            status="done",
+            progress=100,
+            message=str(result.get("message") or "Sync complete"),
+            result=result if isinstance(result, dict) else {"raw": str(result)},
+        )
+    except Exception as e:
+        log.exception("template sync job %s failed", job_id)
+        store.update(
+            job_id,
+            status="failed",
+            message=str(e)[:500],
+            result={"errors": [str(e)]},
+        )
+    finally:
+        db.close()
+
+
+@router.post("/templates/sync", status_code=status.HTTP_202_ACCEPTED)
+def sync_templates(background_tasks: BackgroundTasks) -> dict:
+    """Queue a Meta-template sync. Returns a job_id; poll
+    /api/v2/jobs/{job_id}/status. The actual Meta API call happens
+    in the background — request returns immediately.
+    """
+    store = get_job_store()
+    job_id = store.create(job_type="template_sync", message="Queued")
+    background_tasks.add_task(_run_template_sync, job_id)
+    return {"job_id": job_id}
 
 
 @router.delete(

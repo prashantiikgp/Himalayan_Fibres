@@ -247,6 +247,29 @@ export function useSaveTemplate() {
   });
 }
 
+export function useSubmitTemplate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) =>
+      apiFetch<WATemplateOut>(`/api/v2/wa/templates/${id}/submit`, {
+        method: "POST",
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["wa", "templates"] });
+      qc.invalidateQueries({ queryKey: ["wa", "template"] });
+    },
+  });
+}
+
+export function useSyncTemplates() {
+  return useMutation({
+    mutationFn: () =>
+      apiFetch<{ job_id: string }>("/api/v2/wa/templates/sync", {
+        method: "POST",
+      }),
+  });
+}
+
 export function useDeleteTemplate() {
   const qc = useQueryClient();
   return useMutation({

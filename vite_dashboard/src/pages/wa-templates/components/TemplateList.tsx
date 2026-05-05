@@ -7,12 +7,13 @@
  */
 
 import { useState } from "react";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useDebouncedValue } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
-import { useWaTemplates, type WATemplateOut } from "@/api/wa";
+import { useSyncTemplates, useWaTemplates, type WATemplateOut } from "@/api/wa";
+import { useJobProgress } from "@/api/broadcasts";
 
 const STATUS_OPTIONS = [
   { value: "all", label: "All" },
@@ -43,6 +44,12 @@ export function TemplateList({
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [tier, setTier] = useState<string>("all");
   const debounced = useDebouncedValue(search, 250);
+  const [syncJobId, setSyncJobId] = useState<string | null>(null);
+  const syncMutation = useSyncTemplates();
+  const { data: syncJob } = useJobProgress(syncJobId);
+  const syncing =
+    syncMutation.isPending ||
+    (syncJob && (syncJob.status === "queued" || syncJob.status === "running"));
 
   const isDraftView = statusFilter === "DRAFT";
   const { data, isLoading, error } = useWaTemplates({
@@ -63,14 +70,46 @@ export function TemplateList({
   return (
     <div className="flex h-full flex-col">
       <header className="flex flex-col gap-2 border-b border-border p-card">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-text-muted">
             Templates ({rows.length})
           </h2>
-          <Button size="sm" onClick={onCreateNew}>
-            <Plus className="mr-1 h-4 w-4" /> New draft
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                if (syncing) return;
+                if (!confirm(
+                  "Sync templates from Meta? This pulls the latest status, " +
+                  "category, and components from your WABA. Drafts are " +
+                  "preserved.",
+                )) return;
+                syncMutation.mutate(undefined, {
+                  onSuccess: (res) => setSyncJobId(res.job_id),
+                });
+              }}
+              disabled={!!syncing}
+              title="Sync from Meta"
+            >
+              <RefreshCw className={cn("mr-1 h-4 w-4", syncing && "animate-spin")} />
+              {syncing ? "Syncing…" : "Sync"}
+            </Button>
+            <Button size="sm" onClick={onCreateNew}>
+              <Plus className="mr-1 h-4 w-4" /> New draft
+            </Button>
+          </div>
         </div>
+        {syncJob && syncJob.status === "done" && (
+          <p className="text-[11px] text-success" role="status">
+            {syncJob.message || "Sync complete"}
+          </p>
+        )}
+        {syncJob && syncJob.status === "failed" && (
+          <p className="text-[11px] text-danger" role="alert">
+            Sync failed: {syncJob.message}
+          </p>
+        )}
         <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-text-muted" />
           <Input

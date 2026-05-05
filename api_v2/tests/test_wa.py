@@ -822,10 +822,149 @@ def test_delete_approved_409(
     assert res.status_code == 409
 
 
+# ─── Phase 4.1b.1 — Submit + Sync ────────────────────────────────────────
+
+
+def test_submit_template_to_meta(
+    client: TestClient,
+    auth_headers: dict[str, str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Submit a draft → WhatsAppSender.create_template stub returns
+    success → row flips is_draft=False, status='PENDING', meta_template_id
+    populated."""
+    from api_v2.routers import wa as wa_router
+
+    captured: dict = {}
+
+    def _stub(self, name, category, language, components):  # noqa: ANN001
+        captured["name"] = name
+        captured["category"] = category
+        captured["components"] = components
+        return (True, {"id": "META_T_999", "status": "PENDING"}, None)
+
+    monkeypatch.setattr(wa_router.WhatsAppSender, "create_template", _stub)
+
+    stamp = int(time.time() * 1000)
+    name = f"phase41b_submit_{stamp}"
+    create = client.post(
+        "/api/v2/wa/templates",
+        json={
+            "name": name,
+            "category": "MARKETING",
+            "body_text": "Hi {{1}}",
+            "buttons": [],
+        },
+        headers=auth_headers,
+    )
+    tid = create.json()["id"]
+
+    res = client.post(
+        f"/api/v2/wa/templates/{tid}/submit", headers=auth_headers,
+    )
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert body["is_draft"] is False
+    assert body["status"] == "PENDING"
+    assert captured["name"] == name
+
+
+def test_submit_template_meta_failure_502(
+    client: TestClient,
+    auth_headers: dict[str, str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Meta rejects → 502; row stays a draft."""
+    from api_v2.routers import wa as wa_router
+
+    monkeypatch.setattr(
+        wa_router.WhatsAppSender, "create_template",
+        lambda self, name, category, language, components: (False, None, "rate limit"),
+    )
+
+    stamp = int(time.time() * 1000)
+    name = f"phase41b_fail_{stamp}"
+    create = client.post(
+        "/api/v2/wa/templates",
+        json={"name": name, "category": "MARKETING", "body_text": "x"},
+        headers=auth_headers,
+    )
+    tid = create.json()["id"]
+
+    res = client.post(
+        f"/api/v2/wa/templates/{tid}/submit", headers=auth_headers,
+    )
+    assert res.status_code == 502
+    assert "rate limit" in res.json()["detail"]
+
+    # Still a draft.
+    detail = client.get(
+        f"/api/v2/wa/templates/{tid}", headers=auth_headers
+    ).json()
+    assert detail["is_draft"] is True
+
+
+def test_submit_already_submitted_409(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    from services.database import get_db  # type: ignore[import-not-found]
+    from services.models import WATemplate  # type: ignore[import-not-found]
+
+    stamp = int(time.time() * 1000)
+    db = get_db()
+    try:
+        t = WATemplate(
+            name=f"phase41b_already_{stamp}",
+            language="en_US", category="MARKETING", status="APPROVED",
+            body_text="x", buttons=[], variables=[], is_draft=False,
+        )
+        db.add(t)
+        db.commit()
+        db.refresh(t)
+        tid = t.id
+    finally:
+        db.close()
+
+    res = client.post(
+        f"/api/v2/wa/templates/{tid}/submit", headers=auth_headers,
+    )
+    assert res.status_code == 409
+
+
+def test_sync_templates_returns_job(
+    client: TestClient,
+    auth_headers: dict[str, str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Sync queues a job and the worker calls
+    sync_templates_from_meta. TestClient runs background tasks
+    synchronously so the job is terminal by the time we poll."""
+    from api_v2.routers import wa as wa_router
+
+    monkeypatch.setattr(
+        wa_router.WhatsAppSender, "sync_templates_from_meta",
+        lambda self, db: {"created": 0, "updated": 3, "message": "ok"},
+    )
+
+    res = client.post("/api/v2/wa/templates/sync", headers=auth_headers)
+    assert res.status_code == 202, res.text
+    job_id = res.json()["job_id"]
+
+    status_res = client.get(
+        f"/api/v2/jobs/{job_id}/status", headers=auth_headers,
+    )
+    body = status_res.json()
+    assert body["status"] in {"done", "failed"}
+    if body["status"] == "done":
+        assert body["result"]["updated"] == 3
+
+
 def test_template_writes_require_auth(client: TestClient) -> None:
     assert client.post("/api/v2/wa/templates", json={"name": "x"}).status_code == 401
     assert client.post("/api/v2/wa/templates/1/save", json={}).status_code == 401
     assert client.delete("/api/v2/wa/templates/1").status_code == 401
+    assert client.post("/api/v2/wa/templates/1/submit").status_code == 401
+    assert client.post("/api/v2/wa/templates/sync").status_code == 401
 
 
 def test_sse_stream_route_registered(client: TestClient) -> None:

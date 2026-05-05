@@ -15,6 +15,7 @@ import {
   useCreateTemplate,
   useDeleteTemplate,
   useSaveTemplate,
+  useSubmitTemplate,
   useWaTemplate,
   type TemplateUpsert,
   type WATemplateOut,
@@ -68,6 +69,7 @@ export function TemplateEditor({
   const createMutation = useCreateTemplate();
   const saveMutation = useSaveTemplate();
   const deleteMutation = useDeleteTemplate();
+  const submitMutation = useSubmitTemplate();
 
   // Hydrate the form when the loaded template arrives or mode changes.
   useEffect(() => {
@@ -137,6 +139,19 @@ export function TemplateEditor({
       onSuccess: () => onDeleted(),
       onError: (err) =>
         setSaveError(err instanceof Error ? err.message : "Delete failed"),
+    });
+  }
+
+  function handleSubmitToMeta() {
+    if (templateId === null) return;
+    if (!confirm(
+      "Submit this draft to Meta for approval? Submitted templates are " +
+      "immutable; further edits will create a clone (e.g. _v2).",
+    )) return;
+    setSaveError(null);
+    submitMutation.mutate(templateId, {
+      onError: (err) =>
+        setSaveError(err instanceof Error ? err.message : "Submit failed"),
     });
   }
 
@@ -266,7 +281,7 @@ export function TemplateEditor({
       </div>
 
       <footer className="flex items-center justify-between border-t border-border bg-card/40 px-card py-2">
-        <div>
+        <div className="flex items-center gap-2">
           {mode === "edit" && loaded && loaded.is_draft && !loaded.status && (
             <Button
               type="button"
@@ -283,9 +298,20 @@ export function TemplateEditor({
           {createMutation.isPending || saveMutation.isPending ? (
             <span className="text-xs text-text-muted">Saving…</span>
           ) : null}
-          <Button type="submit" onClick={handleSubmit} size="sm">
+          <Button type="submit" onClick={handleSubmit} size="sm" variant="outline">
             {mode === "create" ? "Create draft" : isImmutable ? "Save as new draft" : "Save changes"}
           </Button>
+          {/* Submit-to-Meta only when this is a saved DRAFT (no status). */}
+          {mode === "edit" && loaded && loaded.is_draft && !loaded.status && (
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleSubmitToMeta}
+              disabled={submitMutation.isPending}
+            >
+              {submitMutation.isPending ? "Submitting…" : "Submit to Meta"}
+            </Button>
+          )}
         </div>
       </footer>
     </div>
