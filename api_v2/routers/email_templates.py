@@ -166,6 +166,7 @@ def save_email_template(
 @router.delete(
     "/email/templates/{template_id}",
     status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None,
 )
 def delete_email_template(template_id: int) -> None:
     db = get_db()
