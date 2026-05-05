@@ -131,6 +131,53 @@ export function useCostEstimate(
   });
 }
 
+export type QueueEmailBroadcastResponse = {
+  job_id: string;
+  estimated_recipients: number;
+};
+
+export type JobStatusResponse = {
+  job_id: string;
+  job_type: string;
+  status: "queued" | "running" | "done" | "failed";
+  progress: number;
+  message: string;
+  result: Record<string, unknown> | null;
+};
+
+export function useQueueEmailBroadcast() {
+  return useMutation({
+    mutationFn: (body: {
+      name: string;
+      template_id: string;
+      subject?: string;
+      filters: BroadcastFiltersIn;
+    }) =>
+      apiFetch<QueueEmailBroadcastResponse>("/api/v2/broadcasts/email", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+  });
+}
+
+/**
+ * Poll a queued broadcast's job status. Stops auto-refetching once the
+ * job reaches a terminal state. Returns null while idle (no jobId).
+ */
+export function useJobProgress(jobId: string | null) {
+  return useQuery({
+    queryKey: ["jobs", jobId],
+    enabled: jobId !== null,
+    queryFn: () =>
+      apiFetch<JobStatusResponse>(`/api/v2/jobs/${jobId}/status`),
+    refetchInterval: (query) => {
+      const data = query.state.data as JobStatusResponse | undefined;
+      if (!data) return 1000;
+      return data.status === "done" || data.status === "failed" ? false : 1000;
+    },
+  });
+}
+
 export function useSendWaBroadcast() {
   return useMutation({
     mutationFn: (body: {

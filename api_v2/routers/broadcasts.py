@@ -13,9 +13,10 @@ that the History tab needs.
 
 from __future__ import annotations
 
+import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 
 from api_v2.deps import require_auth
 from api_v2.schemas.broadcasts import (
@@ -27,9 +28,12 @@ from api_v2.schemas.broadcasts import (
     CostBreakdownItem,
     CostEstimateRequest,
     CostEstimateResponse,
+    QueueEmailBroadcastResponse,
     SendBroadcastRequest,
     SendBroadcastResponse,
+    SendEmailBroadcastRequest,
 )
+from api_v2.services.job_store import get_job_store
 
 from services.database import get_db  # type: ignore[import-not-found]
 from services.models import Broadcast, Campaign  # type: ignore[import-not-found]
@@ -255,3 +259,117 @@ def send_wa_broadcast(req: SendBroadcastRequest) -> SendBroadcastResponse:
         )
     finally:
         db.close()
+
+
+# ─── Phase 3.1b.1 — Email queue + jobs ───────────────────────────────────
+
+
+_log = logging.getLogger("api_v2.broadcasts.email")
+
+
+def _run_email_broadcast(
+    job_id: str,
+    name: str,
+    template_id: str,
+    subject: str,
+    filters_dict: dict,
+) -> None:
+    """BackgroundTasks worker. Wraps v1's send_broadcast in a fresh
+    DB session + JobStore status updates. Per-recipient progress
+    requires forking v1's loop; for now we report queued -> running
+    -> done with the final counts (B13 fix scope).
+    """
+    store = get_job_store()
+    store.update(job_id, status="running", message="Sending…", progress=5)
+
+    db = get_db()
+    try:
+        filters = BroadcastFilters(
+            segment_id=filters_dict.get("segment_id"),
+            countries=list(filters_dict.get("countries") or []),
+            tags=list(filters_dict.get("tags") or []),
+            lifecycles=list(filters_dict.get("lifecycles") or []),
+            consents=list(filters_dict.get("consents") or []),
+            max_recipients=int(filters_dict.get("max_recipients") or 0),
+        )
+        result = send_broadcast(
+            db=db,
+            name=name,
+            channel="email",
+            template_id=template_id,
+            filters=filters,
+            subject=subject,
+        )
+        store.update(
+            job_id,
+            status="done",
+            progress=100,
+            message=f"Sent {result.sent}, failed {result.failed}",
+            result={
+                "broadcast_id": result.broadcast_id,
+                "total_recipients": result.total,
+                "total_sent": result.sent,
+                "total_failed": result.failed,
+                "errors": list(result.errors or [])[:50],
+            },
+        )
+    except Exception as e:
+        _log.exception("email broadcast job %s failed", job_id)
+        store.update(
+            job_id,
+            status="failed",
+            message=str(e)[:500],
+            result={"errors": [str(e)]},
+        )
+    finally:
+        db.close()
+
+
+@router.post(
+    "/broadcasts/email",
+    response_model=QueueEmailBroadcastResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+def queue_email_broadcast(
+    req: SendEmailBroadcastRequest,
+    background_tasks: BackgroundTasks,
+) -> QueueEmailBroadcastResponse:
+    """Queue an email broadcast and return a job_id for polling.
+
+    **B13 fix.** v1's email Send Now ran a 3s/recipient sleep loop on
+    the Gradio request-handler thread, freezing the UI for 5+ min on a
+    100-row send. This endpoint dispatches via FastAPI BackgroundTasks
+    and returns immediately with a job_id; the frontend polls
+    `/api/v2/jobs/{job_id}/status` to render progress.
+    """
+    if not req.name.strip():
+        raise HTTPException(status_code=400, detail="name is required")
+    if not req.template_id.strip():
+        raise HTTPException(status_code=400, detail="template_id is required")
+
+    # Compute the recipient count up front so the UI gets a denominator
+    # for the progress bar before the background task touches the DB.
+    db = get_db()
+    try:
+        preview = get_audience_breakdown(db, "email", _to_filters(req.filters))
+        recipients = int(preview["final_recipients"])
+    finally:
+        db.close()
+
+    store = get_job_store()
+    job_id = store.create(
+        job_type="email_broadcast",
+        message=f"Queued {recipients} recipient(s)",
+    )
+    background_tasks.add_task(
+        _run_email_broadcast,
+        job_id,
+        req.name.strip(),
+        req.template_id.strip(),
+        req.subject or "",
+        req.filters.model_dump(),
+    )
+    return QueueEmailBroadcastResponse(
+        job_id=job_id,
+        estimated_recipients=recipients,
+    )

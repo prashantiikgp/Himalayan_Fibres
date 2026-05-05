@@ -16,17 +16,22 @@ import { useWaTemplates } from "@/api/wa";
 import {
   useAudiencePreview,
   useCostEstimate,
+  useQueueEmailBroadcast,
   useSendWaBroadcast,
+  type BroadcastChannel,
   type BroadcastFiltersIn,
 } from "@/api/broadcasts";
 import { AudienceFunnel } from "./AudienceFunnel";
 import { CostEstimateCards } from "./CostEstimateCards";
 import { SendConfirmDialog } from "./SendConfirmDialog";
+import { SendProgress } from "./SendProgress";
 
 export function ComposeTab() {
+  const [channel, setChannel] = useState<BroadcastChannel>("whatsapp");
   const [name, setName] = useState("");
   const [segmentId, setSegmentId] = useState<string>("all_opted_in");
   const [templateName, setTemplateName] = useState<string>("");
+  const [subject, setSubject] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [completed, setCompleted] = useState<{
@@ -34,6 +39,7 @@ export function ComposeTab() {
     sent: number;
     failed: number;
   } | null>(null);
+  const [activeJobId, setActiveJobId] = useState<string | null>(null);
 
   const { data: segData } = useSegments();
   const { data: tplData } = useWaTemplates({ status: "APPROVED" });
@@ -44,25 +50,31 @@ export function ComposeTab() {
   );
 
   const { data: audience, isFetching: audienceLoading } = useAudiencePreview(
-    "whatsapp",
+    channel,
     filters,
   );
   const selectedTemplate = tplData?.templates.find((t) => t.name === templateName);
   const category = selectedTemplate?.category ?? "MARKETING";
   const { data: cost, isFetching: costLoading } = useCostEstimate(
-    "whatsapp",
+    channel,
     category.toLowerCase(),
     filters,
-    !!templateName,
+    channel === "whatsapp" ? !!templateName : true,
   );
 
-  const sendMutation = useSendWaBroadcast();
+  const sendWaMutation = useSendWaBroadcast();
+  const queueEmailMutation = useQueueEmailBroadcast();
+  const isSending = sendWaMutation.isPending || queueEmailMutation.isPending;
 
   const segmentLabel =
     segData?.segments.find((s) => s.id === segmentId)?.name ?? segmentId;
+
+  // Email allows the template-id to be a free-text slug; we don't gate
+  // on it being in the WA templates list.
+  const hasTemplate = channel === "whatsapp" ? !!templateName : !!templateName;
   const canOpenConfirm =
     name.trim().length > 0 &&
-    !!templateName &&
+    hasTemplate &&
     (audience?.final_recipients ?? 0) > 0;
 
   function handleSendClick() {
@@ -74,23 +86,42 @@ export function ComposeTab() {
   function handleConfirm() {
     if (!canOpenConfirm) return;
     setSubmitError(null);
-    sendMutation.mutate(
-      {
-        name: name.trim(),
-        template_id: templateName,
-        filters,
-      },
-      {
-        onSuccess: (res) => {
-          setCompleted({ name: res.name, sent: res.total_sent, failed: res.total_failed });
-          setConfirmOpen(false);
-          setName("");
-          setTemplateName("");
+    setActiveJobId(null);
+
+    if (channel === "whatsapp") {
+      sendWaMutation.mutate(
+        { name: name.trim(), template_id: templateName, filters },
+        {
+          onSuccess: (res) => {
+            setCompleted({ name: res.name, sent: res.total_sent, failed: res.total_failed });
+            setConfirmOpen(false);
+            setName("");
+            setTemplateName("");
+          },
+          onError: (err) =>
+            setSubmitError(err instanceof Error ? err.message : "Send failed"),
         },
-        onError: (err) =>
-          setSubmitError(err instanceof Error ? err.message : "Send failed"),
-      },
-    );
+      );
+    } else {
+      queueEmailMutation.mutate(
+        {
+          name: name.trim(),
+          template_id: templateName,
+          subject: subject.trim() || undefined,
+          filters,
+        },
+        {
+          onSuccess: (res) => {
+            // Email is async — keep the form populated so the user
+            // sees progress against the same audience preview.
+            setActiveJobId(res.job_id);
+            setConfirmOpen(false);
+          },
+          onError: (err) =>
+            setSubmitError(err instanceof Error ? err.message : "Queue failed"),
+        },
+      );
+    }
   }
 
   return (
@@ -110,6 +141,13 @@ export function ComposeTab() {
         </div>
       )}
 
+      {activeJobId && (
+        <SendProgress
+          jobId={activeJobId}
+          recipientCount={audience?.final_recipients ?? 0}
+        />
+      )}
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr]">
         <form
           onSubmit={(e) => {
@@ -118,13 +156,35 @@ export function ComposeTab() {
           }}
           className="flex flex-col gap-3"
         >
+          <Field label="Channel" id="bc-channel">
+            <div className="inline-flex rounded-md border border-border bg-card p-0.5">
+              {(["whatsapp", "email"] as BroadcastChannel[]).map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => {
+                    setChannel(c);
+                    setTemplateName("");
+                  }}
+                  className={
+                    channel === c
+                      ? "rounded px-3 py-1 text-xs font-medium bg-primary text-white"
+                      : "rounded px-3 py-1 text-xs text-text-muted hover:text-text"
+                  }
+                >
+                  {c === "whatsapp" ? "WhatsApp" : "Email"}
+                </button>
+              ))}
+            </div>
+          </Field>
+
           <div className="grid grid-cols-2 gap-3">
             <Field label="Broadcast name" id="bc-name">
               <Input
                 id="bc-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="WA: April B2B intro"
+                placeholder={channel === "whatsapp" ? "WA: April B2B intro" : "Email: April B2B intro"}
                 required
               />
             </Field>
@@ -144,21 +204,41 @@ export function ComposeTab() {
               </select>
             </Field>
             <Field label="Template" id="bc-template" className="col-span-2">
-              <select
-                id="bc-template"
-                value={templateName}
-                onChange={(e) => setTemplateName(e.target.value)}
-                className="h-9 rounded-md border border-border bg-card px-2 text-sm text-text"
-                required
-              >
-                <option value="">— Pick an approved template —</option>
-                {tplData?.templates.map((t) => (
-                  <option key={t.id} value={t.name}>
-                    {t.name} ({t.category ?? "?"}, {t.variables.length} var{t.variables.length === 1 ? "" : "s"})
-                  </option>
-                ))}
-              </select>
+              {channel === "whatsapp" ? (
+                <select
+                  id="bc-template"
+                  value={templateName}
+                  onChange={(e) => setTemplateName(e.target.value)}
+                  className="h-9 rounded-md border border-border bg-card px-2 text-sm text-text"
+                  required
+                >
+                  <option value="">— Pick an approved template —</option>
+                  {tplData?.templates.map((t) => (
+                    <option key={t.id} value={t.name}>
+                      {t.name} ({t.category ?? "?"}, {t.variables.length} var{t.variables.length === 1 ? "" : "s"})
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <Input
+                  id="bc-template"
+                  value={templateName}
+                  onChange={(e) => setTemplateName(e.target.value)}
+                  placeholder="Email template slug (e.g. b2b_introduction)"
+                  required
+                />
+              )}
             </Field>
+            {channel === "email" && (
+              <Field label="Subject (optional)" id="bc-subject" className="col-span-2">
+                <Input
+                  id="bc-subject"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  placeholder="Override the template subject — empty = use default"
+                />
+              </Field>
+            )}
           </div>
 
           <CostEstimateCards data={cost} isLoading={costLoading} />
@@ -172,7 +252,7 @@ export function ComposeTab() {
           <div className="flex justify-end gap-2 pt-2">
             <Button
               type="submit"
-              disabled={!canOpenConfirm || sendMutation.isPending}
+              disabled={!canOpenConfirm || isSending}
             >
               <Send className="mr-1 h-4 w-4" /> Send Now
             </Button>
@@ -183,8 +263,8 @@ export function ComposeTab() {
           <h3 className="text-sm font-semibold text-text">Notes</h3>
           <ul className="list-disc space-y-1 pl-4">
             <li>WA Send is synchronous — small batches finish in seconds.</li>
+            <li>Email Send queues in the background — progress shown above.</li>
             <li>Template send opens a fresh 24h window per recipient.</li>
-            <li>Email queue + scheduler land in Phase 3.1b.</li>
             <li>Send confirmation requires typing <code>SEND</code>.</li>
           </ul>
         </aside>
@@ -197,7 +277,7 @@ export function ComposeTab() {
         costDisplay={cost?.total_display ?? "—"}
         segmentLabel={segmentLabel}
         templateName={templateName || "—"}
-        isPending={sendMutation.isPending}
+        isPending={isSending}
         errorMessage={submitError}
         onConfirm={handleConfirm}
       />

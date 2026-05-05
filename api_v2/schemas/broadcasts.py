@@ -131,3 +131,23 @@ class SendBroadcastResponse(BaseModel):
     total_sent: int
     total_failed: int
     status: str
+
+
+class SendEmailBroadcastRequest(BaseModel):
+    """POST /broadcasts/email — queues via BackgroundTasks."""
+
+    name: str
+    template_id: str
+    """Email template SLUG (e.g. b2b_introduction). Must exist + active."""
+    subject: str = ""
+    """Override the template's subject_template. Empty = use default."""
+    filters: BroadcastFiltersIn = BroadcastFiltersIn()
+
+
+class QueueEmailBroadcastResponse(BaseModel):
+    """Returned synchronously when an email broadcast is queued."""
+
+    job_id: str
+    estimated_recipients: int
+    """Upfront count so the UI can render a progress bar denominator
+    before the background task starts."""

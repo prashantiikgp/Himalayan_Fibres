@@ -236,6 +236,79 @@ def test_send_wa_validates_required_fields(
     assert res.status_code == 400
 
 
+# ─── Phase 3.1b.1 — Email queue + jobs ───────────────────────────────────
+
+
+def test_queue_email_broadcast_returns_job_id(
+    client: TestClient,
+    auth_headers: dict[str, str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """POST /broadcasts/email returns 202 + job_id immediately and
+    the background task transitions the job to done (or failed)."""
+    # Stub send_broadcast so the test doesn't actually attempt SMTP.
+    from services.broadcast_engine import BroadcastResult  # type: ignore[import-not-found]
+    from api_v2.routers import broadcasts as broadcasts_router
+
+    def _stub(db, name, channel, template_id, filters, subject=""):  # noqa: ANN001
+        return BroadcastResult(
+            broadcast_id=999, sent=2, failed=0, total=2, errors=[],
+        )
+
+    monkeypatch.setattr(broadcasts_router, "send_broadcast", _stub)
+
+    res = client.post(
+        "/api/v2/broadcasts/email",
+        json={
+            "name": "Phase 3.1b.1 test",
+            "template_id": "b2b_introduction",
+            "filters": {"segment_id": "all_opted_in"},
+        },
+        headers=auth_headers,
+    )
+    assert res.status_code == 202, res.text
+    body = res.json()
+    assert "job_id" in body
+    assert "estimated_recipients" in body
+
+    # TestClient runs background tasks synchronously after the response,
+    # so the job is already terminal by the time we poll.
+    status_res = client.get(
+        f"/api/v2/jobs/{body['job_id']}/status", headers=auth_headers,
+    )
+    assert status_res.status_code == 200
+    state = status_res.json()
+    assert state["status"] in {"done", "failed"}
+    assert state["progress"] == 100 or state["status"] == "failed"
+
+
+def test_queue_email_broadcast_rejects_missing_name(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    res = client.post(
+        "/api/v2/broadcasts/email",
+        json={"name": "  ", "template_id": "x"},
+        headers=auth_headers,
+    )
+    assert res.status_code == 400
+
+
+def test_get_job_status_unknown_404(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    res = client.get(
+        "/api/v2/jobs/00000000-0000-0000-0000-000000000000/status",
+        headers=auth_headers,
+    )
+    assert res.status_code == 404
+
+
+def test_jobs_endpoint_requires_auth(client: TestClient) -> None:
+    assert (
+        client.get("/api/v2/jobs/whatever/status").status_code == 401
+    )
+
+
 def test_compose_endpoints_require_auth(client: TestClient) -> None:
     assert (
         client.post("/api/v2/broadcasts/audience-preview", json={"channel": "email"}).status_code
