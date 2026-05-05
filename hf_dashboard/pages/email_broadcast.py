@@ -827,6 +827,7 @@ def build(ctx) -> dict:
             generate_idempotency_key,
             render_template_by_slug,
         )
+        from services.interactions import log_interaction
         from services.models import Campaign, Contact, EmailSend, EmailTemplate
 
         sender = EmailSender()
@@ -936,8 +937,7 @@ def build(ctx) -> dict:
                     # Append to per-contact timeline so the Activity tab on the
                     # contact drawer (v1) and v2's GET /contacts/{id} surface
                     # this campaign send. commit=False — the surrounding tx
-                    # will commit at the end of the send loop.
-                    from services.interactions import log_interaction
+                    # commits at the end of the send loop.
                     log_interaction(
                         db,
                         contact_id=contact.id,

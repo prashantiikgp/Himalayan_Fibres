@@ -105,13 +105,13 @@ def main() -> None:
                     "customer_subtype": r["customer_subtype"].strip(),
                     "geography": r["geography"].strip(),
                     "engagement_level": r["engagement_level"].strip(),
-                    "tags": "",
-                    "consent_status": consent_status,
-                    "consent_source": r["consent_source"].strip(),
                     # Tags intentionally left empty: per-segment design (2026-05-05),
                     # tags mark exceptional/manual flags only (vip / priority / engaged),
                     # not auto-derivable facts (country, has-phone, has-name).
                     # See reports/audit_vite_migration_plan/ backlog notes.
+                    "tags": "",
+                    "consent_status": consent_status,
+                    "consent_source": r["consent_source"].strip(),
                     "lifecycle": _compute_lifecycle(customer_type, consent_status, 0),
                     "total_emails_sent": "0",
                     "total_emails_opened": "0",

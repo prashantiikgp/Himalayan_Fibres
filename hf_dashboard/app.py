@@ -38,31 +38,30 @@ from fastapi.staticfiles import StaticFiles
 # Gradio 4.44.x has a bug in gradio_client/utils.py — when a JSON schema's
 # `additionalProperties` is a bool (True/False) instead of a dict, both
 # `get_type` and `_json_schema_to_python_type` raise TypeError on
-# `if "const" in schema:`. Patch them before any Gradio import so / (which
-# calls api_info()) doesn't 500.
-import gradio_client.utils as _gc_utils  # type: ignore[import-not-found]
+# `if "const" in schema:`. Fixed in Gradio 5+, but the patch is kept as a
+# safety net (no-op on 5+) in case HF resolves an older wheel.
+import gradio as _gr_for_version  # type: ignore[import-not-found]
 
-_orig_get_type = _gc_utils.get_type
+if _gr_for_version.__version__.split(".")[0] == "4":
+    import gradio_client.utils as _gc_utils  # type: ignore[import-not-found]
 
+    _orig_get_type = _gc_utils.get_type
 
-def _safe_get_type(schema):  # type: ignore[no-untyped-def]
-    if isinstance(schema, bool):
-        return "Any"
-    return _orig_get_type(schema)
+    def _safe_get_type(schema):  # type: ignore[no-untyped-def]
+        if isinstance(schema, bool):
+            return "Any"
+        return _orig_get_type(schema)
 
+    _gc_utils.get_type = _safe_get_type
 
-_gc_utils.get_type = _safe_get_type
+    _orig_jsts = _gc_utils._json_schema_to_python_type  # type: ignore[attr-defined]
 
-_orig_jsts = _gc_utils._json_schema_to_python_type  # type: ignore[attr-defined]
+    def _safe_jsts(schema, defs=None):  # type: ignore[no-untyped-def]
+        if isinstance(schema, bool):
+            return "Any"
+        return _orig_jsts(schema, defs)
 
-
-def _safe_jsts(schema, defs=None):  # type: ignore[no-untyped-def]
-    if isinstance(schema, bool):
-        return "Any"
-    return _orig_jsts(schema, defs)
-
-
-_gc_utils._json_schema_to_python_type = _safe_jsts  # type: ignore[attr-defined]
+    _gc_utils._json_schema_to_python_type = _safe_jsts  # type: ignore[attr-defined]
 
 from engines.navigation_engine import build_app_with_sidebar
 from services.database import ensure_db_ready

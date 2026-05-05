@@ -20,8 +20,7 @@ email-validator>=2.1.0
 python-dateutil>=2.8.2
 python-dotenv>=1.0.1
 requests>=2.31.0
-# huggingface_hub 1.x dropped HfFolder/whoami imports that gradio 4.44.x
-# still references. Until we remove the gradio import from api_v2's
-# transitive chain (api_v2/routers/dashboard.py -> hf_dashboard/pages/home.py),
-# stay on the 0.x line.
+# huggingface_hub 1.x dropped HfFolder which Gradio 4.44.x and possibly
+# Gradio 5.x reference. Gradio 6.x switched to get_token() and is compatible
+# with hf_hub 1.x — re-evaluate this cap once we land on Gradio 6.
 huggingface-hub>=0.24.0,<1.0.0

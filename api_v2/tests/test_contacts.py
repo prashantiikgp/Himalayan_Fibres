@@ -363,3 +363,86 @@ def test_import_rejects_non_csv_xlsx(
         headers=auth_headers,
     )
     assert res.status_code == 400
+
+
+# -- POST /contacts/{id}/lifecycle (B2) --
+
+
+def test_set_lifecycle_updates_field_and_logs_interaction(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    cid = _seed_contacts(1)[0]
+    res = client.post(
+        f"/api/v2/contacts/{cid}/lifecycle",
+        json={"lifecycle": "interested", "note": "Asked for samples"},
+        headers=auth_headers,
+    )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["lifecycle"] == "interested"
+    # The activity timeline (newest first) should now have the move.
+    assert any(
+        a["kind"] == "lifecycle_interested"
+        and "interested" in a["summary"]
+        and "Asked for samples" in a["summary"]
+        for a in body["activity"]
+    )
+
+
+def test_set_lifecycle_rejects_unknown_value(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    cid = _seed_contacts(1)[0]
+    res = client.post(
+        f"/api/v2/contacts/{cid}/lifecycle",
+        json={"lifecycle": "not_a_real_state"},
+        headers=auth_headers,
+    )
+    assert res.status_code == 422
+
+
+def test_set_lifecycle_404_on_unknown_contact(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    res = client.post(
+        "/api/v2/contacts/does_not_exist/lifecycle",
+        json={"lifecycle": "interested"},
+        headers=auth_headers,
+    )
+    assert res.status_code == 404
+
+
+def test_set_lifecycle_requires_auth(client: TestClient) -> None:
+    res = client.post(
+        "/api/v2/contacts/test_contact_0/lifecycle",
+        json={"lifecycle": "interested"},
+    )
+    assert res.status_code == 401
+
+
+def test_list_contacts_supports_multi_lifecycle_filter(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """B3: ?lifecycle=contacted&lifecycle=interested filters by both."""
+    cids = _seed_contacts(4)
+    # Move two contacts into the "Needs follow-up" cohort.
+    for i, cid in enumerate(cids[:2]):
+        target = "contacted" if i == 0 else "interested"
+        client.post(
+            f"/api/v2/contacts/{cid}/lifecycle",
+            json={"lifecycle": target},
+            headers=auth_headers,
+        )
+
+    res = client.get(
+        "/api/v2/contacts?lifecycle=contacted&lifecycle=interested&page_size=200",
+        headers=auth_headers,
+    )
+    assert res.status_code == 200
+    body = res.json()
+    returned_ids = {c["id"] for c in body["contacts"]}
+    # Both moved contacts present, neither of the unchanged contacts.
+    assert cids[0] in returned_ids
+    assert cids[1] in returned_ids
+    for r in body["contacts"]:
+        assert r["lifecycle"] in {"contacted", "interested"}
