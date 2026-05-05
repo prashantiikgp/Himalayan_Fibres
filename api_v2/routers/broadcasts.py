@@ -285,11 +285,16 @@ def _run_email_broadcast(
     template_id: str,
     subject: str,
     filters_dict: dict,
+    extra_vars: dict | None = None,
 ) -> None:
     """BackgroundTasks worker. Wraps v1's send_broadcast in a fresh
     DB session + JobStore status updates. Per-recipient progress
     requires forking v1's loop; for now we report queued -> running
     -> done with the final counts (B13 fix scope).
+
+    Phase 7.2a: ``extra_vars`` carries the typed Compose variable values
+    through to ``build_send_variables`` so seeded templates render with
+    the user's chosen subject/CTA/whatever AND the shared branding.
     """
     store = get_job_store()
     store.update(job_id, status="running", message="Sending…", progress=5)
@@ -311,6 +316,7 @@ def _run_email_broadcast(
             template_id=template_id,
             filters=filters,
             subject=subject,
+            extra_vars=dict(extra_vars or {}),
         )
         store.update(
             job_id,
@@ -393,6 +399,9 @@ def queue_email_broadcast(
                 template_slug=req.template_id.strip(),
                 segment_id=req.filters.segment_id,
                 subject=req.subject or "",
+                # Phase 7.2b: persist typed variables so the scheduler
+                # fires with the same merge values the user typed.
+                variables=dict(req.variables or {}),
                 status="scheduled",
                 scheduled_at=sched,
                 total_recipients=recipients,
@@ -436,6 +445,7 @@ def queue_email_broadcast(
         req.template_id.strip(),
         req.subject or "",
         req.filters.model_dump(),
+        dict(req.variables or {}),
     )
     return QueueEmailBroadcastResponse(
         job_id=job_id,

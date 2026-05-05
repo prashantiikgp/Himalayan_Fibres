@@ -16,17 +16,25 @@ page:
           filter apply.
       - title: "Pick a template"
         body: |
-          Type the email template slug (e.g. b2b_introduction,
-          order_confirmation). Templates live on the Email Templates
-          page; the Subject field is optional and overrides the
-          template's default subject when set.
+          The dropdown lists active templates from the Email Templates
+          page. Picking one fills in the Variables section and the live
+          preview to the right. The Subject field is optional and
+          overrides the template's default subject when set.
+      - title: "Variables"
+        body: |
+          Per-recipient values (first name, email, company) resolve from
+          each contact at send time and are NOT shown here. Other
+          variables (CTA copy, dates, IDs) appear as inputs you fill in
+          once and apply to every recipient. Required ones are marked.
       - title: "Send Now vs Schedule"
         body: |
           Send Now queues the broadcast in the background and shows a
           progress bar on this page. Schedule opens a datetime picker;
           the scheduler checks every minute and fires due broadcasts
-          within ~60s of their target time. Cancel a scheduled
-          broadcast from the History tab while it's still pending.
+          within ~60s of their target time. Your typed variables are
+          persisted on the scheduled campaign so the rendered emails
+          match what the live preview showed at compose time. Cancel a
+          scheduled broadcast from the History tab while pending.
       - title: "History + Performance"
         body: |
           History shows every email broadcast. Click a row for

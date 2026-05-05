@@ -335,6 +335,7 @@ def send_broadcast(
     template_id: str,
     filters: BroadcastFilters,
     subject: str = "",
+    extra_vars: dict | None = None,
 ) -> BroadcastResult:
     """Send a broadcast to a filtered audience on a given channel.
 
@@ -345,6 +346,10 @@ def send_broadcast(
         template_id: Email template slug or WA template name
         filters: BroadcastFilters with segment + country + tag + limit
         subject: Email subject line (email channel only)
+        extra_vars: Phase 7.2a — typed variable values applied to every
+            recipient as the `extra` dict on `build_send_variables`.
+            Email-only; ignored for WA. Auto-resolved per-recipient names
+            (first_name, etc.) should not appear here.
     """
     broadcast = Broadcast(
         name=name,
@@ -362,7 +367,9 @@ def send_broadcast(
     if channel == "whatsapp":
         result = _send_wa_broadcast(db, broadcast, template_id, final)
     else:
-        result = _send_email_broadcast(db, broadcast, template_id, subject, final)
+        result = _send_email_broadcast(
+            db, broadcast, template_id, subject, final, extra_vars=extra_vars
+        )
 
     broadcast.status = "sent" if result.failed == 0 else ("sent" if result.sent > 0 else "failed")
     broadcast.total_recipients = result.total
@@ -388,25 +395,54 @@ def _send_wa_broadcast(
     wa_config = get_wa_config()
     tpl_def = wa_config.get_template(template_name)
 
+    # Fallback: if the YAML doesn't know this template, look it up in the
+    # DB. Studio-created templates that were never written back to YAML
+    # land here. We synthesize a TemplateDefinition just for this send so
+    # the variable-resolution path stays uniform.
+    body_var_names: list[str] = []
+    header_var_names: list[str] = []
+    if tpl_def:
+        body_var_names = tpl_def.variable_names
+        header_var_names = tpl_def.header_variable_names
+        lang = tpl_def.language
+    else:
+        from services.models import WATemplate as _WATemplate
+
+        db_row = (
+            db.query(_WATemplate)
+            .filter(_WATemplate.name == template_name)
+            .filter(_WATemplate.is_draft.is_(False))
+            .first()
+        )
+        if db_row is not None:
+            body_var_names = list(db_row.variables or [])
+            header_var_names = _extract_placeholders_local(db_row.header_text or "")
+            lang = db_row.language or "en"
+            log.warning(
+                "WA template %r not in YAML — falling back to DB row "
+                "(register it in templates.yml/new_templates.yml to silence this).",
+                template_name,
+            )
+        else:
+            lang = "en_US"
+
     # contacts are already pre-filtered by apply_filters() at the caller
     eligible = contacts
     sent, failed = 0, 0
     errors = []
 
-    # Use the template's approved language, not the sender's en_US default
-    lang = tpl_def.language if tpl_def else "en_US"
-
     for contact in eligible:
-        # Build (name, value) pairs so the sender can use named-param format
-        rendered_vars: list[tuple[str, str]] = []
-        if tpl_def:
-            for var in tpl_def.variables:
-                value = _resolve_wa_variable(var.name, contact)
-                rendered_vars.append((var.name, value))
+        rendered_body: list[tuple[str, str]] = [
+            (n, _resolve_wa_variable(n, contact)) for n in body_var_names
+        ]
+        rendered_header: list[tuple[str, str]] = [
+            (n, _resolve_wa_variable(n, contact)) for n in header_var_names
+        ]
 
         ok, msg_id, error = sender.send_template(
             contact.wa_id, template_name, lang=lang,
-            variables=rendered_vars or None,
+            variables=rendered_body or None,
+            header_variables=rendered_header or None,
         )
 
         if ok:
@@ -448,9 +484,25 @@ def _send_email_broadcast(
     template_slug: str,
     subject: str,
     contacts: list[Contact],
+    *,
+    extra_vars: dict | None = None,
 ) -> BroadcastResult:
-    """Send email template to all eligible contacts."""
-    from services.email_sender import EmailSender, generate_idempotency_key
+    """Send email template to all eligible contacts.
+
+    Phase 7.2a: rewired to use ``build_send_variables`` +
+    ``render_template_by_slug`` so seeded templates resolve
+    ``{% extends %}`` correctly and pick up shared branding vars
+    (banner_url, footer links, social) — the prior inline narrow
+    ``{name, first_name, company_name, email}`` dict silently dropped
+    every shared-config value.
+    """
+    from services.email_personalization import build_send_variables
+    from services.email_sender import (
+        EmailSender,
+        generate_idempotency_key,
+        render_template_by_slug,
+        render_template_string,
+    )
 
     tpl = db.query(EmailTemplate).filter(EmailTemplate.slug == template_slug).first()
     if not tpl:
@@ -461,32 +513,42 @@ def _send_email_broadcast(
         )
 
     sender = EmailSender()
-    if not sender.smtp_password:
+    if not sender.is_configured():
         return BroadcastResult(
             broadcast_id=broadcast.id,
             sent=0, failed=0, total=0,
-            errors=["SMTP_PASSWORD not set"],
+            errors=["Gmail API not configured (GMAIL_REFRESH_TOKEN unset)"],
         )
 
     # contacts are already pre-filtered by apply_filters() at the caller
     eligible = contacts
     sent, failed = 0, 0
-    errors = []
-    use_subject = subject or tpl.subject_template
+    errors: list[str] = []
+    subject_src = subject or tpl.subject_template or ""
 
     for contact in eligible:
         idem_key = generate_idempotency_key(f"broadcast_{broadcast.id}", contact.id)
         if db.query(EmailSend).filter(EmailSend.idempotency_key == idem_key).first():
             continue
 
-        variables = {
-            "name": f"{contact.first_name} {contact.last_name}".strip() or "there",
-            "first_name": contact.first_name or "there",
-            "company_name": contact.company or "your company",
-            "email": contact.email,
-        }
-        rendered_subject = sender.render_template(use_subject, variables)
-        rendered_html = sender.render_template(tpl.html_content, variables)
+        variables = build_send_variables(
+            contact, attachments={}, extra=extra_vars or None,
+        )
+        try:
+            rendered_html = render_template_by_slug(template_slug, variables)
+            rendered_subject = render_template_string(subject_src, variables)
+        except Exception as e:
+            log.exception("Render failed for broadcast %s contact %s", broadcast.id, contact.id)
+            db.add(EmailSend(
+                contact_id=contact.id, contact_email=contact.email or "",
+                campaign_id=None, subject=subject_src,
+                status="failed",
+                idempotency_key=idem_key,
+                error_message=f"Render error: {e}",
+            ))
+            failed += 1
+            errors.append(f"{contact.email}: render error: {e}")
+            continue
 
         result = sender.send_email(
             contact.email, rendered_subject, rendered_html,
@@ -516,6 +578,20 @@ def _send_email_broadcast(
         sent=sent, failed=failed,
         total=len(eligible), errors=errors,
     )
+
+
+def _extract_placeholders_local(text: str) -> list[str]:
+    """Same shape as WAConfigManager._extract_placeholders but without the
+    import cycle; used for the DB-fallback path when a template isn't in
+    YAML."""
+    import re
+
+    seen: list[str] = []
+    for m in re.finditer(r"\{\{\s*([\w]+)\s*\}\}", text or ""):
+        n = m.group(1)
+        if n not in seen:
+            seen.append(n)
+    return seen
 
 
 def _resolve_wa_variable(var_name: str, contact: Contact) -> str:

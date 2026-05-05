@@ -152,6 +152,11 @@ export function useQueueEmailBroadcast() {
       template_id: string;
       subject?: string;
       filters: BroadcastFiltersIn;
+      /** Phase 7.2a — typed variable values applied to every recipient as
+       * the `extra` dict on `build_send_variables`. Per-recipient
+       * AUTO_RESOLVED names (first_name, etc.) should NOT appear here;
+       * the server resolves those from the contact. */
+      variables?: Record<string, string>;
       /** Phase 3.1b.2 — ISO datetime string. If set + future, the
        * backend creates a Campaign in `status='scheduled'` instead of
        * dispatching now. The scheduler loop fires it. */

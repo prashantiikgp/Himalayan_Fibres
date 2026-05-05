@@ -15,6 +15,10 @@ import { Label } from "@/components/ui/label";
 import { useSegments } from "@/api/contacts";
 import { useWaTemplates } from "@/api/wa";
 import {
+  useEmailTemplate,
+  useEmailTemplates,
+} from "@/api/email_templates";
+import {
   useAudiencePreview,
   useCostEstimate,
   useQueueEmailBroadcast,
@@ -22,6 +26,12 @@ import {
   type BroadcastChannel,
   type BroadcastFiltersIn,
 } from "@/api/broadcasts";
+import {
+  EmailVariablesForm,
+  buildDefaultValues,
+  requiredVariableNames,
+} from "@/components/email/EmailVariablesForm";
+import { EmailRenderPreview } from "@/components/email/EmailRenderPreview";
 import { AudienceFunnel } from "./AudienceFunnel";
 import { CostEstimateCards } from "./CostEstimateCards";
 import { ScheduleSheet } from "./ScheduleSheet";
@@ -60,6 +70,8 @@ export function ComposeTab({
   const [name, setName] = useState("");
   const [segmentId, setSegmentId] = useState<string>("all_opted_in");
   const [templateName, setTemplateName] = useState<string>("");
+  const [emailTemplateId, setEmailTemplateId] = useState<number | null>(null);
+  const [emailVars, setEmailVars] = useState<Record<string, string>>({});
   const [subject, setSubject] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -74,6 +86,26 @@ export function ComposeTab({
 
   const { data: segData } = useSegments();
   const { data: tplData } = useWaTemplates({ status: "APPROVED" });
+  const { data: emailTplData } = useEmailTemplates({ active_only: true });
+  const { data: emailTpl } = useEmailTemplate(
+    channel === "email" ? emailTemplateId : null,
+  );
+
+  // When the picked email template changes, reset typed variables to its
+  // defaults (filtered to non-auto-resolved names) so old values don't
+  // leak into a different template's render.
+  useEffect(() => {
+    if (channel !== "email") return;
+    if (!emailTpl) {
+      setEmailVars({});
+      // Keep templateName in sync with the picked template's slug — the
+      // queue endpoint expects the slug, not the id.
+      if (emailTemplateId === null) setTemplateName("");
+      return;
+    }
+    setEmailVars(buildDefaultValues(emailTpl.variable_spec ?? null, "broadcast"));
+    setTemplateName(emailTpl.slug);
+  }, [channel, emailTemplateId, emailTpl]);
 
   const filters: BroadcastFiltersIn = useMemo(
     () => ({ segment_id: segmentId === "all" ? null : segmentId }),
@@ -100,13 +132,24 @@ export function ComposeTab({
   const segmentLabel =
     segData?.segments.find((s) => s.id === segmentId)?.name ?? segmentId;
 
-  // Email allows the template-id to be a free-text slug; we don't gate
-  // on it being in the WA templates list.
-  const hasTemplate = channel === "whatsapp" ? !!templateName : !!templateName;
+  // For email we now require the picked email template to be loaded so
+  // we have its variable_spec — gate on the template object, not just
+  // the typed slug. Required vars (excluding auto-resolved ones) must
+  // also be filled before Send Now is enabled.
+  const requiredEmailVars = useMemo(
+    () => requiredVariableNames(emailTpl?.variable_spec ?? null, "broadcast"),
+    [emailTpl?.variable_spec],
+  );
+  const allEmailVarsFilled = requiredEmailVars.every(
+    (n) => (emailVars[n] ?? "").trim().length > 0,
+  );
+  const hasTemplate =
+    channel === "whatsapp" ? !!templateName : !!emailTemplateId && !!emailTpl;
   const canOpenConfirm =
     name.trim().length > 0 &&
     hasTemplate &&
-    (audience?.final_recipients ?? 0) > 0;
+    (audience?.final_recipients ?? 0) > 0 &&
+    (channel === "whatsapp" || allEmailVarsFilled);
 
   function handleSendClick() {
     setSubmitError(null);
@@ -128,6 +171,8 @@ export function ComposeTab({
             setConfirmOpen(false);
             setName("");
             setTemplateName("");
+            setEmailTemplateId(null);
+            setEmailVars({});
           },
           onError: (err) =>
             setSubmitError(err instanceof Error ? err.message : "Send failed"),
@@ -140,6 +185,7 @@ export function ComposeTab({
           template_id: templateName,
           subject: subject.trim() || undefined,
           filters,
+          variables: emailVars,
         },
         {
           onSuccess: (res) => {
@@ -210,6 +256,8 @@ export function ComposeTab({
                     onClick={() => {
                       setChannel(c);
                       setTemplateName("");
+                      setEmailTemplateId(null);
+                      setEmailVars({});
                       const next = new URLSearchParams(params);
                       next.set("channel", c);
                       setParams(next, { replace: true });
@@ -269,13 +317,25 @@ export function ComposeTab({
                   ))}
                 </select>
               ) : (
-                <Input
+                <select
                   id="bc-template"
-                  value={templateName}
-                  onChange={(e) => setTemplateName(e.target.value)}
-                  placeholder="Email template slug (e.g. b2b_introduction)"
+                  value={emailTemplateId ?? ""}
+                  onChange={(e) =>
+                    setEmailTemplateId(
+                      e.target.value === "" ? null : Number(e.target.value),
+                    )
+                  }
+                  className="h-9 rounded-md border border-border bg-card px-2 text-sm text-text"
                   required
-                />
+                >
+                  <option value="">— Pick an active email template —</option>
+                  {emailTplData?.templates.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name} ({t.email_type}, {t.required_variables.length} var
+                      {t.required_variables.length === 1 ? "" : "s"})
+                    </option>
+                  ))}
+                </select>
               )}
             </Field>
             {channel === "email" && (
@@ -289,6 +349,24 @@ export function ComposeTab({
               </Field>
             )}
           </div>
+
+          {channel === "email" && emailTpl && (
+            <div className="rounded-md border border-border bg-card/40 p-card">
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-text-muted">
+                Variables
+              </h3>
+              <p className="mb-2 text-[10px] text-text-muted">
+                Per-recipient values (first name, email, company) resolve
+                from each contact at send time and don't appear here.
+              </p>
+              <EmailVariablesForm
+                spec={emailTpl.variable_spec ?? null}
+                values={emailVars}
+                onChange={setEmailVars}
+                mode="broadcast"
+              />
+            </div>
+          )}
 
           <CostEstimateCards data={cost} isLoading={costLoading} />
 
@@ -321,15 +399,33 @@ export function ComposeTab({
           </div>
         </form>
 
-        <aside className="flex flex-col gap-2 rounded-md border border-border bg-card/40 p-card text-xs text-text-muted">
-          <h3 className="text-sm font-semibold text-text">Notes</h3>
-          <ul className="list-disc space-y-1 pl-4">
-            <li>WA Send is synchronous — small batches finish in seconds.</li>
-            <li>Email Send queues in the background — progress shown above.</li>
-            <li>Template send opens a fresh 24h window per recipient.</li>
-            <li>Send confirmation requires typing <code>SEND</code>.</li>
-          </ul>
-        </aside>
+        {channel === "email" ? (
+          <aside className="flex flex-col gap-2 rounded-md border border-border bg-card/40 p-card">
+            {emailTemplateId !== null && emailTpl ? (
+              <EmailRenderPreview
+                templateId={emailTemplateId}
+                variables={emailVars}
+                subjectTemplateOverride={
+                  subject.trim().length > 0 ? subject : null
+                }
+              />
+            ) : (
+              <div className="flex h-full min-h-[200px] items-center justify-center text-xs text-text-muted">
+                Pick a template to see the rendered preview.
+              </div>
+            )}
+          </aside>
+        ) : (
+          <aside className="flex flex-col gap-2 rounded-md border border-border bg-card/40 p-card text-xs text-text-muted">
+            <h3 className="text-sm font-semibold text-text">Notes</h3>
+            <ul className="list-disc space-y-1 pl-4">
+              <li>WA Send is synchronous — small batches finish in seconds.</li>
+              <li>Email Send queues in the background — progress shown above.</li>
+              <li>Template send opens a fresh 24h window per recipient.</li>
+              <li>Send confirmation requires typing <code>SEND</code>.</li>
+            </ul>
+          </aside>
+        )}
       </div>
 
       <SendConfirmDialog
@@ -359,6 +455,7 @@ export function ComposeTab({
               template_id: templateName,
               subject: subject.trim() || undefined,
               filters,
+              variables: emailVars,
               scheduled_at: iso,
             },
             {
@@ -367,6 +464,8 @@ export function ComposeTab({
                 setScheduledOk(iso);
                 setName("");
                 setTemplateName("");
+                setEmailTemplateId(null);
+                setEmailVars({});
               },
               onError: (err) =>
                 setSubmitError(err instanceof Error ? err.message : "Schedule failed"),

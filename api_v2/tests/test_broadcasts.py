@@ -250,7 +250,7 @@ def test_queue_email_broadcast_returns_job_id(
     from services.broadcast_engine import BroadcastResult  # type: ignore[import-not-found]
     from api_v2.routers import broadcasts as broadcasts_router
 
-    def _stub(db, name, channel, template_id, filters, subject=""):  # noqa: ANN001
+    def _stub(db, name, channel, template_id, filters, subject="", **_kwargs):  # noqa: ANN001
         return BroadcastResult(
             broadcast_id=999, sent=2, failed=0, total=2, errors=[],
         )
@@ -291,6 +291,88 @@ def test_queue_email_broadcast_rejects_missing_name(
         headers=auth_headers,
     )
     assert res.status_code == 400
+
+
+def test_queue_email_broadcast_forwards_variables(
+    client: TestClient,
+    auth_headers: dict[str, str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Phase 7.2a regression: typed variables in the Compose form must
+    flow through to the broadcast engine as `extra_vars` so seeded
+    templates render with the user's chosen CTA / dates / IDs."""
+    from services.broadcast_engine import BroadcastResult  # type: ignore[import-not-found]
+    from api_v2.routers import broadcasts as broadcasts_router
+
+    captured: dict = {}
+
+    def _stub(db, name, channel, template_id, filters, subject="", **kwargs):  # noqa: ANN001
+        captured["extra_vars"] = kwargs.get("extra_vars")
+        return BroadcastResult(
+            broadcast_id=1234, sent=1, failed=0, total=1, errors=[],
+        )
+
+    monkeypatch.setattr(broadcasts_router, "send_broadcast", _stub)
+
+    res = client.post(
+        "/api/v2/broadcasts/email",
+        json={
+            "name": "Phase 7.2a regression",
+            "template_id": "b2b_introduction",
+            "filters": {"segment_id": "all_opted_in"},
+            "variables": {"order_number": "ORD-007", "tracking_id": "BD-99"},
+        },
+        headers=auth_headers,
+    )
+    assert res.status_code == 202, res.text
+    # BackgroundTasks fires synchronously under TestClient.
+    assert captured.get("extra_vars") == {
+        "order_number": "ORD-007",
+        "tracking_id": "BD-99",
+    }
+
+
+def test_queue_email_broadcast_persists_variables_on_scheduled_campaign(
+    client: TestClient,
+    auth_headers: dict[str, str],
+) -> None:
+    """Phase 7.2b: a scheduled email broadcast persists its `variables`
+    dict on the Campaign row so the scheduler fires with the right merge
+    values."""
+    import time as _time
+    from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+
+    from services.database import get_db  # type: ignore[import-not-found]
+    from services.models import Campaign  # type: ignore[import-not-found]
+
+    stamp = int(_time.time() * 1000)
+    sched_at = (_dt.now(_tz.utc) + _td(hours=1)).isoformat()
+    res = client.post(
+        "/api/v2/broadcasts/email",
+        json={
+            "name": f"sched_with_vars_{stamp}",
+            "template_id": "b2b_introduction",
+            "filters": {"segment_id": "all_opted_in"},
+            "variables": {"sample_offer": "20% off"},
+            "scheduled_at": sched_at,
+        },
+        headers=auth_headers,
+    )
+    assert res.status_code == 202, res.text
+
+    db = get_db()
+    try:
+        c = (
+            db.query(Campaign)
+            .filter(Campaign.name == f"sched_with_vars_{stamp}")
+            .order_by(Campaign.id.desc())
+            .first()
+        )
+        assert c is not None
+        assert c.status == "scheduled"
+        assert dict(c.variables or {}) == {"sample_offer": "20% off"}
+    finally:
+        db.close()
 
 
 def test_get_job_status_unknown_404(
@@ -542,7 +624,7 @@ def test_scheduler_tick_fires_due_email(
     from api_v2.services import scheduler
 
     # Stub send_broadcast — we don't actually want to hit SMTP.
-    def _stub(db, name, channel, template_id, filters, subject=""):  # noqa: ANN001
+    def _stub(db, name, channel, template_id, filters, subject="", **_kwargs):  # noqa: ANN001
         # Reflect on the DB directly: mark the matching Campaign sent.
         c = (
             db.query(Campaign)

@@ -152,6 +152,11 @@ class SendEmailBroadcastRequest(BaseModel):
     subject: str = ""
     """Override the template's subject_template. Empty = use default."""
     filters: BroadcastFiltersIn = BroadcastFiltersIn()
+    variables: dict[str, str] = {}
+    """Phase 7.2a — typed variable values applied to every recipient as
+    the `extra` dict on `build_send_variables`. Auto-resolved per-
+    recipient names (first_name, etc.) are filled by the server from
+    the contact and should not be passed here."""
     scheduled_at: datetime | None = None
 
 
