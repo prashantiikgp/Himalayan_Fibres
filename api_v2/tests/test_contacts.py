@@ -146,6 +146,68 @@ def test_contacts_no_results_returns_empty_list(
     assert body["total"] == 0
 
 
+def test_contacts_filter_by_segment_evaluates_rules(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """**Phase 6.1 fix.** Selecting a segment must evaluate its rules,
+    not compare segment_id against customer_type. Previously every
+    segment returned 0 because the comparison never matched."""
+    from services.database import get_db  # type: ignore[import-not-found]
+    from services.models import Contact, Segment  # type: ignore[import-not-found]
+
+    import uuid
+    seg_id = uuid.uuid4().hex[:8]
+    cid = f"phase6_seg_{seg_id}"
+
+    db = get_db()
+    try:
+        if not db.query(Contact).filter(Contact.id == cid).first():
+            db.add(
+                Contact(
+                    id=cid,
+                    first_name="Segment",
+                    last_name="Test",
+                    customer_type="phase6_test_type",
+                    consent_status="opted_in",
+                    country="India",
+                )
+            )
+        if db.query(Segment).filter(Segment.id == seg_id).first() is None:
+            db.add(
+                Segment(
+                    id=seg_id,
+                    name=f"Phase 6 segment {seg_id}",
+                    rules={"customer_type": ["phase6_test_type"]},
+                    is_active=True,
+                )
+            )
+        db.commit()
+    finally:
+        db.close()
+
+    res = client.get(
+        f"/api/v2/contacts?segment={seg_id}&page_size=200",
+        headers=auth_headers,
+    )
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert body["total"] >= 1
+    assert any(c["id"] == cid for c in body["contacts"])
+
+
+def test_contacts_filter_by_unknown_segment_returns_empty(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """Unknown segment id → empty result, not 500."""
+    res = client.get(
+        "/api/v2/contacts?segment=nonexistent_xyz",
+        headers=auth_headers,
+    )
+    assert res.status_code == 200
+    assert res.json()["contacts"] == []
+    assert res.json()["total"] == 0
+
+
 def test_contacts_pagination_clamps_high_page(
     client: TestClient, auth_headers: dict[str, str]
 ) -> None:

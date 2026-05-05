@@ -53,8 +53,10 @@ from services.interactions import (  # type: ignore[import-not-found]
 from services.models import (  # type: ignore[import-not-found]
     Contact,
     ContactNote,
+    Segment,
 )
 from services.segments import (  # type: ignore[import-not-found]
+    build_segment_query,
     count_segment_members,
     get_active_segments_cached,
     get_all_tags_from_contacts,
@@ -123,7 +125,41 @@ async def list_contacts(
         )
 
         if segment and segment != "all":
-            q = q.filter(Contact.customer_type == segment)
+            # Phase 6.1 — `segment` is a Segment row id (a hash like
+            # "3ec0ab03"), not a customer_type value. Look up the
+            # segment, evaluate its rules via v1's build_segment_query,
+            # and intersect with the existing query. Previously this
+            # filtered `customer_type == segment_id` which never matched
+            # and silently returned 0 contacts for every segment pick.
+            seg_row = (
+                db.query(Segment).filter(Segment.id == segment).first()
+            )
+            if seg_row is None:
+                return ContactListResponse(
+                    contacts=[], total=0, page=0,
+                    page_size=page_size, total_pages=1,
+                )
+            seg_q, seg_tag_filter = build_segment_query(db, seg_row.rules or {})
+            seg_member_ids: set[str] = {row.id for row in seg_q.all()}
+            if seg_tag_filter:
+                wanted = set(seg_tag_filter)
+                seg_member_ids = {
+                    cid for cid in seg_member_ids
+                    if any(
+                        t in wanted
+                        for t in (
+                            db.query(Contact.tags)
+                            .filter(Contact.id == cid)
+                            .scalar() or []
+                        )
+                    )
+                }
+            if not seg_member_ids:
+                return ContactListResponse(
+                    contacts=[], total=0, page=0,
+                    page_size=page_size, total_pages=1,
+                )
+            q = q.filter(Contact.id.in_(seg_member_ids))
         # `lifecycle` is a list (FastAPI populates ["x"] for ?lifecycle=x and
         # ["x", "y"] for ?lifecycle=x&lifecycle=y). Treat "all" as a no-op
         # placeholder for the single-select dropdown's default value.
