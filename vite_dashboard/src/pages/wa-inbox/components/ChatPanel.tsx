@@ -7,10 +7,7 @@
  * this is the B2 fix.
  */
 
-import { useEffect, useRef, useState } from "react";
-import { Send, Paperclip } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ChannelBadge } from "@/components/badges/ChannelBadge";
+import { useEffect, useRef } from "react";
 import { useConversationDetail } from "@/api/wa";
 import { formatRelative } from "@/lib/format";
 import { MessageBubble } from "./MessageBubble";
@@ -33,11 +30,30 @@ export function ChatPanel({
 }) {
   const { data, isLoading, error } = useConversationDetail(selectedContactId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageContainerRef = useRef<HTMLDivElement>(null);
+  const previousLengthRef = useRef(0);
 
-  // Auto-scroll to the latest message whenever a new one arrives.
+  // Auto-scroll only when (a) a NEW message arrives AND (b) the user is
+  // already near the bottom — so reading older messages isn't disrupted
+  // by the 15s refetch (review fix #7).
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const length = data?.messages.length ?? 0;
+    const grew = length > previousLengthRef.current;
+    previousLengthRef.current = length;
+    if (!grew) return;
+    const el = messageContainerRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    if (distanceFromBottom < 120) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [data?.messages.length]);
+
+  // Reset the previous-length tracker when switching conversations so a
+  // fresh chat doesn't suppress the initial scroll.
+  useEffect(() => {
+    previousLengthRef.current = 0;
+  }, [selectedContactId]);
 
   if (selectedContactId === null) {
     return (
@@ -74,8 +90,9 @@ export function ChatPanel({
             {data.contact_company || data.contact_phone}
           </span>
         </div>
+        {/* Review fix #13: dropped the ChannelBadge — every chat here is */}
+        {/* WhatsApp by construction so the badge was visual noise. */}
         <div className="flex items-center gap-2 text-xs">
-          <ChannelBadge channel="whatsapp" />
           {data.window_open ? (
             <span
               className="rounded-pill border border-success/40 bg-success/10 px-2 py-0.5 text-success"
@@ -91,7 +108,7 @@ export function ChatPanel({
         </div>
       </header>
 
-      <div className="flex-1 overflow-auto px-card py-3">
+      <div ref={messageContainerRef} className="flex-1 overflow-auto px-card py-3">
         <ul className="flex flex-col gap-2">
           {data.messages.length === 0 && (
             <li className="text-center text-xs text-text-muted">
@@ -113,7 +130,10 @@ export function ChatPanel({
       </div>
 
       {data.window_open && hasInbound ? (
-        <Composer placeholder={labels.compose_placeholder} contactId={data.contact_id} />
+        // Review fix #6: instead of greyed-out Send/Attach that look
+        // broken, show a single placeholder banner. The real composer
+        // wires up in Phase 2.1.
+        <ComposerPlaceholder placeholder={labels.compose_placeholder} />
       ) : (
         <ClosedWindowCta
           warning={hasInbound ? labels.window_warning : labels.new_conv_warning}
@@ -124,39 +144,11 @@ export function ChatPanel({
   );
 }
 
-function Composer({
-  placeholder,
-  contactId,
-}: {
-  placeholder: string;
-  contactId: string;
-}) {
-  const [text, setText] = useState("");
-
-  // Send wiring lands in Phase 2.1 — for now the composer is functional
-  // but the Send button is disabled to avoid pretending to send.
-  void contactId;
-  const canSend = text.trim().length > 0;
-
+function ComposerPlaceholder({ placeholder }: { placeholder: string }) {
   return (
-    <div className="border-t border-border px-card py-2">
-      <div className="flex items-end gap-2">
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={placeholder}
-          rows={1}
-          className="min-h-[36px] flex-1 resize-none rounded-md border border-border bg-card p-2 text-sm text-text placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-        />
-        <Button type="button" variant="outline" size="sm" disabled aria-label="Attach">
-          <Paperclip className="h-4 w-4" />
-        </Button>
-        <Button type="button" size="sm" disabled={!canSend} aria-label="Send">
-          <Send className="h-4 w-4" />
-        </Button>
-      </div>
-      <p className="mt-1 text-[10px] text-text-muted">
-        Send wiring lands in Phase 2.1.
+    <div className="border-t border-border bg-card/40 px-card py-3">
+      <p className="text-xs text-text-muted">
+        Reply composer ({placeholder.toLowerCase()}) lands in Phase 2.1.
       </p>
     </div>
   );
@@ -173,10 +165,17 @@ function ClosedWindowCta({
     <div className="flex flex-col gap-2 border-t border-warning/40 bg-warning/5 px-card py-3">
       <p className="text-sm text-warning">{warning}</p>
       <div className="flex justify-end">
-        <Button type="button" size="sm" variant="outline" onClick={onOpenTemplateSheet}>
+        <button
+          type="button"
+          onClick={onOpenTemplateSheet}
+          className="rounded-md border border-border bg-card px-3 py-1 text-xs font-medium text-text hover:bg-card/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
           Send a template
-        </Button>
+        </button>
       </div>
     </div>
   );
 }
+
+// Composer + Composer-state useState removed — Phase 2.1 reintroduces
+// them with a working Send button.

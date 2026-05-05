@@ -1,17 +1,11 @@
-"""Pydantic schemas for /api/v2/wa/* endpoints (Phase 2).
-
-Mirrors the WAChat / WAMessage / WATemplate ORM models in
-hf_dashboard/services/models.py, narrowed to the columns the v2 frontend
-actually renders. Plan D Phase 1.3 column-narrowing applied throughout
-so the wire payload stays small.
-"""
+"""Pydantic schemas for /api/v2/wa/* endpoints (Phase 2)."""
 
 from __future__ import annotations
 
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 
 
 class ConversationListItem(BaseModel):
@@ -33,6 +27,13 @@ class ConversationListItem(BaseModel):
 class ConversationListResponse(BaseModel):
     conversations: list[ConversationListItem]
     total: int
+    page: int
+    page_size: int
+    total_pages: int
+
+
+_INBOUND_DIRECTIONS = {"in", "incoming", "received"}
+_OUTBOUND_DIRECTIONS = {"out", "outgoing", "sent"}
 
 
 class WAMessageOut(BaseModel):
@@ -42,6 +43,9 @@ class WAMessageOut(BaseModel):
 
     id: int
     direction: Literal["in", "out"]
+    """Normalized — DB may carry legacy values like 'incoming'/'outgoing'
+    from older webhook code; the validator below maps them to in/out
+    (review fix #5)."""
     status: str
     text: str
     media_type: str | None
@@ -51,6 +55,19 @@ class WAMessageOut(BaseModel):
     error_code: str | None
     error_detail: str | None
     created_at: datetime
+
+    @field_validator("direction", mode="before")
+    @classmethod
+    def _normalize_direction(cls, v: object) -> str:
+        s = str(v or "").lower().strip()
+        if s in _INBOUND_DIRECTIONS:
+            return "in"
+        if s in _OUTBOUND_DIRECTIONS:
+            return "out"
+        # Pass through unrecognized values so Pydantic's Literal check
+        # still raises and surfaces unknown direction strings instead of
+        # silently coercing them.
+        return s
 
 
 class ConversationDetail(BaseModel):
@@ -87,8 +104,9 @@ class WATemplateOut(BaseModel):
     header_text: str | None
     footer_text: str | None
     variables: list[str]
-    """Names of {{ }} placeholders in body/header/buttons — drives the
-    variables form (B1 fix: render exactly N inputs, no padding)."""
+    """Names of {{ }} placeholders in body/header/footer/buttons/components.
+    First-appearance order so the variables form renders inputs in the
+    same sequence as the template body (B1 fix consumer)."""
 
 
 class WATemplatesResponse(BaseModel):

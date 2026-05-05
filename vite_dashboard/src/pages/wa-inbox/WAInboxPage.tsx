@@ -29,8 +29,10 @@ export function WAInboxPage() {
     setParams(next, { replace: true });
   }
 
+  // Review fix #12: previously used a CSS var (--shell-topbar-height)
+  // that no engine emitted. AppShell topbar is fixed at 56px (h-14).
   return (
-    <div className="grid h-[calc(100vh-var(--shell-topbar-height,56px))] grid-cols-[minmax(240px,1fr)_minmax(380px,2fr)_minmax(320px,2fr)] gap-2 p-2">
+    <div className="grid h-[calc(100vh-56px)] grid-cols-[minmax(240px,1fr)_minmax(380px,2fr)_minmax(320px,2fr)] gap-2 p-2">
       <section
         aria-label="Conversations"
         className="overflow-hidden rounded-lg border border-border bg-card/40"

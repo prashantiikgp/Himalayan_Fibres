@@ -106,7 +106,7 @@ app.include_router(health.router, prefix="/api/v2")
 app.include_router(auth.router, prefix="/api/v2/auth", tags=["auth"])
 app.include_router(dashboard.router, prefix="/api/v2", tags=["dashboard"])
 app.include_router(contacts.router, prefix="/api/v2", tags=["contacts"])
-app.include_router(wa.router)  # router already prefixes /api/v2/wa
+app.include_router(wa.router, prefix="/api/v2/wa", tags=["wa"])
 
 # Static SPA mount — built dist/ from vite_dashboard.
 # In dev (where dist/ doesn't exist), this is skipped silently.

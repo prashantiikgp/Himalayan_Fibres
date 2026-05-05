@@ -21,6 +21,9 @@ export type ConversationListItem = {
 export type ConversationListResponse = {
   conversations: ConversationListItem[];
   total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
 };
 
 export type WAMessageOut = {
@@ -70,13 +73,26 @@ export type WATemplatesResponse = {
   total: number;
 };
 
-export function useConversations(search?: string, archived = false) {
+export type ConversationsQuery = {
+  search?: string;
+  archived?: boolean;
+  page?: number;
+  page_size?: number;
+};
+
+export function useConversations(q: ConversationsQuery = {}) {
   const params = new URLSearchParams();
-  if (search) params.set("search", search);
-  if (archived) params.set("archived", "true");
+  if (q.search) params.set("search", q.search);
+  if (q.archived) params.set("archived", "true");
+  if (q.page !== undefined) params.set("page", String(q.page));
+  if (q.page_size !== undefined) params.set("page_size", String(q.page_size));
   const qs = params.toString() ? `?${params.toString()}` : "";
   return useQuery({
-    queryKey: ["wa", "conversations", { search: search ?? "", archived }],
+    queryKey: [
+      "wa",
+      "conversations",
+      { search: q.search ?? "", archived: !!q.archived, page: q.page ?? 0, page_size: q.page_size ?? 50 },
+    ],
     queryFn: () => apiFetch<ConversationListResponse>(`/api/v2/wa/conversations${qs}`),
     placeholderData: keepPreviousData,
     // Light polling for now — Phase 2.1 swaps this for SSE.

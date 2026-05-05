@@ -6,7 +6,7 @@
  * active conversation in the parent.
  */
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useConversations, type ConversationListItem } from "@/api/wa";
@@ -25,7 +25,40 @@ export function ConversationList({
 }) {
   const [search, setSearch] = useState("");
   const debounced = useDebouncedValue(search, 250);
-  const { data, isLoading, error } = useConversations(debounced || undefined);
+  // Phase 2.0 always shows page 0; pagination UI lands when the inbox
+  // accumulates enough chats to need it.
+  const { data, isLoading, error } = useConversations({
+    search: debounced || undefined,
+    page_size: 100,
+  });
+  const listRef = useRef<HTMLUListElement>(null);
+
+  // Keyboard navigation per WAI-ARIA listbox role (review fix #10):
+  // ArrowUp/Down move focus + selection within the list, Home/End jump
+  // to ends. Enter/Space on a row activates it (handled per-row).
+  function handleListKeyDown(e: React.KeyboardEvent<HTMLUListElement>) {
+    if (!data) return;
+    const total = data.conversations.length;
+    if (total === 0) return;
+    const currentIdx = data.conversations.findIndex(
+      (c) => c.contact_id === selectedContactId,
+    );
+
+    let nextIdx: number | null = null;
+    if (e.key === "ArrowDown") nextIdx = Math.min(total - 1, (currentIdx < 0 ? -1 : currentIdx) + 1);
+    else if (e.key === "ArrowUp") nextIdx = Math.max(0, (currentIdx < 0 ? total : currentIdx) - 1);
+    else if (e.key === "Home") nextIdx = 0;
+    else if (e.key === "End") nextIdx = total - 1;
+    if (nextIdx === null) return;
+
+    const next = data.conversations[nextIdx];
+    if (!next) return;
+    e.preventDefault();
+    onSelect(next.contact_id);
+    // Move DOM focus to the newly-selected row so the ring follows it.
+    const rows = listRef.current?.querySelectorAll<HTMLLIElement>('[role="option"]');
+    rows?.[nextIdx]?.focus();
+  }
 
   return (
     <div className="flex h-full flex-col">
@@ -40,7 +73,14 @@ export function ConversationList({
           />
         </div>
       </div>
-      <ul className="flex-1 overflow-auto" role="listbox" aria-label="Conversations">
+      <ul
+        ref={listRef}
+        className="flex-1 overflow-auto"
+        role="listbox"
+        aria-label="Conversations"
+        tabIndex={data && data.conversations.length > 0 ? 0 : -1}
+        onKeyDown={handleListKeyDown}
+      >
         {isLoading && (
           <li className="p-card text-sm text-text-muted">Loading conversations…</li>
         )}

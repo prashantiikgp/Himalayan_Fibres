@@ -4,6 +4,10 @@
  * Decisions:
  *   - 30s staleTime: most dashboard data is fine to refetch on window focus,
  *     so the cache is short-lived. Per-query overrides are fine.
+ *   - refetchOnWindowFocus: false — pages that need live data already use
+ *     refetchInterval (e.g. WA Inbox polls every 15-30s). Without this,
+ *     tabbing back fires an extra request on top of the polling, which
+ *     is wasteful and can spike rate-limited APIs (review fix #8).
  *   - 1 retry on network errors only, not on 4xx (no point retrying 401/403).
  *   - On 401, the apiFetch helper redirects to /login; queries don't need to.
  */
@@ -15,7 +19,7 @@ export const queryClient = new QueryClient({
     queries: {
       staleTime: 30 * 1000,
       gcTime: 5 * 60 * 1000,
-      refetchOnWindowFocus: true,
+      refetchOnWindowFocus: false,
       retry: (failureCount, error) => {
         if (error instanceof ApiError) {
           // Don't retry 4xx — caller will see the error and decide.
