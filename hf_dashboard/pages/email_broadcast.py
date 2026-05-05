@@ -933,6 +933,24 @@ def build(ctx) -> dict:
                 )
                 if result["success"]:
                     sent += 1
+                    # Append to per-contact timeline so the Activity tab on the
+                    # contact drawer (v1) and v2's GET /contacts/{id} surface
+                    # this campaign send. commit=False — the surrounding tx
+                    # will commit at the end of the send loop.
+                    from services.interactions import log_interaction
+                    log_interaction(
+                        db,
+                        contact_id=contact.id,
+                        kind="email_sent",
+                        summary=f"{tpl.name}: {rendered_subject}"[:255],
+                        payload={
+                            "campaign_id": campaign_id,
+                            "template_slug": template_slug,
+                            "subject": rendered_subject,
+                        },
+                        actor="campaign",
+                        commit=False,
+                    )
                 else:
                     failed += 1
 
