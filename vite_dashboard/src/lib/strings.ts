@@ -132,6 +132,15 @@ export const STRINGS = {
         lifecycle: "Lifecycle",
         consent: "Consent",
       },
+      lifecycleActions: {
+        label: "Mark as",
+        replied: "Replied",
+        interested: "Interested",
+        converted: "Converted",
+        notInterested: "Not interested",
+        savingPrefix: "Saving ",
+        failedPrefix: "Failed to update lifecycle: ",
+      },
     },
   },
 } as const;

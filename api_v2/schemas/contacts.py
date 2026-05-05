@@ -121,6 +121,21 @@ class NoteCreate(BaseModel):
     body: str = Field(min_length=1)
 
 
+class LifecycleUpdate(BaseModel):
+    """Body for POST /api/v2/contacts/{id}/lifecycle. Quick-action drawer
+    button click → updates contact.lifecycle + appends a timeline entry.
+    """
+
+    lifecycle: Literal[
+        "new_lead", "contacted", "interested", "customer", "churned"
+    ]
+    note: str | None = Field(
+        default=None,
+        max_length=255,
+        description="Optional short reason — appended to the interaction summary.",
+    )
+
+
 class ImportResponse(BaseModel):
     imported: int
     skipped: int

@@ -36,6 +36,7 @@ from api_v2.schemas.contacts import (
     ContactUpdate,
     CountriesResponse,
     ImportResponse,
+    LifecycleUpdate,
     NoteCreate,
     SegmentSummary,
     SegmentsResponse,
@@ -85,7 +86,14 @@ def _is_real_email(email: str | None) -> bool:
 async def list_contacts(
     _auth: Annotated[None, Depends(require_auth)],
     segment: str | None = Query(None, description="Filter by customer_type segment id"),
-    lifecycle: str | None = Query(None, description="Filter by lifecycle stage id"),
+    lifecycle: list[str] = Query(
+        default_factory=list,
+        description=(
+            "Filter by lifecycle stage. Repeat the param for OR matching "
+            "(e.g. ?lifecycle=contacted&lifecycle=interested for "
+            "Needs-follow-up). Backward-compatible with the single-value form."
+        ),
+    ),
     country: str | None = Query(None),
     channel: Literal["all", "email", "whatsapp", "both"] = "all",
     tags: list[str] = Query(default_factory=list),
@@ -116,8 +124,12 @@ async def list_contacts(
 
         if segment and segment != "all":
             q = q.filter(Contact.customer_type == segment)
-        if lifecycle and lifecycle != "all":
-            q = q.filter(Contact.lifecycle == lifecycle)
+        # `lifecycle` is a list (FastAPI populates ["x"] for ?lifecycle=x and
+        # ["x", "y"] for ?lifecycle=x&lifecycle=y). Treat "all" as a no-op
+        # placeholder for the single-select dropdown's default value.
+        active_lifecycles = [lc for lc in lifecycle if lc and lc != "all"]
+        if active_lifecycles:
+            q = q.filter(Contact.lifecycle.in_(active_lifecycles))
         if country and country != "all":
             q = q.filter(Contact.country == country)
         if channel == "email":
@@ -243,6 +255,83 @@ async def list_contact_countries(
         db.close()
 
 
+def _build_contact_detail(db, c) -> ContactDetail:  # type: ignore[no-untyped-def]
+    """Compose the full drawer payload for a Contact row.
+
+    Centralised so GET /contacts/{id} and POST /contacts/{id}/lifecycle
+    both return the same shape after a write.
+    """
+    all_segments = get_active_segments_cached()
+    seg_ids = segments_for_contact(c, all_segments)
+    by_id = {s.id: s for s in all_segments}
+    matched = [
+        SegmentSummary(
+            id=s.id,
+            name=s.name,
+            color=getattr(s, "color", None),
+            description=getattr(s, "description", None),
+            member_count=count_segment_members(db, s),
+        )
+        for sid in seg_ids
+        if (s := by_id.get(sid)) is not None
+    ]
+
+    threaded_rows = (
+        db.query(ContactNote)
+        .filter(ContactNote.contact_id == c.id)
+        .order_by(ContactNote.created_at.desc())
+        .all()
+    )
+    threaded_notes = [
+        ContactNoteOut(id=n.id, body=n.body, author=n.author, created_at=_iso(n.created_at))
+        for n in threaded_rows
+    ]
+
+    try:
+        activity_rows = get_interactions(db, c.id, limit=50)
+    except Exception:
+        activity_rows = []
+    activity = [
+        ContactInteractionOut(
+            id=a.id,
+            kind=a.kind,
+            summary=a.summary or "",
+            actor=getattr(a, "actor", None),
+            created_at=_iso(a.created_at),
+        )
+        for a in activity_rows
+    ]
+
+    channels: list[Literal["email", "whatsapp"]] = []
+    if _is_real_email(c.email):
+        channels.append("email")
+    if c.wa_id:
+        channels.append("whatsapp")
+
+    return ContactDetail(
+        id=c.id,
+        first_name=c.first_name or "",
+        last_name=c.last_name or "",
+        company=c.company or "",
+        email=c.email if _is_real_email(c.email) else "",
+        phone=c.phone or "",
+        wa_id=c.wa_id,
+        lifecycle=c.lifecycle or "",
+        customer_type=c.customer_type or "",
+        consent_status=c.consent_status or "",
+        country=c.country or "",
+        tags=list(c.tags or []),
+        segments=seg_ids,
+        channels=channels,
+        customer_subtype=c.customer_subtype or "",
+        geography=c.geography or "",
+        legacy_notes=c.notes or "",
+        threaded_notes=threaded_notes,
+        activity=activity,
+        matched_segments=matched,
+    )
+
+
 @router.get("/contacts/{contact_id}", response_model=ContactDetail)
 async def get_contact(
     contact_id: str,
@@ -254,76 +343,67 @@ async def get_contact(
         c = db.query(Contact).filter(Contact.id == contact_id).one_or_none()
         if c is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found")
+        return _build_contact_detail(db, c)
+    finally:
+        db.close()
 
-        all_segments = get_active_segments_cached()
-        seg_ids = segments_for_contact(c, all_segments)
-        by_id = {s.id: s for s in all_segments}
-        matched = [
-            SegmentSummary(
-                id=s.id,
-                name=s.name,
-                color=getattr(s, "color", None),
-                description=getattr(s, "description", None),
-                member_count=count_segment_members(db, s),
-            )
-            for sid in seg_ids
-            if (s := by_id.get(sid)) is not None
-        ]
 
-        threaded_rows = (
-            db.query(ContactNote)
-            .filter(ContactNote.contact_id == c.id)
-            .order_by(ContactNote.created_at.desc())
-            .all()
+@router.post(
+    "/contacts/{contact_id}/lifecycle",
+    response_model=ContactDetail,
+)
+async def set_contact_lifecycle(
+    contact_id: str,
+    body: LifecycleUpdate,
+    _auth: Annotated[None, Depends(require_auth)],
+) -> ContactDetail:
+    """Quick-action lifecycle move for the contact drawer.
+
+    Updates `contact.lifecycle` and appends a `lifecycle_<value>` interaction
+    so the Activity tab reflects the move. Returns the full ContactDetail so
+    the frontend can re-render the drawer in one round-trip.
+    """
+    db = get_db()
+    try:
+        c = db.query(Contact).filter(Contact.id == contact_id).one_or_none()
+        if c is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found")
+
+        old_lifecycle = c.lifecycle or "new_lead"
+        c.lifecycle = body.lifecycle
+
+        summary = f"{old_lifecycle} → {body.lifecycle}"
+        if body.note:
+            summary = f"{summary} — {body.note}"
+        log_interaction(
+            db,
+            contact_id=contact_id,
+            kind=f"lifecycle_{body.lifecycle}",
+            summary=summary[:255],
+            payload={
+                "old": old_lifecycle,
+                "new": body.lifecycle,
+                "note": body.note,
+            },
+            actor="user",
+            commit=False,
         )
-        threaded_notes = [
-            ContactNoteOut(id=n.id, body=n.body, author=n.author, created_at=_iso(n.created_at))
-            for n in threaded_rows
-        ]
 
         try:
-            activity_rows = get_interactions(db, c.id, limit=50)
-        except Exception:
-            activity_rows = []
-        activity = [
-            ContactInteractionOut(
-                id=a.id,
-                kind=a.kind,
-                summary=a.summary or "",
-                actor=getattr(a, "actor", None),
-                created_at=_iso(a.created_at),
-            )
-            for a in activity_rows
-        ]
+            db.commit()
+        except IntegrityError as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Constraint violation: {getattr(e.orig, 'args', [str(e)])[0]}",
+            ) from e
 
-        channels: list[Literal["email", "whatsapp"]] = []
-        if _is_real_email(c.email):
-            channels.append("email")
-        if c.wa_id:
-            channels.append("whatsapp")
-
-        return ContactDetail(
-            id=c.id,
-            first_name=c.first_name or "",
-            last_name=c.last_name or "",
-            company=c.company or "",
-            email=c.email if _is_real_email(c.email) else "",
-            phone=c.phone or "",
-            wa_id=c.wa_id,
-            lifecycle=c.lifecycle or "",
-            customer_type=c.customer_type or "",
-            consent_status=c.consent_status or "",
-            country=c.country or "",
-            tags=list(c.tags or []),
-            segments=seg_ids,
-            channels=channels,
-            customer_subtype=c.customer_subtype or "",
-            geography=c.geography or "",
-            legacy_notes=c.notes or "",
-            threaded_notes=threaded_notes,
-            activity=activity,
-            matched_segments=matched,
-        )
+        return _build_contact_detail(db, c)
+    except HTTPException:
+        raise
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()
 

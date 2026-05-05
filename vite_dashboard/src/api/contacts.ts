@@ -32,7 +32,14 @@ export type ContactListResponse = {
 
 export type ContactsQuery = {
   segment?: string;
+  /** Single lifecycle filter (single-select dropdown). "all" = no filter. */
   lifecycle?: string;
+  /**
+   * Multi-value lifecycle filter — used by the "Needs follow-up" chip,
+   * which sets `["contacted", "interested"]`. Takes precedence over
+   * `lifecycle` when non-empty.
+   */
+  lifecycles?: string[];
   country?: string;
   channel?: "all" | "email" | "whatsapp" | "both";
   tags?: string[];
@@ -44,7 +51,11 @@ export type ContactsQuery = {
 function toQueryString(q: ContactsQuery): string {
   const sp = new URLSearchParams();
   if (q.segment && q.segment !== "all") sp.set("segment", q.segment);
-  if (q.lifecycle && q.lifecycle !== "all") sp.set("lifecycle", q.lifecycle);
+  if (q.lifecycles && q.lifecycles.length > 0) {
+    for (const lc of q.lifecycles) sp.append("lifecycle", lc);
+  } else if (q.lifecycle && q.lifecycle !== "all") {
+    sp.set("lifecycle", q.lifecycle);
+  }
   if (q.country && q.country !== "all") sp.set("country", q.country);
   if (q.channel && q.channel !== "all") sp.set("channel", q.channel);
   if (q.search) sp.set("search", q.search);
@@ -138,6 +149,24 @@ export async function addContactNote(id: string, body: string): Promise<ContactN
   return apiFetch<ContactNoteOut>(`/api/v2/contacts/${id}/notes`, {
     method: "POST",
     body: JSON.stringify({ body }),
+  });
+}
+
+export type LifecycleValue =
+  | "new_lead"
+  | "contacted"
+  | "interested"
+  | "customer"
+  | "churned";
+
+export async function setContactLifecycle(
+  id: string,
+  lifecycle: LifecycleValue,
+  note?: string,
+): Promise<ContactDetail> {
+  return apiFetch<ContactDetail>(`/api/v2/contacts/${id}/lifecycle`, {
+    method: "POST",
+    body: JSON.stringify({ lifecycle, note }),
   });
 }
 

@@ -19,7 +19,12 @@ import { useUrlState } from "@/lib/url-state";
 import { useDebouncedValue } from "@/lib/hooks";
 import { Button } from "@/components/ui/button";
 import { ContactsTable } from "./components/ContactsTable";
-import { ContactsFilterBar, DEFAULT_FILTERS, type ContactFilters } from "./components/ContactsFilterBar";
+import {
+  ContactsFilterBar,
+  DEFAULT_FILTERS,
+  NEEDS_FOLLOWUP_LIFECYCLES,
+  type ContactFilters,
+} from "./components/ContactsFilterBar";
 import { ContactDrawer } from "./components/ContactDrawer";
 import { AddContactDialog } from "./components/AddContactDialog";
 import { ImportContactsDialog } from "./components/ImportContactsDialog";
@@ -59,6 +64,7 @@ export function ContactsPage() {
       country: url.get("country", DEFAULT_FILTERS.country),
       channel: (url.get("channel", DEFAULT_FILTERS.channel) as ContactFilters["channel"]) ?? "all",
       search: url.get("search", ""),
+      needsFollowup: url.get("needs_followup", "") === "1",
     }),
     [url],
   );
@@ -67,7 +73,17 @@ export function ContactsPage() {
   const [drawerContact, setDrawerContact] = useState<ContactRow | null>(null);
 
   const handleFilterChange = (next: Partial<ContactFilters>) => {
-    url.set({ ...next, page: null });
+    // Map the boolean toggle to the URL "needs_followup=1" representation,
+    // since useUrlState only round-trips strings.
+    const urlNext: Record<string, string | null> = {};
+    for (const [key, val] of Object.entries(next)) {
+      if (key === "needsFollowup") {
+        urlNext.needs_followup = val ? "1" : null;
+      } else {
+        urlNext[key] = val == null ? null : String(val);
+      }
+    }
+    url.set({ ...urlNext, page: null });
     setPage(0);
   };
 
@@ -83,7 +99,11 @@ export function ContactsPage() {
 
   const { data, isLoading, error } = useContacts({
     segment: filters.segment,
-    lifecycle: filters.lifecycle,
+    // Needs-follow-up overrides the single-select dropdown — expand it into
+    // the multi-value `lifecycles` param so the API filters by lifecycle in
+    // [contacted, interested].
+    lifecycle: filters.needsFollowup ? "all" : filters.lifecycle,
+    lifecycles: filters.needsFollowup ? [...NEEDS_FOLLOWUP_LIFECYCLES] : undefined,
     country: filters.country,
     channel: filters.channel,
     search: debouncedSearch,

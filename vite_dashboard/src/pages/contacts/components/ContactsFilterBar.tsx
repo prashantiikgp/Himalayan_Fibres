@@ -8,6 +8,7 @@
  */
 
 import { useSegments, useContactCountries, useContactTags } from "@/api/contacts";
+import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +19,16 @@ export type ContactFilters = {
   country: string;
   channel: "all" | "email" | "whatsapp" | "both";
   search: string;
+  /**
+   * Quick-toggle for the "Needs follow-up" cohort = lifecycle in
+   * [contacted, interested]. Takes precedence over the single-select
+   * lifecycle dropdown when on. The dropdown is disabled while active.
+   */
+  needsFollowup: boolean;
 };
+
+/** Multi-value lifecycle filter expanded for the "Needs follow-up" chip. */
+export const NEEDS_FOLLOWUP_LIFECYCLES = ["contacted", "interested"] as const;
 
 export const DEFAULT_FILTERS: ContactFilters = {
   segment: "all",
@@ -26,6 +36,7 @@ export const DEFAULT_FILTERS: ContactFilters = {
   country: "all",
   channel: "all",
   search: "",
+  needsFollowup: false,
 };
 
 const LIFECYCLES = [
@@ -120,6 +131,16 @@ export function ContactsFilterBar({
             onChange={(e) => onChange({ search: e.target.value })}
           />
         </div>
+        <Button
+          type="button"
+          size="sm"
+          variant={value.needsFollowup ? "default" : "outline"}
+          onClick={() => onChange({ needsFollowup: !value.needsFollowup })}
+          className="h-8 self-start text-xs"
+          aria-pressed={value.needsFollowup}
+        >
+          🔥 Needs follow-up
+        </Button>
         <NativeSelect
           label="Segment"
           value={value.segment}
@@ -127,8 +148,8 @@ export function ContactsFilterBar({
           onChange={(v) => onChange({ segment: v })}
         />
         <NativeSelect
-          label="Lifecycle"
-          value={value.lifecycle}
+          label={value.needsFollowup ? "Lifecycle (overridden)" : "Lifecycle"}
+          value={value.needsFollowup ? "all" : value.lifecycle}
           options={LIFECYCLES}
           onChange={(v) => onChange({ lifecycle: v })}
         />

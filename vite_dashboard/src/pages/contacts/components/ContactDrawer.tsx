@@ -30,11 +30,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   addContactNote,
+  setContactLifecycle,
   updateContact,
   useContactDetail,
   type ContactDetail,
   type ContactRow,
   type ContactUpdate,
+  type LifecycleValue,
 } from "@/api/contacts";
 import { formatRelative } from "@/lib/format";
 import { track } from "@/lib/analytics";
@@ -83,6 +85,16 @@ export function ContactDrawer({
           )}
           {detail && contact && (
             <Tabs defaultValue="profile">
+              <LifecycleQuickActions
+                contactId={contact.id}
+                currentLifecycle={detail.lifecycle}
+                onUpdated={() => {
+                  queryClient.invalidateQueries({ queryKey: ["contacts"] });
+                  queryClient.invalidateQueries({
+                    queryKey: ["contacts", "detail", contact.id],
+                  });
+                }}
+              />
               <TabsList className="w-full justify-start">
                 <TabsTrigger value="profile">{STRINGS.contacts.drawer.tabProfile}</TabsTrigger>
                 <TabsTrigger value="tags">{STRINGS.contacts.drawer.tabTags}</TabsTrigger>
@@ -156,6 +168,83 @@ export function ContactDrawer({
     </Sheet>
   );
 }
+
+/**
+ * Quick-action lifecycle buttons. One click moves the contact through
+ * the lifecycle (new_lead → contacted → interested → customer | churned)
+ * and writes a `lifecycle_<value>` interaction so the Activity tab and
+ * the "Needs follow-up" filter immediately reflect it.
+ *
+ * Mapped buttons (from BACKLOG_lifecycle_workflow.md):
+ *   ✉️ Replied         → contacted
+ *   ⭐ Interested       → interested
+ *   ✅ Converted        → customer
+ *   ❌ Not interested   → churned
+ */
+function LifecycleQuickActions({
+  contactId,
+  currentLifecycle,
+  onUpdated,
+}: {
+  contactId: string;
+  currentLifecycle: string;
+  onUpdated: () => void;
+}) {
+  const t = STRINGS.contacts.drawer.lifecycleActions;
+  const [pending, setPending] = useState<LifecycleValue | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const ACTIONS: { value: LifecycleValue; label: string; icon: string }[] = [
+    { value: "contacted", label: t.replied, icon: "✉️" },
+    { value: "interested", label: t.interested, icon: "⭐" },
+    { value: "customer", label: t.converted, icon: "✅" },
+    { value: "churned", label: t.notInterested, icon: "❌" },
+  ];
+
+  async function handleClick(value: LifecycleValue) {
+    setPending(value);
+    setError(null);
+    try {
+      await setContactLifecycle(contactId, value);
+      track("contact_lifecycle_quick_action", { from: currentLifecycle, to: value });
+      onUpdated();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setPending(null);
+    }
+  }
+
+  return (
+    <div className="mb-3 flex flex-col gap-2">
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-text-muted">{t.label}:</span>
+        <div className="flex flex-wrap gap-1.5">
+          {ACTIONS.map((a) => (
+            <Button
+              key={a.value}
+              type="button"
+              size="sm"
+              variant={currentLifecycle === a.value ? "default" : "outline"}
+              disabled={pending !== null}
+              onClick={() => handleClick(a.value)}
+              className="h-7 px-2 text-xs"
+            >
+              <span className="mr-1">{a.icon}</span>
+              {pending === a.value ? `${t.savingPrefix}${a.label}…` : a.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+      {error && (
+        <p className="text-xs text-danger" role="alert">
+          {t.failedPrefix}{error}
+        </p>
+      )}
+    </div>
+  );
+}
+
 
 function ProfileForm({ detail, onSaved }: { detail: ContactDetail; onSaved: () => void }) {
   const [form, setForm] = useState<ContactUpdate>({});
