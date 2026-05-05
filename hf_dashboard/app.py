@@ -137,19 +137,22 @@ def _flow_automation_loop():
 _flow_thread = threading.Thread(target=_flow_automation_loop, daemon=True)
 _flow_thread.start()
 
-# -- Gradio app --
-demo = build_app_with_sidebar(title="Himalayan Fibers")
-
 # -- Mount Gradio onto FastAPI with theme + CSS --
 from shared.theme import build_theme
 from shared.theme_css import DASHBOARD_CSS
+
+# Theme + CSS are now set on the Blocks constructor inside
+# build_app_with_sidebar — works on both Gradio 4 (current HF pin) and 6.
+demo = build_app_with_sidebar(
+    title="Himalayan Fibers",
+    theme=build_theme(),
+    css=DASHBOARD_CSS,
+)
 
 app = gr.mount_gradio_app(
     fastapi_app,
     demo,
     path="/",
-    theme=build_theme(),
-    css=DASHBOARD_CSS,
 )
 
 
