@@ -1,6 +1,9 @@
-# Upper bounds on pandas + gradio to avoid HF-build hash-mismatch errors
-# from too-recently-released wheels. Bump these intentionally when needed.
-gradio>=4.44.0,<5.0.0
+# Upper bound on pandas to avoid HF-build hash-mismatch errors. Gradio
+# floor bumped to 5.x (2026-05-05) — Gradio 4.44.x has multiple bugs that
+# surface as 500 on / once the Pydantic schema graph grows: bool-schema
+# crash in gradio_client.utils.get_type, and a starlette TemplateResponse
+# signature mismatch that yields "unhashable type: 'dict'".
+gradio>=5.0.0,<7.0.0
 fastapi>=0.109.0
 uvicorn>=0.27.0
 sqlalchemy>=2.0.25
