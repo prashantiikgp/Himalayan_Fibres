@@ -87,3 +87,31 @@ gmail_token.json
 
 # Alembic versions (optional - uncomment if you want to track migrations)
 # alembic/versions/
+
+# Google OAuth client secrets (downloaded from Cloud Console)
+client_secret_*.json
+
+# Backup files
+*.csv.bak_*
+data/contacts.csv.bak_*
+hf_dashboard/data/contacts.csv.bak_*
+
+# Runtime egress / per-day logs
+hf_dashboard/data/egress_log_*.json
+
+# Vite/TS build artifacts
+vite_dashboard/tsconfig.tsbuildinfo
+
+# Playwright verification screenshots — move to temp/ or remove after use
+/verify-*.png
+/verify_*.png
+/preview-*.png
+/preview-*.html
+/three-panel-layout.png
+/wa-inbox-state-*.png
+
+# Loose asset drops (jpg/png images dropped at repo root or assets/) —
+# media that should live in hf_dashboard/static/ or config/media/, not
+# the repo root.
+/assets/*.jpg
+/assets/*.png
