@@ -298,6 +298,228 @@ def test_list_templates_default_approved_only(
         assert isinstance(t["variables"], list)
 
 
+# ─── write endpoints (Phase 2.1) ─────────────────────────────────────────
+
+
+@pytest.fixture()
+def stub_sender(monkeypatch: pytest.MonkeyPatch) -> dict[str, object]:
+    """Replace WhatsAppSender's send_text/send_template with stubs that
+    record calls and return unique wa_message_ids. Avoids real Meta hits
+    AND avoids the UNIQUE-constraint collision that would happen if
+    every test reused the same stub message id."""
+    calls: dict[str, object] = {"text": None, "template": None, "result": None}
+    counter = {"n": 0}
+
+    def _next_id() -> str:
+        counter["n"] += 1
+        return f"wamid.STUB.{int(time.time() * 1000)}.{counter['n']}"
+
+    def _send_text(self, to_phone: str, text: str):  # noqa: ANN001
+        calls["text"] = {"to_phone": to_phone, "text": text}
+        if calls["result"] is not None:
+            return calls["result"]
+        return (True, _next_id(), None)
+
+    def _send_template(self, to_phone: str, template_name, lang="en_US", variables=None):  # noqa: ANN001
+        calls["template"] = {
+            "to_phone": to_phone,
+            "template_name": template_name,
+            "lang": lang,
+            "variables": list(variables or []),
+        }
+        if calls["result"] is not None:
+            return calls["result"]
+        return (True, _next_id(), None)
+
+    from api_v2.routers import wa as wa_router
+
+    monkeypatch.setattr(wa_router.WhatsAppSender, "send_text", _send_text)
+    monkeypatch.setattr(wa_router.WhatsAppSender, "send_template", _send_template)
+    return calls
+
+
+def test_send_text_message_within_window(
+    client: TestClient, auth_headers: dict[str, str], stub_sender: dict[str, object]
+) -> None:
+    """POST /wa/messages succeeds with an open window."""
+    cid, _ = _seed_wa(window_open=True)
+    res = client.post(
+        "/api/v2/wa/messages",
+        json={"contact_id": cid, "text": "Reply within window"},
+        headers=auth_headers,
+    )
+    assert res.status_code == 201, res.text
+    body = res.json()
+    assert body["direction"] == "out"
+    assert body["status"] == "sent"
+    assert body["text"] == "Reply within window"
+    assert stub_sender["text"]["text"] == "Reply within window"
+
+
+def test_send_text_message_window_closed_412(
+    client: TestClient, auth_headers: dict[str, str], stub_sender: dict[str, object]
+) -> None:
+    """Closed window returns 412 Precondition Failed (Plan D Phase 1.3)."""
+    cid, _ = _seed_wa(window_open=False)
+    res = client.post(
+        "/api/v2/wa/messages",
+        json={"contact_id": cid, "text": "should be blocked"},
+        headers=auth_headers,
+    )
+    assert res.status_code == 412
+    assert "window" in res.json()["detail"].lower()
+    assert stub_sender["text"] is None  # never reached the sender
+
+
+def test_send_text_message_empty_text_400(
+    client: TestClient, auth_headers: dict[str, str], stub_sender: dict[str, object]
+) -> None:
+    cid, _ = _seed_wa(window_open=True)
+    res = client.post(
+        "/api/v2/wa/messages",
+        json={"contact_id": cid, "text": "   "},
+        headers=auth_headers,
+    )
+    assert res.status_code == 400
+
+
+def test_send_template_message(
+    client: TestClient, auth_headers: dict[str, str], stub_sender: dict[str, object]
+) -> None:
+    """POST /wa/template-sends succeeds outside the window AND extends it."""
+    from services.database import get_db  # type: ignore[import-not-found]
+    from services.models import (  # type: ignore[import-not-found]
+        WAChat,
+        WATemplate,
+    )
+
+    cid, _ = _seed_wa(window_open=False)
+    stamp = int(time.time() * 1000)
+    name = f"phase2_send_test_{stamp}"
+    db = get_db()
+    try:
+        db.add(
+            WATemplate(
+                name=name,
+                language="en_US",
+                category="MARKETING",
+                status="APPROVED",
+                body_text="Hi {{1}}, your sample is ready.",
+                buttons=[],
+                variables=[],
+                is_draft=False,
+            )
+        )
+        db.commit()
+    finally:
+        db.close()
+
+    res = client.post(
+        "/api/v2/wa/template-sends",
+        json={
+            "contact_id": cid,
+            "template_name": name,
+            "language": "en_US",
+            "variables": ["Inbox Tester"],
+        },
+        headers=auth_headers,
+    )
+    assert res.status_code == 201, res.text
+    assert stub_sender["template"]["template_name"] == name
+    assert stub_sender["template"]["variables"] == ["Inbox Tester"]
+
+    # Window should now be reopened.
+    db = get_db()
+    try:
+        chat = db.query(WAChat).filter(WAChat.contact_id == cid).first()
+        assert chat is not None
+        from datetime import datetime, timezone
+        expires = chat.window_expires_at
+        if expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        assert expires > datetime.now(timezone.utc)
+    finally:
+        db.close()
+
+
+def test_send_template_unknown_template_404(
+    client: TestClient, auth_headers: dict[str, str], stub_sender: dict[str, object]
+) -> None:
+    cid, _ = _seed_wa(window_open=False)
+    res = client.post(
+        "/api/v2/wa/template-sends",
+        json={"contact_id": cid, "template_name": "does_not_exist_xxx"},
+        headers=auth_headers,
+    )
+    assert res.status_code == 404
+
+
+def test_send_template_rejects_non_approved(
+    client: TestClient, auth_headers: dict[str, str], stub_sender: dict[str, object]
+) -> None:
+    """Template with status='PENDING' is rejected at 400."""
+    from services.database import get_db  # type: ignore[import-not-found]
+    from services.models import WATemplate  # type: ignore[import-not-found]
+
+    cid, _ = _seed_wa(window_open=False)
+    stamp = int(time.time() * 1000)
+    name = f"pending_template_{stamp}"
+    db = get_db()
+    try:
+        db.add(
+            WATemplate(
+                name=name, language="en_US", category="MARKETING",
+                status="PENDING", body_text="Hi", buttons=[], variables=[],
+                is_draft=False,
+            )
+        )
+        db.commit()
+    finally:
+        db.close()
+
+    res = client.post(
+        "/api/v2/wa/template-sends",
+        json={"contact_id": cid, "template_name": name},
+        headers=auth_headers,
+    )
+    assert res.status_code == 400
+    assert "APPROVED" in res.json()["detail"]
+
+
+def test_send_text_meta_failure_502(
+    client: TestClient, auth_headers: dict[str, str], stub_sender: dict[str, object]
+) -> None:
+    """If WhatsAppSender returns failure, we surface 502 + persist a failed
+    WAMessage row so the conversation list reflects the attempt."""
+    cid, _ = _seed_wa(window_open=True)
+    stub_sender["result"] = (False, None, "401 token expired")
+
+    res = client.post(
+        "/api/v2/wa/messages",
+        json={"contact_id": cid, "text": "boom"},
+        headers=auth_headers,
+    )
+    assert res.status_code == 502
+    assert "401 token expired" in res.json()["detail"]
+
+    # Verify a failed WAMessage row was recorded.
+    from services.database import get_db  # type: ignore[import-not-found]
+    from services.models import WAMessage  # type: ignore[import-not-found]
+
+    db = get_db()
+    try:
+        rows = (
+            db.query(WAMessage)
+            .filter(WAMessage.contact_id == cid)
+            .filter(WAMessage.status == "failed")
+            .all()
+        )
+        assert len(rows) >= 1
+        assert any("token expired" in (r.error_detail or "") for r in rows)
+    finally:
+        db.close()
+
+
 def test_list_templates_extracts_variables(
     client: TestClient, auth_headers: dict[str, str]
 ) -> None:

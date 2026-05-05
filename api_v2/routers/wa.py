@@ -14,10 +14,10 @@ from __future__ import annotations
 
 import json
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import or_
 
 from api_v2.deps import require_auth
@@ -25,6 +25,8 @@ from api_v2.schemas.wa import (
     ConversationDetail,
     ConversationListItem,
     ConversationListResponse,
+    SendMessageRequest,
+    SendTemplateRequest,
     WAMessageOut,
     WATemplateOut,
     WATemplatesResponse,
@@ -38,6 +40,7 @@ from services.models import (  # type: ignore[import-not-found]
     WAMessage,
     WATemplate,
 )
+from services.wa_sender import WhatsAppSender  # type: ignore[import-not-found]
 
 router = APIRouter(tags=["wa"], dependencies=[Depends(require_auth)])
 """No prefix here — main.py mounts this router at /api/v2/wa to match the
@@ -270,5 +273,206 @@ def list_templates(
             for t in rows
         ]
         return WATemplatesResponse(templates=out, total=len(out))
+    finally:
+        db.close()
+
+
+# ─── write endpoints (Phase 2.1) ─────────────────────────────────────────
+
+
+def _phone_for(contact: Contact) -> str | None:
+    """Pick the best `to_phone` value for the WhatsApp Cloud API.
+
+    Prefer `wa_id` (already E.164 without +) since the webhook stores it
+    that way; fall back to the digit-stripped `phone` column.
+    """
+    if contact.wa_id:
+        return contact.wa_id
+    if contact.phone:
+        return "".join(ch for ch in contact.phone if ch.isdigit()) or None
+    return None
+
+
+def _ensure_chat(db, contact_id: str) -> WAChat:
+    """Get-or-create the WAChat row for a contact."""
+    chat = db.query(WAChat).filter(WAChat.contact_id == contact_id).first()
+    if chat is None:
+        chat = WAChat(contact_id=contact_id)
+        db.add(chat)
+        db.flush()
+    return chat
+
+
+@router.post(
+    "/messages",
+    response_model=WAMessageOut,
+    status_code=status.HTTP_201_CREATED,
+)
+def send_text_message(req: SendMessageRequest) -> WAMessageOut:
+    """Send a plain text reply within an open 24h customer-service window.
+
+    Returns 412 (Precondition Failed) if the window is closed — the
+    frontend already gates this client-side via the closed-window CTA,
+    but this is the server-side enforcement (Plan D Phase 1.3).
+    """
+    text = (req.text or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="text must be non-empty")
+
+    db = get_db()
+    try:
+        contact = db.query(Contact).filter(Contact.id == req.contact_id).first()
+        if contact is None:
+            raise HTTPException(status_code=404, detail="Contact not found")
+
+        chat = _ensure_chat(db, contact.id)
+        if not _is_window_open(chat.window_expires_at):
+            raise HTTPException(
+                status_code=status.HTTP_412_PRECONDITION_FAILED,
+                detail="24h customer-service window is closed; send a template instead",
+            )
+
+        to_phone = _phone_for(contact)
+        if not to_phone:
+            raise HTTPException(
+                status_code=400,
+                detail="Contact has no phone or wa_id",
+            )
+
+        sender = WhatsAppSender()
+        ok, wa_message_id, error = sender.send_text(to_phone, text)
+
+        msg = WAMessage(
+            chat_id=chat.id,
+            contact_id=contact.id,
+            direction="out",
+            status="sent" if ok else "failed",
+            text=text,
+            wa_message_id=wa_message_id,
+            error_code=None if ok else "send_failed",
+            error_detail=None if ok else (error or ""),
+            created_at=datetime.now(timezone.utc),
+        )
+        db.add(msg)
+
+        if ok:
+            chat.last_message_at = msg.created_at
+            chat.last_message_preview = text[:255]
+
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+
+        if not ok:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=f"WhatsApp send failed: {error or 'unknown'}",
+            )
+
+        db.refresh(msg)
+        return WAMessageOut.model_validate(msg)
+    except HTTPException:
+        raise
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+
+@router.post(
+    "/template-sends",
+    response_model=WAMessageOut,
+    status_code=status.HTTP_201_CREATED,
+)
+def send_template_message(req: SendTemplateRequest) -> WAMessageOut:
+    """Send a pre-approved template (works outside the 24h window).
+
+    Templates that succeed open a fresh 24h window — record that on the
+    WAChat row so subsequent text replies are unblocked.
+    """
+    db = get_db()
+    try:
+        contact = db.query(Contact).filter(Contact.id == req.contact_id).first()
+        if contact is None:
+            raise HTTPException(status_code=404, detail="Contact not found")
+
+        # Validate the template exists and is approved.
+        tmpl = (
+            db.query(WATemplate)
+            .filter(WATemplate.name == req.template_name)
+            .filter(WATemplate.is_draft.is_(False))
+            .first()
+        )
+        if tmpl is None:
+            raise HTTPException(status_code=404, detail="Template not found")
+        if (tmpl.status or "").upper() != "APPROVED":
+            raise HTTPException(
+                status_code=400,
+                detail=f"Template status is {tmpl.status!r}; only APPROVED can be sent",
+            )
+
+        to_phone = _phone_for(contact)
+        if not to_phone:
+            raise HTTPException(status_code=400, detail="Contact has no phone or wa_id")
+
+        chat = _ensure_chat(db, contact.id)
+
+        sender = WhatsAppSender()
+        ok, wa_message_id, error = sender.send_template(
+            to_phone,
+            template_name=req.template_name,
+            lang=req.language or tmpl.language or "en_US",
+            variables=list(req.variables or []),
+        )
+
+        # Build a preview from the template body so the conversation list
+        # shows something meaningful (vs an empty preview).
+        preview = (tmpl.body_text or req.template_name)[:255]
+
+        msg = WAMessage(
+            chat_id=chat.id,
+            contact_id=contact.id,
+            direction="out",
+            status="sent" if ok else "failed",
+            text=preview,
+            wa_message_id=wa_message_id,
+            error_code=None if ok else "send_failed",
+            error_detail=None if ok else (error or ""),
+            created_at=datetime.now(timezone.utc),
+        )
+        db.add(msg)
+
+        if ok:
+            chat.last_message_at = msg.created_at
+            chat.last_message_preview = preview
+            # Successful template sends DO open a new 24h window per
+            # Meta's policy when a customer interacts with the template.
+            # Conservative: extend the window so the UI unlocks the
+            # text composer immediately. The webhook will refine the
+            # exact expiry on the next inbound.
+            chat.window_expires_at = msg.created_at + timedelta(hours=24)
+
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+
+        if not ok:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=f"WhatsApp template send failed: {error or 'unknown'}",
+            )
+
+        db.refresh(msg)
+        return WAMessageOut.model_validate(msg)
+    except HTTPException:
+        raise
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()

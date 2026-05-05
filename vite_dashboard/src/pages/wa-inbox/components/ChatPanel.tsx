@@ -7,8 +7,10 @@
  * this is the B2 fix.
  */
 
-import { useEffect, useRef } from "react";
-import { useConversationDetail } from "@/api/wa";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useConversationDetail, useSendTextMessage } from "@/api/wa";
 import { formatRelative } from "@/lib/format";
 import { MessageBubble } from "./MessageBubble";
 
@@ -130,10 +132,10 @@ export function ChatPanel({
       </div>
 
       {data.window_open && hasInbound ? (
-        // Review fix #6: instead of greyed-out Send/Attach that look
-        // broken, show a single placeholder banner. The real composer
-        // wires up in Phase 2.1.
-        <ComposerPlaceholder placeholder={labels.compose_placeholder} />
+        <Composer
+          contactId={data.contact_id}
+          placeholder={labels.compose_placeholder}
+        />
       ) : (
         <ClosedWindowCta
           warning={hasInbound ? labels.window_warning : labels.new_conv_warning}
@@ -144,13 +146,55 @@ export function ChatPanel({
   );
 }
 
-function ComposerPlaceholder({ placeholder }: { placeholder: string }) {
+function Composer({
+  contactId,
+  placeholder,
+}: {
+  contactId: string;
+  placeholder: string;
+}) {
+  const [text, setText] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const sendMutation = useSendTextMessage();
+  const canSend = text.trim().length > 0 && !sendMutation.isPending;
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (!canSend) return;
+    setError(null);
+    sendMutation.mutate(
+      { contact_id: contactId, text: text.trim() },
+      {
+        onSuccess: () => setText(""),
+        onError: (err) => setError(err instanceof Error ? err.message : "Send failed"),
+      },
+    );
+  }
+
   return (
-    <div className="border-t border-border bg-card/40 px-card py-3">
-      <p className="text-xs text-text-muted">
-        Reply composer ({placeholder.toLowerCase()}) lands in Phase 2.1.
-      </p>
-    </div>
+    <form onSubmit={handleSubmit} className="border-t border-border px-card py-2">
+      <div className="flex items-end gap-2">
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              if (canSend) handleSubmit(e as unknown as FormEvent);
+            }
+          }}
+          placeholder={placeholder}
+          rows={1}
+          className="min-h-[36px] flex-1 resize-none rounded-md border border-border bg-card p-2 text-sm text-text placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        />
+        <Button type="submit" size="sm" disabled={!canSend} aria-label="Send">
+          {sendMutation.isPending ? "…" : <Send className="h-4 w-4" />}
+        </Button>
+      </div>
+      {error && (
+        <p role="alert" className="mt-1 text-xs text-danger">{error}</p>
+      )}
+    </form>
   );
 }
 

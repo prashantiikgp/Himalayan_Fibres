@@ -112,3 +112,23 @@ class WATemplateOut(BaseModel):
 class WATemplatesResponse(BaseModel):
     templates: list[WATemplateOut]
     total: int
+
+
+class SendMessageRequest(BaseModel):
+    """POST /wa/messages — text reply within an open 24h window."""
+
+    contact_id: str
+    text: str
+
+
+class SendTemplateRequest(BaseModel):
+    """POST /wa/template-sends — template send (works outside the window)."""
+
+    contact_id: str
+    template_name: str
+    language: str = "en_US"
+    variables: list[str] = []
+    """Positional ({{1}}, {{2}}…) values. The wa sender currently only
+    consumes positional in this endpoint; named-variable templates are
+    a Phase 2.2 follow-up since the frontend variables form already
+    knows the variable order from the templates endpoint."""

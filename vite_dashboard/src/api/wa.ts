@@ -4,7 +4,7 @@
  * Read-only endpoints to start. Send endpoints + SSE land in 2.1+.
  */
 
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "./client";
 
 export type ConversationListItem = {
@@ -115,5 +115,59 @@ export function useWaTemplates(category?: string) {
     queryKey: ["wa", "templates", category ?? "all"],
     queryFn: () => apiFetch<WATemplatesResponse>(`/api/v2/wa/templates${qs}`),
     staleTime: 5 * 60 * 1000,
+  });
+}
+
+/* ── write paths (Phase 2.1) ─────────────────────────────────────────── */
+
+export type SendMessageRequest = {
+  contact_id: string;
+  text: string;
+};
+
+export type SendTemplateRequest = {
+  contact_id: string;
+  template_name: string;
+  language?: string;
+  variables?: string[];
+};
+
+/**
+ * Send a text message in the open 24h window. Mutation invalidates the
+ * affected conversation detail + the conversation list so previews
+ * update immediately without waiting for the polling tick.
+ */
+export function useSendTextMessage() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: SendMessageRequest) =>
+      apiFetch<WAMessageOut>("/api/v2/wa/messages", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+    onSuccess: (_msg, variables) => {
+      qc.invalidateQueries({ queryKey: ["wa", "conversation", variables.contact_id] });
+      qc.invalidateQueries({ queryKey: ["wa", "conversations"] });
+    },
+  });
+}
+
+/**
+ * Send a pre-approved template. Always allowed (independent of window).
+ * Successful template sends extend the 24h window — the cache invalidations
+ * here refetch the chat detail so the composer unlocks client-side too.
+ */
+export function useSendTemplate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: SendTemplateRequest) =>
+      apiFetch<WAMessageOut>("/api/v2/wa/template-sends", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+    onSuccess: (_msg, variables) => {
+      qc.invalidateQueries({ queryKey: ["wa", "conversation", variables.contact_id] });
+      qc.invalidateQueries({ queryKey: ["wa", "conversations"] });
+    },
   });
 }

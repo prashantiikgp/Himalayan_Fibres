@@ -1,27 +1,39 @@
 /**
  * <WAInboxPage> — entry component for /wa-inbox.
  *
- * Phase 2.0 (this commit) ships read-only: list conversations, view a
- * conversation's messages, see window-open state. Send-text and Send-
- * template paths land in Phase 2.1, SSE for live inbound in Phase 2.2.
+ * Phase 2.0 shipped read-only (list, detail, window state).
+ * Phase 2.1 (this commit) adds the real Composer + TemplateSheet wired
+ * to the POST /wa/messages and POST /wa/template-sends mutations.
  *
- * Bug fixes already wired by construction:
+ * Bug fixes wired by construction:
  *  - B2 (composer enabled when sending impossible): the composer is
- *    only rendered when window_open AND last_inbound_at exist; otherwise
- *    we render the closed-window CTA.
+ *    only rendered when window_open AND last_inbound_at exist; the
+ *    closed-window CTA opens the TemplateSheet instead.
+ *  - B1 (variables form scrolling/8 always-visible slots): TemplateSheet
+ *    renders exactly N inputs in a non-scrolling vertical stack.
  */
 
 import { useState } from "react";
 import { configLoader } from "@/loaders/configLoader";
 import { useSearchParams } from "react-router-dom";
+import { useConversations } from "@/api/wa";
 import { ConversationList } from "./components/ConversationList";
 import { ChatPanel } from "./components/ChatPanel";
+import { TemplateSheet } from "./components/TemplateSheet";
 
 export function WAInboxPage() {
   const cfg = configLoader.getPage("wa_inbox");
   const [params, setParams] = useSearchParams();
   const selected = params.get("contact");
   const [templateSheetOpen, setTemplateSheetOpen] = useState(false);
+
+  // Look up the selected contact's display name from the conversation
+  // list (cheap — the list query is already in the cache from the left
+  // panel) so the TemplateSheet header reads "Sending to <name>".
+  const { data: convList } = useConversations({ page_size: 200 });
+  const selectedName = selected
+    ? convList?.conversations.find((c) => c.contact_id === selected)?.contact_name ?? selected
+    : "";
 
   function selectContact(contactId: string) {
     const next = new URLSearchParams(params);
@@ -57,17 +69,33 @@ export function WAInboxPage() {
 
       <section
         aria-label="Tools"
-        className="overflow-hidden rounded-lg border border-border bg-card/40 p-card"
+        className="flex flex-col overflow-hidden rounded-lg border border-border bg-card/40 p-card"
       >
-        <h2 className="mb-1 text-sm font-semibold uppercase tracking-wider text-text-muted">
+        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-text-muted">
           {cfg.page.panels.template_sheet.title}
         </h2>
         <p className="text-xs text-text-muted">
-          {templateSheetOpen
-            ? "Template editor lands in Phase 2.1. The composer-disabled + closed-window CTA already work."
-            : "Click 'Send a template' from the chat panel to compose. Wired in Phase 2.1."}
+          Templates work outside the 24h window. Use the chat panel's
+          "Send a template" button (or the button below) when the window
+          is closed or you're starting a fresh conversation.
         </p>
+        <button
+          type="button"
+          onClick={() => setTemplateSheetOpen(true)}
+          disabled={!selected}
+          className="mt-3 self-start rounded-md border border-border bg-card px-3 py-1 text-xs font-medium text-text hover:bg-card/80 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          Open template picker
+        </button>
       </section>
+
+      <TemplateSheet
+        open={templateSheetOpen}
+        onOpenChange={setTemplateSheetOpen}
+        contactId={selected}
+        contactName={selectedName}
+        labels={cfg.page.panels.template_sheet}
+      />
     </div>
   );
 }

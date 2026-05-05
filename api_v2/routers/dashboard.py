@@ -17,11 +17,13 @@ from pydantic import BaseModel, Field
 
 from api_v2.deps import require_auth
 
-# Reuse v1's cached helpers — no duplication of business logic.
-from pages.home import (  # type: ignore[import-not-found]
-    _activity_feed_cached,
-    _home_counters_cached,
-    _lifecycle_counts_cached,
+# Reuse the cached metric loaders — Phase 2.3 moved these out of
+# pages/home.py (which top-level imports gradio) into services so
+# api_v2 doesn't drag gradio into its dependency tree.
+from services.home_metrics import (  # type: ignore[import-not-found]
+    activity_feed_cached as _activity_feed_cached,
+    home_counters_cached as _home_counters_cached,
+    lifecycle_counts_cached as _lifecycle_counts_cached,
 )
 from services.contact_schema import get_lifecycle_stages  # type: ignore[import-not-found]
 
