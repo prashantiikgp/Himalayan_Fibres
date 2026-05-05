@@ -50,9 +50,9 @@ export function DataTable<T>({
         className,
       )}
     >
-      <div className="overflow-x-auto">
+      <div className="max-h-[calc(100vh-280px)] overflow-auto">
         <table className="w-full text-sm">
-          <thead className="border-b border-border bg-card/50">
+          <thead className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (

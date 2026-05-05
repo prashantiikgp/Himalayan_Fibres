@@ -5,7 +5,7 @@ page:
   subtitle: "Browse, edit, and segment your contact base"
   landed_phase: 1
   table:
-    page_size: 50
+    page_size: 10
     columns:
       - "name"
       - "company"
