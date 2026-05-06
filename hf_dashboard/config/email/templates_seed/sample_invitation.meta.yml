@@ -1,0 +1,17 @@
+template:
+  slug: sample_invitation
+  name: "Sample Invitation — Free Sample CTA"
+  category: cold_outreach
+  subject_template: "A free yarn sample from the Himalayas, {{ first_name }}"
+  is_active: true
+  required_variables:
+    - first_name
+  optional_variables:
+    - sample_request_link
+  variables:
+    - name: sample_request_link
+      label: "Sample-request form URL"
+      type: url
+      placeholder: "https://www.himalayanfibres.com/samples"
+      example: ""
+      required: false

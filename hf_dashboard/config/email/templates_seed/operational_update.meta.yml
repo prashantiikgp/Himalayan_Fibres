@@ -1,7 +1,7 @@
 template:
   slug: operational_update
   name: "Operational Update"
-  category: announcement
+  category: campaign_general
   subject_template: "{{ update_title }} — Himalayan Fibres"
   is_active: true
   required_variables:

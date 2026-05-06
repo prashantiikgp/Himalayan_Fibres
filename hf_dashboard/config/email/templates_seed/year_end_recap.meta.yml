@@ -1,0 +1,66 @@
+template:
+  slug: year_end_recap
+  name: "Campaign Seasonal — Year-End Recap"
+  category: campaign_seasonal
+  subject_template: "A year with you — {{ year }} in numbers"
+  is_active: true
+  required_variables:
+    - first_name
+  optional_variables:
+    - year
+    - stat1_value
+    - stat1_label
+    - stat2_value
+    - stat2_label
+    - stat3_value
+    - stat3_label
+    - blog_link
+  variables:
+    - name: year
+      label: "Year"
+      type: text
+      placeholder: "2025"
+      example: "2025"
+      required: false
+    - name: stat1_value
+      label: "Stat 1 — value"
+      type: text
+      placeholder: "12,400 kg"
+      example: "12,400 kg"
+      required: false
+    - name: stat1_label
+      label: "Stat 1 — label"
+      type: text
+      placeholder: "Yarn shipped"
+      example: "Yarn shipped"
+      required: false
+    - name: stat2_value
+      label: "Stat 2 — value"
+      type: text
+      placeholder: "64"
+      example: "64"
+      required: false
+    - name: stat2_label
+      label: "Stat 2 — label"
+      type: text
+      placeholder: "Partner spinners"
+      example: "Partner spinners"
+      required: false
+    - name: stat3_value
+      label: "Stat 3 — value"
+      type: text
+      placeholder: "42"
+      example: "42"
+      required: false
+    - name: stat3_label
+      label: "Stat 3 — label"
+      type: text
+      placeholder: "Countries delivered to"
+      example: "Countries delivered to"
+      required: false
+    - name: blog_link
+      label: "Full recap blog URL"
+      type: url
+      placeholder: "https://www.himalayanfibres.com/blog/year-end"
+      example: ""
+      required: false

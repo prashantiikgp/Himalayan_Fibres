@@ -1,7 +1,9 @@
 template:
   slug: sample_shipped
   name: "Sample Shipped — Tracking"
-  category: transactional
+  category: sample_flow
+  flow: sample
+  flow_step: 2
   subject_template: "Your Himalayan Fibres samples are on the way 📦"
   is_active: true
   required_variables:

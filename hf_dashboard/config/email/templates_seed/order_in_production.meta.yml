@@ -1,0 +1,26 @@
+template:
+  slug: order_in_production
+  name: "Order Flow Step 1 — In Preparation"
+  category: order_flow
+  flow: order
+  flow_step: 1
+  subject_template: "Your order {{ order_number }} is being prepared, {{ first_name }}"
+  is_active: true
+  required_variables:
+    - first_name
+    - order_number
+  optional_variables:
+    - expected_dispatch_date
+  variables:
+    - name: order_number
+      label: "Order number"
+      type: text
+      placeholder: "10014"
+      example: "10014"
+      required: true
+    - name: expected_dispatch_date
+      label: "Expected dispatch (human)"
+      type: text
+      placeholder: "next week"
+      example: "next week"
+      required: false

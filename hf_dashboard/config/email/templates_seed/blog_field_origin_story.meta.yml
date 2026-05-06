@@ -1,0 +1,24 @@
+template:
+  slug: blog_field_origin_story
+  name: "Campaign Story — Field / Origin"
+  category: campaign_story
+  subject_template: "From the slopes of {{ region_name }}"
+  is_active: true
+  required_variables:
+    - first_name
+  optional_variables:
+    - region_name
+    - blog_link
+  variables:
+    - name: region_name
+      label: "Partner region / village"
+      type: text
+      placeholder: "Uttarkashi"
+      example: "Uttarkashi"
+      required: false
+    - name: blog_link
+      label: "Blog URL (read more)"
+      type: url
+      placeholder: "https://www.himalayanfibres.com/blog/origin"
+      example: ""
+      required: false

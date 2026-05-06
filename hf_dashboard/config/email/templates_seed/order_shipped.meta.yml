@@ -1,7 +1,9 @@
 template:
   slug: order_shipped
   name: "Order Shipped — Tracking"
-  category: transactional
+  category: order_flow
+  flow: order
+  flow_step: 3
   subject_template: "Your Himalayan Fibres order is on its way 📦"
   is_active: true
   required_variables:

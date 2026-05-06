@@ -31,3 +31,76 @@ shared:
   color_card_bg: "#f5f5f5"
   color_card_border: "#e8e8e8"
   font_stack: "'Amiri', Georgia, serif"
+
+  # Canonical price-list PDF (founder-maintained, mirrored to Supabase by
+  # scripts/upload_price_list.py). 1-year signed URL — refresh annually
+  # OR whenever the price list is updated by re-running the script.
+  # Source of truth on disk: G:/My Drive/1. Media & Marketing/9. Customer Engagement/Catalogue _Distribution/XYZ_Price_List_16_Aug.pdf
+  price_list_pdf_url: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/sign/email-invoices/canonical/current_price_list.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83OTM3MzgzNi1iZDQyLTQ0M2EtOTA5My03NzA5MTI3YjNjODAiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJlbWFpbC1pbnZvaWNlcy9jYW5vbmljYWwvY3VycmVudF9wcmljZV9saXN0LnBkZiIsImlhdCI6MTc3ODA0NDAzOCwiZXhwIjoxODA5NTgwMDM4fQ.a_UXh7wUJU9PmK1Az6FWRreGxBScB2_8SezYQro-z90"
+
+  # Curated public-bucket image URLs. Reference via {{ media.<key> }} in templates.
+  # Bucket `wa-template-images` is public; URLs do not expire.
+  media:
+    # Hero banners (16:9)
+    hero_mountain: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Hero%20Banner%20Image/Banner_Behind_Mountain.png"
+    hero_email_banner: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Hero%20Banner%20Image/Whatsapp%20email%20Banner.jpg"
+
+    # Process — hand-spinning (sample preparation, story templates)
+    spinning_main: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Creating%20Images/Hand%20Spinning/Hand_spinning_main.jpg"
+    spinning_close: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Creating%20Images/Hand%20Spinning/Hand_spinning_Close_view.jpg"
+    spinning_3: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Creating%20Images/Hand%20Spinning/Hand_spinning_3.jpg"
+    spinning_4: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Creating%20Images/Hand%20Spinning/Hand_spinning_4.jpg"
+    spinning_5: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Creating%20Images/Hand%20Spinning/Hand_spinning_5.jpg"
+
+    # Village (origin / story)
+    village_houses: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Creating%20Images/Village%20Images/Village_houses.jpg"
+    village_top: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Creating%20Images/Village%20Images/Himalayan_village_Top%20View.jpg"
+    village_close: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Creating%20Images/Village%20Images/Cose_house_view.jpg"
+    village_1: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Creating%20Images/Village%20Images/Himalayan%20Village_1.jpg"
+    village_2: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Creating%20Images/Village%20Images/Himalayan_Village_2.jpg"
+
+    # Fibre & fields (raw materials, packing — order_in_production)
+    fibre_bundles: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Fibre%20%26%20Fields/Fibre%20Bundles.jpg"
+    fibre_in_open: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Fibre%20%26%20Fields/Fibre%20Bundles%20In%20Open.jpg"
+    fibre_storage: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Fibre%20%26%20Fields/Fibre%20Storage.jpg"
+    men_packing: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Fibre%20%26%20Fields/Men%20Packing%20Bundles.jpg"
+
+    # Farm processing (decorticator, bark drying)
+    decorticator: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Farm%20Images/Decorticator%20Working.jpeg"
+    bark_drying: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Farm%20Images/Barks%20Drying.jpeg"
+    bark_drying_far: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Farm%20Images/Bark%20Drying%20Far%20View.jpeg"
+
+    # Field workers (story / origin / harvest)
+    women_beating: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field/Women_beating_fibre.jpg"
+    multiple_women: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field/Multiple_women.jpg"
+    worker_sorting: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field/Worker_sorting_fibre.jpg"
+    sun_drying: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field/Fibre%20Geting%20Sun%20Dry.jpg"
+
+    # Hemp products (yarn-first)
+    hemp_yarn_natural_1: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Plant%20Based/2.2%20Hemp%20Yarn/2.2.1%20Natural%20Hemp%20Yarn/1.jpg"
+    hemp_yarn_natural_2: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Plant%20Based/2.2%20Hemp%20Yarn/2.2.1%20Natural%20Hemp%20Yarn/2.jpg"
+    hemp_yarn_natural_3: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Plant%20Based/2.2%20Hemp%20Yarn/2.2.1%20Natural%20Hemp%20Yarn/3.jpg"
+    hemp_yarn_white_card: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Plant%20Based/2.2%20Hemp%20Yarn/2.2.2%20White%20Hemp%20Yarn/Product%20Card_800%20%20800%20px.jpg"
+    hemp_yarn_white_2: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Plant%20Based/2.2%20Hemp%20Yarn/2.2.2%20White%20Hemp%20Yarn/Hemp%20Bleach_2.jpg"
+    hemp_fibre_display: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Plant%20Based/2.1%20Hemp%20Fibre/2.1.1%20Raw%20Hemp%20Fibre/Display.webp"
+
+    # Nettle products (yarn-first)
+    nettle_yarn_fine_1: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Plant%20Based/1.2%20Nettle%20Yarn/1.2.1%20Nettle%20Yarn%20Fine/1.jpg"
+    nettle_yarn_thick_1: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Plant%20Based/1.2%20Nettle%20Yarn/1.2.2%20Nettle%20Yarn%20Thick/1.jpg"
+    nettle_yarn_thick_2: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Plant%20Based/1.2%20Nettle%20Yarn/1.2.2%20Nettle%20Yarn%20Thick/2.jpg"
+    nettle_yarn_white_1: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Plant%20Based/1.2%20Nettle%20Yarn/1.2.3%20White%20Nettle/1.jpg"
+    nettle_yarn_special_erb: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Plant%20Based/1.2%20Nettle%20Yarn/1.2.4%20Special%20Nettle%20Yarn/ERB%20Sepcial_1.webp"
+
+    # Wool products (Tibetan)
+    wool_tibetan_1: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Animal%20Based/Tibetian%20Yarn/1.jpg"
+    wool_tibetan_2: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Animal%20Based/Tibetian%20Yarn/2.jpg"
+    wool_tibetan_5: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Animal%20Based/Tibetian%20Yarn/5.jpg"
+
+    # Collection (Nettle Wool blends)
+    collection_burberry_main: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Nettle%20Wool%20Collection/Burberry%20Series/1.%20Burberry%20Series.webp"
+    collection_burberry_top: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Nettle%20Wool%20Collection/Burberry%20Series/2.%20Top%20View.webp"
+    collection_burberry_close: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Nettle%20Wool%20Collection/Burberry%20Series/3.%20Close%20Up%20Image.webp"
+    collection_noor_main: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Nettle%20Wool%20Collection/Noor%20Series/Noor_Main.webp"
+    collection_noor_silver: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Nettle%20Wool%20Collection/Noor%20Series/noor_Silver.webp"
+    collection_snow_white_1: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Nettle%20Wool%20Collection/Snow%20White%20Series/Image1.jpg"
+    collection_snow_white_4: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Product%20Images/Nettle%20Wool%20Collection/Snow%20White%20Series/image%204.jpg"

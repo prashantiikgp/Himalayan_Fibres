@@ -1,44 +1,54 @@
 {#-
-  SAMPLE INVITATION — sample-CTA email used in:
-    - welcome series day 7
-    - potential_domestic cold sequence day 14
-    - international_email sequence day 21
-    - churned winback step 2
+  COLD OUTREACH — Sample invitation. Sent to leads who haven't yet
+  requested a sample. Entry point of the Sample Dispatch flow.
+
+  Voice: founder-warm + yarn-first. Hero image first (finished yarn,
+  not raw fibre), then a soft "we'd like to send you one" with no
+  pressure on quantity or commitment.
 
   Per-send variables:
-    first_name*       recipient first name
-    hero_image_url    public HTTPS URL (default: nettle thick yarn)
-    sample_request_link  optional URL to a sample-request form
+    first_name*           recipient first name
+    sample_request_link?  optional URL to a sample-request form
+                          (renders a primary CTA when set)
 -#}
 {% extends 'layout/base.html' %}
 {% from 'partials/middle/heading.html' import heading with context %}
 {% from 'partials/middle/paragraph.html' import paragraph with context %}
 {% from 'partials/middle/hero_image.html' import hero_image with context %}
+{% from 'partials/middle/image_grid.html' import image_grid with context %}
 {% from 'partials/middle/cta_button.html' import cta_button with context %}
 {% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
 
 {% block content %}
 
-{{ heading('Try a free yarn sample', emoji='🌿') }}
+{{ hero_image(media.nettle_yarn_fine_1, alt='Hand-spun nettle yarn from the Himalayas') }}
+
+{{ heading('A free yarn sample, on us', emoji='🌿') }}
 
 {{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
 
-{{ paragraph("We'd love for you to feel our yarn before you commit. Send a free sample pack — a small swatch from each fibre family — to your address, no MOQ, no commitment.") }}
+{{ paragraph("Quick note &mdash; I run a small yarn-spinning project in the Indian Himalayas, and I'd like to send you a physical sample of our work. No charge, no shipping fee, no minimum order.") }}
 
-{{ hero_image(hero_image_url or 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/nettle-thick-yarn-975912fa.jpg', alt='Hand-spun Himalayan yarn — sample swatch') }}
+{{ paragraph("Three families to pick from:") }}
 
-{{ paragraph("Three families to choose from:") }}
+{{ image_grid([
+  {'image_url': media.nettle_yarn_fine_1, 'caption': 'Plant — Nettle &amp; Hemp', 'image_alt': 'Plant-based yarn'},
+  {'image_url': media.wool_tibetan_1,    'caption': 'Animal — Tibetan Wool',     'image_alt': 'Wool yarn'},
+  {'image_url': media.collection_burberry_main, 'caption': 'Blend — Signature collections', 'image_alt': 'Blended yarn'}
+]) }}
 
-{{ paragraph("• <strong>Plant</strong> — Himalayan nettle and hemp<br>• <strong>Animal</strong> — Tibetan wool from high-altitude sheep<br>• <strong>Blend</strong> — signature collections (Burberry, Noor, and more)") }}
+{{ paragraph("A few things to know before you reply:") }}
 
-{{ paragraph("Reply with your address and which family fits your project — or let us know to send all three. We dispatch within 2-3 days.") }}
+{{ paragraph("• <strong>What's inside the parcel:</strong> a representative spool from the family you choose. Big enough to feel and swatch with. Plus a one-page spec sheet (fibre source, count, twist, dye notes).<br>• <strong>Why we send it free:</strong> the yarn has to feel right in your hand before any conversation about volume. Most suppliers won't ship a sample without a bulk-order commitment. That's not us.<br>• <strong>What we ask back:</strong> just whether the fibre felt right for what you're working on. No high-pressure follow-up.") }}
 
-{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+{{ paragraph("Reply to this email with the family you'd like to try (or let me know to send all three) along with a shipping address. We dispatch within 2&ndash;4 working days.") }}
+
+{{ paragraph('&mdash; Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
 
 {% if sample_request_link %}
 {{ cta_button('Request your free sample', sample_request_link) }}
 {% endif %}
 
-{{ whatsapp_help_button('Hi Himalayan Fibres — I would like a free yarn sample.') }}
+{{ whatsapp_help_button('Hi Prashant — I would like to request a free yarn sample.') }}
 
 {% endblock %}

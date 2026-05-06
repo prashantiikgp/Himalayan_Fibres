@@ -1,15 +1,16 @@
 template:
-  slug: sample_request_received
-  name: "Sample Request — Acknowledgement"
+  slug: sample_swatch_preparation
+  name: "Sample Flow Step 1 — Swatch Preparation"
   category: sample_flow
   flow: sample
-  flow_step: 0
-  subject_template: "We have your sample request, {{ first_name }} 🌿"
+  flow_step: 1
+  subject_template: "We're hand-picking your {{ fibre_requested }} swatches, {{ first_name }}"
   is_active: true
   required_variables:
     - first_name
-  optional_variables:
     - fibre_requested
+  optional_variables:
+    - expected_dispatch_date
     - book_call_link
   variables:
     - name: fibre_requested
@@ -17,6 +18,12 @@ template:
       type: text
       placeholder: "nettle yarn"
       example: "nettle yarn"
+      required: true
+    - name: expected_dispatch_date
+      label: "Expected dispatch (human)"
+      type: text
+      placeholder: "this Friday"
+      example: "this Friday"
       required: false
     - name: book_call_link
       label: "Book-a-call link"

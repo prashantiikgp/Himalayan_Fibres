@@ -1,0 +1,17 @@
+template:
+  slug: yarn_categories_intro
+  name: "Campaign — Yarn Lineup Overview"
+  category: campaign_product
+  subject_template: "A 2-minute tour of our yarn lineup, {{ first_name }}"
+  is_active: true
+  required_variables:
+    - first_name
+  optional_variables:
+    - catalog_link
+  variables:
+    - name: catalog_link
+      label: "Catalog URL"
+      type: url
+      placeholder: "https://www.himalayanfibres.com/catalog"
+      example: ""
+      required: false

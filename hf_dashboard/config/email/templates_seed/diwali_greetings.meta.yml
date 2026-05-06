@@ -1,0 +1,17 @@
+template:
+  slug: diwali_greetings
+  name: "Campaign Seasonal — Diwali Greetings"
+  category: campaign_seasonal
+  subject_template: "Diwali wishes from Himalayan Fibres ✨"
+  is_active: true
+  required_variables:
+    - first_name
+  optional_variables:
+    - year
+  variables:
+    - name: year
+      label: "Year (human)"
+      type: text
+      placeholder: "2025"
+      example: "2025"
+      required: false

@@ -1,0 +1,83 @@
+template:
+  slug: proforma_invoice
+  name: "Transactional — Proforma Invoice"
+  category: transactional
+  subject_template: "Proforma {{ proforma_number }} — Himalayan Fibres"
+  is_active: true
+  expected_attachments:
+    - invoice
+  required_variables:
+    - first_name
+    - proforma_number
+  optional_variables:
+    - proforma_date
+    - validity_days
+    - ship_to_html
+    - items_html
+    - subtotal
+    - shipping_estimate
+    - total_due
+    - bank_details_html
+    - pay_link
+    - invoice_url
+  variables:
+    - name: proforma_number
+      label: "Proforma number"
+      type: text
+      placeholder: "PRO-2026-001"
+      example: "PRO-2026-001"
+      required: true
+    - name: proforma_date
+      label: "Issue date"
+      type: text
+      placeholder: "02 May 2026"
+      example: "02 May 2026"
+      required: false
+    - name: validity_days
+      label: "Validity (days)"
+      type: text
+      placeholder: "7"
+      example: "7"
+      required: false
+    - name: ship_to_html
+      label: "Ship to (HTML)"
+      type: textarea
+      placeholder: "Mrs. Alisha Panda<br>Brahmapur, Odisha 760004"
+      example: "Mrs. Alisha Panda<br>Brahmapur, Odisha 760004"
+      required: false
+    - name: items_html
+      label: "Items (HTML)"
+      type: textarea
+      placeholder: '<p style="margin:4px 0;">Himalayan nettle yarn × 50 kg</p>'
+      example: '<p style="margin:4px 0;">Himalayan nettle yarn × 50 kg</p>'
+      required: false
+    - name: subtotal
+      label: "Subtotal"
+      type: text
+      placeholder: "₹45,000"
+      example: "₹45,000"
+      required: false
+    - name: shipping_estimate
+      label: "Shipping (estimated)"
+      type: text
+      placeholder: "₹2,500"
+      example: "₹2,500"
+      required: false
+    - name: total_due
+      label: "Total due"
+      type: text
+      placeholder: "₹47,500"
+      example: "₹47,500"
+      required: false
+    - name: bank_details_html
+      label: "Bank / payment details (HTML)"
+      type: textarea
+      placeholder: "<p>UPI: himalayanfibres@upi</p>"
+      example: ""
+      required: false
+    - name: pay_link
+      label: "Payment URL"
+      type: url
+      placeholder: "https://www.himalayanfibres.com/pay/PRO-2026-001"
+      example: ""
+      required: false

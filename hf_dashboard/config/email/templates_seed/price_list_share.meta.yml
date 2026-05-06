@@ -1,0 +1,34 @@
+template:
+  slug: price_list_share
+  name: "Transactional — Price List Share"
+  category: transactional
+  subject_template: "Our current yarn price list, {{ first_name }}"
+  is_active: true
+  expected_attachments:
+    - price_list
+  required_variables:
+    - first_name
+  optional_variables:
+    - valid_until
+    - notes
+    - book_call_link
+    - price_list_url
+  variables:
+    - name: valid_until
+      label: "Valid until (human)"
+      type: text
+      placeholder: "30 June 2026"
+      example: "30 June 2026"
+      required: false
+    - name: notes
+      label: "Per-send note"
+      type: textarea
+      placeholder: "Volume discounts negotiable for 1+ tonne orders."
+      example: ""
+      required: false
+    - name: book_call_link
+      label: "Book-a-call link"
+      type: url
+      placeholder: "https://cal.com/himalayanfibres/intro"
+      example: ""
+      required: false

@@ -25,6 +25,7 @@ from __future__ import annotations
 import logging
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field
@@ -36,6 +37,24 @@ from services.models import EmailTemplate
 log = logging.getLogger(__name__)
 
 _CFG_DIR = Path(__file__).resolve().parent.parent / "config" / "email" / "templates_seed"
+
+
+EmailCategory = Literal[
+    "transactional",
+    "sample_flow",
+    "order_flow",
+    "welcome_flow",
+    "campaign_product",
+    "campaign_story",
+    "campaign_seasonal",
+    "campaign_general",
+    "cold_outreach",
+    "winback",
+]
+
+EmailFlow = Literal["sample", "order", "welcome"]
+
+ExpectedAttachmentKind = Literal["invoice", "price_list"]
 
 
 class TemplateVariableSpec(BaseModel):
@@ -54,12 +73,15 @@ class SeedTemplateMeta(BaseModel):
 
     slug: str
     name: str
-    category: str = "campaign"
+    category: EmailCategory = "campaign_general"
     subject_template: str = ""
     is_active: bool = True
     required_variables: list[str] = Field(default_factory=list)
     optional_variables: list[str] = Field(default_factory=list)
     variables: list[TemplateVariableSpec] = Field(default_factory=list)
+    flow: EmailFlow | None = None
+    flow_step: int | None = None
+    expected_attachments: list[ExpectedAttachmentKind] = Field(default_factory=list)
 
 
 class _SeedDocument(BaseModel):

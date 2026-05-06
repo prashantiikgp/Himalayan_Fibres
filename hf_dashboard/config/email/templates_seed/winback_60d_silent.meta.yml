@@ -1,7 +1,7 @@
 template:
   slug: winback_60d_silent
   name: "Winback — 60 Day Silent"
-  category: nurture
+  category: winback
   subject_template: "What's new at Himalayan Fibres"
   is_active: true
   required_variables:

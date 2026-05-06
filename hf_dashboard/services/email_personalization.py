@@ -3,9 +3,11 @@
 One campaign can have many recipients. At fire time, each recipient
 needs a merged dict of:
 
-  - shared branding vars (banner_url, address, social links, colors, ...)
+  - shared branding vars (banner_url, address, social links, colors, media, ...)
   - standard contact fields (first_name, last_name, name, email, company)
-  - invoice_url (from EmailAttachment lookup — empty string if none)
+  - one variable per attachment kind (e.g. ``invoice_url``,
+    ``price_list_url``) — empty string when no attachment of that
+    kind exists for the contact
   - any extra per-send vars the caller passes (order_number, total, ...)
 
 To avoid N DB queries for an N-recipient campaign, the broadcast send
@@ -26,11 +28,19 @@ from services.models import Contact, EmailAttachment
 
 log = logging.getLogger(__name__)
 
+# Every attachment kind we surface as a `{kind}_url` template variable.
+# Keep in sync with `template_seed.ExpectedAttachmentKind`.
+_ATTACHMENT_VAR_NAMES = ("invoice", "price_list")
+
 
 def load_campaign_attachments(
     db: Session, campaign_id: int | None
-) -> dict[str, EmailAttachment]:
+) -> dict[str, list[EmailAttachment]]:
     """Pre-fetch all attachments for a campaign, keyed by contact_id.
+
+    Returns a mapping ``contact_id -> [EmailAttachment, ...]`` because a
+    single contact can have multiple attachments of different kinds for
+    the same campaign (e.g. invoice + price_list).
 
     One query per campaign instead of one per recipient. Returns an
     empty dict when ``campaign_id`` is None (draft compose with no
@@ -43,16 +53,19 @@ def load_campaign_attachments(
         .filter(EmailAttachment.campaign_id == campaign_id)
         .all()
     )
-    return {r.contact_id: r for r in rows}
+    out: dict[str, list[EmailAttachment]] = {}
+    for r in rows:
+        out.setdefault(r.contact_id, []).append(r)
+    return out
 
 
 def build_send_variables(
     contact: Contact,
-    attachments: dict[str, EmailAttachment],
+    attachments: dict[str, list[EmailAttachment]],
     *,
     extra: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Merge shared config + contact fields + invoice_url + extras.
+    """Merge shared config + contact fields + attachment URLs + extras.
 
     Parameters
     ----------
@@ -60,8 +73,10 @@ def build_send_variables(
         The recipient Contact model instance.
     attachments
         Result of :func:`load_campaign_attachments` — a dict mapping
-        contact_id → EmailAttachment for the current campaign. Only
-        ``kind='invoice'`` is used for now (maps to ``invoice_url``).
+        contact_id → list of EmailAttachment rows for the current
+        campaign. Each attachment's ``kind`` field becomes a template
+        variable named ``{kind}_url`` (e.g. ``invoice_url``,
+        ``price_list_url``).
     extra
         Optional per-send variables provided by the caller
         (e.g. ``order_number``, ``total``, ``tracking_id``). These are
@@ -91,9 +106,20 @@ def build_send_variables(
         }
     )
 
-    # Invoice attachment → invoice_url (empty string if none)
-    att = attachments.get(contact.id)
-    base["invoice_url"] = att.signed_url if (att and att.kind == "invoice") else ""
+    # One variable per attachment kind. Defaults:
+    #   - invoice_url:    empty string (only present when explicitly attached
+    #                     per recipient via the invoice upload flow)
+    #   - price_list_url: shared canonical URL from shared.yml — same PDF
+    #                     for every recipient, so there's no benefit to
+    #                     per-recipient mirroring. Per-recipient
+    #                     EmailAttachment row still wins if present (lets
+    #                     the founder send a different/older price list to
+    #                     a specific contact via the broadcast composer).
+    base["invoice_url"] = ""
+    base["price_list_url"] = base.get("price_list_pdf_url", "") or ""
+    for att in attachments.get(contact.id, []):
+        if att.kind in _ATTACHMENT_VAR_NAMES:
+            base[f"{att.kind}_url"] = att.signed_url or ""
 
     if extra:
         base.update(extra)

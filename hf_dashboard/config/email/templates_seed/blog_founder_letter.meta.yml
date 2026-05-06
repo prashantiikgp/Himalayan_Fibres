@@ -1,0 +1,24 @@
+template:
+  slug: blog_founder_letter
+  name: "Campaign Story — Founder Letter"
+  category: campaign_story
+  subject_template: "A quarterly note — {{ quarter }} from Himalayan Fibres"
+  is_active: true
+  required_variables:
+    - first_name
+  optional_variables:
+    - quarter
+    - letter_link
+  variables:
+    - name: quarter
+      label: "Quarter (human)"
+      type: text
+      placeholder: "Q4 2025"
+      example: "Q4 2025"
+      required: false
+    - name: letter_link
+      label: "Blog URL (read more)"
+      type: url
+      placeholder: "https://www.himalayanfibres.com/blog/q4-2025"
+      example: ""
+      required: false

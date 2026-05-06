@@ -1,7 +1,9 @@
 template:
   slug: onboarding_day_14_first_order
   name: "Onboarding Day 14 — First Order Nudge"
-  category: nurture
+  category: welcome_flow
+  flow: welcome
+  flow_step: 2
   subject_template: "Still on the fence, {{ first_name }}?"
   is_active: true
   required_variables:

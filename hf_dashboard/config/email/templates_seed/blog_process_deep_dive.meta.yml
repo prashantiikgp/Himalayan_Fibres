@@ -1,0 +1,17 @@
+template:
+  slug: blog_process_deep_dive
+  name: "Campaign Story — Process Deep-Dive"
+  category: campaign_story
+  subject_template: "How we make our yarn — start to finish"
+  is_active: true
+  required_variables:
+    - first_name
+  optional_variables:
+    - blog_link
+  variables:
+    - name: blog_link
+      label: "Blog URL (read more)"
+      type: url
+      placeholder: "https://www.himalayanfibres.com/blog/process"
+      example: ""
+      required: false

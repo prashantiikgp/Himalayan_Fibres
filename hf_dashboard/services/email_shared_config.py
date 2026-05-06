@@ -11,7 +11,7 @@ from functools import lru_cache
 from pathlib import Path
 
 import yaml
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 _CFG_PATH = Path(__file__).resolve().parent.parent / "config" / "email" / "shared.yml"
 
@@ -51,6 +51,17 @@ class SharedEmailConfig(BaseModel):
     color_card_bg: str
     color_card_border: str
     font_stack: str
+
+    # Curated media library — full public Supabase URLs for the
+    # `wa-template-images` bucket. Templates reference via `{{ media.<key> }}`
+    # so adding a new image is one YAML edit, not a template-wide search/replace.
+    media: dict[str, str] = Field(default_factory=dict)
+
+    # Canonical price-list PDF — signed Supabase URL (1-year expiry).
+    # Refresh with `python scripts/upload_price_list.py <local-pdf-path>`.
+    # Surfaced to templates as `{{ price_list_url }}` via build_send_variables
+    # whenever the per-recipient EmailAttachment lookup misses.
+    price_list_pdf_url: str = ""
 
 
 class _SharedEmailConfigDocument(BaseModel):

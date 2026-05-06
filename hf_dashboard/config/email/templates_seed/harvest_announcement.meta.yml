@@ -1,0 +1,38 @@
+template:
+  slug: harvest_announcement
+  name: "Campaign Seasonal — Harvest Announcement"
+  category: campaign_seasonal
+  subject_template: "Our {{ harvest_year }} {{ fibre }} harvest is in"
+  is_active: true
+  required_variables:
+    - first_name
+  optional_variables:
+    - harvest_year
+    - fibre
+    - availability_date
+    - catalog_link
+  variables:
+    - name: harvest_year
+      label: "Harvest year"
+      type: text
+      placeholder: "2026"
+      example: "2026"
+      required: false
+    - name: fibre
+      label: "Fibre name"
+      type: text
+      placeholder: "nettle"
+      example: "nettle"
+      required: false
+    - name: availability_date
+      label: "First-availability date (human)"
+      type: text
+      placeholder: "mid-November"
+      example: "mid-November"
+      required: false
+    - name: catalog_link
+      label: "Catalog URL"
+      type: url
+      placeholder: "https://www.himalayanfibres.com/catalog"
+      example: ""
+      required: false

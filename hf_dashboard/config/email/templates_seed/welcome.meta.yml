@@ -1,7 +1,9 @@
 template:
   slug: welcome
   name: "Welcome — New Subscriber"
-  category: nurture
+  category: welcome_flow
+  flow: welcome
+  flow_step: 0
   subject_template: "Welcome to Himalayan Fibres 🌿"
   is_active: true
   required_variables:

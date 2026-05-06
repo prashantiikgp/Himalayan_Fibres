@@ -1,0 +1,24 @@
+template:
+  slug: blog_customer_case_study
+  name: "Campaign Story — Customer Case Study"
+  category: campaign_story
+  subject_template: "How {{ customer_name }} uses our yarn"
+  is_active: true
+  required_variables:
+    - first_name
+  optional_variables:
+    - customer_name
+    - blog_link
+  variables:
+    - name: customer_name
+      label: "Customer / partner name"
+      type: text
+      placeholder: "Auroville Mills"
+      example: "Auroville Mills"
+      required: false
+    - name: blog_link
+      label: "Blog URL (read more)"
+      type: url
+      placeholder: "https://www.himalayanfibres.com/blog/case-auroville"
+      example: ""
+      required: false

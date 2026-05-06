@@ -1,7 +1,9 @@
 template:
   slug: order_confirmation
   name: "Order Confirmation"
-  category: transactional
+  category: order_flow
+  flow: order
+  flow_step: 0
   subject_template: "Order confirmed — thank you, {{ first_name }}!"
   is_active: true
   required_variables:

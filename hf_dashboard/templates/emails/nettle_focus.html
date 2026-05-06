@@ -1,113 +1,74 @@
 {#-
-  CATEGORY FOCUS — Himalayan nettle yarn (editorial / blog format).
+  CAMPAIGN PRODUCT — Himalayan nettle yarn (magazine / editorial format).
 
-  Mirrors the wool_focus editorial pattern: heading + lead → 1st image_split
-  → pull quote → 2nd image_split → variant grid → CTAs. No spec table.
+  Yarn-first: opens with finished nettle yarn (fine grade), demotes raw
+  fibre to the variant grid. Founder voice.
 
   Per-send variables (all optional except first_name):
     first_name*
-
-    -- Texture / hero image_split (left) --
-    texture_image_url, texture_title, texture_body, texture_link
-
-    -- Pull quote --
-    quote_text, quote_attribution
-
-    -- Process image_split (right) --
-    process_image_url, process_title, process_body, process_link
-
-    -- 3-cell variant grid --
-    variant_1_image_url, variant_1_caption, variant_1_link
-    variant_2_image_url, variant_2_caption, variant_2_link
-    variant_3_image_url, variant_3_caption, variant_3_link
-
-    -- Footer CTAs --
-    catalog_link
+    catalog_link?    optional — renders "See the full catalog" CTA
 -#}
 {% extends 'layout/base.html' %}
 {% from 'partials/middle/heading.html' import heading with context %}
 {% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/hero_image.html' import hero_image with context %}
 {% from 'partials/middle/image_split.html' import image_split with context %}
 {% from 'partials/middle/image_grid.html' import image_grid with context %}
 {% from 'partials/middle/pull_quote.html' import pull_quote with context %}
 {% from 'partials/middle/cta_button.html' import cta_button with context %}
 {% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
 
-{% set _wix = 'https://www.himalayanfibres.com/product-page' %}
-{% set _img = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category' %}
-{% set _field = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field' %}
-
-{% set _t_img   = texture_image_url or (_img + '/nettle-thick-yarn-975912fa.jpg') %}
-{% set _t_title = texture_title or 'Hand-spun, lustrous like silk' %}
-{% set _t_body  = texture_body or "Nettle yarn looks and feels closer to silk than to cotton. The fibres are long, hollow, and naturally lustrous &mdash; light catches them differently than it catches a tightly-twisted cotton thread. Hand-spun in counts of 10/2 (thick) and 20/2 (fine), it takes natural and synthetic dyes equally well and keeps colour through wet processing." %}
-{% set _t_link  = texture_link or (_wix + '/nettle-blend-yarn') %}
-
-{% set _quote = quote_text or "Stinging nettle was used by the Greeks before the wheel reached them. We aren't innovating — we're remembering." %}
-{% set _quote_attr = quote_attribution or '— Prashant Agrawal, Founder' %}
-
-{% set _p_img   = process_image_url or (_field + '/field-artisan1-3bd5ca62.jpg') %}
-{% set _p_title = process_title or 'Wild, harvested by hand' %}
-{% set _p_body  = process_body or "Himalayan stinging nettle (Girardinia diversifolia) grows wild on the slopes of Gorkha and Almora at 1,200&ndash;2,000 metres. No one plants it; no one fertilizes it. Local women hand-harvest the stems in the dry season, rot them in mountain streams, decorticate the fibre, and hand-spin it on traditional wooden wheels at home." %}
-{% set _p_link  = process_link or '' %}
-
-{% set _v1_img = variant_1_image_url or (_img + '/nettle-thick-yarn-975912fa.jpg') %}
-{% set _v1_cap = variant_1_caption or 'Thick yarn — 10/2 count' %}
-{% set _v1_lnk = variant_1_link or (_wix + '/nettle-blend-yarn') %}
-{% set _v2_img = variant_2_image_url or (_img + '/nettle-white-yarn-dd1a1e68.jpg') %}
-{% set _v2_cap = variant_2_caption or 'White nettle — bleach-processed' %}
-{% set _v2_lnk = variant_2_link or (_wix + '/nettle-blend-yarn') %}
-{% set _v3_img = variant_3_image_url or (_img + '/nettle1-5313de78.jpg') %}
-{% set _v3_cap = variant_3_caption or 'Raw fibre — cottonised' %}
-{% set _v3_lnk = variant_3_link or (_wix + '/nettle-blend-yarn') %}
+{% set _wix = 'https://www.himalayanfibres.com/product-page/himalayan-nettle-yarn' %}
 
 {% block content %}
 
-{{ heading('Wild nettle, hand-spun in Gorkha') }}
+{{ hero_image(media.nettle_yarn_fine_1, alt='Hand-spun Himalayan nettle yarn', link=_wix) }}
+
+{{ heading('Himalayan nettle yarn — wild, hand-spun') }}
 
 {{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
 
-{{ paragraph("Long before cotton became the world's default, mountain communities in the Himalayas were spinning yarn from a wild plant most cities consider a weed. Stinging nettle &mdash; the same plant that stings your shins on a hike &mdash; produces some of the strongest, finest, and most lustrous natural fibres known. We've spent the last decade building a supply chain back to that plant, working with women's collectives in Gorkha district who've been processing nettle this way for generations.") }}
-
-{{ paragraph("<strong>Why nettle.</strong> Pure economics, before we get to the romance: nettle yarn is 30-50% stronger than cotton at the same yarn count. It absorbs dye more deeply. It softens with washing rather than wearing through. And because the plant grows wild &mdash; nobody irrigates, fertilizes, or sprays it &mdash; the input cost per kilogram of fibre is structurally lower than for any cultivated alternative.") }}
+{{ paragraph("A note about the yarn that started this whole project. Himalayan giant nettle (<em>Girardinia diversifolia</em>) is a wild plant &mdash; nobody cultivates it; we don't either. Partner villages harvest the stalks each autumn from forest edges between 1,500 and 3,000 metres, ret them in mountain streams, and we hand-spin the fibre into yarn that's been used in Himalayan textiles for at least 6,000 years.") }}
 
 {{ image_split(
-     image_url=_t_img,
-     title=_t_title,
-     body=_t_body,
-     link=_t_link,
+     image_url=media.nettle_yarn_thick_1,
+     title='Stronger than cotton, naturally antimicrobial',
+     body="Nettle fibre is comparable to flax in tensile strength but with a softer hand. It's naturally antimicrobial &mdash; the same compounds that sting your skin keep mildew and bacteria off the finished yarn. UV-resistant, breathable, and it gets softer with each wash.",
+     link=_wix,
      image_side='left',
      image_size=300
 ) }}
 
-{{ pull_quote(_quote, attribution=_quote_attr) }}
-
-{{ paragraph("<strong>How it gets here.</strong> The harvest happens in October-December when the stems have lignified. Women cut them at the base, bundle them, and submerge the bundles in flowing mountain water for 2-3 weeks. The cold water rotting (called retting) breaks down the pectin holding the fibre to the stem. After retting, the fibre is hand-stripped, cleaned, and combed before being hand-spun on wooden wheels in artisan homes &mdash; no factory, no electricity-driven mill.") }}
+{{ pull_quote(
+     "I switched a whole knitwear capsule to nettle after one season. The drape is closer to linen but it doesn't go limp. We've reordered three times now.",
+     attribution='&mdash; knitwear designer, Berlin'
+) }}
 
 {{ image_split(
-     image_url=_p_img,
-     title=_p_title,
-     body=_p_body,
-     link=_p_link,
+     image_url=media.nettle_yarn_white_1,
+     title='Three grades, four uses',
+     body="We hand-spin nettle in three counts: fine (for knitwear, scarves, and shawls), thick (for upholstery and rugs), and a special long-staple grade we call ERB (for carpets and high-stress weaving). All three come from the same forests and the same spinners.",
+     link=_wix,
      image_side='right',
      image_size=300
 ) }}
 
-{{ paragraph("<strong>Where it ends up.</strong> Hand-knotted carpet manufacturers in Bhadohi and Mirzapur for warps and accent yarn. Designer ateliers across Europe for one-of-a-kind summer apparel. Yarn stores in the US and UK for hand-knitting and weaving. Increasingly part of our signature blend collections (Burberry Series, Noor) where it's combined with Tibetan wool or our own hemp.") }}
+{{ paragraph("<strong>Wild-harvest, traceable.</strong> Because nobody farms nettle, there's no monoculture, no irrigation, no fertilizer, no pesticide. Just an autumn harvest by the same families who've been doing it for generations, with our partner co-ops paying transparent rates per kg of green stalk delivered.") }}
 
 {{ image_grid([
-     {'image_url': _v1_img, 'caption': _v1_cap, 'link': _v1_lnk},
-     {'image_url': _v2_img, 'caption': _v2_cap, 'link': _v2_lnk},
-     {'image_url': _v3_img, 'caption': _v3_cap, 'link': _v3_lnk},
+  {'image_url': media.nettle_yarn_fine_1,        'caption': 'Fine nettle yarn',     'link': _wix},
+  {'image_url': media.nettle_yarn_thick_1,       'caption': 'Thick nettle yarn',    'link': _wix},
+  {'image_url': media.nettle_yarn_special_erb,   'caption': 'ERB long-staple',      'link': _wix},
 ]) }}
 
-{{ paragraph("<strong>How to order.</strong> Available as hand-spun yarn in 10/2 and 20/2 counts, in natural undyed colour or as bleach-processed white, as raw cottonised fibre for spinners, and as part of our blend collections. Minimum order 50 kg per fibre type, lead time 2-3 weeks. Free samples &mdash; reply with your address and we'll dispatch within 2-3 days.") }}
+{{ paragraph("<strong>How to order.</strong> Free samples on request &mdash; reply with your address and the grade you'd like (fine, thick, or ERB) and we'll dispatch within 2&ndash;4 working days.") }}
 
-{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+{{ paragraph('&mdash; Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
 
 {% if catalog_link %}
 {{ cta_button('See the full catalog', catalog_link) }}
 {% endif %}
 
-{{ whatsapp_help_button('Hi Himalayan Fibres — I would like more details on the nettle yarn.') }}
+{{ whatsapp_help_button('Hi Prashant — I would like more details on the nettle yarn.') }}
 
 {% endblock %}

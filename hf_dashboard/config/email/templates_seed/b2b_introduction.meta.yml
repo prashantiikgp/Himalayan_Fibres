@@ -1,7 +1,7 @@
 template:
   slug: b2b_introduction
   name: "B2B Introduction — Carpet Exporters"
-  category: campaign
+  category: cold_outreach
   subject_template: "Premium Himalayan Fibers for {{ company_name }}"
   is_active: true
   required_variables:

@@ -1,114 +1,74 @@
 {#-
-  CATEGORY FOCUS — Himalayan hemp yarn (editorial / blog format).
+  CAMPAIGN PRODUCT — Himalayan hemp yarn (magazine / editorial format).
 
-  Mirrors the wool_focus editorial pattern: heading + lead → 1st image_split
-  → pull quote → 2nd image_split → variant grid → CTAs. No spec table —
-  specs woven into prose. Each body image links to its Wix product page.
+  Yarn-first: opens with finished hemp yarn (image_split), demotes raw
+  fibre to the variant grid. Founder voice; no marketing fluff.
 
   Per-send variables (all optional except first_name):
     first_name*
-
-    -- Texture / hero image_split (left) --
-    texture_image_url, texture_title, texture_body, texture_link
-
-    -- Pull quote --
-    quote_text, quote_attribution
-
-    -- Process image_split (right) --
-    process_image_url, process_title, process_body, process_link
-
-    -- 3-cell variant grid --
-    variant_1_image_url, variant_1_caption, variant_1_link
-    variant_2_image_url, variant_2_caption, variant_2_link
-    variant_3_image_url, variant_3_caption, variant_3_link
-
-    -- Footer CTAs --
-    catalog_link
+    catalog_link?    optional — renders "See the full catalog" CTA
 -#}
 {% extends 'layout/base.html' %}
 {% from 'partials/middle/heading.html' import heading with context %}
 {% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/hero_image.html' import hero_image with context %}
 {% from 'partials/middle/image_split.html' import image_split with context %}
 {% from 'partials/middle/image_grid.html' import image_grid with context %}
 {% from 'partials/middle/pull_quote.html' import pull_quote with context %}
 {% from 'partials/middle/cta_button.html' import cta_button with context %}
 {% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
 
-{% set _wix = 'https://www.himalayanfibres.com/product-page' %}
-{% set _img = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category' %}
-{% set _field = 'https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field' %}
-
-{% set _t_img   = texture_image_url or (_img + '/hemp-natural-yarn-42b9dfe4.jpg') %}
-{% set _t_title = texture_title or 'The plant, up close' %}
-{% set _t_body  = texture_body or "Hemp is a long-fibre crop &mdash; strands inside the stem stretch the full length of the plant, sometimes 4 metres. After retting and decortication, those long fibres can be hand-spun into yarn that's stronger and more breathable than cotton, with natural antimicrobial properties that make it ideal for textiles in humid climates." %}
-{% set _t_link  = texture_link or (_wix + '/himalayan-hemp-yarn') %}
-
-{% set _quote = quote_text or "Hemp resists mildew, bacteria, and UV in ways cotton just doesn't. That's why we use it for towels and bedding linens that need to last through ten monsoons." %}
-{% set _quote_attr = quote_attribution or '— design partner, Auroville' %}
-
-{% set _p_img   = process_image_url or (_field + '/field-artisan3-b4235ee8.jpg') %}
-{% set _p_title = process_title or 'Cultivated, retted, hand-spun' %}
-{% set _p_body  = process_body or "Cannabis sativa is cultivated by partner farmers in the Himalayan foothills. The harvest is rotted in mountain streams (retted), then hand-stripped and decorticated. The resulting fibre is hand-spun by women in artisan homes, with no factory involvement at any step." %}
-{% set _p_link  = process_link or '' %}
-
-{% set _v1_img = variant_1_image_url or (_img + '/hemp-natural-yarn-42b9dfe4.jpg') %}
-{% set _v1_cap = variant_1_caption or 'Natural hemp yarn — undyed' %}
-{% set _v1_lnk = variant_1_link or (_wix + '/himalayan-hemp-yarn') %}
-{% set _v2_img = variant_2_image_url or (_img + '/hemp-white-yarn-9aeb0912.jpg') %}
-{% set _v2_cap = variant_2_caption or 'White hemp — bleach-processed' %}
-{% set _v2_lnk = variant_2_link or (_wix + '/himalayan-hemp-yarn') %}
-{% set _v3_img = variant_3_image_url or (_img + '/hemp1-4159d907.jpg') %}
-{% set _v3_cap = variant_3_caption or 'Raw hemp fibre — for spinners' %}
-{% set _v3_lnk = variant_3_link or (_wix + '/himalayan-hemp-yarn') %}
+{% set _wix = 'https://www.himalayanfibres.com/product-page/himalayan-hemp-yarn' %}
 
 {% block content %}
 
-{{ heading('Hemp from the Himalayan hills') }}
+{{ hero_image(media.hemp_yarn_natural_1, alt='Hand-spun natural hemp yarn from the Himalayas', link=_wix) }}
+
+{{ heading('Hemp yarn from the Himalayan hills') }}
 
 {{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
 
-{{ paragraph("Cannabis sativa was cultivated in the Himalayan hills long before it became politically loaded elsewhere. The plant grows fast, needs almost no water, takes nothing from the soil, and produces some of the longest, strongest natural fibres on the planet. We work with farmer partners across Uttarakhand and Himachal who've been growing it for generations, and we ship the resulting yarn to designers and bedding makers across India and abroad.") }}
-
-{{ paragraph("<strong>Why hemp.</strong> Beyond the sustainability story, hemp has functional properties that aren't marketing fluff. It's naturally antimicrobial &mdash; mildew can't get a foothold the way it does with cotton. It's UV-resistant. It softens with use rather than breaking down. Apparel made from hemp lasts 3-4× longer than equivalent cotton.") }}
+{{ paragraph("A short note about one of our oldest yarns. We hand-spin hemp from <em>Cannabis sativa</em> grown by partner farmers in Uttarakhand and Himachal &mdash; the same plant that's been cultivated in these hills for generations. The yarn ships to apparel makers, bedding manufacturers, and bag-and-accessory designers across India and abroad.") }}
 
 {{ image_split(
-     image_url=_t_img,
-     title=_t_title,
-     body=_t_body,
-     link=_t_link,
+     image_url=media.hemp_yarn_natural_2,
+     title='Strong, breathable, ages well',
+     body="Hemp is a long-fibre crop &mdash; strands inside the stem stretch the full length of the plant, sometimes 4 metres. The resulting yarn is naturally antimicrobial, UV-resistant, and softens with use rather than breaking down. Apparel made from hemp lasts 3&ndash;4&times; longer than equivalent cotton.",
+     link=_wix,
      image_side='left',
      image_size=300
 ) }}
 
-{{ pull_quote(_quote, attribution=_quote_attr) }}
-
-{{ paragraph("<strong>Sustainability that's measurable.</strong> Hemp uses about half the water cotton needs and zero pesticides, because pests don't like it. The plant absorbs CO2 four times faster than the same area of forest. None of this is trade-show fluff &mdash; it's just how the crop behaves. The reason it isn't more widespread is regulatory, not agronomic.") }}
+{{ pull_quote(
+     "Hemp resists mildew, bacteria, and UV in ways cotton just doesn't. That's why we use it for towels and bedding linens that need to last through ten monsoons.",
+     attribution='&mdash; design partner, Auroville'
+) }}
 
 {{ image_split(
-     image_url=_p_img,
-     title=_p_title,
-     body=_p_body,
-     link=_p_link,
+     image_url=media.hemp_yarn_white_card,
+     title='Two finishes, same craft',
+     body="We hand-spin two main hemp yarn grades: a natural undyed yarn (warm beige tones, retains the plant's character) and a white hemp yarn (bleach-processed for colour-receptive applications). Both come from the same farms, the same spinners, and the same standards.",
+     link=_wix,
      image_side='right',
      image_size=300
 ) }}
 
-{{ paragraph("<strong>Where it ends up.</strong> Apparel makers using hemp for shirting, drawstring trousers, and lightweight summer fabrics. Bedding manufacturers for sheets and bath towels. Bag and accessory designers for canvas-style hemp blends. Increasingly used in carpet blends with our nettle and Tibetan wool for projects requiring durability + softness.") }}
+{{ paragraph("<strong>The numbers, briefly.</strong> Hemp uses about half the water cotton needs and zero pesticides &mdash; the plant doesn't attract them. It absorbs CO&#8322; four times faster than the same area of forest. None of this is trade-show fluff. It's just how the crop behaves. The reason hemp isn't more widespread is regulatory, not agronomic.") }}
 
 {{ image_grid([
-     {'image_url': _v1_img, 'caption': _v1_cap, 'link': _v1_lnk},
-     {'image_url': _v2_img, 'caption': _v2_cap, 'link': _v2_lnk},
-     {'image_url': _v3_img, 'caption': _v3_cap, 'link': _v3_lnk},
+  {'image_url': media.hemp_yarn_natural_1,    'caption': 'Natural hemp yarn',  'link': _wix},
+  {'image_url': media.hemp_yarn_white_card,   'caption': 'White hemp yarn',    'link': _wix},
+  {'image_url': media.hemp_fibre_display,     'caption': 'Raw fibre (for spinners)', 'link': _wix},
 ]) }}
 
-{{ paragraph("<strong>How to order.</strong> Available as natural hemp yarn (undyed), white hemp yarn (bleach-processed for colour-receptive applications), as raw fibre for spinners, and as part of our blend collections. Minimum order 50 kg per fibre type, lead time 2-3 weeks. Free samples on request &mdash; reply with your address and we'll dispatch within 2-3 days.") }}
+{{ paragraph("<strong>How to order.</strong> Available as natural or white hemp yarn, raw fibre for spinners, or as part of our blend collections. Free samples on request &mdash; reply with your address and the grade you'd like, and we'll dispatch within 2&ndash;4 working days.") }}
 
-{{ paragraph('— Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+{{ paragraph('&mdash; Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
 
 {% if catalog_link %}
 {{ cta_button('See the full catalog', catalog_link) }}
 {% endif %}
 
-{{ whatsapp_help_button('Hi Himalayan Fibres — I would like more details on the hemp yarn.') }}
+{{ whatsapp_help_button('Hi Prashant — I would like more details on the hemp yarn.') }}
 
 {% endblock %}

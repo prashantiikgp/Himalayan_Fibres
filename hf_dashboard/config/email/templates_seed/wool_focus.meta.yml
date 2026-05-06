@@ -1,0 +1,17 @@
+template:
+  slug: wool_focus
+  name: "Campaign — Tibetan Wool Yarn Focus"
+  category: campaign_product
+  subject_template: "Tibetan wool yarn — hand-spun at altitude, {{ first_name }}"
+  is_active: true
+  required_variables:
+    - first_name
+  optional_variables:
+    - catalog_link
+  variables:
+    - name: catalog_link
+      label: "Catalog URL"
+      type: url
+      placeholder: "https://www.himalayanfibres.com/catalog"
+      example: ""
+      required: false
