@@ -113,5 +113,8 @@ vite_dashboard/tsconfig.tsbuildinfo
 # Loose asset drops (jpg/png images dropped at repo root or assets/) —
 # media that should live in hf_dashboard/static/ or config/media/, not
 # the repo root.
-/assets/*.jpg
-/assets/*.png
+/assets/
+
+# Local backups of files mutated by one-shot cleanup scripts.
+# Kept on the operator's machine for revert; never committed.
+/cleanup_backup_*/
