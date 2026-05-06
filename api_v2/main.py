@@ -51,6 +51,7 @@ from api_v2.routers import (  # noqa: E402
     health,
     jobs,
     wa,
+    wa_webhook,
 )
 
 log = logging.getLogger(__name__)
@@ -194,6 +195,11 @@ app.include_router(auth.router, prefix="/api/v2/auth", tags=["auth"])
 app.include_router(dashboard.router, prefix="/api/v2", tags=["dashboard"])
 app.include_router(contacts.router, prefix="/api/v2", tags=["contacts"])
 app.include_router(wa.router, prefix="/api/v2/wa", tags=["wa"])
+# Phase 10.9: webhook lives at /webhook/whatsapp (no /api/v2 prefix)
+# so Meta's WABA configuration can point at the same path on either v1
+# or v2 Spaces. Captures delivery-status callbacks (sent/delivered/
+# read/failed) so the chat panel surfaces real failure reasons.
+app.include_router(wa_webhook.router, tags=["wa-webhook"])
 app.include_router(broadcasts.router, prefix="/api/v2", tags=["broadcasts"])
 app.include_router(flows.router, prefix="/api/v2", tags=["flows"])
 # Phase 7.7 — flow membership endpoints (POST /flow-memberships/{id}/stop +

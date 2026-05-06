@@ -14,11 +14,16 @@ language: en
 
 header:
   format: IMAGE
-  image: https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/nettle-thick-yarn-975912fa.jpg
+  # Phase 10.6 fix: previous URLs (wa-template-images/category/*.jpg) all
+  # returned HTTP 400 — those files were never uploaded. Pointing now at
+  # verified-reachable assets in the actual Supabase buckets. URLs were
+  # confirmed via HEAD probe (200 OK) on 2026-05-06.
+  image: https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-media/Whatsapp%20email%20Banner.jpg
   image_caption: "Hand-spun yarn — open the catalog to see the full range"
   alternates:
-    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/burberry-27f4a1b3.jpg
-    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/category/wool1-f329d1f9.jpg
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-media/Snow%20White%20Series%20800800.png
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/field/Fibre%20Geting%20Sun%20Dry.jpg
+    - https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Farm%20Images/Bark%20Drying%20Far%20View.jpeg
 
 body: |
   Hi {{1}},

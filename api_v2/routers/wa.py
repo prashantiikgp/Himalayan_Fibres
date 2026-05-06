@@ -775,6 +775,20 @@ def update_header_asset_url(template_id: int, body: dict) -> None:
     a re-submit + re-approval cycle.
     """
     new_url = (body.get("header_asset_url") or "").strip()
+    skip_probe = bool(body.get("skip_probe"))
+
+    # Phase 10.8: HEAD-probe before saving so the operator hears about a
+    # broken URL immediately, not via a silent Meta delivery failure.
+    # Skippable via skip_probe=true for cases where the URL is known-
+    # private but valid (e.g. a fresh upload that needs propagation).
+    if new_url and not skip_probe:
+        ok, err = _probe_image_url(new_url)
+        if not ok:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={"message": f"Image URL not reachable: {err}", "url": new_url},
+            )
+
     db = get_db()
     try:
         t = db.query(WATemplate).filter(WATemplate.id == template_id).first()
@@ -899,6 +913,27 @@ def submit_template_to_meta(template_id: int) -> WATemplateOut:
         if not (t.body_text or "").strip():
             raise HTTPException(status_code=400, detail="body_text is required")
 
+        # Phase 10.8: gate submission on a reachable image URL when the
+        # template uses a media header. Meta's reviewer fetches this URL
+        # at approval time; an unreachable URL silently fails approval.
+        if (t.header_format or "").upper() in ("IMAGE", "VIDEO", "DOCUMENT"):
+            asset = (t.header_asset_url or "").strip()
+            if not asset:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"{t.header_format} header requires header_asset_url",
+                )
+            ok, err = _probe_image_url(asset)
+            if not ok:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail={
+                        "message": f"Header asset URL not reachable: {err}",
+                        "url": asset,
+                        "hint": "Pick an image from the library or paste a verified URL.",
+                    },
+                )
+
         components = build_components(_spec_from_template(t))
         sender = WhatsAppSender()
         ok, data, err = sender.create_template(
@@ -975,6 +1010,38 @@ def _run_template_sync(job_id: str) -> None:
 # called once per Studio/Compose page load. Revisit if profiling shows
 # it's hot.
 
+def _probe_image_url(url: str) -> tuple[bool, str | None]:
+    """Phase 10.8: HEAD-probe an image URL with a 5s timeout. Returns
+    (ok, error_message). ok=True iff status is 2xx and content-type
+    starts with image/.
+
+    We do this server-side (not browser-side) because Meta will fetch
+    from Meta's IPs, not the operator's browser — a CORS-blocked URL
+    could appear "broken" to the browser yet work fine for Meta.
+    """
+    if not url or not url.strip():
+        return False, "URL is empty"
+    if not url.startswith(("http://", "https://")):
+        return False, "URL must start with http:// or https://"
+
+    import httpx
+    try:
+        r = httpx.head(url, follow_redirects=True, timeout=5.0)
+    except httpx.TimeoutException:
+        return False, "URL timed out (>5s)"
+    except (httpx.TransportError, OSError) as e:
+        return False, f"Connection error: {type(e).__name__}: {e}"
+
+    if r.status_code // 100 != 2:
+        return False, f"URL returned HTTP {r.status_code}"
+
+    ct = (r.headers.get("content-type") or "").lower()
+    if not ct.startswith("image/"):
+        return False, f"URL is not an image (content-type={ct or 'missing'})"
+
+    return True, None
+
+
 _INTENT_LABEL_MAP: dict[str, str] = {
     "onboarding": "Intro",
     "transactional": "Order",
@@ -995,30 +1062,128 @@ def _intent_label_for(use_case: str) -> str:
 # so the Studio editor can show a dropdown of stable URLs (no expiring
 # Meta CDN URLs). Operator drops new images into the folder + redeploys.
 
+_SUPABASE_LISTING_CACHE: dict = {"at": 0.0, "images": []}
+_SUPABASE_CACHE_TTL_S = 60.0
+
+
+def _list_supabase_images() -> list[dict]:
+    """Phase 10.7: list public images in the Supabase wa-media + wa-template-images
+    buckets. Cached per-process for 60s to avoid hammering Supabase on every
+    Studio page load. Recurses one level into wa-template-images so the
+    folder-organised bucket surfaces every file.
+    """
+    import os
+    import time as _time
+    import urllib.parse
+
+    now = _time.monotonic()
+    if (now - _SUPABASE_LISTING_CACHE["at"]) < _SUPABASE_CACHE_TTL_S and _SUPABASE_LISTING_CACHE["images"]:
+        return _SUPABASE_LISTING_CACHE["images"]
+
+    url = (os.environ.get("SUPABASE_URL") or "").rstrip("/")
+    key = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABASE_KEY")
+    if not (url and key):
+        return []
+
+    import httpx
+
+    image_exts = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
+
+    def _list_dir(bucket: str, prefix: str = "") -> list[dict]:
+        try:
+            r = httpx.post(
+                f"{url}/storage/v1/object/list/{bucket}",
+                headers={
+                    "Authorization": f"Bearer {key}",
+                    "apikey": key,
+                    "Content-Type": "application/json",
+                },
+                json={"prefix": prefix, "limit": 200, "offset": 0},
+                timeout=10,
+            )
+            return r.json() if r.status_code == 200 else []
+        except Exception:
+            return []
+
+    images: list[dict] = []
+    # wa-media: flat bucket, image files at root
+    for it in _list_dir("wa-media", ""):
+        n = it.get("name", "")
+        mime = ((it.get("metadata") or {}).get("mimetype") or "").lower()
+        if not mime.startswith("image/"):
+            continue
+        encoded = urllib.parse.quote(n, safe="/")
+        images.append({
+            "filename": n,
+            "source": "supabase:wa-media",
+            "url": f"{url}/storage/v1/object/public/wa-media/{encoded}",
+            "size_bytes": (it.get("metadata") or {}).get("size", 0),
+        })
+
+    # wa-template-images: folder-organised, recurse one level
+    bucket = "wa-template-images"
+    for top in _list_dir(bucket, ""):
+        n = top.get("name", "")
+        mime = ((top.get("metadata") or {}).get("mimetype") or "").lower()
+        if mime.startswith("image/"):
+            encoded = urllib.parse.quote(n, safe="/")
+            images.append({
+                "filename": n,
+                "source": f"supabase:{bucket}",
+                "url": f"{url}/storage/v1/object/public/{bucket}/{encoded}",
+                "size_bytes": (top.get("metadata") or {}).get("size", 0),
+            })
+        elif not mime:
+            # Likely a folder — list it.
+            for child in _list_dir(bucket, f"{n}/"):
+                cn = child.get("name", "")
+                cmime = ((child.get("metadata") or {}).get("mimetype") or "").lower()
+                if cmime.startswith("image/"):
+                    full = f"{n}/{cn}"
+                    encoded = urllib.parse.quote(full, safe="/")
+                    images.append({
+                        "filename": full,
+                        "source": f"supabase:{bucket}",
+                        "url": f"{url}/storage/v1/object/public/{bucket}/{encoded}",
+                        "size_bytes": (child.get("metadata") or {}).get("size", 0),
+                    })
+
+    _SUPABASE_LISTING_CACHE["at"] = now
+    _SUPABASE_LISTING_CACHE["images"] = images
+    return images
+
+
 @router.get("/header-images")
 def list_header_images(request: Request) -> dict:
-    """Return URLs for every image committed to the static WA-header dir.
+    """Return URLs for every reachable header image — local repo files
+    (committed to hf_dashboard/static/wa_template_headers/) PLUS images
+    in the Supabase wa-media and wa-template-images public buckets.
 
-    URLs are absolute so Meta can fetch them at template approval AND
-    template send time. The folder ships with the v2 Docker bundle.
+    Phase 10.7: Supabase listing added so Studio operators can pick from
+    the actual asset library without leaving the dashboard.
+
+    URLs are absolute and verified to be public. Meta can fetch them at
+    template approval AND template send time.
     """
     from pathlib import Path
 
     repo_root = Path(__file__).resolve().parent.parent.parent
     header_dir = repo_root / "hf_dashboard" / "static" / "wa_template_headers"
-    if not header_dir.exists():
-        return {"images": []}
-
     image_exts = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
     base = str(request.base_url).rstrip("/")
-    images = []
-    for p in sorted(header_dir.iterdir()):
-        if p.is_file() and p.suffix.lower() in image_exts:
-            images.append({
-                "filename": p.name,
-                "url": f"{base}/static/wa_template_headers/{p.name}",
-                "size_bytes": p.stat().st_size,
-            })
+    images: list[dict] = []
+
+    if header_dir.exists():
+        for p in sorted(header_dir.iterdir()):
+            if p.is_file() and p.suffix.lower() in image_exts:
+                images.append({
+                    "filename": p.name,
+                    "source": "local",
+                    "url": f"{base}/static/wa_template_headers/{p.name}",
+                    "size_bytes": p.stat().st_size,
+                })
+
+    images.extend(_list_supabase_images())
     return {"images": images}
 
 
