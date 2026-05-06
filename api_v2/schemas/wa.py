@@ -128,6 +128,30 @@ class WATemplatesResponse(BaseModel):
     total: int
 
 
+class TemplateRegistryEntry(BaseModel):
+    """One row from config/whatsapp/templates.yml — joined client-side
+    with `WATemplateOut` rows so the picker can show Intent badges and
+    rich descriptions without a second round-trip.
+
+    `intent_label` is derived server-side from `use_case` via a fixed
+    map (onboarding→Intro, transactional→Order, product_showcase→Sample,
+    catalog→Catalog, retention→Follow-up, testing→Test, default→Other)
+    so the frontend never needs to know the raw values.
+    """
+
+    name: str
+    display_name: str
+    description: str = ""
+    use_case: str = ""
+    intent_label: str = "Other"
+    category: str = ""
+    notes: str = ""
+
+
+class TemplateRegistryOut(BaseModel):
+    entries: list[TemplateRegistryEntry]
+
+
 class SendMessageRequest(BaseModel):
     """POST /wa/messages — text reply within an open 24h window."""
 

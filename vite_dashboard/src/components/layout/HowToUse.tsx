@@ -46,7 +46,7 @@ export function HowToUse({
         </summary>
 
         {howTo.sections.length > 0 && (
-          <div className="mt-3 flex flex-col gap-3 rounded-lg border border-border bg-card/40 p-card text-sm">
+          <div className="mt-3 grid grid-cols-1 gap-4 rounded-lg border border-border bg-card/40 p-card text-sm md:grid-cols-2 xl:grid-cols-3">
             {howTo.sections.map((s, i) => (
               <section key={i} className="flex flex-col gap-1">
                 <h2 className="text-xs font-semibold uppercase tracking-wider text-text-muted">

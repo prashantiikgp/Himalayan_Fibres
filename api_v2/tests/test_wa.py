@@ -999,6 +999,48 @@ def test_sse_stream_route_registered(client: TestClient) -> None:
     assert "get" in schema["paths"]["/api/v2/wa/stream"]
 
 
+def test_template_registry_intent_label_map(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """Phase 8.1 — registry endpoint maps use_case → intent_label per
+    the fixed table; missing/unknown values fall back to 'Other'."""
+    res = client.get("/api/v2/wa/template-registry", headers=auth_headers)
+    assert res.status_code == 200
+    body = res.json()
+    assert "entries" in body
+    by_name = {e["name"]: e for e in body["entries"]}
+
+    expected_pairs = {
+        "onboarding": "Intro",
+        "transactional": "Order",
+        "product_showcase": "Sample",
+        "catalog": "Catalog",
+        "retention": "Follow-up",
+        "testing": "Test",
+    }
+    for entry in body["entries"]:
+        uc = (entry["use_case"] or "").lower()
+        if uc in expected_pairs:
+            assert entry["intent_label"] == expected_pairs[uc], (
+                f"{entry['name']}: use_case={uc!r} should map to "
+                f"{expected_pairs[uc]!r} but got {entry['intent_label']!r}"
+            )
+        else:
+            assert entry["intent_label"] == "Other", (
+                f"{entry['name']}: unknown use_case {uc!r} should fall back "
+                f"to 'Other' but got {entry['intent_label']!r}"
+            )
+
+    # The hello_world template has use_case=testing — confirm it routes through.
+    assert "hello_world" in by_name
+    assert by_name["hello_world"]["intent_label"] == "Test"
+
+
+def test_template_registry_requires_auth(client: TestClient) -> None:
+    res = client.get("/api/v2/wa/template-registry")
+    assert res.status_code in (401, 403)
+
+
 def test_list_templates_extracts_variables(
     client: TestClient, auth_headers: dict[str, str]
 ) -> None:

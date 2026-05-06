@@ -8,6 +8,10 @@ from __future__ import annotations
 import logging
 import mimetypes
 import pathlib
+import random
+import ssl
+import time as _time
+from datetime import datetime, timezone
 from typing import Any
 
 import httpx
@@ -15,6 +19,15 @@ import httpx
 from services.config import get_settings
 
 _log = logging.getLogger(__name__)
+
+
+class WhatsAppSendTransientError(RuntimeError):
+    """Raised when a Meta API call exhausts retries on a transient
+    network/TLS failure. The API router maps this to HTTP 503 with
+    `retryable: true` so the frontend can offer a Retry button.
+
+    Preserves the original exception via `__cause__`.
+    """
 
 
 def _quality_score_str(raw) -> str | None:
@@ -42,14 +55,36 @@ def _rejection_reason_str(raw) -> str:
 
 
 class WhatsAppSender:
-    """Sync client for the Meta WhatsApp Cloud API."""
+    """Sync client for the Meta WhatsApp Cloud API.
 
-    # HF Spaces' outbound to graph.facebook.com occasionally fails the
-    # initial SSL handshake (suspected dual-stack IPv4/IPv6 oddity). A
-    # bounded retry recovers transparently — set with the same defaults
-    # the v1 broadcast engine had been quietly absorbing for months.
-    _MAX_RETRIES = 2
-    _RETRY_BACKOFF_S = 1.5
+    ── Phase 9.1 audit: every Meta API call site, retry-routed or not ──
+    Updated 2026-05-06. Verify against grep before changing — see
+    `_request_with_retry` for the routing helper.
+
+    | Method                       | Routes through retry? | Reason if no                                  |
+    | ---------------------------- | --------------------- | --------------------------------------------- |
+    | send_text                    | YES (POST)            | —                                             |
+    | send_template (primary)      | YES (POST)            | —                                             |
+    | send_template (lang fallback)| YES (POST)            | —                                             |
+    | list_templates               | YES (GET)             | Read path, idempotent — safe to retry         |
+    | get_template_details         | YES (GET)             | Read path, idempotent — safe to retry         |
+    | upload_media                 | NO  (POST multipart)  | Long-running; multipart form not in helper sig |
+    | submit_template_to_meta      | NO  (POST)            | Idempotency: a retry could double-create      |
+    | delete_template              | NO  (DELETE)          | Idempotency: re-delete returns 404            |
+    """
+
+    # Phase 9.1: retry budget bumped from 2 → 4 (5 attempts total) with
+    # explicit backoff ladder [2, 5, 10, 20]s + ±20% jitter. Total worst
+    # case ~37s, well under any reasonable proxy timeout. Original 4.5s
+    # budget was shorter than HF egress hiccups frequently observed.
+    _MAX_RETRIES = 4
+    _BACKOFF_LADDER_S = (2.0, 5.0, 10.0, 20.0)
+
+    # In-process diagnostics — read by /api/v2/wa/diagnostics. Resets on
+    # Space restart, which is fine for incident triage.
+    last_send_attempt_at: datetime | None = None
+    last_send_error_type: str | None = None
+    last_send_error_msg: str | None = None
 
     def __init__(self):
         settings = get_settings()
@@ -59,44 +94,96 @@ class WhatsAppSender:
         self.api_version = "v21.0"
         self.graph_base = "https://graph.facebook.com"
         # Split connect/read so a slow handshake doesn't eat the whole budget.
+        # Phase 9.1: kept generous read=30s for slow Meta endpoints
+        # (template submission can take 10-15s).
         self._timeout = httpx.Timeout(connect=15.0, read=30.0, write=30.0, pool=5.0)
 
-    def _post_with_retry(self, url: str, *, json: dict, json_ct: bool = True):
-        """POST with bounded retries on transient connection / SSL errors.
+    @classmethod
+    def _record_failure(cls, exc: Exception) -> None:
+        cls.last_send_attempt_at = datetime.now(timezone.utc)
+        cls.last_send_error_type = type(exc).__name__
+        cls.last_send_error_msg = str(exc)[:200]
 
-        Retries ONLY on httpx network-layer failures (ConnectError,
-        ConnectTimeout, ReadTimeout, RemoteProtocolError). HTTP error
-        status codes are returned to the caller so the existing 132001
-        language fallback keeps working untouched.
+    @classmethod
+    def _record_success(cls) -> None:
+        cls.last_send_attempt_at = datetime.now(timezone.utc)
+        cls.last_send_error_type = None
+        cls.last_send_error_msg = None
+
+    def _request_with_retry(
+        self,
+        method: str,
+        url: str,
+        **kwargs,
+    ) -> httpx.Response:
+        """Execute an httpx call with bounded retries on transient errors.
+
+        Catches the entire `httpx.TransportError` family (ConnectError /
+        ConnectTimeout / ReadTimeout / RemoteProtocolError + future
+        siblings) plus bare `ssl.SSLError` and `OSError` (belt-and-braces:
+        in some httpx/anyio versions a handshake failure can escape as
+        either rather than wrapped in `httpx.ConnectError` — D2 in plan).
+        HTTP error status codes are returned to the caller untouched so
+        existing fallbacks (e.g. send_template's 132001 language retry)
+        keep working.
+
+        On final failure raises `WhatsAppSendTransientError` with the
+        original exception preserved as `__cause__`.
         """
-        import time as _time
-
+        kwargs.setdefault("timeout", self._timeout)
+        method_upper = method.upper()
         last_exc: Exception | None = None
+        started = _time.monotonic()
         for attempt in range(self._MAX_RETRIES + 1):
             try:
-                return httpx.post(
-                    url,
-                    headers=self._headers(json_ct=json_ct),
-                    json=json,
-                    timeout=self._timeout,
-                )
-            except (
-                httpx.ConnectError,
-                httpx.ConnectTimeout,
-                httpx.ReadTimeout,
-                httpx.RemoteProtocolError,
-            ) as e:
+                resp = httpx.request(method_upper, url, **kwargs)
+                if attempt > 0:
+                    _log.info(
+                        "WA %s recovered on attempt %d/%d after %.1fs",
+                        method_upper, attempt + 1, self._MAX_RETRIES + 1,
+                        _time.monotonic() - started,
+                    )
+                self._record_success()
+                return resp
+            except (httpx.TransportError, ssl.SSLError, OSError) as e:
                 last_exc = e
                 if attempt < self._MAX_RETRIES:
+                    backoff = self._BACKOFF_LADDER_S[
+                        min(attempt, len(self._BACKOFF_LADDER_S) - 1)
+                    ]
+                    backoff *= 1.0 + random.uniform(-0.2, 0.2)  # ±20% jitter
                     _log.warning(
-                        "WA POST transient error (attempt %d/%d): %s",
-                        attempt + 1, self._MAX_RETRIES + 1, e,
+                        "WA %s transient error (attempt %d/%d, sleeping %.1fs): %s: %s",
+                        method_upper, attempt + 1, self._MAX_RETRIES + 1,
+                        backoff, type(e).__name__, e,
                     )
-                    _time.sleep(self._RETRY_BACKOFF_S * (2 ** attempt))
+                    _time.sleep(backoff)
                     continue
-                raise
+                # Final attempt failed — log structured + raise wrapped.
+                elapsed = _time.monotonic() - started
+                _log.error(
+                    "WA %s exhausted %d retries after %.1fs (timeout connect=%s read=%s); "
+                    "final error %s: %s; url=%s",
+                    method_upper, self._MAX_RETRIES + 1, elapsed,
+                    self._timeout.connect, self._timeout.read,
+                    type(e).__name__, e, url,
+                )
+                self._record_failure(e)
+                raise WhatsAppSendTransientError(
+                    f"Meta API unreachable after {self._MAX_RETRIES + 1} attempts: "
+                    f"{type(e).__name__}: {e}"
+                ) from e
         # Defensive — loop always either returns or raises.
-        raise last_exc or RuntimeError("WA POST failed without exception")
+        raise WhatsAppSendTransientError("unreachable") from last_exc
+
+    # Backwards-compat shim — existing call sites still use the old name.
+    def _post_with_retry(self, url: str, *, json: dict, json_ct: bool = True):
+        return self._request_with_retry(
+            "POST",
+            url,
+            headers=self._headers(json_ct=json_ct),
+            json=json,
+        )
 
     @property
     def _messages_url(self) -> str:
@@ -129,6 +216,10 @@ class WhatsAppSender:
             if r.status_code // 100 == 2:
                 return True, self._extract_message_id(r.json()), None
             return False, None, f"{r.status_code}: {r.text}"
+        except WhatsAppSendTransientError:
+            # Propagate so the API router can map to 503 retryable
+            # instead of 502 generic. Phase 9.1.
+            raise
         except Exception as e:
             return False, None, str(e)
 
@@ -208,6 +299,9 @@ class WhatsAppSender:
             }
             try:
                 r = self._post_with_retry(self._messages_url, json=payload)
+            except WhatsAppSendTransientError:
+                # Propagate so router → 503 retryable. Phase 9.1.
+                raise
             except Exception as e:
                 return False, None, str(e)
 
@@ -244,6 +338,8 @@ class WhatsAppSender:
             if r.status_code // 100 == 2:
                 return True, self._extract_message_id(r.json()), None
             return False, None, f"{r.status_code}: {r.text}"
+        except WhatsAppSendTransientError:
+            raise
         except Exception as e:
             return False, None, str(e)
 
@@ -285,7 +381,8 @@ class WhatsAppSender:
             return {"ok": False, "error": str(e)}
 
     def list_templates(self) -> tuple[bool, list[dict] | None, str | None]:
-        """List all message templates for the WABA."""
+        """List all message templates for the WABA. (Read path; routes
+        through `_request_with_retry` — Phase 9.1 audit row.)"""
         if not self.waba_id:
             return False, None, "WA_WABA_ID not set"
         url = f"{self.graph_base}/{self.api_version}/{self.waba_id}/message_templates"
@@ -294,7 +391,9 @@ class WhatsAppSender:
             "limit": 100,
         }
         try:
-            r = httpx.get(url, headers=self._headers(), params=params, timeout=self._timeout)
+            r = self._request_with_retry(
+                "GET", url, headers=self._headers(), params=params,
+            )
             if r.status_code // 100 == 2:
                 return True, r.json().get("data", []), None
             return False, None, f"{r.status_code}: {r.text}"
@@ -318,6 +417,10 @@ class WhatsAppSender:
             "category": category,
             "components": components,
         }
+        # Phase 9.1 carve-out: NOT routed through _request_with_retry.
+        # Template submission is non-idempotent — a transparent retry
+        # could double-create the template at Meta. Operator handles
+        # rare transient failures by clicking Submit again.
         try:
             r = httpx.post(url, headers=self._headers(), json=payload, timeout=self._timeout)
             if r.status_code // 100 == 2:
@@ -331,6 +434,9 @@ class WhatsAppSender:
         if not self.waba_id:
             return False, "WA_WABA_ID not set"
         url = f"{self.graph_base}/{self.api_version}/{self.waba_id}/message_templates"
+        # Phase 9.1 carve-out: NOT routed through retry — re-deleting
+        # an already-deleted template returns 404 and breaks idempotency
+        # of the operator-visible result.
         try:
             r = httpx.delete(url, headers=self._headers(), params={"name": name}, timeout=self._timeout)
             if r.status_code // 100 == 2:
@@ -372,16 +478,29 @@ class WhatsAppSender:
             if not name or not language:
                 continue
 
-            existing = (
+            # Phase 9.2: tolerate duplicate (name, language) rows that
+            # accumulated from earlier draft-then-submit flows. Keep
+            # non-drafts ahead of drafts; oldest id wins ties.
+            candidates = (
                 db.query(WATemplate)
                 .filter(WATemplate.name == name, WATemplate.language == language)
-                .one_or_none()
+                .order_by(WATemplate.is_draft.asc(), WATemplate.id.asc())
+                .all()
             )
+            existing = candidates[0] if candidates else None
             quality_score = _quality_score_str(tpl.get("quality_score"))
             rejection = _rejection_reason_str(tpl.get("rejected_reason"))
             components = tpl.get("components", []) or []
             flat = decompose_components(components)
             if existing:
+                # Sync has consolidated this template at Meta — drop any
+                # remaining sibling rows so the next sync stays clean.
+                for dup in candidates[1:]:
+                    _log.warning(
+                        "sync: removing duplicate WATemplate id=%s name=%s lang=%s is_draft=%s",
+                        dup.id, dup.name, dup.language, dup.is_draft,
+                    )
+                    db.delete(dup)
                 existing.category = tpl.get("category")
                 existing.status = tpl.get("status")
                 existing.quality_score = quality_score

@@ -29,6 +29,8 @@ from api_v2.schemas.wa import (
     ConversationListResponse,
     SendMessageRequest,
     SendTemplateRequest,
+    TemplateRegistryEntry,
+    TemplateRegistryOut,
     TemplateUpsert,
     WAMessageOut,
     WATemplateOut,
@@ -43,7 +45,10 @@ from services.models import (  # type: ignore[import-not-found]
     WAMessage,
     WATemplate,
 )
-from services.wa_sender import WhatsAppSender  # type: ignore[import-not-found]
+from services.wa_sender import (  # type: ignore[import-not-found]
+    WhatsAppSender,
+    WhatsAppSendTransientError,
+)
 from services.wa_template_builder import build_components  # type: ignore[import-not-found]
 from api_v2.services.job_store import get_job_store
 
@@ -416,7 +421,21 @@ def send_text_message(req: SendMessageRequest) -> WAMessageOut:
             )
 
         sender = WhatsAppSender()
-        ok, wa_message_id, error = sender.send_text(to_phone, text)
+        try:
+            ok, wa_message_id, error = sender.send_text(to_phone, text)
+        except WhatsAppSendTransientError as e:
+            # Phase 9.1: upstream Meta API unreachable after retries.
+            # 503 + retryable=True signals the frontend to offer a Retry
+            # button rather than a generic failure.
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={
+                    "message": "WhatsApp upstream temporarily unavailable. Please retry.",
+                    "retryable": True,
+                    "error": str(e),
+                },
+            )
 
         msg = WAMessage(
             chat_id=chat.id,
@@ -497,13 +516,25 @@ def send_template_message(req: SendTemplateRequest) -> WAMessageOut:
         chat = _ensure_chat(db, contact.id)
 
         sender = WhatsAppSender()
-        ok, wa_message_id, error = sender.send_template(
-            to_phone,
-            template_name=req.template_name,
-            lang=req.language or tmpl.language or "en_US",
-            variables=list(req.variables or []),
-            header_variables=list(req.header_variables or []),
-        )
+        try:
+            ok, wa_message_id, error = sender.send_template(
+                to_phone,
+                template_name=req.template_name,
+                lang=req.language or tmpl.language or "en_US",
+                variables=list(req.variables or []),
+                header_variables=list(req.header_variables or []),
+            )
+        except WhatsAppSendTransientError as e:
+            # Phase 9.1: Meta unreachable after retries → 503 retryable.
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={
+                    "message": "WhatsApp upstream temporarily unavailable. Please retry.",
+                    "retryable": True,
+                    "error": str(e),
+                },
+            )
 
         # Build a preview from the template body so the conversation list
         # shows something meaningful (vs an empty preview).
@@ -894,6 +925,118 @@ def _run_template_sync(job_id: str) -> None:
         )
     finally:
         db.close()
+
+
+# ─── Phase 8.1: template registry ────────────────────────────────────────
+#
+# Surfaces config/whatsapp/templates.yml so the picker can show Intent
+# badges. The DB table only carries Meta-provided fields (category,
+# status, body_text…) — `use_case` and `display_name` live in YAML.
+#
+# Cache: read on every request. The YAML is <5KB and the endpoint is
+# called once per Studio/Compose page load. Revisit if profiling shows
+# it's hot.
+
+_INTENT_LABEL_MAP: dict[str, str] = {
+    "onboarding": "Intro",
+    "transactional": "Order",
+    "product_showcase": "Sample",
+    "catalog": "Catalog",
+    "retention": "Follow-up",
+    "testing": "Test",
+}
+
+
+def _intent_label_for(use_case: str) -> str:
+    return _INTENT_LABEL_MAP.get((use_case or "").lower(), "Other")
+
+
+@router.get("/template-registry", response_model=TemplateRegistryOut)
+def list_template_registry() -> TemplateRegistryOut:
+    """Parsed config/whatsapp/templates.yml + derived intent_label.
+
+    Frontend left-joins this against /wa/templates by name; templates
+    that aren't in the registry get intent_label="Other" client-side.
+    """
+    from services.wa_config import get_wa_config  # type: ignore[import-not-found]
+
+    cfg = get_wa_config()
+    cfg.reload()  # YAML is small; pick up edits without process restart.
+    entries: list[TemplateRegistryEntry] = []
+    for name, t in cfg._templates.items():
+        entries.append(
+            TemplateRegistryEntry(
+                name=name,
+                display_name=t.display_name,
+                description=t.description,
+                use_case=t.use_case,
+                intent_label=_intent_label_for(t.use_case),
+                category=t.category,
+                notes=t.notes,
+            )
+        )
+    entries.sort(key=lambda e: e.name)
+    return TemplateRegistryOut(entries=entries)
+
+
+@router.get("/diagnostics")
+def wa_diagnostics() -> dict:
+    """Phase 9.1: operator-facing health probe for the WA send pipeline.
+
+    Performs a single GET to graph.facebook.com (no auth needed for the
+    bare hostname) and reports connect + TLS handshake timing. Also
+    surfaces the active retry/timeout config and the last-send-error
+    fields tracked on `WhatsAppSender` (in-process, resets on restart).
+
+    TODO: when APP_PASSWORD lands on the v2 Space, gate this endpoint
+    behind the same auth gate (see api_v2/deps.py::require_auth).
+    """
+    import time as _time
+    import httpx
+    import ssl
+
+    sender = WhatsAppSender()
+    out: dict = {
+        "config": {
+            "connect_timeout_s": sender._timeout.connect,
+            "read_timeout_s": sender._timeout.read,
+            "max_retries": WhatsAppSender._MAX_RETRIES,
+            "backoff_ladder_s": list(WhatsAppSender._BACKOFF_LADDER_S),
+        },
+        "last_send_attempt_at": (
+            WhatsAppSender.last_send_attempt_at.isoformat()
+            if WhatsAppSender.last_send_attempt_at
+            else None
+        ),
+        "last_send_error_type": WhatsAppSender.last_send_error_type,
+        "last_send_error_msg": WhatsAppSender.last_send_error_msg,
+    }
+
+    # Probe Meta — short timeout so this endpoint never hangs.
+    started = _time.monotonic()
+    try:
+        # GET / with no auth — Meta returns 4xx but the TLS+connect work
+        # is what we're measuring, not the response body.
+        r = httpx.get(
+            "https://graph.facebook.com/v21.0/",
+            timeout=httpx.Timeout(connect=5.0, read=5.0, write=5.0, pool=5.0),
+        )
+        elapsed = _time.monotonic() - started
+        out["probe"] = {
+            "ok": True,
+            "status_code": r.status_code,
+            "total_ms": int(elapsed * 1000),
+        }
+    except (httpx.TransportError, ssl.SSLError, OSError) as e:
+        elapsed = _time.monotonic() - started
+        out["probe"] = {
+            "ok": False,
+            "error_type": type(e).__name__,
+            "error_msg": str(e)[:200],
+            "total_ms": int(elapsed * 1000),
+        }
+
+    return out
 
 
 @router.post("/templates/sync", status_code=status.HTTP_202_ACCEPTED)

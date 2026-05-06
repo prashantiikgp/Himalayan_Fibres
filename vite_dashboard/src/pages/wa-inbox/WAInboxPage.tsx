@@ -18,6 +18,7 @@ import { configLoader } from "@/loaders/configLoader";
 import { useSearchParams } from "react-router-dom";
 import { HowToUse } from "@/components/layout/HowToUse";
 import { useConversations, useWaLiveStream } from "@/api/wa";
+import { useContactDetail } from "@/api/contacts";
 import { ConversationList } from "./components/ConversationList";
 import { ChatPanel } from "./components/ChatPanel";
 import { TemplateSheet } from "./components/TemplateSheet";
@@ -40,11 +41,26 @@ export function WAInboxPage() {
   // Look up the selected contact's display name from the conversation
   // list (cheap — the list query is already in the cache from the left
   // panel) so the TemplateSheet header reads "Sending to <name>". Falls
-  // back to the picker's name (no WAChat row yet) and finally the id.
+  // back to the picker's name (no WAChat row yet) then to the contacts
+  // endpoint for direct-URL nav (Phase 9.3) and finally the id.
   const { data: convList } = useConversations({ page_size: 200 });
+  const inConvList = !!convList?.conversations.find(
+    (c) => c.contact_id === selected,
+  );
+  const inPickedNames = !!(selected && pickedNames[selected]);
+  const { data: contactDetail } = useContactDetail(
+    selected && !inConvList && !inPickedNames ? selected : null,
+  );
+  const fetchedFullName = contactDetail
+    ? [contactDetail.first_name, contactDetail.last_name]
+        .filter(Boolean)
+        .join(" ")
+        .trim() || contactDetail.company || ""
+    : "";
   const selectedName = selected
     ? convList?.conversations.find((c) => c.contact_id === selected)?.contact_name
       ?? pickedNames[selected]
+      ?? fetchedFullName
       ?? selected
     : "";
 
@@ -62,7 +78,12 @@ export function WAInboxPage() {
   return (
     <div className="flex flex-col">
       <HowToUse pageTitle={cfg.page.title} howTo={cfg.page.how_to_use} />
-      <div className="grid h-[calc(100vh-96px)] grid-cols-[minmax(240px,1fr)_minmax(380px,2fr)_minmax(320px,2fr)] gap-2 p-2">
+      {/* Phase 8.5: dropped the third "Tools" column. The chat panel
+          already exposes "Send a template" via its CTA, and the
+          new-conversation picker (D9) auto-opens TemplateSheet — so
+          a third panel was duplicate UI. Grid is now 2-col with the
+          chat panel filling the recovered space. */}
+      <div className="grid h-[calc(100vh-96px)] grid-cols-[minmax(240px,1fr)_minmax(560px,4fr)] gap-2 p-2">
       <section
         aria-label="Conversations"
         className="overflow-hidden rounded-lg border border-border bg-card/40"
@@ -85,28 +106,6 @@ export function WAInboxPage() {
           labels={cfg.page.panels.chat}
           onOpenTemplateSheet={() => setTemplateSheetOpen(true)}
         />
-      </section>
-
-      <section
-        aria-label="Tools"
-        className="flex flex-col overflow-hidden rounded-lg border border-border bg-card/40 p-card"
-      >
-        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-text-muted">
-          {cfg.page.panels.template_sheet.title}
-        </h2>
-        <p className="text-xs text-text-muted">
-          Templates work outside the 24h window. Use the chat panel's
-          "Send a template" button (or the button below) when the window
-          is closed or you're starting a fresh conversation.
-        </p>
-        <button
-          type="button"
-          onClick={() => setTemplateSheetOpen(true)}
-          disabled={!selected}
-          className="mt-3 self-start rounded-md border border-border bg-card px-3 py-1 text-xs font-medium text-text hover:bg-card/80 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-        >
-          Open template picker
-        </button>
       </section>
 
       <TemplateSheet

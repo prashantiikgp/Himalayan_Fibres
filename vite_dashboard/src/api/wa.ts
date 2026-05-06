@@ -82,6 +82,22 @@ export type WATemplatesResponse = {
   total: number;
 };
 
+// ── Phase 8.1: template registry (joined client-side with WATemplateOut) ──
+
+export type TemplateRegistryEntry = {
+  name: string;
+  display_name: string;
+  description: string;
+  use_case: string;
+  intent_label: string;
+  category: string;
+  notes: string;
+};
+
+export type TemplateRegistryOut = {
+  entries: TemplateRegistryEntry[];
+};
+
 export type ConversationsQuery = {
   search?: string;
   archived?: boolean;
@@ -139,6 +155,33 @@ export function useWaTemplates(q: TemplatesQuery | string = {}) {
     queryKey: ["wa", "templates", query],
     queryFn: () => apiFetch<WATemplatesResponse>(`/api/v2/wa/templates${qs}`),
     staleTime: 60 * 1000,
+  });
+}
+
+/**
+ * Phase 9.1: detects the 503 retryable response shape from the WA send
+ * endpoints. Backend returns `{detail: {message, retryable: true, error}}`
+ * which FastAPI serializes; ApiError exposes the raw body string.
+ */
+export function isRetryableSendError(err: unknown): boolean {
+  if (!(err instanceof Error)) return false;
+  const anyErr = err as { status?: number; body?: string };
+  if (anyErr.status !== 503) return false;
+  if (!anyErr.body) return false;
+  try {
+    const parsed = JSON.parse(anyErr.body);
+    return parsed?.detail?.retryable === true;
+  } catch {
+    return false;
+  }
+}
+
+export function useTemplateRegistry() {
+  return useQuery({
+    queryKey: ["wa", "template-registry"],
+    queryFn: () => apiFetch<TemplateRegistryOut>("/api/v2/wa/template-registry"),
+    // Registry only changes on backend deploy; ~5min cache is plenty.
+    staleTime: 5 * 60 * 1000,
   });
 }
 

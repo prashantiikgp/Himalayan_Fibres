@@ -10,13 +10,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { TemplatePreview } from "@/components/wa/TemplatePreview";
+import { WaTemplatePicker } from "@/components/wa/WaTemplatePicker";
 import {
   extractPlaceholders,
   resolveVariableForContact,
 } from "@/lib/wa-template-vars";
 import {
+  isRetryableSendError,
   useConversationDetail,
   useSendTemplate,
   useWaTemplates,
@@ -41,7 +42,10 @@ export function TemplateSheet({
   contactName: string;
   labels: Labels;
 }) {
-  const { data, isLoading, error } = useWaTemplates();
+  // Picker drives the selection now (Phase 8.3); we still need the
+  // templates list to look up the selected template by name for preview
+  // + send-payload purposes.
+  const { data } = useWaTemplates({ status: "APPROVED" });
   const { data: convData } = useConversationDetail(contactId);
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const selected: WATemplateOut | null = useMemo(
@@ -52,6 +56,12 @@ export function TemplateSheet({
   const [headerVars, setHeaderVars] = useState<Record<string, string>>({});
   const sendMutation = useSendTemplate();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  // Phase 9.1: when the backend returns 503 retryable, the operator
+  // gets a Retry button. The mutation's `error` object is the source
+  // of truth for the retryable flag.
+  const retryable = sendMutation.error
+    ? isRetryableSendError(sendMutation.error)
+    : false;
 
   // Header placeholders are derived from header_text by scanning {{N}}
   // tokens — the DB doesn't store them separately. Body placeholders use
@@ -135,24 +145,12 @@ export function TemplateSheet({
         </SheetHeader>
 
         <div className="flex flex-1 flex-col gap-4 overflow-auto px-card pb-card">
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="tpl-pick" className="text-xs text-text-muted">Template</Label>
-            <select
-              id="tpl-pick"
-              value={selectedName ?? ""}
-              onChange={(e) => setSelectedName(e.target.value || null)}
-              disabled={isLoading || !!error}
-              className="h-9 rounded-md border border-border bg-card px-2 text-sm text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            >
-              <option value="">— Pick a template —</option>
-              {data?.templates.map((t) => (
-                <option key={t.id} value={t.name}>
-                  {t.name} ({t.category ?? "?"}, {t.variables.length} var{t.variables.length === 1 ? "" : "s"})
-                </option>
-              ))}
-            </select>
-            {error && <p role="alert" className="text-xs text-danger">{error.message}</p>}
-          </div>
+          <WaTemplatePicker
+            value={selectedName}
+            onChange={setSelectedName}
+            status="APPROVED"
+            density="compact"
+          />
 
           {selected && (
             <>
@@ -176,7 +174,23 @@ export function TemplateSheet({
               />
 
               {submitError && (
-                <p role="alert" className="text-sm text-danger">{submitError}</p>
+                <div
+                  role="alert"
+                  className="flex items-center justify-between gap-3 rounded-md border border-danger/40 bg-danger/5 p-2 text-sm text-danger"
+                >
+                  <span>{submitError}</span>
+                  {retryable && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={handleSend}
+                      disabled={sendMutation.isPending}
+                    >
+                      Retry
+                    </Button>
+                  )}
+                </div>
               )}
 
               <div className="flex justify-end gap-2 pt-2">
