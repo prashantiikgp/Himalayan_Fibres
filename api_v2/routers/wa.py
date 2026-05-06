@@ -752,6 +752,44 @@ def create_template(body: TemplateUpsert) -> WATemplateOut:
         db.close()
 
 
+@router.patch(
+    "/templates/{template_id}/header-asset-url",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None,
+)
+def update_header_asset_url(template_id: int, body: dict) -> None:
+    """Phase 10.2: update ONLY `header_asset_url` on a template, bypassing
+    the clone-on-edit policy.
+
+    Justification: header_asset_url is local-only metadata used by
+    `WhatsAppSender.send_template` at send time. Meta doesn't store or
+    care about this URL after template approval — they validated the
+    template's image format at submission time but use whatever
+    fresh URL we send each call. So updating it doesn't break the
+    immutable contract with Meta.
+
+    Use case: Meta CDN URLs in `header_asset_url` (synced from
+    `example.header_handle`) expire after ~5 days. When they do,
+    sends fail with "(#100) Invalid parameter". Operator updates to
+    a stable Supabase / static URL via this endpoint without forcing
+    a re-submit + re-approval cycle.
+    """
+    new_url = (body.get("header_asset_url") or "").strip()
+    db = get_db()
+    try:
+        t = db.query(WATemplate).filter(WATemplate.id == template_id).first()
+        if t is None:
+            raise HTTPException(status_code=404, detail="Template not found")
+        t.header_asset_url = new_url
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+    finally:
+        db.close()
+
+
 @router.post("/templates/{template_id}/save", response_model=WATemplateOut)
 def save_template(template_id: int, body: TemplateUpsert) -> WATemplateOut:
     """Save edits to a template.

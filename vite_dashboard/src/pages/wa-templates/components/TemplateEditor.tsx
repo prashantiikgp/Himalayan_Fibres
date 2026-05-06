@@ -17,6 +17,7 @@ import {
   useHeaderImages,
   useSaveTemplate,
   useSubmitTemplate,
+  useUpdateHeaderAssetUrl,
   useWaTemplate,
   type TemplateUpsert,
   type WATemplateOut,
@@ -75,6 +76,8 @@ export function TemplateEditor({
   const deleteMutation = useDeleteTemplate();
   const submitMutation = useSubmitTemplate();
   const { data: headerImagesData } = useHeaderImages();
+  const updateHeaderUrlMutation = useUpdateHeaderAssetUrl();
+  const [headerUrlSavedAt, setHeaderUrlSavedAt] = useState<number | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmSubmit, setConfirmSubmit] = useState(false);
 
@@ -269,12 +272,47 @@ export function TemplateEditor({
           {form.header_format && form.header_format !== "TEXT" && (
             <Field label={`${form.header_format} URL`} id="tpl-header-url">
               <div className="flex flex-col gap-1.5">
-                <Input
-                  id="tpl-header-url"
-                  value={form.header_asset_url ?? ""}
-                  onChange={(e) => set("header_asset_url", e.target.value)}
-                  placeholder="https://… (paste a Supabase URL or pick from the library below)"
-                />
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="tpl-header-url"
+                    value={form.header_asset_url ?? ""}
+                    onChange={(e) => set("header_asset_url", e.target.value)}
+                    placeholder="https://… (paste a Supabase URL or pick from the library below)"
+                    className="flex-1"
+                  />
+                  {/* Phase 10.2: bypass clone-on-edit for URL-only changes.
+                      Meta doesn't store this URL — it's local metadata
+                      consumed at send time. Lets the operator repoint an
+                      expired Meta CDN URL without re-submitting. */}
+                  {isImmutable && templateId !== null && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        updateHeaderUrlMutation.mutate(
+                          { id: templateId, url: form.header_asset_url ?? "" },
+                          {
+                            onSuccess: () => setHeaderUrlSavedAt(Date.now()),
+                            onError: (err) =>
+                              setSaveError(
+                                err instanceof Error ? err.message : "Update failed",
+                              ),
+                          },
+                        );
+                      }}
+                      disabled={updateHeaderUrlMutation.isPending}
+                      title="Replace the URL on this immutable template without cloning"
+                    >
+                      {updateHeaderUrlMutation.isPending ? "Saving…" : "Save URL only"}
+                    </Button>
+                  )}
+                </div>
+                {headerUrlSavedAt && (
+                  <p className="text-[10px] text-success">
+                    URL updated {new Date(headerUrlSavedAt).toLocaleTimeString()} — sends will use it immediately.
+                  </p>
+                )}
                 {/* Phase 10.3: dropdown of locally-committed images. */}
                 {headerImagesData && headerImagesData.images.length > 0 && (
                   <div className="flex items-center gap-2">

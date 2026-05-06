@@ -201,6 +201,25 @@ export function useHeaderImages() {
   });
 }
 
+// Phase 10.2: PATCH only the header_asset_url, bypassing clone-on-edit.
+// Used when an APPROVED template's Meta CDN URL has expired and we
+// need to repoint to a stable Supabase / static URL without forcing
+// a re-submit + re-approval cycle.
+export function useUpdateHeaderAssetUrl() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, url }: { id: number; url: string }) =>
+      apiFetch<void>(`/api/v2/wa/templates/${id}/header-asset-url`, {
+        method: "PATCH",
+        body: JSON.stringify({ header_asset_url: url }),
+      }),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ["wa", "templates"] });
+      qc.invalidateQueries({ queryKey: ["wa", "template", vars.id] });
+    },
+  });
+}
+
 /* ── write paths (Phase 2.1) ─────────────────────────────────────────── */
 
 export type SendMessageRequest = {
