@@ -201,19 +201,111 @@ class WhatsAppSender:
     def _extract_message_id(data: dict) -> str | None:
         return (data.get("messages") or [{}])[0].get("id")
 
-    @staticmethod
-    def _build_media_header_param(template_name: str, lang: str) -> dict | None:
-        """Phase 10.2: look up the template's header_format + header_asset_url
-        and return the right Meta media-parameter dict if (and only if)
-        the template uses an IMAGE/VIDEO/DOCUMENT header.
+    # Phase 11.1: per-process media_id cache. Meta media_ids live for
+    # ~30 days on their CDN; we cache the (source → media_id) mapping
+    # so repeat sends of the same template image don't re-upload every
+    # time. Cache key is the resolved source string (URL or absolute
+    # local path). Resets on container restart, which is fine — the
+    # next send just re-uploads.
+    _media_id_cache: dict[str, tuple[str, float]] = {}
+    _MEDIA_ID_TTL_S = 25 * 24 * 3600  # 25 days, conservatively under Meta's 30
 
-        Returns None for TEXT-header or no-header templates — caller
-        falls back to the existing text-parameter path.
+    def _resolve_image_to_media_id(self, source: str) -> str | None:
+        """Phase 11.1: turn an image source (local path, http(s) URL, or
+        an HF Space static path) into a Meta media_id by uploading the
+        bytes to /{phone-number-id}/media.
 
-        Importantly: returns None if `header_asset_url` is empty even
-        when header_format is media — the send will then fail at Meta
-        with a clear "header parameter required" error. Better than
-        silently sending a bogus URL.
+        Cached per-process; subsequent sends reuse the same media_id.
+
+        Returns None on any failure — caller falls back to the {"link":
+        source} path so we don't break sends that previously worked
+        even with a flaky upload step.
+        """
+        import time as _time
+
+        now = _time.monotonic()
+        cached = self._media_id_cache.get(source)
+        if cached and (now - cached[1]) < self._MEDIA_ID_TTL_S:
+            return cached[0]
+
+        # 1) Get the image bytes + content-type
+        ct = "image/jpeg"
+        data: bytes | None = None
+        filename = "header.jpg"
+        try:
+            if source.startswith(("http://", "https://")):
+                r = httpx.get(source, follow_redirects=True, timeout=30)
+                if r.status_code != 200:
+                    _log.warning("media upload: source URL %s returned HTTP %s", source, r.status_code)
+                    return None
+                data = r.content
+                ct = (r.headers.get("content-type") or ct).split(";")[0].strip()
+                # Pull a sensible filename from the URL path
+                from urllib.parse import urlparse, unquote
+                last = unquote(urlparse(source).path.rsplit("/", 1)[-1] or filename)
+                filename = last or filename
+            else:
+                # Treat as local path; resolve relative to repo root if not absolute.
+                p = pathlib.Path(source)
+                if not p.is_absolute():
+                    repo_root = pathlib.Path(__file__).resolve().parent.parent.parent
+                    p = repo_root / source
+                if not p.exists() or not p.is_file():
+                    _log.warning("media upload: local source %s missing", p)
+                    return None
+                data = p.read_bytes()
+                guessed, _ = mimetypes.guess_type(str(p))
+                ct = guessed or ct
+                filename = p.name
+        except Exception as e:
+            _log.warning("media upload: failed to read source %s: %s", source, e)
+            return None
+
+        if not data:
+            return None
+
+        # 2) Upload to Meta /media. Carve-out from _request_with_retry —
+        # multipart upload with a long timeout, single-attempt (idempotent
+        # but expensive on retry).
+        if not self.phone_number_id:
+            return None
+        try:
+            r = httpx.post(
+                f"{self.graph_base}/{self.api_version}/{self.phone_number_id}/media",
+                headers=self._headers(json_ct=False),
+                files={"file": (filename, data, ct)},
+                data={"messaging_product": "whatsapp", "type": ct},
+                timeout=60,
+            )
+        except Exception as e:
+            _log.warning("media upload: Meta /media POST failed: %s", e)
+            return None
+
+        if r.status_code // 100 != 2:
+            _log.warning("media upload: Meta returned %s: %s", r.status_code, r.text[:200])
+            return None
+        media_id = r.json().get("id")
+        if not media_id:
+            return None
+
+        self._media_id_cache[source] = (media_id, now)
+        _log.info("media upload: %s → media_id=%s (cached %ds)", filename, media_id, self._MEDIA_ID_TTL_S)
+        return media_id
+
+    def _build_media_header_param(self, template_name: str, lang: str) -> dict | None:
+        """Phase 10.2 / 11.1: build the Meta media-parameter dict for a
+        media-header template.
+
+        Lookup chain:
+          1. WATemplate.header_asset_url from the DB row
+          2. Resolve to media_id via _resolve_image_to_media_id (Path B —
+             upload to Meta CDN, sidesteps Meta's external fetcher)
+          3. If upload fails, fall back to {"link": url} (Path A — Meta
+             fetches at delivery; same as today's behaviour)
+
+        Returns None when the template doesn't use a media header OR
+        when there's no header_asset_url at all (caller's existing
+        text-header / no-header path takes over).
         """
         try:
             from services.database import get_db  # type: ignore[import-not-found]
@@ -243,6 +335,13 @@ class WhatsAppSender:
         if fmt not in ("IMAGE", "VIDEO", "DOCUMENT") or not url:
             return None
         media_key = fmt.lower()  # IMAGE → "image", etc.
+
+        # Phase 11.1: try the upload-then-send path first. If it fails,
+        # fall back to {"link": url} so we degrade to the prior
+        # behaviour rather than breaking sends.
+        media_id = self._resolve_image_to_media_id(url)
+        if media_id:
+            return {"type": media_key, media_key: {"id": media_id}}
         return {"type": media_key, media_key: {"link": url}}
 
     def send_text(self, to_phone: str, text: str) -> tuple[bool, str | None, str | None]:

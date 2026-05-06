@@ -482,11 +482,20 @@ def send_text_message(req: SendMessageRequest) -> WAMessageOut:
     response_model=WAMessageOut,
     status_code=status.HTTP_201_CREATED,
 )
-def send_template_message(req: SendTemplateRequest) -> WAMessageOut:
+def send_template_message(
+    req: SendTemplateRequest,
+    force: Annotated[bool, Query()] = False,
+) -> WAMessageOut:
     """Send a pre-approved template (works outside the 24h window).
 
     Templates that succeed open a fresh 24h window — record that on the
     WAChat row so subsequent text replies are unblocked.
+
+    Phase 11.2 marketing pacing guard: blocks the send when the recipient
+    has received >=3 outbound MARKETING templates in the last 24h. Meta's
+    per-recipient marketing pacing window silently drops messages above
+    this threshold (we hit it during testing today). Pass ?force=true to
+    override after the operator has read the warning.
     """
     db = get_db()
     try:
@@ -508,6 +517,43 @@ def send_template_message(req: SendTemplateRequest) -> WAMessageOut:
                 status_code=400,
                 detail=f"Template status is {tmpl.status!r}; only APPROVED can be sent",
             )
+
+        # Phase 11.2: marketing pacing guard. Counts ALL outbound
+        # messages to this contact in the last 24h (template + text).
+        # Meta's per-recipient marketing throttle doesn't strictly
+        # distinguish — but it's tightest on MARKETING. We only enforce
+        # the guard for MARKETING sends so transactional UTILITY sends
+        # (order_shipped, payment_confirmation) aren't artificially
+        # blocked. Every outbound counts toward the budget regardless
+        # of whether it succeeded or failed at delivery.
+        if (tmpl.category or "").upper() == "MARKETING" and not force:
+            window_start = datetime.now(timezone.utc) - timedelta(hours=24)
+            recent_outbound = (
+                db.query(WAMessage)
+                .filter(
+                    WAMessage.contact_id == contact.id,
+                    WAMessage.direction == "out",
+                    WAMessage.created_at >= window_start,
+                )
+                .count()
+            )
+            MARKETING_PACING_LIMIT = 3
+            if recent_outbound >= MARKETING_PACING_LIMIT:
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail={
+                        "message": (
+                            f"This contact has received {recent_outbound} outbound message(s) "
+                            f"in the last 24h. Meta's per-recipient marketing pacing "
+                            f"silently drops sends above this threshold (we hit it during "
+                            f"testing). Wait or pass ?force=true to override."
+                        ),
+                        "retryable": False,
+                        "outbound_count_24h": recent_outbound,
+                        "limit": MARKETING_PACING_LIMIT,
+                        "force_override_param": "force=true",
+                    },
+                )
 
         to_phone = _phone_for(contact)
         if not to_phone:
