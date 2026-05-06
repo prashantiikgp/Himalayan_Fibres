@@ -95,12 +95,20 @@ IGNORE_PATTERNS = [
     "playwright-report/**",
     "test-results/**",
     "coverage/**",
-    # local SQLite DBs — prod uses DATABASE_URL via Space Secret
+    # local SQLite DBs — prod uses DATABASE_URL via Space Secret.
+    # Need both top-level (`data/foo.db`) and nested (`hf_dashboard/data/foo.db`)
+    # patterns because `huggingface_hub.upload_folder.ignore_patterns` matches
+    # against the full relative path inside the staging tree, not per-folder.
     "data/*.db",
     "data/*.db-journal",
     "data/*.db-shm",
     "data/*.db-wal",
+    "**/data/*.db",
+    "**/data/*.db-journal",
+    "**/data/*.db-shm",
+    "**/data/*.db-wal",
     "media/**",
+    "**/media/**",
     # repo-only test artifacts
     "verifications/**",
     "repro/**",
