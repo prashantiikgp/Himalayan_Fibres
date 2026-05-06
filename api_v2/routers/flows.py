@@ -14,7 +14,10 @@ from sqlalchemy import func
 
 from api_v2.deps import require_auth
 from api_v2.schemas.flows import (
+    FlowDetailOut,
     FlowMembershipCreate,
+    FlowMembershipDetail,
+    FlowMembershipDetailsResponse,
     FlowMembershipOut,
     FlowMembershipsResponse,
     FlowOut,
@@ -164,6 +167,42 @@ def list_flow_runs(
         db.close()
 
 
+@router.get("/flows/{flow_id}", response_model=FlowDetailOut)
+def get_flow(flow_id: int) -> FlowDetailOut:
+    """Single-flow detail — drives the /flows/:id page header + KPIs.
+    Returns the full steps array plus per-status counts of memberships."""
+    db = get_db()
+    try:
+        flow = db.query(Flow).filter(Flow.id == flow_id).first()
+        if flow is None:
+            raise HTTPException(status_code=404, detail="Flow not found")
+
+        # Per-status counts in one GROUP BY.
+        rows = (
+            db.query(FlowMembership.status, func.count(FlowMembership.id))
+            .filter(FlowMembership.flow_id == flow_id)
+            .group_by(FlowMembership.status)
+            .all()
+        )
+        counts: dict[str, int] = {st: int(cnt) for st, cnt in rows}
+        # Fold {active, waiting_event, paused} into the response's
+        # `active_count` field for consistency with the list endpoint.
+        active_count = (
+            counts.get("active", 0)
+            + counts.get("waiting_event", 0)
+            + counts.get("paused", 0)
+        )
+
+        base = _flow_to_out(flow, active_count)
+        return FlowDetailOut(
+            **base.model_dump(),
+            steps=list(flow.steps or []),
+            counts=counts,
+        )
+    finally:
+        db.close()
+
+
 @router.get("/flows/{flow_id}/memberships", response_model=FlowMembershipsResponse)
 def list_flow_memberships(
     flow_id: int,
@@ -282,6 +321,63 @@ def create_flow_membership(
         db.close()
 
 
+def _set_membership_status(
+    membership_id: int,
+    *,
+    target_status: str,
+    allowed_from: tuple[str, ...],
+    interaction_kind: str,
+    interaction_summary_template: str,
+    re_arm: bool = False,
+) -> FlowMembershipOut:
+    """Shared transition logic for stop / pause / resume.
+
+    `allowed_from` lists the statuses we'll transition out of; any other
+    status returns 409 (idempotent stops/pauses on terminal rows return
+    the row unchanged with 200 — see stop_membership for the special
+    case). `re_arm=True` sets next_fire_at=now (for resume).
+    """
+    from datetime import datetime, timezone
+
+    from services.interactions import log_interaction  # type: ignore[import-not-found]
+
+    db = get_db()
+    try:
+        m = db.query(FlowMembership).filter(FlowMembership.id == membership_id).first()
+        if m is None:
+            raise HTTPException(status_code=404, detail="Membership not found")
+        if m.status not in allowed_from:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Cannot transition from status '{m.status}' to '{target_status}'",
+            )
+
+        now = datetime.now(timezone.utc)
+        m.status = target_status
+        m.last_step_at = now
+        if re_arm:
+            m.next_fire_at = now
+            m.error = ""  # clear stale error on resume
+        else:
+            m.next_fire_at = None
+        log_interaction(
+            db,
+            contact_id=m.contact_id,
+            kind=interaction_kind,
+            summary=interaction_summary_template.format(flow_id=m.flow_id),
+            payload={"membership_id": m.id, "flow_id": m.flow_id},
+            actor="user",
+            commit=False,
+        )
+        db.commit()
+
+        flow = db.query(Flow).filter(Flow.id == m.flow_id).first()
+        contact = db.query(Contact).filter(Contact.id == m.contact_id).first()
+        return _membership_to_out(m, flow=flow, contact=contact)
+    finally:
+        db.close()
+
+
 @membership_router.post(
     "/flow-memberships/{membership_id}/stop",
     response_model=FlowMembershipOut,
@@ -322,15 +418,78 @@ def stop_membership(membership_id: int) -> FlowMembershipOut:
         db.close()
 
 
+@membership_router.post(
+    "/flow-memberships/{membership_id}/pause",
+    response_model=FlowMembershipOut,
+)
+def pause_membership(membership_id: int) -> FlowMembershipOut:
+    """Operator pause. From {active, waiting_event} → paused. The next
+    `tick_flows()` claim filter excludes 'paused' so no further sends
+    fire until Resume. Idempotent on already-paused rows: returns
+    409 'Cannot transition' so the UI knows nothing changed."""
+    return _set_membership_status(
+        membership_id,
+        target_status="paused",
+        allowed_from=("active", "waiting_event"),
+        interaction_kind="flow_paused",
+        interaction_summary_template="Paused flow #{flow_id}",
+    )
+
+
+@membership_router.post(
+    "/flow-memberships/{membership_id}/resume",
+    response_model=FlowMembershipOut,
+)
+def resume_membership(membership_id: int) -> FlowMembershipOut:
+    """Operator resume. From paused → active with next_fire_at=now so
+    the next tick claims and fires the membership's current step.
+    409 if the membership isn't paused (e.g., already active or
+    terminal)."""
+    return _set_membership_status(
+        membership_id,
+        target_status="active",
+        allowed_from=("paused",),
+        interaction_kind="flow_resumed",
+        interaction_summary_template="Resumed flow #{flow_id}",
+        re_arm=True,
+    )
+
+
+def _membership_to_detail(
+    m: FlowMembership,
+    *,
+    flow: Flow | None = None,
+    contact: Contact | None = None,
+) -> FlowMembershipDetail:
+    """Like `_membership_to_out`, but enriches with `flow_trigger_type`
+    and the resolved current step JSON. The drawer uses these to decide
+    whether to render the Mark Sample Shipped button (membership in
+    sample_dispatch + status='waiting_event' + current_step has
+    trigger_event tag=samples_shipped)."""
+    base = _membership_to_out(m, flow=flow, contact=contact)
+    steps = list(flow.steps or []) if flow else []
+    current = (
+        steps[m.current_step_index]
+        if 0 <= m.current_step_index < len(steps)
+        else None
+    )
+    return FlowMembershipDetail(
+        **base.model_dump(),
+        flow_trigger_type=(flow.trigger_type if flow else "manual") or "manual",
+        current_step=current,
+    )
+
+
 @membership_router.get(
     "/contacts/{contact_id}/flow-memberships",
-    response_model=FlowMembershipsResponse,
+    response_model=FlowMembershipDetailsResponse,
 )
 def list_contact_flow_memberships(
     contact_id: str,
     include_past: Annotated[bool, Query()] = True,
-) -> FlowMembershipsResponse:
-    """Drawer Flows-tab data — all memberships for a contact.
+) -> FlowMembershipDetailsResponse:
+    """Drawer Flows-tab data — all memberships for a contact, enriched
+    with the flow's trigger context and the resolved current step JSON.
     `include_past=false` filters out completed/failed/stopped."""
     db = get_db()
     try:
@@ -351,9 +510,11 @@ def list_contact_flow_memberships(
             for f in db.query(Flow).filter(Flow.id.in_(flow_ids)).all():
                 flow_map[f.id] = f
 
-        return FlowMembershipsResponse(
+        return FlowMembershipDetailsResponse(
             memberships=[
-                _membership_to_out(m, flow=flow_map.get(m.flow_id), contact=contact)
+                _membership_to_detail(
+                    m, flow=flow_map.get(m.flow_id), contact=contact,
+                )
                 for m in rows
             ],
             total=len(rows),

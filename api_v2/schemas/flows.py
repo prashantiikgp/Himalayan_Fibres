@@ -93,11 +93,38 @@ class FlowMembershipsResponse(BaseModel):
     total: int
 
 
+class FlowMembershipDetail(FlowMembershipOut):
+    """Drawer-friendly variant — includes the flow's trigger context and
+    the resolved current step JSON so the UI can decide whether to
+    render the Mark Sample Shipped button without a second round-trip
+    to /flows/{id} (PLAN_flows §5.3)."""
+
+    flow_trigger_type: str = "manual"
+    current_step: dict[str, Any] | None = None
+
+
 class FlowMembershipCreate(BaseModel):
     """Body for POST /api/v2/flows/{flow_id}/memberships."""
 
     contact_id: str
     actor: str = "user"
+
+
+class FlowDetailOut(FlowOut):
+    """Single-flow read with the full steps array + per-status counts.
+    Drives the /flows/:id detail page header + KPI cards."""
+
+    steps: list[dict[str, Any]] = Field(default_factory=list)
+    counts: dict[str, int] = Field(default_factory=dict)
+
+
+class FlowMembershipDetailsResponse(BaseModel):
+    """Response shape for `GET /contacts/{id}/flow-memberships` — uses
+    the richer `FlowMembershipDetail` so the drawer renders the
+    contextual Mark Sample Shipped button without another round-trip."""
+
+    memberships: list[FlowMembershipDetail]
+    total: int
 
 
 class FlowStepRunOut(BaseModel):

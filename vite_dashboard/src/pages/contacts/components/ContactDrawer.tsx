@@ -41,6 +41,7 @@ import {
 import { formatRelative } from "@/lib/format";
 import { track } from "@/lib/analytics";
 import { STRINGS } from "@/lib/strings";
+import { FlowsTab } from "./ContactDrawer/FlowsTab";
 
 const LIFECYCLE_OPTIONS = ["new_lead", "contacted", "interested", "customer", "churned"];
 const CONSENT_OPTIONS = ["pending", "opted_in", "opted_out"];
@@ -101,6 +102,7 @@ export function ContactDrawer({
                 <TabsTrigger value="notes">
                   {STRINGS.contacts.drawer.tabNotes} {detail.threaded_notes.length > 0 && `(${detail.threaded_notes.length})`}
                 </TabsTrigger>
+                <TabsTrigger value="flows">{STRINGS.contacts.drawer.tabFlows}</TabsTrigger>
                 <TabsTrigger value="activity">{STRINGS.contacts.drawer.tabActivity}</TabsTrigger>
               </TabsList>
 
@@ -137,6 +139,10 @@ export function ContactDrawer({
                     });
                   }}
                 />
+              </TabsContent>
+
+              <TabsContent value="flows">
+                <FlowsTab contactId={contact.id} />
               </TabsContent>
 
               <TabsContent value="activity">

@@ -784,6 +784,270 @@ def test_send_exception_marks_placeholder_failed_no_false_advance() -> None:
         db.close()
 
 
+# ─── Phase 7.8: pause / resume + GET /flows/{id} ────────────────────
+
+
+def test_pause_membership_clears_next_fire_at(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """POST /flow-memberships/{id}/pause sets status='paused' and
+    clears next_fire_at. tick_flows must NOT claim paused rows."""
+    from api_v2.services.flows_engine_v2 import tick_flows
+    from services.database import get_db
+    from services.models import FlowMembership
+
+    flow_id = _seed_tag_flow("test_pause")
+    cid = _seed_contact("pause_target")
+
+    db = get_db()
+    try:
+        m = FlowMembership(
+            flow_id=flow_id,
+            contact_id=cid,
+            status="active",
+            current_step_index=0,
+            next_fire_at=datetime.now(timezone.utc) - timedelta(seconds=10),
+            trigger_source="manual",
+        )
+        db.add(m)
+        db.commit()
+        member_id = m.id
+    finally:
+        db.close()
+
+    res = client.post(
+        f"/api/v2/flow-memberships/{member_id}/pause",
+        headers=auth_headers,
+    )
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert body["status"] == "paused"
+    assert body["next_fire_at"] is None
+
+    # Confirm tick_flows skips paused rows.
+    result = tick_flows()
+    db = get_db()
+    try:
+        m2 = db.query(FlowMembership).filter(FlowMembership.id == member_id).one()
+        assert m2.status == "paused", "tick must not claim paused rows"
+        assert m2.current_step_index == 0
+    finally:
+        db.close()
+
+
+def test_resume_membership_re_arms_next_fire_at(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """POST /flow-memberships/{id}/resume from paused → active with
+    next_fire_at=now. The next tick claims it."""
+    from services.database import get_db
+    from services.models import FlowMembership
+
+    flow_id = _seed_tag_flow("test_resume")
+    cid = _seed_contact("resume_target")
+
+    db = get_db()
+    try:
+        m = FlowMembership(
+            flow_id=flow_id,
+            contact_id=cid,
+            status="paused",
+            current_step_index=0,
+            next_fire_at=None,
+            trigger_source="manual",
+            error="some prior error",
+        )
+        db.add(m)
+        db.commit()
+        member_id = m.id
+    finally:
+        db.close()
+
+    res = client.post(
+        f"/api/v2/flow-memberships/{member_id}/resume",
+        headers=auth_headers,
+    )
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert body["status"] == "active"
+    assert body["next_fire_at"] is not None
+    assert body["error"] == ""  # cleared on resume
+
+
+def test_pause_rejects_terminal_status(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """409 when transitioning out of a terminal status."""
+    from services.database import get_db
+    from services.models import FlowMembership
+
+    flow_id = _seed_tag_flow("test_pause_terminal")
+    cid = _seed_contact("pause_terminal")
+
+    db = get_db()
+    try:
+        m = FlowMembership(
+            flow_id=flow_id,
+            contact_id=cid,
+            status="completed",
+            current_step_index=2,
+            next_fire_at=None,
+            trigger_source="manual",
+        )
+        db.add(m)
+        db.commit()
+        member_id = m.id
+    finally:
+        db.close()
+
+    res = client.post(
+        f"/api/v2/flow-memberships/{member_id}/pause",
+        headers=auth_headers,
+    )
+    assert res.status_code == 409
+
+
+def test_resume_rejects_non_paused(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """409 when resuming a membership that isn't paused."""
+    from services.database import get_db
+    from services.models import FlowMembership
+
+    flow_id = _seed_tag_flow("test_resume_non_paused")
+    cid = _seed_contact("resume_non_paused")
+
+    db = get_db()
+    try:
+        m = FlowMembership(
+            flow_id=flow_id,
+            contact_id=cid,
+            status="active",
+            current_step_index=0,
+            next_fire_at=datetime.now(timezone.utc),
+            trigger_source="manual",
+        )
+        db.add(m)
+        db.commit()
+        member_id = m.id
+    finally:
+        db.close()
+
+    res = client.post(
+        f"/api/v2/flow-memberships/{member_id}/resume",
+        headers=auth_headers,
+    )
+    assert res.status_code == 409
+
+
+def test_get_flow_detail_endpoint(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """GET /api/v2/flows/{id} returns the full steps array + per-status counts."""
+    from services.database import get_db
+    from services.models import Flow, FlowMembership
+
+    db = get_db()
+    try:
+        flow = db.query(Flow).filter(Flow.slug == "sample_dispatch").first()
+        assert flow is not None
+        flow_id = flow.id
+    finally:
+        db.close()
+
+    cid_active = _seed_contact("flow_detail_active")
+    cid_completed = _seed_contact("flow_detail_completed")
+
+    db = get_db()
+    try:
+        db.add(
+            FlowMembership(
+                flow_id=flow_id, contact_id=cid_active,
+                status="active", current_step_index=0,
+                next_fire_at=datetime.now(timezone.utc),
+                trigger_source="manual",
+            )
+        )
+        db.add(
+            FlowMembership(
+                flow_id=flow_id, contact_id=cid_completed,
+                status="completed", current_step_index=3,
+                next_fire_at=None,
+                trigger_source="manual",
+            )
+        )
+        db.commit()
+    finally:
+        db.close()
+
+    res = client.get(f"/api/v2/flows/{flow_id}", headers=auth_headers)
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert body["slug"] == "sample_dispatch"
+    assert body["trigger_type"] == "tag"
+    assert body["channel"] == "multi"
+    assert isinstance(body["steps"], list)
+    assert len(body["steps"]) == 3
+    assert isinstance(body["counts"], dict)
+    # active_count rolls up active+waiting_event+paused
+    assert body["counts"].get("active", 0) >= 1
+    assert body["counts"].get("completed", 0) >= 1
+
+
+def test_get_flow_detail_404(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    res = client.get("/api/v2/flows/9999999", headers=auth_headers)
+    assert res.status_code == 404
+
+
+def test_contact_flow_memberships_includes_current_step(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    """The drawer needs the current step JSON inline so it knows
+    whether to render the Mark Sample Shipped button."""
+    from services.database import get_db
+    from services.models import Flow, FlowMembership
+
+    db = get_db()
+    try:
+        flow_id = (
+            db.query(Flow).filter(Flow.slug == "sample_dispatch").first().id
+        )
+    finally:
+        db.close()
+
+    cid = _seed_contact("drawer_current_step")
+
+    db = get_db()
+    try:
+        db.add(
+            FlowMembership(
+                flow_id=flow_id, contact_id=cid,
+                status="waiting_event", current_step_index=1,
+                next_fire_at=None,
+                trigger_source="tag",
+            )
+        )
+        db.commit()
+    finally:
+        db.close()
+
+    res = client.get(
+        f"/api/v2/contacts/{cid}/flow-memberships",
+        headers=auth_headers,
+    )
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert body["total"] >= 1
+    sample = next((m for m in body["memberships"] if m["flow_slug"] == "sample_dispatch"), None)
+    assert sample is not None
+    assert sample["flow_trigger_type"] == "tag"
+    assert sample["current_step"] is not None
+    # Step 1 of Sample Dispatch is event-gated on samples_shipped.
+    assert sample["current_step"]["trigger_event"]["value"] == "samples_shipped"
+
+
 def test_assign_flow_partial_unique_blocks_duplicate() -> None:
     """The pre-insert SELECT in assign_flow returns None for an active
     duplicate; the partial unique index would also block at the DB

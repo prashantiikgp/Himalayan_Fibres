@@ -131,6 +131,13 @@ _KIND_ICON = {
     "wa_inbound": "⬅",
     "tag_added": "🏷",
     "segment_matched": "🎯",
+    # Phase 7.7 / 7.8 — flow-engine events
+    "flow_assigned": "🔗",
+    "flow_step_sent": "▶",
+    "flow_completed": "✓",
+    "flow_stopped": "⊘",
+    "flow_paused": "⏸",
+    "flow_resumed": "⏯",
 }
 
 _KIND_COLOR = {
@@ -143,6 +150,12 @@ _KIND_COLOR = {
     "wa_inbound": "#8b5cf6",
     "tag_added": "#ec4899",
     "segment_matched": "#ef4444",
+    "flow_assigned": "#6366f1",
+    "flow_step_sent": "#06b6d4",
+    "flow_completed": "#22c55e",
+    "flow_stopped": "#64748b",
+    "flow_paused": "#64748b",
+    "flow_resumed": "#6366f1",
 }
 
 

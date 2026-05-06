@@ -362,15 +362,24 @@ def _seed_default_templates(db: Session):
 
 
 def _seed_default_flows(db: Session):
-    """Create pre-defined automation flows. Runs once on first seed."""
+    """Create pre-defined automation flows. Runs once on first seed.
+
+    These three pre-Phase-7 flows are seeded `is_active=False` because
+    Phase 7.7 introduced the proper trigger/membership model and
+    Sample Dispatch is the canonical example. Operators still see them
+    in the unfiltered list (with the Inactive pill) so the history is
+    preserved; the "Active only" default filter on the list page hides
+    them. Flip `is_active=True` if you want to bring one back.
+    """
     flows = [
         Flow(
             name="B2B Introduction Flow",
             slug="b2b_introduction_flow",
-            description="3-step email sequence for new B2B carpet exporter leads",
+            description="Legacy 3-step email sequence — superseded by tag-triggered flows",
             channel="email",
             trigger_type="manual",
             trigger_config={},
+            is_active=False,
             steps=[
                 {"day": 0, "template_slug": "b2b_introduction", "subject": "Premium Himalayan Fibers for {{company_name}}"},
                 {"day": 3, "template_slug": "sustainability", "subject": "Meet EU & US Sustainability Standards"},
@@ -380,10 +389,11 @@ def _seed_default_flows(db: Session):
         Flow(
             name="Welcome & Nurture Flow",
             slug="welcome_nurture_flow",
-            description="2-step welcome email sequence for new contacts",
+            description="Legacy 2-step welcome — superseded by Sample Dispatch + welcome flow",
             channel="email",
             trigger_type="manual",
             trigger_config={},
+            is_active=False,
             steps=[
                 {"day": 0, "template_slug": "welcome_production", "subject": "Welcome to Himalayan Fibers"},
                 {"day": 5, "template_slug": "welcome_final", "subject": "Discover Our Product Range"},
@@ -392,10 +402,11 @@ def _seed_default_flows(db: Session):
         Flow(
             name="WhatsApp Welcome Flow",
             slug="whatsapp_welcome_flow",
-            description="2-step WhatsApp template sequence for new leads",
+            description="Legacy 2-step WA — superseded by multi-channel Sample Dispatch",
             channel="whatsapp",
             trigger_type="manual",
             trigger_config={},
+            is_active=False,
             steps=[
                 {"day": 0, "wa_template": "welcome_message", "variables": ["{{first_name}}"]},
                 {"day": 3, "wa_template": "snow_white", "variables": []},
@@ -459,12 +470,24 @@ SAMPLE_DISPATCH_FLOW_DEF = {
 }
 
 
+LEGACY_FLOW_SLUGS = (
+    "b2b_introduction_flow",
+    "welcome_nurture_flow",
+    "whatsapp_welcome_flow",
+)
+
+
 def seed_phase7_flows(db: Session) -> dict:
     """Idempotently seed Phase 7.7 flows. Called from ensure_db_ready
     on every boot so prod DBs picked up the new flow without resetting.
 
     Skips any slug that already exists; never overwrites — operator
     edits via the (Phase 7.9) flow editor must survive a redeploy.
+
+    Phase 7.8: also deactivates the 3 legacy seed flows on prod DBs
+    that were seeded before Phase 7 (they were seeded `is_active=True`).
+    Idempotent: if they're already inactive or already operator-edited
+    to a different state, leave them alone.
     """
     inserted, skipped = 0, 0
     for flow_def in [SAMPLE_DISPATCH_FLOW_DEF]:
@@ -485,8 +508,29 @@ def seed_phase7_flows(db: Session) -> dict:
             )
         )
         inserted += 1
+
+    # One-shot legacy deactivation. We only flip flows that are still
+    # the original legacy seed (description starts with "Legacy" OR
+    # matches the original cohort-flow descriptions). If an operator
+    # edited the description, we trust that edit.
+    deactivated = 0
+    legacy = db.query(Flow).filter(
+        Flow.slug.in_(LEGACY_FLOW_SLUGS),
+        Flow.is_active.is_(True),
+    ).all()
+    for flow in legacy:
+        desc = flow.description or ""
+        if (
+            desc.startswith("Legacy")
+            or "carpet exporter" in desc
+            or "welcome email sequence" in desc
+            or "WhatsApp template sequence" in desc
+        ):
+            flow.is_active = False
+            deactivated += 1
+
     db.commit()
-    return {"inserted": inserted, "skipped": skipped}
+    return {"inserted": inserted, "skipped": skipped, "deactivated_legacy": deactivated}
 
 
 def ensure_db_ready():

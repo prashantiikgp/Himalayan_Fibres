@@ -1,34 +1,39 @@
 /**
- * <FlowsTable> — read-only list of automation flows.
+ * <FlowsTable> — list of automation flows with trigger pill + active count.
  *
- * Phase 5.0 ships read-only. Phase 5.1+ will add Start/Pause/Cancel
- * actions and a per-flow detail drawer with the steps editor.
+ * Phase 7.8: row click navigates to /flows/:id (replaces the inline
+ * cohort-runs panel from Phase 5.0). The legacy useFlowRuns hook stays
+ * in api/flows.ts for backward compat but no UI consumes it.
  */
 
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/tables/DataTable";
-import { useFlowRuns, useFlows, type FlowOut } from "@/api/flows";
+import {
+  useFlows,
+  type FlowOut,
+  type FlowChannel,
+} from "@/api/flows";
 import { formatRelative } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export function FlowsTable() {
   const [activeOnly, setActiveOnly] = useState(false);
-  const [channel, setChannel] = useState<"all" | "email" | "whatsapp">("all");
+  const [channel, setChannel] =
+    useState<"all" | "email" | "whatsapp" | "multi">("all");
+  const navigate = useNavigate();
   const { data, isLoading, error } = useFlows({
     active_only: activeOnly,
     channel: channel === "all" ? undefined : channel,
   });
-  const [openFlow, setOpenFlow] = useState<FlowOut | null>(null);
 
   const columns = useMemo<ColumnDef<FlowOut, unknown>[]>(
     () => [
       {
         accessorKey: "is_active",
         header: "Status",
-        cell: ({ row }) => (
-          <ActivePill active={row.original.is_active} />
-        ),
+        cell: ({ row }) => <ActivePill active={row.original.is_active} />,
       },
       {
         accessorKey: "name",
@@ -37,7 +42,7 @@ export function FlowsTable() {
           <div className="flex flex-col">
             <span className="font-medium text-text">{row.original.name}</span>
             {row.original.description && (
-              <span className="truncate text-xs text-text-muted">
+              <span className="line-clamp-2 text-xs text-text-muted">
                 {row.original.description}
               </span>
             )}
@@ -45,16 +50,40 @@ export function FlowsTable() {
         ),
       },
       {
+        accessorKey: "trigger_type",
+        header: "Trigger",
+        cell: ({ row }) => (
+          <TriggerPill
+            triggerType={row.original.trigger_type}
+            triggerConfig={row.original.trigger_config}
+          />
+        ),
+      },
+      {
         accessorKey: "channel",
         header: "Channel",
-        cell: ({ row }) => (
-          <ChannelPill channel={row.original.channel} />
-        ),
+        cell: ({ row }) => <ChannelPill channel={row.original.channel} />,
       },
       {
         accessorKey: "step_count",
         header: "Steps",
-        cell: ({ row }) => row.original.step_count,
+        cell: ({ row }) => (
+          <span className="text-text">{row.original.step_count}</span>
+        ),
+      },
+      {
+        accessorKey: "active_count",
+        header: "Active",
+        cell: ({ row }) => (
+          <span
+            className={cn(
+              "tabular-nums",
+              row.original.active_count > 0 ? "text-text" : "text-text-muted",
+            )}
+          >
+            {row.original.active_count}
+          </span>
+        ),
       },
       {
         accessorKey: "created_at",
@@ -68,7 +97,6 @@ export function FlowsTable() {
   return (
     <div className="flex flex-col gap-3 p-card">
       <div className="flex items-center gap-3">
-        {/* Phase 6.5: page title moved to HowToUse accordion above. */}
         <div className="ml-auto flex items-center gap-3">
           <label className="flex items-center gap-2 text-xs text-text-muted">
             <input
@@ -87,6 +115,7 @@ export function FlowsTable() {
             <option value="all">All channels</option>
             <option value="email">Email</option>
             <option value="whatsapp">WhatsApp</option>
+            <option value="multi">Multi</option>
           </select>
         </div>
       </div>
@@ -97,81 +126,9 @@ export function FlowsTable() {
         isLoading={isLoading}
         error={error}
         getRowId={(row) => String(row.id)}
-        onRowClick={(row) => setOpenFlow(row)}
+        onRowClick={(row) => navigate(`/flows/${row.id}`)}
         emptyMessage="No flows match these filters."
       />
-
-      {openFlow && (
-        <FlowRunsPanel flow={openFlow} onClose={() => setOpenFlow(null)} />
-      )}
-    </div>
-  );
-}
-
-function FlowRunsPanel({
-  flow,
-  onClose,
-}: {
-  flow: FlowOut;
-  onClose: () => void;
-}) {
-  const { data, isLoading, error } = useFlowRuns(flow.id, 20);
-
-  return (
-    <div className="rounded-lg border border-border bg-card/40 p-card">
-      <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-text">
-          Recent runs — {flow.name}
-        </h2>
-        <button
-          type="button"
-          onClick={onClose}
-          className="text-xs text-text-muted hover:text-text"
-        >
-          Close
-        </button>
-      </div>
-      {isLoading && <p className="text-xs text-text-muted">Loading runs…</p>}
-      {error && (
-        <p role="alert" className="text-xs text-danger">
-          {error.message}
-        </p>
-      )}
-      {data && data.runs.length === 0 && (
-        <p className="text-xs text-text-muted">No runs yet.</p>
-      )}
-      {data && data.runs.length > 0 && (
-        <table className="w-full text-xs">
-          <thead className="text-text-muted">
-            <tr className="border-b border-border/40">
-              <th className="py-1 text-left font-medium">Started</th>
-              <th className="py-1 text-left font-medium">Segment</th>
-              <th className="py-1 text-left font-medium">Step</th>
-              <th className="py-1 text-left font-medium">Status</th>
-              <th className="py-1 text-right font-medium">Sent</th>
-              <th className="py-1 text-right font-medium">Failed</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.runs.map((r) => (
-              <tr key={r.id} className="border-b border-border/20">
-                <td className="py-1 text-text">{formatRelative(r.started_at)}</td>
-                <td className="py-1 text-text-muted">{r.segment_id ?? "—"}</td>
-                <td className="py-1 text-text">{r.current_step + 1}</td>
-                <td className="py-1">
-                  <RunStatusPill status={r.status} />
-                </td>
-                <td className="py-1 text-right text-text">{r.total_sent}</td>
-                <td className="py-1 text-right">
-                  <span className={r.total_failed > 0 ? "text-danger" : ""}>
-                    {r.total_failed}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
     </div>
   );
 }
@@ -191,46 +148,71 @@ function ActivePill({ active }: { active: boolean }) {
   );
 }
 
-function ChannelPill({ channel }: { channel: "email" | "whatsapp" }) {
-  const isWa = channel === "whatsapp";
+export function ChannelPill({ channel }: { channel: FlowChannel | string }) {
+  const tone =
+    channel === "whatsapp"
+      ? "border-success/40 bg-success/10 text-success"
+      : channel === "multi"
+      ? "border-purple-500/40 bg-purple-500/10 text-purple-500"
+      : "border-primary/40 bg-primary/10 text-primary";
+  const label =
+    channel === "whatsapp"
+      ? "WhatsApp"
+      : channel === "multi"
+      ? "Multi"
+      : "Email";
   return (
     <span
       className={cn(
         "inline-block rounded-pill border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider",
-        isWa
-          ? "border-success/40 bg-success/10 text-success"
-          : "border-primary/40 bg-primary/10 text-primary",
+        tone,
       )}
     >
-      {isWa ? "WhatsApp" : "Email"}
+      {label}
     </span>
   );
 }
 
-function RunStatusPill({ status }: { status: string }) {
-  const lower = status.toLowerCase();
-  const tone =
-    lower === "active"
-      ? "primary"
-      : lower === "completed"
-      ? "success"
-      : lower === "failed" || lower === "cancelled"
-      ? "danger"
-      : "muted";
-  const cls: Record<string, string> = {
-    success: "border-success/40 bg-success/10 text-success",
-    danger: "border-danger/40 bg-danger/10 text-danger",
-    primary: "border-primary/40 bg-primary/10 text-primary",
-    muted: "border-border bg-card text-text-muted",
-  };
+/**
+ * Renders the trigger as a pill: "Manual", "Lifecycle: customer",
+ * "Tag: samples_requested". Falls back to the raw type for unknown
+ * trigger kinds rather than failing.
+ */
+export function TriggerPill({
+  triggerType,
+  triggerConfig,
+}: {
+  triggerType: string;
+  triggerConfig: Record<string, unknown>;
+}) {
+  let label: string;
+  let tone: string;
+
+  if (triggerType === "manual") {
+    label = "Manual";
+    tone = "border-border bg-card text-text-muted";
+  } else if (triggerType === "lifecycle") {
+    const to = triggerConfig?.to ?? triggerConfig?.lifecycle;
+    const value = Array.isArray(to) ? to.join(" / ") : (to ?? "?");
+    label = `Lifecycle: ${value}`;
+    tone = "border-primary/40 bg-primary/10 text-primary";
+  } else if (triggerType === "tag") {
+    const tag = triggerConfig?.tag ?? "?";
+    label = `Tag: ${tag}`;
+    tone = "border-warning/40 bg-warning/10 text-warning";
+  } else {
+    label = triggerType;
+    tone = "border-border bg-card text-text-muted";
+  }
+
   return (
     <span
       className={cn(
-        "rounded-pill border px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider",
-        cls[tone],
+        "inline-block rounded-pill border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider",
+        tone,
       )}
     >
-      {status}
+      {label}
     </span>
   );
 }

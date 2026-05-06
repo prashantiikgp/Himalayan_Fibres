@@ -1,29 +1,49 @@
-# Flows page config — lands in Phase 5 (read-only).
+# Flows page config — Phase 7.8.
 
 page:
   title: "Flows"
-  subtitle: ""
+  subtitle: "Automated multi-step sequences with operator intervention points"
   how_to_use:
-    summary: "Multi-step automated send sequences (read-only)."
+    summary: "Auto-enroll contacts on a tag/lifecycle change and run a multi-step send sequence with operator pause/resume/stop control."
     sections:
-      - title: "What flows do"
+      - title: "How a flow runs"
         body: |
-          A flow runs a sequence of templated sends spaced by a
-          per-step delay. E.g. "send b2b_introduction on day 0,
-          followup_interest on day 3, sample_offer on day 7" —
-          one row per flow, one row per recipient cohort.
-      - title: "Read-only for now"
+          A flow is a list of steps. When a contact's lifecycle
+          changes or a configured tag is added, they're enrolled in
+          any matching flow automatically. The scheduler tick (once
+          a minute) fires the steps with the configured delays.
+          Some steps wait for an operator action — e.g. "Mark sample
+          shipped" — instead of a timer.
+      - title: "Sample Dispatch — the canonical flow"
         body: |
-          This page lists existing flows + their recent runs.
-          Starting / pausing / cancelling runs and editing the
-          step list lands in a follow-up phase — for now this
-          surface is for visibility only.
-      - title: "Click a row for runs"
+          1. Tag a contact `samples_requested` (in the contact drawer
+             Tags tab) → step 0 fires immediately. Within 60 s the
+             contact gets a thank-you email and a WhatsApp ack.
+          2. The membership parks at status `waiting_event`.
+             Prepare the sample physically.
+          3. Open the contact drawer → Flows tab → click "Mark sample
+             shipped" with tracking_id + courier. Step 1 sends the
+             dispatch email + WA template with the real tracking.
+          4. Seven days later, step 2 sends the follow-up
+             ("How did it feel?"). Membership is `completed`.
+      - title: "See per-contact progress"
         body: |
-          Each flow row expands inline to show its last 20 runs:
-          status, current step, total contacts, sent + failed
-          counts, started-at timestamp.
-  landed_phase: 5
-  runs_limit: 10
+          Click any flow row to see every contact in that flow with
+          their current step, when the next send fires, and per-row
+          Pause / Resume / Stop actions. Or open a contact's drawer
+          → Flows tab to see all their memberships in one place.
+      - title: "Pause vs. Stop"
+        body: |
+          Pause re-arms when you click Resume — useful if samples
+          aren't ready and you want to hold communication for a few
+          days. Stop is terminal — the membership won't fire any
+          more steps and a fresh tag-add starts a new membership.
+  landed_phase: 7
+  table:
+    page_size: 25
+  detail:
+    members_default_status: "active"
+    step_runs_default_status: ""
+    members_page_size: 50
   styles:
     step_card_padding: "10px 14px"

@@ -165,12 +165,35 @@ export const WaTemplatesPageConfig = z
 
 export type WaTemplatesPageConfigT = z.infer<typeof WaTemplatesPageConfig>;
 
-/* ── Flows (Phase 5) ────────────────────────────────────────────────────── */
+/* ── Flows (Phase 5 → 7.8) ──────────────────────────────────────────────── */
 
 export const FlowsPageConfig = z
   .object({
     page: PageMeta.extend({
+      /** Phase 5.0 cohort runs panel — kept for back-compat; unused
+       * by the Phase 7.8 list page (which navigates to /flows/:id
+       * instead). */
       runs_limit: PosInt.default(10),
+      /** Phase 7.8 list page table tuning. */
+      table: z
+        .object({
+          page_size: PosInt.default(25),
+        })
+        .strict()
+        .default({ page_size: 25 }),
+      /** Phase 7.8 detail-page tuning. */
+      detail: z
+        .object({
+          members_default_status: z.string().default("active"),
+          step_runs_default_status: z.string().default(""),
+          members_page_size: PosInt.default(50),
+        })
+        .strict()
+        .default({
+          members_default_status: "active",
+          step_runs_default_status: "",
+          members_page_size: 50,
+        }),
       styles: z.record(z.string(), CssLength).default({}),
     }).strict(),
   })
