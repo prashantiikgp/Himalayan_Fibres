@@ -1,7 +1,23 @@
-"""Email sender using Gmail API (HTTP-based, works on HF Spaces).
+"""Email sender supporting two transports.
 
-Uses OAuth2 refresh token to send emails via Gmail API over HTTPS.
-No SMTP needed — bypasses HF Spaces port blocking.
+1. **Gmail API** (default — HTTP-based, works on HF Spaces).
+   Uses OAuth2 refresh token to send via the Gmail API over HTTPS.
+   The catch: Gmail rewrites the MIME From header to whatever account
+   the OAuth refresh token belongs to. So if your refresh token is for
+   account X, every email comes from X — `SMTP_FROM_EMAIL` is ignored.
+
+2. **SMTP** (alternative — smtplib over STARTTLS).
+   Honors `SMTP_FROM_EMAIL` literally. Pick this when you need to send
+   from a domain alias (e.g. `info@himalayanfibres.com`) without
+   re-authorizing the Gmail OAuth.
+   Note: HF Spaces *had* outbound port issues with SMTP in the past;
+   587 has been observed working as of Phase 7.8.
+
+Transport selection (env var `EMAIL_TRANSPORT`):
+  - `gmail_api` → use Gmail API (requires GMAIL_REFRESH_TOKEN).
+  - `smtp`      → use SMTP (requires SMTP_PASSWORD).
+  - `auto` (default) → Gmail API if GMAIL_REFRESH_TOKEN is set,
+    else SMTP if SMTP_PASSWORD is set, else fail loud.
 """
 
 from __future__ import annotations
@@ -11,6 +27,8 @@ import hashlib
 import logging
 import os
 import re
+import smtplib
+import ssl
 from datetime import datetime, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -107,11 +125,22 @@ log = logging.getLogger(__name__)
 
 
 class EmailSender:
-    """Send emails via Gmail API (HTTPS)."""
+    """Send emails via Gmail API (HTTPS) or SMTP (smtplib + STARTTLS).
+
+    Pick the transport via the `EMAIL_TRANSPORT` env var (`gmail_api` |
+    `smtp` | `auto`). `auto` is the default — uses Gmail API if a
+    refresh token is set, falls back to SMTP otherwise.
+    """
+
+    TRANSPORT_GMAIL = "gmail_api"
+    TRANSPORT_SMTP = "smtp"
 
     def __init__(self):
         settings = get_settings()
+        self.smtp_host = settings.smtp_host
+        self.smtp_port = settings.smtp_port
         self.smtp_user = settings.smtp_user
+        self.smtp_password = settings.smtp_password
         self.from_name = settings.smtp_from_name
         self.from_email = settings.smtp_from_email
         self.daily_limit = settings.email_daily_limit
@@ -121,10 +150,24 @@ class EmailSender:
         self.client_secret = os.getenv("GMAIL_CLIENT_SECRET", "")
         self.refresh_token = os.getenv("GMAIL_REFRESH_TOKEN", "")
 
-        # Also check SMTP password for backward compat display
-        self.smtp_password = settings.smtp_password
-
         self._access_token = None
+        self.transport = self._choose_transport()
+
+    def _choose_transport(self) -> str:
+        """Resolve `EMAIL_TRANSPORT` env var, with sensible auto-detect."""
+        explicit = os.getenv("EMAIL_TRANSPORT", "auto").strip().lower()
+        if explicit == self.TRANSPORT_GMAIL:
+            return self.TRANSPORT_GMAIL
+        if explicit == self.TRANSPORT_SMTP:
+            return self.TRANSPORT_SMTP
+        # auto: prefer Gmail API if creds set, else SMTP if SMTP_PASSWORD
+        # set, else default to gmail_api (will fail loud at send time
+        # with a clear message).
+        if self.refresh_token and self.client_id and self.client_secret:
+            return self.TRANSPORT_GMAIL
+        if self.smtp_password and self.smtp_user:
+            return self.TRANSPORT_SMTP
+        return self.TRANSPORT_GMAIL
 
     def _get_access_token(self) -> str:
         """Get a fresh access token using the refresh token."""
@@ -145,17 +188,26 @@ class EmailSender:
         return self._access_token
 
     def is_configured(self) -> bool:
-        """Check if Gmail API credentials are set."""
+        """True iff the active transport has the credentials it needs."""
+        if self.transport == self.TRANSPORT_SMTP:
+            return bool(self.smtp_user and self.smtp_password and self.smtp_host)
         return bool(self.refresh_token and self.client_id and self.client_secret)
 
     def test_connection(self) -> dict:
-        """Test Gmail API connectivity."""
-        if not self.is_configured():
-            return {"success": False, "message": "Gmail API not configured. Set GMAIL_REFRESH_TOKEN in HF Space secrets."}
+        """Probe the active transport. Returns {success, message}."""
+        if self.transport == self.TRANSPORT_SMTP:
+            return self._test_smtp_connection()
+        return self._test_gmail_connection()
+
+    def _test_gmail_connection(self) -> dict:
+        if not (self.refresh_token and self.client_id and self.client_secret):
+            return {
+                "success": False,
+                "message": "Gmail API not configured. Set GMAIL_REFRESH_TOKEN in HF Space secrets.",
+            }
 
         try:
             token = self._get_access_token()
-            # Verify by getting user profile
             r = requests.get(
                 "https://gmail.googleapis.com/gmail/v1/users/me/profile",
                 headers={"Authorization": f"Bearer {token}"},
@@ -167,35 +219,90 @@ class EmailSender:
         except Exception as e:
             return {"success": False, "message": f"Connection failed: {e}"}
 
+    def _test_smtp_connection(self) -> dict:
+        if not (self.smtp_user and self.smtp_password and self.smtp_host):
+            return {
+                "success": False,
+                "message": "SMTP not configured. Set SMTP_USER and SMTP_PASSWORD secrets.",
+            }
+        try:
+            ctx = ssl.create_default_context()
+            with smtplib.SMTP(self.smtp_host, self.smtp_port, timeout=15) as server:
+                server.ehlo()
+                server.starttls(context=ctx)
+                server.ehlo()
+                server.login(self.smtp_user, self.smtp_password)
+            return {
+                "success": True,
+                "message": f"Connected to SMTP {self.smtp_host}:{self.smtp_port} as {self.smtp_user}",
+            }
+        except smtplib.SMTPAuthenticationError as e:
+            detail = e.smtp_error.decode("utf-8", "replace") if isinstance(e.smtp_error, (bytes, bytearray)) else str(e.smtp_error)
+            return {
+                "success": False,
+                "message": f"SMTP auth failed: {detail}. For Gmail, you need a Google App Password (16 chars), not your account password.",
+            }
+        except (OSError, smtplib.SMTPException) as e:
+            return {"success": False, "message": f"SMTP error: {e}"}
+
     def send_email(self, to_email: str, subject: str, html_content: str,
                    plain_text: str = None, reply_to: str = None, to_name: str = None) -> dict:
-        """Send a single email via Gmail API."""
+        """Dispatch to the configured transport.
+
+        Returns ``{"success": bool, "message": str, "message_id"?: str,
+        "sent_at"?: ISO-8601}``. Never raises — failures come back in
+        the dict so the caller can record them on the EmailSend row.
+        """
         if not self.is_configured():
-            return {"success": False, "message": "Gmail API not configured. Set GMAIL_REFRESH_TOKEN in HF Space secrets."}
+            if self.transport == self.TRANSPORT_SMTP:
+                return {
+                    "success": False,
+                    "message": "SMTP not configured. Set SMTP_USER and SMTP_PASSWORD secrets.",
+                }
+            return {
+                "success": False,
+                "message": "Gmail API not configured. Set GMAIL_REFRESH_TOKEN in HF Space secrets.",
+            }
 
+        # Build the MIME envelope once; both transports use it.
         try:
-            html_content = self._preprocess_html(html_content)
+            msg = self._build_mime_message(
+                to_email=to_email, subject=subject, html_content=html_content,
+                plain_text=plain_text, reply_to=reply_to, to_name=to_name,
+            )
+        except Exception as e:
+            return {"success": False, "message": f"Failed to build message: {e}"}
 
-            msg = MIMEMultipart("alternative")
-            msg["Subject"] = subject
-            msg["From"] = formataddr((self.from_name, self.from_email))
-            msg["To"] = formataddr((to_name, to_email)) if to_name else to_email
-            msg["Date"] = formatdate(localtime=True)
-            msg["Message-ID"] = make_msgid(domain=self.from_email.split("@")[1])
-            msg["List-Unsubscribe"] = f"<mailto:{self.from_email}?subject=Unsubscribe>"
-            msg["Reply-To"] = reply_to or self.from_email
+        if self.transport == self.TRANSPORT_SMTP:
+            return self._send_via_smtp(to_email, msg)
+        return self._send_via_gmail_api(to_email, msg)
 
-            if not plain_text:
-                plain_text = re.sub("<[^<]+?>", "", html_content)
-                plain_text = re.sub(r"\s+", " ", plain_text).strip()[:5000]
+    def _build_mime_message(
+        self, *, to_email: str, subject: str, html_content: str,
+        plain_text: str | None, reply_to: str | None, to_name: str | None,
+    ) -> MIMEMultipart:
+        html_content = self._preprocess_html(html_content)
 
-            msg.attach(MIMEText(plain_text, "plain", "utf-8"))
-            msg.attach(MIMEText(html_content, "html", "utf-8"))
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = formataddr((self.from_name, self.from_email))
+        msg["To"] = formataddr((to_name, to_email)) if to_name else to_email
+        msg["Date"] = formatdate(localtime=True)
+        msg["Message-ID"] = make_msgid(domain=self.from_email.split("@")[1])
+        msg["List-Unsubscribe"] = f"<mailto:{self.from_email}?subject=Unsubscribe>"
+        msg["Reply-To"] = reply_to or self.from_email
 
-            # Encode message for Gmail API
+        if not plain_text:
+            plain_text = re.sub("<[^<]+?>", "", html_content)
+            plain_text = re.sub(r"\s+", " ", plain_text).strip()[:5000]
+
+        msg.attach(MIMEText(plain_text, "plain", "utf-8"))
+        msg.attach(MIMEText(html_content, "html", "utf-8"))
+        return msg
+
+    def _send_via_gmail_api(self, to_email: str, msg: MIMEMultipart) -> dict:
+        try:
             raw_message = base64.urlsafe_b64encode(msg.as_bytes()).decode("utf-8")
-
-            # Send via Gmail API
             token = self._get_access_token()
             response = requests.post(
                 "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
@@ -205,7 +312,6 @@ class EmailSender:
                 },
                 json={"raw": raw_message},
             )
-
             if response.status_code == 200:
                 msg_id = response.json().get("id", "")
                 return {
@@ -214,12 +320,52 @@ class EmailSender:
                     "message_id": msg_id,
                     "sent_at": datetime.now(timezone.utc).isoformat(),
                 }
-            else:
-                error = response.json().get("error", {}).get("message", response.text)
-                return {"success": False, "message": f"Gmail API error: {error}"}
-
+            error = response.json().get("error", {}).get("message", response.text)
+            return {"success": False, "message": f"Gmail API error: {error}"}
         except Exception as e:
             return {"success": False, "message": f"Failed: {e}"}
+
+    def _send_via_smtp(self, to_email: str, msg: MIMEMultipart) -> dict:
+        """Send via SMTP STARTTLS. Honors `SMTP_FROM_EMAIL` literally —
+        the From header is preserved end-to-end (unlike Gmail API which
+        rewrites it to the OAuth account)."""
+        try:
+            ctx = ssl.create_default_context()
+            with smtplib.SMTP(self.smtp_host, self.smtp_port, timeout=30) as server:
+                server.ehlo()
+                server.starttls(context=ctx)
+                server.ehlo()
+                server.login(self.smtp_user, self.smtp_password)
+                # send_message uses msg["From"] / msg["To"] directly.
+                server.send_message(msg)
+            return {
+                "success": True,
+                "message": f"Sent to {to_email} via SMTP",
+                "message_id": msg["Message-ID"],
+                "sent_at": datetime.now(timezone.utc).isoformat(),
+            }
+        except smtplib.SMTPAuthenticationError as e:
+            detail = (
+                e.smtp_error.decode("utf-8", "replace")
+                if isinstance(e.smtp_error, (bytes, bytearray))
+                else str(e.smtp_error)
+            )
+            log.warning("SMTP auth failed: %s", detail)
+            return {
+                "success": False,
+                "message": (
+                    f"SMTP auth failed: {detail}. For Gmail, use a Google "
+                    "App Password (16 chars) — not your regular password."
+                ),
+            }
+        except smtplib.SMTPRecipientsRefused as e:
+            return {"success": False, "message": f"Recipient refused: {e.recipients}"}
+        except smtplib.SMTPException as e:
+            return {"success": False, "message": f"SMTP error: {e}"}
+        except (OSError, TimeoutError) as e:
+            return {"success": False, "message": f"SMTP network error: {e}"}
+        except Exception as e:
+            return {"success": False, "message": f"SMTP failed: {e}"}
 
     def send_test_email(self, to_email: str) -> dict:
         """Send a test email."""
