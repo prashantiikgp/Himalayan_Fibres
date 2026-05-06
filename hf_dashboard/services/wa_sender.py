@@ -201,6 +201,50 @@ class WhatsAppSender:
     def _extract_message_id(data: dict) -> str | None:
         return (data.get("messages") or [{}])[0].get("id")
 
+    @staticmethod
+    def _build_media_header_param(template_name: str, lang: str) -> dict | None:
+        """Phase 10.2: look up the template's header_format + header_asset_url
+        and return the right Meta media-parameter dict if (and only if)
+        the template uses an IMAGE/VIDEO/DOCUMENT header.
+
+        Returns None for TEXT-header or no-header templates — caller
+        falls back to the existing text-parameter path.
+
+        Importantly: returns None if `header_asset_url` is empty even
+        when header_format is media — the send will then fail at Meta
+        with a clear "header parameter required" error. Better than
+        silently sending a bogus URL.
+        """
+        try:
+            from services.database import get_db  # type: ignore[import-not-found]
+            from services.models import WATemplate  # type: ignore[import-not-found]
+        except ImportError:
+            return None
+
+        db = get_db()
+        try:
+            tpl = (
+                db.query(WATemplate)
+                .filter(
+                    WATemplate.name == template_name,
+                    WATemplate.language == lang,
+                    WATemplate.is_draft.is_(False),
+                )
+                .order_by(WATemplate.id.desc())
+                .first()
+            )
+        finally:
+            db.close()
+
+        if tpl is None:
+            return None
+        fmt = (tpl.header_format or "").upper()
+        url = (tpl.header_asset_url or "").strip()
+        if fmt not in ("IMAGE", "VIDEO", "DOCUMENT") or not url:
+            return None
+        media_key = fmt.lower()  # IMAGE → "image", etc.
+        return {"type": media_key, media_key: {"link": url}}
+
     def send_text(self, to_phone: str, text: str) -> tuple[bool, str | None, str | None]:
         """Send a plain text message (24h window only)."""
         if not self.phone_number_id:
@@ -268,10 +312,23 @@ class WhatsAppSender:
                 ]
             return [{"type": "text", "text": value} for _, value in pairs]
 
+        # Phase 10.2: media-header support. If the WATemplate row has
+        # header_format in (IMAGE/VIDEO/DOCUMENT) AND a header_asset_url,
+        # prepend a header component with the right media param. Without
+        # this, Meta returns "(#100) Invalid parameter" because the
+        # approved template requires a media parameter at send time.
+        media_header_param = self._build_media_header_param(template_name, lang)
+
         components = []
-        header_params = _build_params(header_variables)
-        if header_params:
-            components.append({"type": "header", "parameters": header_params})
+        if media_header_param is not None:
+            # Media header takes precedence over text — a template can't
+            # have both. If both were somehow supplied, media wins (text
+            # header_variables would belong to a TEXT-format template).
+            components.append({"type": "header", "parameters": [media_header_param]})
+        else:
+            header_params = _build_params(header_variables)
+            if header_params:
+                components.append({"type": "header", "parameters": header_params})
         body_params = _build_params(variables)
         if body_params:
             components.append({"type": "body", "parameters": body_params})

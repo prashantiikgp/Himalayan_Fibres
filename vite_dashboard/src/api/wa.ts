@@ -185,6 +185,22 @@ export function useTemplateRegistry() {
   });
 }
 
+// Phase 10.3: list of available header images served from the
+// hf_dashboard/static/wa_template_headers/ folder.
+export type HeaderImage = {
+  filename: string;
+  url: string;
+  size_bytes: number;
+};
+
+export function useHeaderImages() {
+  return useQuery({
+    queryKey: ["wa", "header-images"],
+    queryFn: () => apiFetch<{ images: HeaderImage[] }>("/api/v2/wa/header-images"),
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 /* ── write paths (Phase 2.1) ─────────────────────────────────────────── */
 
 export type SendMessageRequest = {

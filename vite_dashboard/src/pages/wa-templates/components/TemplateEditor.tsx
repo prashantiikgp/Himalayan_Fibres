@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import {
   useCreateTemplate,
   useDeleteTemplate,
+  useHeaderImages,
   useSaveTemplate,
   useSubmitTemplate,
   useWaTemplate,
@@ -21,6 +22,7 @@ import {
   type WATemplateOut,
 } from "@/api/wa";
 import { ApprovedBanner } from "./ApprovedBanner";
+import { ButtonsEditor, type WAButton } from "./ButtonsEditor";
 import { TemplatePreview } from "@/components/wa/TemplatePreview";
 import { extractPlaceholders } from "@/lib/wa-template-vars";
 import { ConfirmDialog } from "@/components/feedback/ConfirmDialog";
@@ -72,6 +74,7 @@ export function TemplateEditor({
   const saveMutation = useSaveTemplate();
   const deleteMutation = useDeleteTemplate();
   const submitMutation = useSubmitTemplate();
+  const { data: headerImagesData } = useHeaderImages();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmSubmit, setConfirmSubmit] = useState(false);
 
@@ -265,12 +268,49 @@ export function TemplateEditor({
           )}
           {form.header_format && form.header_format !== "TEXT" && (
             <Field label={`${form.header_format} URL`} id="tpl-header-url">
-              <Input
-                id="tpl-header-url"
-                value={form.header_asset_url ?? ""}
-                onChange={(e) => set("header_asset_url", e.target.value)}
-                placeholder="https://…"
-              />
+              <div className="flex flex-col gap-1.5">
+                <Input
+                  id="tpl-header-url"
+                  value={form.header_asset_url ?? ""}
+                  onChange={(e) => set("header_asset_url", e.target.value)}
+                  placeholder="https://… (paste a Supabase URL or pick from the library below)"
+                />
+                {/* Phase 10.3: dropdown of locally-committed images. */}
+                {headerImagesData && headerImagesData.images.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <Label
+                      htmlFor="tpl-header-library"
+                      className="text-[11px] text-text-muted"
+                    >
+                      From library:
+                    </Label>
+                    <select
+                      id="tpl-header-library"
+                      value=""
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          set("header_asset_url", e.target.value);
+                          e.target.value = "";  // reset so re-pick works
+                        }
+                      }}
+                      className="h-8 flex-1 rounded-md border border-border bg-card px-2 text-xs text-text"
+                    >
+                      <option value="">— Pick from {headerImagesData.images.length} image{headerImagesData.images.length === 1 ? "" : "s"} —</option>
+                      {headerImagesData.images.map((img) => (
+                        <option key={img.url} value={img.url}>
+                          {img.filename} ({Math.round(img.size_bytes / 1024)}kb)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                <p className="text-[10px] text-text-subtle">
+                  Tip: drop new images into{" "}
+                  <code>hf_dashboard/static/wa_template_headers/</code> and
+                  redeploy to add them to the library. Supabase URLs from
+                  the existing <code>wa-template-images</code> bucket work too.
+                </p>
+              </div>
             </Field>
           )}
 
@@ -294,6 +334,13 @@ export function TemplateEditor({
               placeholder="Optional small print"
             />
           </Field>
+
+          {/* Phase 10.4: button editor with presets. Buttons render
+              live in the phone preview via TemplatePreview. */}
+          <ButtonsEditor
+            buttons={(form.buttons as WAButton[] | undefined) ?? []}
+            onChange={(next) => set("buttons", next)}
+          />
 
           {saveError && (
             <p role="alert" className="text-sm text-danger">{saveError}</p>

@@ -951,6 +951,39 @@ def _intent_label_for(use_case: str) -> str:
     return _INTENT_LABEL_MAP.get((use_case or "").lower(), "Other")
 
 
+# ─── Phase 10.3: WA template header images ───────────────────────────────
+#
+# Lists images committed under hf_dashboard/static/wa_template_headers/
+# so the Studio editor can show a dropdown of stable URLs (no expiring
+# Meta CDN URLs). Operator drops new images into the folder + redeploys.
+
+@router.get("/header-images")
+def list_header_images(request: Request) -> dict:
+    """Return URLs for every image committed to the static WA-header dir.
+
+    URLs are absolute so Meta can fetch them at template approval AND
+    template send time. The folder ships with the v2 Docker bundle.
+    """
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parent.parent.parent
+    header_dir = repo_root / "hf_dashboard" / "static" / "wa_template_headers"
+    if not header_dir.exists():
+        return {"images": []}
+
+    image_exts = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
+    base = str(request.base_url).rstrip("/")
+    images = []
+    for p in sorted(header_dir.iterdir()):
+        if p.is_file() and p.suffix.lower() in image_exts:
+            images.append({
+                "filename": p.name,
+                "url": f"{base}/static/wa_template_headers/{p.name}",
+                "size_bytes": p.stat().st_size,
+            })
+    return {"images": images}
+
+
 @router.get("/template-registry", response_model=TemplateRegistryOut)
 def list_template_registry() -> TemplateRegistryOut:
     """Parsed config/whatsapp/templates.yml + derived intent_label.
@@ -1010,6 +1043,15 @@ def wa_diagnostics() -> dict:
         ),
         "last_send_error_type": WhatsAppSender.last_send_error_type,
         "last_send_error_msg": WhatsAppSender.last_send_error_msg,
+        # Phase 10.5: catalog link status. Hard-coded to the linked WABA
+        # catalog known from prior session work (campaign/whatsapp_campaign/
+        # shared/company_templates/catalog_browse.yml). When the operator
+        # changes the linked catalog at Meta, update these values.
+        "catalog": {
+            "linked": True,
+            "id": "605077809183163",
+            "name": "Catalog_products",
+        },
     }
 
     # Probe Meta — short timeout so this endpoint never hangs.

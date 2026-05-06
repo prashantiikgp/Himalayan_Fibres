@@ -205,6 +205,17 @@ app.include_router(
 )
 app.include_router(email_send.router, prefix="/api/v2", tags=["email_send"])
 
+# Phase 10.3: serve repo-committed WA template header images at a stable
+# URL Meta can fetch. Folder: hf_dashboard/static/wa_template_headers/.
+# New images dropped into the folder appear after redeploy.
+_WA_HEADER_DIR = _REPO_ROOT / "hf_dashboard" / "static" / "wa_template_headers"
+if _WA_HEADER_DIR.exists():
+    app.mount(
+        "/static/wa_template_headers",
+        StaticFiles(directory=str(_WA_HEADER_DIR)),
+        name="wa_template_headers",
+    )
+
 # Static SPA mount — built dist/ from vite_dashboard.
 # In dev (where dist/ doesn't exist), this is skipped silently.
 _SPA_DIST = _REPO_ROOT / "vite_dashboard" / "dist"
