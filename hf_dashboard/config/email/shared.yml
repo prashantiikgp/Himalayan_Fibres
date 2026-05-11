@@ -8,11 +8,14 @@ shared:
   company_phone: "+91 8582952074"
 
   whatsapp_url: "https://wa.me/918582952074"
-  whatsapp_icon_url: "https://img.icons8.com/color/48/whatsapp--v1.png"
+  # Icons rehosted in our public Supabase bucket (Gmail's image proxy is
+  # consistent with these URLs; icons8 was rendering broken tiles in some
+  # Gmail clients).
+  whatsapp_icon_url: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Social%20Icons/whatsapp.png"
   instagram_url: "https://www.instagram.com/himalayan_fibres/"
-  instagram_icon_url: "https://img.icons8.com/color/48/instagram-new--v1.png"
+  instagram_icon_url: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Social%20Icons/instagram.png"
   facebook_url: "https://www.facebook.com/Himalayanfibres"
-  facebook_icon_url: "https://img.icons8.com/color/48/facebook-new.png"
+  facebook_icon_url: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Social%20Icons/facebook.png"
 
   privacy_url: "https://www.himalayanfibres.com/privacy-policy"
   terms_url: "https://www.himalayanfibres.com/terms-conditions"

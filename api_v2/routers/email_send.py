@@ -166,17 +166,27 @@ def test_send(req: TestSendRequest) -> TestSendResponse:
                 status_code=400, detail="Contact has no email address"
             )
 
-        # Per-day dedup window: one row per (single_send, contact, day).
-        idem_key = generate_idempotency_key("single_send", contact.id)
+        # Per-day dedup window: one row per (single_send, contact, template, day).
+        # `template_id` MUST be part of the key — without it, sending the
+        # welcome template earlier today blocks an order_shipped send to the
+        # same contact later today (the user-reported "duplicate, already
+        # sent today" false positive).
+        idem_key = generate_idempotency_key(
+            "single_send", contact.id, str(req.template_id)
+        )
         existing = (
             db.query(EmailSend)
             .filter(EmailSend.idempotency_key == idem_key)
             .first()
         )
-        if existing is not None:
+        # Only short-circuit if the prior attempt actually succeeded. A
+        # `failed` row from earlier today (Gmail outage, render bug, etc.)
+        # must NOT permanently block retries — we re-use the same row and
+        # overwrite its status when the retry runs below.
+        if existing is not None and existing.status == "sent":
             return TestSendResponse(
                 success=True,
-                message="duplicate, already sent today",
+                message=f"already sent earlier today to {contact.email}",
                 email_send_id=existing.id,
             )
 
@@ -214,17 +224,28 @@ def test_send(req: TestSendRequest) -> TestSendResponse:
             to_name=(contact.first_name or None),
         )
 
-        row = EmailSend(
-            contact_id=contact.id,
-            contact_email=contact.email or "",
-            campaign_id=None,
-            subject=rendered_subject,
-            status="sent" if result["success"] else "failed",
-            idempotency_key=idem_key,
-            error_message="" if result["success"] else result.get("message", ""),
-            sent_at=datetime.now(timezone.utc) if result["success"] else None,
-        )
-        db.add(row)
+        # Retry path: if an earlier failed row exists for this key, update
+        # it in place — inserting a new row would 23505 on the unique
+        # idempotency_key index.
+        if existing is not None:
+            row = existing
+            row.contact_email = contact.email or ""
+            row.subject = rendered_subject
+            row.status = "sent" if result["success"] else "failed"
+            row.error_message = "" if result["success"] else result.get("message", "")
+            row.sent_at = datetime.now(timezone.utc) if result["success"] else None
+        else:
+            row = EmailSend(
+                contact_id=contact.id,
+                contact_email=contact.email or "",
+                campaign_id=None,
+                subject=rendered_subject,
+                status="sent" if result["success"] else "failed",
+                idempotency_key=idem_key,
+                error_message="" if result["success"] else result.get("message", ""),
+                sent_at=datetime.now(timezone.utc) if result["success"] else None,
+            )
+            db.add(row)
         try:
             db.commit()
         except Exception:

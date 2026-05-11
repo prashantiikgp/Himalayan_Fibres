@@ -4,7 +4,7 @@
   email body (collections overview, "our 3 fibre families", etc.).
 
   Dimensions: image is fixed at full-card-width × 200px, cropped via
-  object-fit:cover. Card width is 632px content-area (680 outer − 24 padding × 2).
+  object-fit:cover. Card width is 672px content-area (720 outer − 24 padding × 2).
   Modern clients honor the crop; Outlook desktop letterboxes.
 
   Usage:
@@ -27,10 +27,10 @@
         <td style="padding:0;">
           {% if link %}
           <a href="{{ link }}" target="_blank" rel="noopener" style="text-decoration:none;">
-            <img src="{{ image_url }}" alt="{{ image_alt or title }}" width="632" height="{{ image_height }}" style="display:block;width:100%;max-width:632px;height:{{ image_height }}px;max-height:{{ image_height }}px;object-fit:cover;border:0;outline:none;text-decoration:none;">
+            <img src="{{ image_url }}" alt="{{ image_alt or title }}" width="672" height="{{ image_height }}" style="display:block;width:100%;max-width:672px;height:{{ image_height }}px;max-height:{{ image_height }}px;object-fit:cover;border:0;outline:none;text-decoration:none;">
           </a>
           {% else %}
-          <img src="{{ image_url }}" alt="{{ image_alt or title }}" width="632" height="{{ image_height }}" style="display:block;width:100%;max-width:632px;height:{{ image_height }}px;max-height:{{ image_height }}px;object-fit:cover;border:0;outline:none;text-decoration:none;">
+          <img src="{{ image_url }}" alt="{{ image_alt or title }}" width="672" height="{{ image_height }}" style="display:block;width:100%;max-width:672px;height:{{ image_height }}px;max-height:{{ image_height }}px;object-fit:cover;border:0;outline:none;text-decoration:none;">
           {% endif %}
         </td>
       </tr>

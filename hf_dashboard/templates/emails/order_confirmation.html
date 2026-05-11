@@ -10,7 +10,8 @@
 
 {{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
 
-{{ paragraph("We're thrilled to confirm your order with <strong>Himalayan Fibres</strong> 🌿. Your support means the world to us, and we're excited to begin preparing your items with care and love from the Himalayas.") }}
+{# &nbsp; before 🌿 prevents Gmail from orphaning the emoji onto the next line. #}
+{{ paragraph("We're thrilled to confirm your order with <strong>Himalayan Fibres</strong>&nbsp;🌿. Your support means the world to us, and we're excited to begin preparing your items with care and love from the Himalayas.") }}
 
 {#
   ORDER SUMMARY — this is the per-send section.

@@ -10,7 +10,8 @@
 
 {{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
 
-{{ paragraph('We hope your order from <strong>Himalayan Fibres</strong> 🌿 arrived safely and exceeded your expectations. Every fibre and yarn we ship carries a little piece of our workshop in the Himalayas.') }}
+{# &nbsp; before 🌿 prevents Gmail from orphaning the emoji onto the next line. #}
+{{ paragraph('We hope your order from <strong>Himalayan Fibres</strong>&nbsp;🌿 arrived safely and exceeded your expectations. Every fibre and yarn we ship carries a little piece of our workshop in the Himalayas.') }}
 
 {{ info_card(
   'Your feedback means the world to us',
@@ -18,7 +19,8 @@
   icon_emoji='🌱'
 ) }}
 
-{{ cta_button('⭐ Share Your Feedback', 'https://www.himalayanfibres.com/reviews') }}
+{# Interim: mailto until /reviews page lives on the Wix site (see docs/feature_backlog.md). #}
+{{ cta_button('⭐ Share Your Feedback', 'mailto:info@himalayanfibres.com?subject=Product%20Review%20-%20Himalayan%20Fibres&body=Hi%20Himalayan%20Fibres%20Team%2C%0A%0AHere%20is%20my%20feedback%3A%0A%0A1.%20What%20I%20received%3A%0A2.%20What%20I%20liked%3A%0A3.%20What%20could%20be%20better%3A%0A%0AThanks%21') }}
 
 {{ paragraph('If something fell short of expectations, please reply directly to this email. We read every message personally and we would love the chance to make it right.') }}
 

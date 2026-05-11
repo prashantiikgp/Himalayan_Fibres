@@ -7,25 +7,34 @@
  */
 
 import { useState } from "react";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/feedback/ConfirmDialog";
 import { useDebouncedValue } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
-import { useEmailTemplates, type EmailTemplateOut } from "@/api/email_templates";
+import {
+  useDeleteEmailTemplate,
+  useEmailTemplates,
+  type EmailTemplateOut,
+} from "@/api/email_templates";
 
 export function EmailTemplateList({
   selectedId,
   onSelect,
   onCreateNew,
+  onDeleted,
 }: {
   selectedId: number | null;
   onSelect: (id: number) => void;
   onCreateNew: () => void;
+  onDeleted?: (id: number) => void;
 }) {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "active" | "inactive">("all");
+  const [confirmDelete, setConfirmDelete] = useState<EmailTemplateOut | null>(null);
   const debounced = useDebouncedValue(search, 250);
+  const deleteMutation = useDeleteEmailTemplate();
 
   const { data, isLoading, error } = useEmailTemplates({
     search: debounced || undefined,
@@ -84,9 +93,41 @@ export function EmailTemplateList({
             template={t}
             isActive={t.id === selectedId}
             onClick={() => onSelect(t.id)}
+            onDeleteClick={() => setConfirmDelete(t)}
           />
         ))}
       </ul>
+
+      <ConfirmDialog
+        open={confirmDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmDelete(null);
+        }}
+        title={
+          confirmDelete
+            ? `Delete "${confirmDelete.name}"?`
+            : "Delete template?"
+        }
+        description={
+          "This template will be permanently removed. Broadcasts that already used this slug keep their record (sent history is preserved)."
+        }
+        confirmLabel="Delete"
+        destructive
+        isPending={deleteMutation.isPending}
+        onConfirm={() => {
+          if (!confirmDelete) return;
+          const deletedId = confirmDelete.id;
+          deleteMutation.mutate(deletedId, {
+            onSuccess: () => {
+              setConfirmDelete(null);
+              onDeleted?.(deletedId);
+            },
+            onError: () => {
+              setConfirmDelete(null);
+            },
+          });
+        }}
+      />
     </div>
   );
 }
@@ -95,10 +136,12 @@ function Row({
   template,
   isActive,
   onClick,
+  onDeleteClick,
 }: {
   template: EmailTemplateOut;
   isActive: boolean;
   onClick: () => void;
+  onDeleteClick: () => void;
 }) {
   return (
     <li
@@ -113,23 +156,37 @@ function Row({
         }
       }}
       className={cn(
-        "flex cursor-pointer flex-col gap-0.5 border-b border-border/40 px-card py-2 transition-colors",
+        "group flex cursor-pointer flex-col gap-0.5 border-b border-border/40 px-card py-2 transition-colors",
         "hover:bg-card/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
         isActive && "bg-card/80",
       )}
     >
       <div className="flex items-baseline justify-between gap-2">
         <span className="truncate text-sm font-medium text-text">{template.name}</span>
-        <span
-          className={cn(
-            "shrink-0 rounded-pill border px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider",
-            template.is_active
-              ? "border-success/40 bg-success/10 text-success"
-              : "border-border bg-card text-text-muted",
-          )}
-        >
-          {template.is_active ? "Active" : "Inactive"}
-        </span>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <span
+            className={cn(
+              "rounded-pill border px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider",
+              template.is_active
+                ? "border-success/40 bg-success/10 text-success"
+                : "border-border bg-card text-text-muted",
+            )}
+          >
+            {template.is_active ? "Active" : "Inactive"}
+          </span>
+          <button
+            type="button"
+            aria-label={`Delete template ${template.name}`}
+            title="Delete template"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteClick();
+            }}
+            className="rounded p-1 text-text-muted opacity-0 transition-opacity hover:bg-danger/10 hover:text-danger focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger group-hover:opacity-100"
+          >
+            <Trash2 className="h-3.5 w-3.5" aria-hidden />
+          </button>
+        </div>
       </div>
       <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-text-muted">
         <code>{template.slug}</code>

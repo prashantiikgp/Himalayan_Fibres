@@ -3,8 +3,8 @@
   multi-category templates with a 1+2 layout (one big hero card above,
   two smaller paired cards beneath).
 
-  Total row at 680 outer with 24px outer padding = 632px content.
-  Two ~308px cells with 16px gap = 632. On mobile, modern clients
+  Total row at 720 outer with 24px outer padding = 672px content.
+  Two ~328px cells with 16px gap = 672. On mobile, modern clients
   reflow to stacked.
 
   Args (per item):
@@ -23,12 +23,12 @@
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
       <tr>
         {% for it in [left, right] %}
-        <td valign="top" width="308" {% if loop.first %}style="padding-right:16px;"{% endif %}>
+        <td valign="top" width="328" {% if loop.first %}style="padding-right:16px;"{% endif %}>
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:{{ color_card_bg or '#ffffff' }};border:1px solid {{ color_card_border }};border-radius:8px;overflow:hidden;">
             <tr>
               <td style="padding:0;">
                 {% if it.link %}<a href="{{ it.link }}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">{% endif %}
-                <img src="{{ it.image_url }}" alt="{{ it.image_alt or it.title }}" width="308" height="{{ it.image_height or image_height }}" style="display:block;width:100%;max-width:308px;height:{{ it.image_height or image_height }}px;max-height:{{ it.image_height or image_height }}px;object-fit:cover;border:0;outline:none;text-decoration:none;">
+                <img src="{{ it.image_url }}" alt="{{ it.image_alt or it.title }}" width="328" height="{{ it.image_height or image_height }}" style="display:block;width:100%;max-width:328px;height:{{ it.image_height or image_height }}px;max-height:{{ it.image_height or image_height }}px;object-fit:cover;border:0;outline:none;text-decoration:none;">
                 {% if it.link %}</a>{% endif %}
               </td>
             </tr>

@@ -47,6 +47,9 @@ export function EmailTemplatesPage() {
             selectedId={selectedId}
             onSelect={setSelected}
             onCreateNew={startCreate}
+            onDeleted={(deletedId) => {
+              if (deletedId === selectedId) clearSelection();
+            }}
           />
         </section>
 
