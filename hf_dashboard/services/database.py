@@ -323,25 +323,55 @@ def _seed_segments(db: Session):
     log.info("Seeded %d segments", count)
 
 
+# Canonical campaign/standalone template definitions (name, slug, path
+# relative to templates/, subject_template). Single source of truth for both
+# first-run seeding and the every-boot subject reconcile. Bodies render from
+# the on-disk file via email_sender.NON_SHELL_TEMPLATE_FILES; the DB row only
+# carries metadata + subject_template (which has no file fallback, so it must
+# be kept in sync here — see reconcile_campaign_subjects).
+CAMPAIGN_TEMPLATE_DEFS = [
+    ("B2B Introduction - Carpet Exporters", "b2b_introduction", "campaigns/b2b_introduction_carpet_exporters.html", "Premium Himalayan Fibres for {{company_name}}"),
+    ("Sustainability Compliance", "sustainability", "campaigns/sustainability_compliance_campaign.html", "Meet EU & US Sustainability Standards"),
+    ("Tariff Advantage", "tariff_advantage", "campaigns/tariff_advantage_campaign.html", "Beat Import Tariffs with Domestic Himalayan Fibres"),
+    ("Welcome Email Final", "welcome_final", "campaigns/welcome_email_final.html", "Welcome to Himalayan Fibres, {{name}}"),
+    ("Welcome Email Production", "welcome_production", "campaigns/welcome_email_production.html", "Welcome to Himalayan Fibres"),
+    # NOTE: legacy `order_confirmation` removed — replaced by the new
+    # seed loader that reads from config/email/templates_seed/ and
+    # compiles Jinja2 templates with the locked shell partials.
+    ("Welcome (Transactional)", "welcome_transactional", "transactional/welcome.html", "Welcome to Himalayan Fibres, {{first_name}}"),
+]
+
+
+def reconcile_campaign_subjects(db: Session) -> int:
+    """Idempotent: keep existing campaign rows' ``subject_template`` in sync
+    with ``CAMPAIGN_TEMPLATE_DEFS``. Bodies self-heal via the on-disk file,
+    but subject_template has no file fallback — a stale once-seeded DB row
+    keeps serving the old subject (e.g. the 'Fibers'→'Fibres' fix) forever.
+    Runs on every boot so a deploy is enough to correct it; no manual
+    prod-DB write needed. Returns the number of rows updated."""
+    updated = 0
+    for name, slug, _path, subject in CAMPAIGN_TEMPLATE_DEFS:
+        row = (
+            db.query(EmailTemplate)
+            .filter(EmailTemplate.slug == slug)
+            .first()
+        )
+        if row is not None and (row.subject_template or "") != subject:
+            row.subject_template = subject
+            updated += 1
+    if updated:
+        db.commit()
+        log.info("Reconciled %d campaign template subject(s)", updated)
+    return updated
+
+
 def _seed_default_templates(db: Session):
     """Register email templates from templates/ directory."""
     templates_dir = Path(__file__).resolve().parent.parent / "templates"
     if not templates_dir.exists():
         return
 
-    template_defs = [
-        ("B2B Introduction - Carpet Exporters", "b2b_introduction", "campaigns/b2b_introduction_carpet_exporters.html", "Premium Himalayan Fibres for {{company_name}}"),
-        ("Sustainability Compliance", "sustainability", "campaigns/sustainability_compliance_campaign.html", "Meet EU & US Sustainability Standards"),
-        ("Tariff Advantage", "tariff_advantage", "campaigns/tariff_advantage_campaign.html", "Beat Import Tariffs with Domestic Himalayan Fibres"),
-        ("Welcome Email Final", "welcome_final", "campaigns/welcome_email_final.html", "Welcome to Himalayan Fibres, {{name}}"),
-        ("Welcome Email Production", "welcome_production", "campaigns/welcome_email_production.html", "Welcome to Himalayan Fibres"),
-        # NOTE: legacy `order_confirmation` removed — replaced by the new
-        # seed loader that reads from config/email/templates_seed/ and
-        # compiles Jinja2 templates with the locked shell partials.
-        ("Welcome (Transactional)", "welcome_transactional", "transactional/welcome.html", "Welcome to Himalayan Fibres, {{first_name}}"),
-    ]
-
-    for name, slug, path, subject in template_defs:
+    for name, slug, path, subject in CAMPAIGN_TEMPLATE_DEFS:
         full_path = templates_dir / path
         html = ""
         if full_path.exists():
@@ -358,7 +388,7 @@ def _seed_default_templates(db: Session):
         db.add(tpl)
 
     db.flush()
-    log.info("Seeded %d email templates", len(template_defs))
+    log.info("Seeded %d email templates", len(CAMPAIGN_TEMPLATE_DEFS))
 
 
 def _seed_default_flows(db: Session):
@@ -555,6 +585,20 @@ def ensure_db_ready():
             db.close()
     except Exception:
         log.exception("Email template seed failed (non-fatal)")
+
+    # Keep campaign templates' subject_template in sync with the canonical
+    # defs on every boot. Bodies self-heal from the on-disk file, but the
+    # subject lives only in the DB row — without this a once-seeded prod row
+    # serves a stale subject forever (B9 'Fibers'→'Fibres' would never reach
+    # already-seeded Spaces). Idempotent; a deploy is enough to correct it.
+    try:
+        db = get_db()
+        try:
+            reconcile_campaign_subjects(db)
+        finally:
+            db.close()
+    except Exception:
+        log.exception("Campaign subject reconcile failed (non-fatal)")
 
     # Phase 7.7 — Sample Dispatch and other tag/lifecycle-triggered
     # flows. Idempotent: skip slugs that already exist so operator edits
