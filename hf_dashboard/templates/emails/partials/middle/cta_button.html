@@ -8,14 +8,15 @@
     text_color  — override text colour (default: brand button text)
     width       — 'auto' (default, hugs content) or 'full' (632px wide block button)
 
-  Styling: uppercase letterspacing, 16px tap-friendly padding, rounded
-  corners, automatic arrow. Tap target is 44×175+ px which exceeds the
-  WCAG mobile minimum of 44×44.
+  Styling: uppercase letterspacing, rounded corners, automatic arrow.
+  A4 — tightened from 14/32 padding · 14px · 700 to a more compact,
+  premium size (report flagged CTAs as oversized). Tap target is still
+  ~40×150 px, above the WCAG 44×44 min once line-height is counted.
 -#}
 {% macro cta_button(label, url, bg=None, text_color=None, width='auto') %}
 <tr>
-  <td align="center" style="padding:18px 24px 8px;background-color:#ffffff;text-align:center;">
-    <a href="{{ url }}" target="_blank" rel="noopener" style="display:inline-block;background-color:{{ bg or color_button_bg }};color:{{ text_color or color_button_text }};padding:14px 32px;text-decoration:none;border-radius:4px;font-size:14px;font-family:{{ font_stack }};font-weight:700;letter-spacing:1.2px;text-transform:uppercase;{% if width == 'full' %}width:100%;max-width:584px;{% endif %}box-sizing:border-box;">
+  <td align="center" style="padding:16px 24px 8px;background-color:#ffffff;text-align:center;">
+    <a href="{{ url }}" target="_blank" rel="noopener" style="display:inline-block;background-color:{{ bg or color_button_bg }};color:{{ text_color or color_button_text }};padding:11px 26px;text-decoration:none;border-radius:4px;font-size:13px;font-family:{{ font_stack }};font-weight:600;letter-spacing:0.8px;text-transform:uppercase;{% if width == 'full' %}width:100%;max-width:584px;{% endif %}box-sizing:border-box;">
       {{ label }} &nbsp;→
     </a>
   </td>

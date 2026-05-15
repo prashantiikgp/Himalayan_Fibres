@@ -29,11 +29,15 @@
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
       <tr>
         {% if image_side == 'left' %}
+        {# A6: collapse the image cell entirely when no image — text takes
+           full width instead of leaving a large empty column/gap. #}
+        {% if image_url %}
         <td width="{{ image_size }}" valign="top" style="padding-right:16px;">
           {% if link %}<a href="{{ link }}" target="_blank" rel="noopener" style="text-decoration:none;">{% endif %}
           <img src="{{ image_url }}" alt="{{ image_alt }}" width="{{ image_size }}" height="{{ image_size }}" style="display:block;width:100%;max-width:{{ image_size }}px;height:{{ image_size }}px;max-height:{{ image_size }}px;object-fit:cover;border:0;outline:none;text-decoration:none;border-radius:6px;">
           {% if link %}</a>{% endif %}
         </td>
+        {% endif %}
         <td valign="top" style="font-family:{{ font_stack }};">
           {% if title %}
           <h4 style="font-size:15px;font-weight:700;color:{{ color_accent }};margin:0 0 8px;">
@@ -51,11 +55,13 @@
           {% endif %}
           <p style="font-size:14px;color:{{ color_body }};margin:0;line-height:1.6;">{{ body | safe }}</p>
         </td>
+        {% if image_url %}
         <td width="{{ image_size }}" valign="top">
           {% if link %}<a href="{{ link }}" target="_blank" rel="noopener" style="text-decoration:none;">{% endif %}
           <img src="{{ image_url }}" alt="{{ image_alt }}" width="{{ image_size }}" height="{{ image_size }}" style="display:block;width:100%;max-width:{{ image_size }}px;height:{{ image_size }}px;max-height:{{ image_size }}px;object-fit:cover;border:0;outline:none;text-decoration:none;border-radius:6px;">
           {% if link %}</a>{% endif %}
         </td>
+        {% endif %}
         {% endif %}
       </tr>
     </table>
