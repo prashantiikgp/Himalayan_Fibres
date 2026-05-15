@@ -63,6 +63,15 @@ class SharedEmailConfig(BaseModel):
     # whenever the per-recipient EmailAttachment lookup misses.
     price_list_pdf_url: str = ""
 
+    # Canonical product-catalogue PDF (signed Supabase URL, 1-year).
+    # Surfaced to templates as `{{ catalog_link }}` via build_send_variables
+    # so every catalog CTA renders with a working link by default.
+    catalog_pdf_url: str = ""
+
+    # Public sample-request / contact page — default for the
+    # `{{ sample_request_link }}` / `{{ sample_form_link }}` CTAs.
+    sample_request_url: str = ""
+
 
 class _SharedEmailConfigDocument(BaseModel):
     model_config = ConfigDict(extra="forbid")

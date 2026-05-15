@@ -117,6 +117,15 @@ def build_send_variables(
     #                     a specific contact via the broadcast composer).
     base["invoice_url"] = ""
     base["price_list_url"] = base.get("price_list_pdf_url", "") or ""
+    # Config-driven CTA defaults so catalog / sample-request buttons always
+    # render with a working link. A per-send value in `extra` still wins
+    # (base.update(extra) below). Fixes B3/B4: these CTAs were gated on
+    # variables that were never populated, so the buttons rendered empty.
+    _catalog = base.get("catalog_pdf_url", "") or ""
+    _sample = base.get("sample_request_url", "") or ""
+    base["catalog_link"] = _catalog
+    base["sample_request_link"] = _sample
+    base["sample_form_link"] = _sample
     for att in attachments.get(contact.id, []):
         if att.kind in _ATTACHMENT_VAR_NAMES:
             base[f"{att.kind}_url"] = att.signed_url or ""

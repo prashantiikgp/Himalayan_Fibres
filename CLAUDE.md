@@ -2,43 +2,55 @@
 
 ## Deployment (READ THIS FIRST — do not improvise, do not use git push)
 
-The dashboard is deployed to a **Hugging Face Space** via the
-`huggingface_hub` Python SDK, **not** via git push. This is important —
-past sessions have tried `git push` and broken because the HF Space is
-not a git mirror of this repo:
+**⚠️ There are TWO Hugging Face Spaces (parallel migration). v1 is
+DEPRECATED. Target v2 only.**
 
-- **HF Space layout is FLAT** — files live at the Space root (`app.py`,
-  `services/`, `pages/`, `engines/`, etc.). There is NO `hf_dashboard/`
-  wrapper folder on HF.
-- **Local layout has the wrapper** — everything that runs on HF lives
-  under `hf_dashboard/` so we can also have `app/`, `config/`,
-  `scripts/`, etc. at the repo root.
-- **Every HF commit is an upload, not a push.** If you inspect
-  `git log` on the HF Space, every commit message is `Upload ... with
-  huggingface_hub` or similar. That is the deploy mechanism.
+| | v1 — DEPRECATED, do not deploy/test | **v2 — THE FOCUS** |
+|---|---|---|
+| App | `hf_dashboard/` Gradio + FastAPI | `vite_dashboard/` SPA + `api_v2/` FastAPI (shares `hf_dashboard/` services until "Phase 5") |
+| Space | `prashantiitkgp08/himalayan-fibers-dashboard` | `Prashantiitkgp08/Himalayan_Fibrer_v2` |
+| Live URL | ~~prashantiitkgp08-himalayan-fibers-dashboard.hf.space~~ | **https://prashantiitkgp08-himalayan-fibrer-v2.hf.space/** |
+| Deploy | ~~`python scripts/deploy_hf.py`~~ | **`python scripts/deploy_hf_v2.py`** |
+| Auth | none | **password-gated** — `APP_PASSWORD` Space secret; `/api/v2/*` needs `Authorization: Bearer <APP_PASSWORD>` |
+| Health | — | `GET /api/v2/health` |
 
-**The ONE supported deploy command:**
+Deployment is via the `huggingface_hub` Python SDK (`HfApi.upload_folder`),
+**not** git push — the HF Space is not a git mirror of this repo (flat
+layout at Space root; HF history unrelated). Every HF commit is an
+upload (`Upload ... with huggingface_hub`), not a push.
+
+**The ONE supported deploy command (v2):**
 
 ```bash
-python scripts/deploy_hf.py
+python scripts/deploy_hf_v2.py
 ```
 
-This uses `HfApi.upload_folder` to copy the contents of `hf_dashboard/`
-to the Space root in a single commit, skipping caches, local SQLite
-DBs, local media uploads, and `.env` files. After it returns, HF
-rebuilds the Docker image (`hf_dashboard/Dockerfile`) automatically.
-Wait for the Space to show **Running** before verifying.
+Uploads `Dockerfile.v2`→`Dockerfile`, `api_v2/`, `hf_dashboard/`,
+`config/`, `vite_dashboard/` (frontend built inside the multi-stage
+Docker build) in a single commit, skipping caches, local SQLite DBs,
+and `.env`. After it returns, HF rebuilds the Docker image (≈5–8 min:
+pnpm build + FastAPI). Wait for the Space to show **Running** and
+`/api/v2/health` to return `status: ok` before verifying.
 
 Options:
 ```bash
-python scripts/deploy_hf.py --dry-run                  # list files, don't upload
-python scripts/deploy_hf.py -m "Custom commit message" # override auto message
+python scripts/deploy_hf_v2.py --dry-run                  # list files, don't upload
+python scripts/deploy_hf_v2.py -m "Custom commit message" # override auto message
 ```
 
-- **Live URL:** https://prashantiitkgp08-himalayan-fibers-dashboard.hf.space/
-- **Build logs / Space settings:** https://huggingface.co/spaces/prashantiitkgp08/himalayan-fibers-dashboard
-- **No auth on the Space** — `APP_PASSWORD` is unset, so Playwright
-  verification can hit the live URL directly with no login step.
+`scripts/deploy_hf.py` (v1) still exists but **must not be used** — it
+targets the deprecated Space.
+
+- **v2 live URL:** https://prashantiitkgp08-himalayan-fibrer-v2.hf.space/
+- **v2 build logs / settings:** https://huggingface.co/spaces/Prashantiitkgp08/Himalayan_Fibrer_v2
+- **v2 is password-gated.** Verifying via `api_v2` (curl) or Playwright
+  needs the `APP_PASSWORD`; pass it as a Bearer token to `/api/v2/*`.
+  Useful endpoints: `POST /api/v2/email/render-preview` (server-side
+  Jinja render of a template) and `POST /api/v2/email/test-send`.
+- **Templates + `hf_dashboard/config/email/shared.yml` are shared**
+  between v1 and v2, so email-template fixes apply to both; the
+  duplicate-send dedupe logic is v2-specific in
+  `api_v2/routers/email_send.py`.
 
 ### Auth for uploads
 
@@ -68,9 +80,13 @@ Per user preference (2026-04-14): **never run the app locally.** The
 flow is always:
 
 1. Commit the change locally (`git commit`)
-2. `python scripts/deploy_hf.py`
-3. Wait for the Space to report **Running**
-4. Drive the live URL with the Playwright MCP tools (headless) to verify
+2. `python scripts/deploy_hf_v2.py`
+3. Wait for the v2 Space to report **Running** + `/api/v2/health` ok
+   (note: HF can lag 1–3 min before the Docker rebuild starts — poll
+   for a non-RUNNING transition, then RUNNING again, so you don't catch
+   the old build)
+4. Verify via `api_v2` endpoints (Bearer `APP_PASSWORD`) and/or drive
+   the v2 Vite UI with Playwright MCP headless (handle the login gate)
 5. Only hand off once checks pass
 
 ## Project layout (short)

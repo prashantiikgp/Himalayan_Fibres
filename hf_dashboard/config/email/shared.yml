@@ -41,6 +41,15 @@ shared:
   # Source of truth on disk: G:/My Drive/1. Media & Marketing/9. Customer Engagement/Catalogue _Distribution/XYZ_Price_List_16_Aug.pdf
   price_list_pdf_url: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/sign/email-invoices/canonical/current_price_list.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83OTM3MzgzNi1iZDQyLTQ0M2EtOTA5My03NzA5MTI3YjNjODAiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJlbWFpbC1pbnZvaWNlcy9jYW5vbmljYWwvY3VycmVudF9wcmljZV9saXN0LnBkZiIsImlhdCI6MTc3ODA0NDAzOCwiZXhwIjoxODA5NTgwMDM4fQ.a_UXh7wUJU9PmK1Az6FWRreGxBScB2_8SezYQro-z90"
 
+  # Canonical product-catalogue PDF — signed Supabase URL (1-year expiry).
+  # Refresh with `python scripts/upload_catalogue.py <local-pdf-path>`.
+  # Surfaced to templates as `{{ catalog_link }}` via build_send_variables.
+  catalog_pdf_url: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/sign/email-invoices/canonical/product_catalogue.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83OTM3MzgzNi1iZDQyLTQ0M2EtOTA5My03NzA5MTI3YjNjODAiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJlbWFpbC1pbnZvaWNlcy9jYW5vbmljYWwvcHJvZHVjdF9jYXRhbG9ndWUucGRmIiwiaWF0IjoxNzc4ODU5MjE2LCJleHAiOjE4MTAzOTUyMTZ9.Y0GZM0MO0VmCg4-e4L5teCPXHLpPHQw6B4PSGybQa1s"
+
+  # Public sample-request / contact destination — used as the default
+  # for `{{ sample_request_link }}` / `{{ sample_form_link }}` CTAs.
+  sample_request_url: "https://www.himalayanfibres.com/contact"
+
   # Curated public-bucket image URLs. Reference via {{ media.<key> }} in templates.
   # Bucket `wa-template-images` is public; URLs do not expire.
   media:
