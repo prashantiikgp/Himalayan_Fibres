@@ -36,9 +36,46 @@ from email.utils import formataddr, formatdate, make_msgid
 from pathlib import Path
 
 import requests
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from jinja2 import Environment, FileSystemLoader, Undefined, select_autoescape
 
 from services.config import get_settings
+
+
+class SafeUndefined(Undefined):
+    """Render-safe Undefined: a missing variable degrades to an empty
+    string instead of 500-ing the whole send.
+
+    B12 — many templates do ``'…' + some_var + '…'`` string concat.
+    With Jinja's default ``Undefined`` that raises ``UndefinedError`` when
+    the var is missing, killing the entire email. For transactional/
+    marketing email a blank is always better than a failed send; the
+    per-template copy review (Wave 4) + regression (Wave 5) catch blanks.
+    Booleans still work (``{% if var %}`` → falsy), so conditional blocks
+    are unaffected.
+    """
+
+    __slots__ = ()
+
+    def __str__(self) -> str:  # {{ var }}
+        return ""
+
+    def __html__(self) -> str:
+        return ""
+
+    def __add__(self, other):  # 'x' ... NO; var + 'y'
+        return other if isinstance(other, str) else ""
+
+    def __radd__(self, other):  # 'x' + var
+        return other if isinstance(other, str) else ""
+
+    def __iter__(self):
+        return iter(())
+
+    def __bool__(self) -> bool:
+        return False
+
+    def __getattr__(self, _name):
+        return self
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -61,6 +98,7 @@ def get_jinja_env() -> Environment:
             autoescape=select_autoescape(enabled_extensions=(), default=False),
             trim_blocks=True,
             lstrip_blocks=True,
+            undefined=SafeUndefined,  # B12: missing var → '' not a 500
         )
     return _JINJA_ENV
 

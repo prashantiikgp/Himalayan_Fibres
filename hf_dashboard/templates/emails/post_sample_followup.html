@@ -20,6 +20,10 @@
 
 {% block content %}
 
+{# B12: guard required content var — undefined in a string concat 500s the
+   whole send. Falsy/missing → neutral wording instead of a render crash. #}
+{% set fibre_sent = fibre_sent or 'sample' %}
+
 {{ heading('How did the sample feel?', emoji='🌿') }}
 
 {{ paragraph('Hello <strong>' + first_name + '</strong>,') }}

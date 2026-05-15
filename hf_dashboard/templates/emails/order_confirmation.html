@@ -46,6 +46,7 @@
       <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="width:100%;font-size:14px;color:{{ color_accent }};margin-top:10px;">
         {% if subtotal %}<tr><td style="padding:6px 0;color:#555;">Subtotal</td><td style="padding:6px 0;" align="right">{{ subtotal }}</td></tr>{% endif %}
         {% if shipping %}<tr><td style="padding:6px 0;color:#555;">Courier Charges</td><td style="padding:6px 0;" align="right">{{ shipping }}</td></tr>{% endif %}
+        {% if gst_amount %}<tr><td style="padding:6px 0;color:#555;">GST / Tax</td><td style="padding:6px 0;" align="right">{{ gst_amount }}</td></tr>{% endif %}
         <tr><td colspan="2" style="border-top:1px solid {{ color_card_border }};height:1px;line-height:1px;"></td></tr>
         {% if total %}<tr><td style="padding:8px 0;font-weight:bold;">Total</td><td style="padding:8px 0;font-weight:bold;" align="right">{{ total }}</td></tr>{% endif %}
         {% if payment_method %}<tr><td style="padding:2px 0;color:#555;">Payment</td><td style="padding:2px 0;" align="right">{{ payment_method }}</td></tr>{% endif %}

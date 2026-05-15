@@ -37,7 +37,11 @@
 
 {{ paragraph('Hello <strong>' + first_name + '</strong>,') }}
 
+{% if invoice_url %}
 {{ paragraph("Quick note &mdash; your proforma invoice is below. The full stamped PDF is attached for your records (one-click download button below the summary). Once payment lands, we'll confirm the order and start preparing your items.") }}
+{% else %}
+{{ paragraph("Quick note &mdash; your proforma invoice is below. Once payment lands, we'll confirm the order and start preparing your items.") }}
+{% endif %}
 
 {# PROFORMA SUMMARY — products + amounts inline #}
 {% if proforma_number or items_html %}
@@ -64,6 +68,7 @@
       <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="width:100%;font-size:14px;color:{{ color_accent }};margin-top:10px;">
         {% if subtotal %}<tr><td style="padding:6px 0;color:#555;">Subtotal</td><td style="padding:6px 0;" align="right">{{ subtotal }}</td></tr>{% endif %}
         {% if shipping_estimate %}<tr><td style="padding:6px 0;color:#555;">Courier (estimated)</td><td style="padding:6px 0;" align="right">{{ shipping_estimate }}</td></tr>{% endif %}
+        {% if gst_amount %}<tr><td style="padding:6px 0;color:#555;">GST / Tax</td><td style="padding:6px 0;" align="right">{{ gst_amount }}</td></tr>{% endif %}
         <tr><td colspan="2" style="border-top:1px solid {{ color_card_border }};height:1px;line-height:1px;"></td></tr>
         {% if total_due %}<tr><td style="padding:8px 0;font-weight:bold;">Total due</td><td style="padding:8px 0;font-weight:bold;" align="right">{{ total_due }}</td></tr>{% endif %}
       </table>
