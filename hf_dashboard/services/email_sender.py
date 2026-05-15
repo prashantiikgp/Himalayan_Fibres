@@ -85,6 +85,22 @@ class SafeUndefined(Undefined):
 # ─────────────────────────────────────────────────────────────────────────────
 
 _TEMPLATES_ROOT = Path(__file__).resolve().parent.parent / "templates" / "emails"
+_TEMPLATES_DIR = _TEMPLATES_ROOT.parent  # .../templates
+
+# Standalone (non-shell) templates that live OUTSIDE templates/emails/ — full
+# self-contained HTML, not the {% extends 'layout/base.html' %} shell. Paths
+# are relative to templates/. Single source of truth: database.py seeds the
+# same files into DB rows, but the renderer now prefers these files so edits
+# propagate via the normal deploy flow (previously the renderer used a stale
+# DB copy seeded once, so edits to these files silently never took effect).
+NON_SHELL_TEMPLATE_FILES: dict[str, str] = {
+    "b2b_introduction": "campaigns/b2b_introduction_carpet_exporters.html",
+    "sustainability": "campaigns/sustainability_compliance_campaign.html",
+    "tariff_advantage": "campaigns/tariff_advantage_campaign.html",
+    "welcome_final": "campaigns/welcome_email_final.html",
+    "welcome_production": "campaigns/welcome_email_production.html",
+    "welcome_transactional": "transactional/welcome.html",
+}
 
 _JINJA_ENV: Environment | None = None
 
@@ -125,24 +141,38 @@ def render_template_string(template_content: str, variables: dict) -> str:
 
 
 def template_file_exists(slug: str) -> bool:
-    """Check whether a seeded template file exists on disk for this slug."""
-    return (_TEMPLATES_ROOT / f"{slug}.html").exists()
+    """Check whether an on-disk template file exists for this slug —
+    either the shell template ``emails/<slug>.html`` or a registered
+    standalone template under ``templates/`` (campaigns/, transactional/)."""
+    if (_TEMPLATES_ROOT / f"{slug}.html").exists():
+        return True
+    rel = NON_SHELL_TEMPLATE_FILES.get(slug)
+    return bool(rel and (_TEMPLATES_DIR / rel).exists())
 
 
 def render_template_by_slug(slug: str, variables: dict) -> str:
     """Render an email template to HTML for a single recipient.
 
-    Prefers the on-disk file at ``templates/emails/<slug>.html`` — which
-    resolves ``{% extends %}`` against the locked shell layout — but falls
-    back to rendering the DB row's ``html_content`` if no file exists
-    (so future DB-created templates from a UI editor still work).
+    Resolution order:
+      1. ``templates/emails/<slug>.html`` — shell template (resolves
+         ``{% extends %}`` against the locked layout).
+      2. A registered standalone file in ``NON_SHELL_TEMPLATE_FILES``
+         (campaigns/, transactional/) — rendered as a self-contained
+         string. Preferred over the DB so edits to these files ship via
+         the normal deploy flow.
+      3. The DB row's ``html_content`` (UI-created / legacy templates).
 
     The ``variables`` dict should already contain the merged shared
     branding config plus per-recipient send vars (see
     :func:`services.email_personalization.build_send_variables`).
     """
-    if template_file_exists(slug):
+    if (_TEMPLATES_ROOT / f"{slug}.html").exists():
         return render_template_file(f"{slug}.html", variables)
+
+    rel = NON_SHELL_TEMPLATE_FILES.get(slug)
+    if rel and (_TEMPLATES_DIR / rel).exists():
+        text = (_TEMPLATES_DIR / rel).read_text(encoding="utf-8")
+        return render_template_string(text, variables)
 
     # Fallback: render whatever is in the DB row for this slug.
     from services.database import get_db

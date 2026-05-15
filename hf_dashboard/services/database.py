@@ -330,15 +330,15 @@ def _seed_default_templates(db: Session):
         return
 
     template_defs = [
-        ("B2B Introduction - Carpet Exporters", "b2b_introduction", "campaigns/b2b_introduction_carpet_exporters.html", "Premium Himalayan Fibers for {{company_name}}"),
+        ("B2B Introduction - Carpet Exporters", "b2b_introduction", "campaigns/b2b_introduction_carpet_exporters.html", "Premium Himalayan Fibres for {{company_name}}"),
         ("Sustainability Compliance", "sustainability", "campaigns/sustainability_compliance_campaign.html", "Meet EU & US Sustainability Standards"),
-        ("Tariff Advantage", "tariff_advantage", "campaigns/tariff_advantage_campaign.html", "Beat Import Tariffs with Domestic Himalayan Fibers"),
-        ("Welcome Email Final", "welcome_final", "campaigns/welcome_email_final.html", "Welcome to Himalayan Fibers, {{name}}"),
-        ("Welcome Email Production", "welcome_production", "campaigns/welcome_email_production.html", "Welcome to Himalayan Fibers"),
+        ("Tariff Advantage", "tariff_advantage", "campaigns/tariff_advantage_campaign.html", "Beat Import Tariffs with Domestic Himalayan Fibres"),
+        ("Welcome Email Final", "welcome_final", "campaigns/welcome_email_final.html", "Welcome to Himalayan Fibres, {{name}}"),
+        ("Welcome Email Production", "welcome_production", "campaigns/welcome_email_production.html", "Welcome to Himalayan Fibres"),
         # NOTE: legacy `order_confirmation` removed — replaced by the new
         # seed loader that reads from config/email/templates_seed/ and
         # compiles Jinja2 templates with the locked shell partials.
-        ("Welcome (Transactional)", "welcome_transactional", "transactional/welcome.html", "Welcome to Himalayan Fibers, {{first_name}}"),
+        ("Welcome (Transactional)", "welcome_transactional", "transactional/welcome.html", "Welcome to Himalayan Fibres, {{first_name}}"),
     ]
 
     for name, slug, path, subject in template_defs:
@@ -381,9 +381,9 @@ def _seed_default_flows(db: Session):
             trigger_config={},
             is_active=False,
             steps=[
-                {"day": 0, "template_slug": "b2b_introduction", "subject": "Premium Himalayan Fibers for {{company_name}}"},
+                {"day": 0, "template_slug": "b2b_introduction", "subject": "Premium Himalayan Fibres for {{company_name}}"},
                 {"day": 3, "template_slug": "sustainability", "subject": "Meet EU & US Sustainability Standards"},
-                {"day": 7, "template_slug": "tariff_advantage", "subject": "Beat Import Tariffs with Domestic Himalayan Fibers"},
+                {"day": 7, "template_slug": "tariff_advantage", "subject": "Beat Import Tariffs with Domestic Himalayan Fibres"},
             ],
         ),
         Flow(
@@ -395,7 +395,7 @@ def _seed_default_flows(db: Session):
             trigger_config={},
             is_active=False,
             steps=[
-                {"day": 0, "template_slug": "welcome_production", "subject": "Welcome to Himalayan Fibers"},
+                {"day": 0, "template_slug": "welcome_production", "subject": "Welcome to Himalayan Fibres"},
                 {"day": 5, "template_slug": "welcome_final", "subject": "Discover Our Product Range"},
             ],
         ),
