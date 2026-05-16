@@ -5,14 +5,18 @@
 </tr>
 <tr>
   <td bgcolor="#ffffff" style="background-color:#ffffff;padding:18px 24px 22px;font-family:{{ font_stack }};font-size:12px;line-height:1.7;color:{{ color_text }};text-align:center;">
+    {#- Plain typographic contact block. Emoji "icons" (📍📧📞) were
+        unreliable — Gmail renders them as broken-image glyphs. Bold
+        text labels render identically in every client, no broken
+        images, and keep the A1/A3 alignment problem permanently gone. -#}
     <p style="margin:6px 0;color:{{ color_text }};line-height:1.6;">
-      <em>📍 Address:</em>
-      <em>{{ address }}</em>
+      <strong>Address:</strong> {{ address }}
     </p>
     <p style="margin:6px 0;color:{{ color_text }};line-height:1.6;">
-      <em>📧 {{ company_email }}</em>
-      <span style="display:inline-block;width:10px;">&nbsp;</span>
-      <em>📞 {{ company_phone }}</em>
+      <strong>Email:</strong>
+      <a href="mailto:{{ company_email }}" style="color:{{ color_text }};text-decoration:none;">{{ company_email }}</a>
+      <span style="display:inline-block;width:14px;">&nbsp;</span>
+      <strong>Phone:</strong> {{ company_phone }}
     </p>
     {#-
       Inline-block wrappers around each link give Gmail a clean wrap
