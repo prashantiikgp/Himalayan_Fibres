@@ -330,7 +330,7 @@ def _seed_segments(db: Session):
 # carries metadata + subject_template (which has no file fallback, so it must
 # be kept in sync here — see reconcile_campaign_subjects).
 CAMPAIGN_TEMPLATE_DEFS = [
-    ("B2B Introduction - Carpet Exporters", "b2b_introduction", "campaigns/b2b_introduction_carpet_exporters.html", "Premium Himalayan Fibres for {{company_name}}"),
+    ("B2B Introduction - Carpet Exporters", "b2b_introduction", "campaigns/b2b_introduction_carpet_exporters.html", "Premium Himalayan Fibres for your carpet business"),
     ("Sustainability Compliance", "sustainability", "campaigns/sustainability_compliance_campaign.html", "Meet EU & US Sustainability Standards"),
     ("Tariff Advantage", "tariff_advantage", "campaigns/tariff_advantage_campaign.html", "A Domestic Sourcing Advantage for Carpet Exporters"),
     ("Welcome Email Final", "welcome_final", "campaigns/welcome_email_final.html", "Welcome to Himalayan Fibres, {{name}}"),
@@ -411,7 +411,7 @@ def _seed_default_flows(db: Session):
             trigger_config={},
             is_active=False,
             steps=[
-                {"day": 0, "template_slug": "b2b_introduction", "subject": "Premium Himalayan Fibres for {{company_name}}"},
+                {"day": 0, "template_slug": "b2b_introduction", "subject": "Premium Himalayan Fibres for your carpet business"},
                 {"day": 3, "template_slug": "sustainability", "subject": "Meet EU & US Sustainability Standards"},
                 {"day": 7, "template_slug": "tariff_advantage", "subject": "A Domestic Sourcing Advantage for Carpet Exporters"},
             ],
