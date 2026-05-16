@@ -1,197 +1,56 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meet EU & US Sustainability Standards with Himalayan Fibres</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Amiri&display=swap');
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: #f2f2f2;
-      font-family: 'Amiri', serif;
-    }
-  </style>
-</head>
-<body>
-<table width="100%" cellpadding="0" cellspacing="0" style="padding: 40px 0;">
-  <tr>
-    <td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 640px; background-color: #ffffff; border-radius: 10px; box-shadow: 0 0 18px rgba(0, 0, 0, 0.15); margin: 0 20px;">
+{#-
+  CAMPAIGN — Sustainability compliance (Wave 6: migrated onto the shared
+  shell). card_variant=True for the premium look; shared banner / social /
+  fixed-footer-icons from the shell; no top hero. Copy is the Wave 4
+  source-honest version (claims softened, decorative emoji dropped).
+-#}
+{% extends 'layout/base.html' %}
+{% set card_variant = True %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/info_card.html' import info_card with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
 
-        <!-- Hero Image -->
-        <tr>
-          <td>
-            <img src="{{ banner_url }}" alt="Himalayan Fibres - Sustainable Fibres" style="width: 100%; height: auto; display: block; border-top-left-radius: 10px; border-top-right-radius: 10px;">
-          </td>
-        </tr>
+{% block content %}
 
-        <!-- Main Content -->
-        <tr>
-          <td style="padding: 30px;">
-            <!-- Headline -->
-            <h2 style="text-align: center; font-size: 22px; font-weight: bold; color: #222; margin: 0 0 20px; font-family: 'Amiri', serif;">
-              🌱 Your Buyers Want Sustainable. Are You Ready?
-            </h2>
+{{ heading('Your buyers want sustainable. Are you ready?') }}
 
-            <!-- Greeting -->
-            <p style="font-size: 16px; color: #222; margin: 0 0 10px; font-family: 'Amiri', serif;">Dear <strong>{{ contact_company or first_name or 'there' }}</strong>,</p>
+{{ paragraph('Dear <strong>' + (contact_company or first_name or 'there') + '</strong>,') }}
 
-            <p style="font-size: 16px; color: #222; margin: 0 0 15px; font-family: 'Amiri', serif;">
-              European and American buyers are increasingly demanding <strong>verified sustainable sourcing</strong> for their carpet imports. The EU's new textile regulations and growing consumer awareness mean that sustainability is no longer optional — it's a competitive necessity.
-            </p>
+{{ paragraph("European and American buyers are increasingly asking for <strong>verified sustainable sourcing</strong> on their carpet imports. The EU's new textile regulations and growing consumer awareness mean sustainability is now a competitive necessity.") }}
 
-            <!-- Stats Box -->
-            <div style="background-color: #e8f5e9; border: 1px solid #4caf50; padding: 20px; margin: 20px 0; border-radius: 6px; text-align: center;">
-              <p style="font-size: 20px; color: #2e7d32; margin: 0; font-weight: bold; font-family: 'Amiri', serif;">A growing requirement</p>
-              <p style="font-size: 14px; color: #2e7d32; margin: 5px 0 0; font-family: 'Amiri', serif;">
-                A growing share of European and US buyers now ask for sustainability documentation on textile imports.
-              </p>
-            </div>
+{{ info_card('A growing requirement',
+   'A growing share of European and US buyers now ask for sustainability documentation on textile imports.') }}
 
-            <!-- Why Himalayan Fibres -->
-            <div style="margin: 25px 0;">
-              <h3 style="font-family: 'Amiri', serif; font-size: 18px; font-weight: bold; color: #222; margin-bottom: 15px;">
-                🌿 Why Himalayan Fibres Meet Global Standards:
-              </h3>
+{{ heading('Why Himalayan Fibres meet global standards', size='18px') }}
 
-              <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f5f0; border-radius: 6px;">
-                <h4 style="font-size: 16px; font-weight: 600; color: #2c3e50; margin: 0 0 8px; font-family: 'Amiri', serif;">
-                  ✓ 100% Natural & Chemical-Free
-                </h4>
-                <p style="font-size: 14px; color: #555; margin: 0; font-family: 'Amiri', serif;">
-                  Our Himalayan Nettle and Hemp grow wild at 1200-2000m altitude — <strong>no pesticides, no synthetic fertilizers, no irrigation</strong>. Nature does the work.
-                </p>
-              </div>
+{{ info_card('100% natural &amp; chemical-free',
+   'Our Himalayan nettle and hemp grow wild at 1200&ndash;2000&nbsp;m altitude &mdash; <strong>no pesticides, no synthetic fertilizers, no irrigation</strong>. Nature does the work.') }}
+{{ info_card('Low-impact natural-fibre production',
+   'Hemp and nettle grow with minimal inputs and absorb CO&#8322; as they grow, supporting <strong>sustainability-focused sourcing</strong> for your carpets.') }}
+{{ info_card('Fair trade &amp; rural livelihoods',
+   'Hand-harvested by Himalayan farming communities. Every purchase supports <strong>sustainable rural livelihoods</strong> &mdash; supporting transparent, responsible sourcing narratives.') }}
+{{ info_card('Biodegradable &amp; circular',
+   'Unlike synthetic alternatives, our natural fibres are <strong>fully biodegradable</strong> &mdash; meeting circular-economy requirements.') }}
 
-              <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f5f0; border-radius: 6px;">
-                <h4 style="font-size: 16px; font-weight: 600; color: #2c3e50; margin: 0 0 8px; font-family: 'Amiri', serif;">
-                  ✓ Low-Impact Natural-Fibre Production
-                </h4>
-                <p style="font-size: 14px; color: #555; margin: 0; font-family: 'Amiri', serif;">
-                  Hemp and nettle grow with minimal inputs and absorb CO2 as they grow, supporting <strong>sustainability-focused sourcing</strong> for your carpets.
-                </p>
-              </div>
+{{ paragraph("<strong>Documentation we provide:</strong> origin certificates, processing documentation, and sustainability statements. Custom documentation available on request.") }}
 
-              <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f5f0; border-radius: 6px;">
-                <h4 style="font-size: 16px; font-weight: 600; color: #2c3e50; margin: 0 0 8px; font-family: 'Amiri', serif;">
-                  ✓ Fair Trade & Rural Livelihoods
-                </h4>
-                <p style="font-size: 14px; color: #555; margin: 0; font-family: 'Amiri', serif;">
-                  Hand-harvested by Himalayan farming communities. Every purchase supports <strong>sustainable rural livelihoods</strong> — supporting transparent, responsible sourcing narratives.
-                </p>
-              </div>
+{{ cta_button('Download the product catalogue', catalog_link) }}
 
-              <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f5f0; border-radius: 6px;">
-                <h4 style="font-size: 16px; font-weight: 600; color: #2c3e50; margin: 0 0 8px; font-family: 'Amiri', serif;">
-                  ✓ Biodegradable & Circular
-                </h4>
-                <p style="font-size: 14px; color: #555; margin: 0; font-family: 'Amiri', serif;">
-                  Unlike synthetic alternatives, our natural fibers are <strong>fully biodegradable</strong> — meeting circular economy requirements.
-                </p>
-              </div>
-            </div>
+{{ heading('Our sustainable fibre range', size='18px') }}
 
-            <!-- Certifications Coming -->
-            <div style="border: 2px dashed #c38513; padding: 15px 20px; margin: 20px 0; border-radius: 6px; text-align: center;">
-              <p style="font-size: 15px; color: #222; margin: 0; font-family: 'Amiri', serif;">
-                <strong>📋 Documentation We Provide:</strong><br>
-                Origin certificates • Processing documentation • Sustainability statements<br>
-                <em style="font-size: 13px; color: #666;">Custom documentation available on request</em>
-              </p>
-            </div>
+{{ info_card('Himalayan stinging nettle',
+   'Wild-harvested, zero-input cultivation. Strong, silky fibre suited to premium carpets; used by eco-conscious European brands.') }}
+{{ info_card('Himalayan hemp',
+   'A strong natural fibre &mdash; antimicrobial, UV-resistant, and durable. Increasingly used in sustainable textile applications.') }}
+{{ info_card('Tibetan wool blends',
+   'Ethically sourced high-altitude wool, blended with hemp or nettle for distinctive sustainable yarns.') }}
 
-            <!-- CTA Buttons -->
-            <table cellpadding="0" cellspacing="0" width="100%" style="margin-top: 25px;">
-              <tr>
-                <td align="center" style="padding: 5px;">
-                  <a href="https://drive.google.com/file/d/1nkLZaOtZVE_GUl6osv1pDYWcMa3pRJyk/view?usp=sharing" style="background-color: #232323; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 5px; display: inline-block; font-size: 16px; font-weight: bold; font-family: 'Amiri', serif;">
-                    📄 Download Product Catalog
-                  </a>
-                </td>
-              </tr>
-              <tr>
-                <td align="center" style="padding: 10px;">
-                  <a href="mailto:info@himalayanfibres.com?subject=Sustainability%20Documentation%20Request" style="background-color: #4caf50; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 5px; display: inline-block; font-size: 15px; font-family: 'Amiri', serif;">
-                    📧 Request Sustainability Documentation
-                  </a>
-                </td>
-              </tr>
-            </table>
+{{ paragraph("Let's discuss how our fibres can help you win more export orders. Reply to this email or request sustainability documentation any time.") }}
 
-            <!-- Product Overview -->
-            <div style="margin: 30px 0;">
-              <h3 style="font-family: 'Amiri', serif; font-size: 20px; font-weight: bold; color: #222; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.5px;">🧶 Our Sustainable Fiber Range</h3>
+{{ paragraph('&mdash; Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
 
-              <div style="margin-bottom: 20px;">
-                <h4 style="font-size: 16px; font-weight: 600; color: #2c3e50; margin-bottom: 6px; font-family: 'Amiri', serif;">🌿 Himalayan Stinging Nettle</h4>
-                <p style="font-size: 14px; color: #222; margin: 0; font-family: 'Amiri', serif;">Wild-harvested, zero-input cultivation. Strong silky fiber perfect for premium carpets. Popular with eco-conscious European brands.</p>
-              </div>
+{{ whatsapp_help_button('Hi Prashant — I would like sustainability documentation for our carpet imports.') }}
 
-              <div style="margin-bottom: 20px;">
-                <h4 style="font-size: 16px; font-weight: 600; color: #2c3e50; margin-bottom: 6px; font-family: 'Amiri', serif;">🌱 Himalayan Hemp</h4>
-                <p style="font-size: 14px; color: #222; margin: 0; font-family: 'Amiri', serif;">A strong natural fibre — antimicrobial, UV-resistant, and durable. Increasingly used in sustainable textile applications.</p>
-              </div>
-
-              <div style="margin-bottom: 20px;">
-                <h4 style="font-size: 16px; font-weight: 600; color: #2c3e50; margin-bottom: 6px; font-family: 'Amiri', serif;">🐑 Tibetan Wool Blends</h4>
-                <p style="font-size: 14px; color: #222; margin: 0; font-family: 'Amiri', serif;">Ethically sourced high-altitude wool. Blended with hemp or nettle for unique sustainable yarn offerings.</p>
-              </div>
-            </div>
-
-            <!-- Closing -->
-            <div style="background-color: #232323; color: #ffffff; padding: 20px; border-radius: 6px; text-align: center; margin-top: 25px;">
-              <p style="font-size: 16px; margin: 0 0 10px; font-family: 'Amiri', serif;">
-                <strong>Let's discuss how our fibers can help you win more export orders.</strong>
-              </p>
-              <p style="font-size: 14px; margin: 0; font-family: 'Amiri', serif;">
-                📧 <a href="mailto:info@himalayanfibres.com" style="color: #c38513;">info@himalayanfibres.com</a> |
-                📞 <a href="tel:+918582952074" style="color: #c38513;">+91 858-295-2074</a> |
-                💬 <a href="https://wa.me/918582952074" style="color: #c38513;">WhatsApp</a>
-              </p>
-            </div>
-
-            <!-- Signature -->
-            <div style="margin-top: 30px;">
-              <table style="font-family: 'Amiri', serif; color: #222222; font-size: 14px; line-height: 1.5;" cellspacing="0" cellpadding="0">
-                <tr>
-                  <td style="padding: 0;">
-                    <div style="font-size: 16px; font-weight: bold; color: #000000;">Prashant Agarwal</div>
-                    <div style="margin-top: 2px; color: #232323;">Manager, ERB Textile Private Limited</div>
-                    <div style="margin-top: 5px;">
-                      <a href="https://www.himalayanfibres.com/" style="color: #c38513;">himalayanfibres.com</a>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-            </div>
-
-          </td>
-        </tr>
-
-        <!-- Footer -->
-        <tr>
-          <td>
-            <hr style="margin: 0 0 10px 0; border: none; border-top: 1px solid #ddd;">
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <div style="background-color: #f5f5f5; padding: 10px 24px; font-size: 12px; color: #232323; text-align: center; font-family: 'Amiri', serif;">
-              <p><em>📍 S.K. Complex, Khurje Wala Mohalla, Daulat Ganj, Lashkar, Gwalior 474001</em></p>
-              <p><em>📧 info@himalayanfibres.com | 📞 +91 8582952074</em></p>
-              <p style="font-size: 12px; font-style: italic; margin-top: 10px;">
-                To unsubscribe, <a href="mailto:info@himalayanfibres.com?subject=Unsubscribe" style="color: #555;">email us</a> with subject "Unsubscribe".
-              </p>
-              <p style="margin-top: 10px;">© 2025 Himalayan Fibres. All rights reserved.</p>
-            </div>
-          </td>
-        </tr>
-
-      </table>
-    </td>
-  </tr>
-</table>
-</body>
-</html>
+{% endblock %}
