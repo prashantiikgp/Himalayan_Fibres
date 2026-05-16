@@ -34,6 +34,11 @@ class SharedEmailConfig(BaseModel):
     facebook_url: str
     facebook_icon_url: str
 
+    # Footer contact icons (hosted PNGs — reliable, unlike emoji).
+    location_icon_url: str = ""
+    email_icon_url: str = ""
+    phone_icon_url: str = ""
+
     privacy_url: str
     terms_url: str
     refund_url: str

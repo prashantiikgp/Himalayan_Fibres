@@ -5,19 +5,37 @@
 </tr>
 <tr>
   <td bgcolor="#ffffff" style="background-color:#ffffff;padding:18px 24px 22px;font-family:{{ font_stack }};font-size:12px;line-height:1.7;color:{{ color_text }};text-align:center;">
-    {#- Plain typographic contact block. Emoji "icons" (📍📧📞) were
-        unreliable — Gmail renders them as broken-image glyphs. Bold
-        text labels render identically in every client, no broken
-        images, and keep the A1/A3 alignment problem permanently gone. -#}
-    <p style="margin:6px 0;color:{{ color_text }};line-height:1.6;">
-      <strong>Address:</strong> {{ address }}
-    </p>
-    <p style="margin:6px 0;color:{{ color_text }};line-height:1.6;">
-      <strong>Email:</strong>
-      <a href="mailto:{{ company_email }}" style="color:{{ color_text }};text-decoration:none;">{{ company_email }}</a>
-      <span style="display:inline-block;width:14px;">&nbsp;</span>
-      <strong>Phone:</strong> {{ company_phone }}
-    </p>
+    {#- Contact icons restored as HOSTED PNGs (same proven approach as
+        the social row — emoji 📍📧📞 rendered as broken glyphs in Gmail).
+        Each row is a 2-cell table (icon | text, valign=middle) inside a
+        centred wrapper, so the icon always sits cleanly beside its text
+        — this also permanently fixes the A1 misalignment. -#}
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:0 auto 4px;">
+      <tr>
+        <td valign="middle" style="padding:3px 7px 3px 0;">
+          <img src="{{ location_icon_url }}" width="14" height="14" alt="" style="display:block;border:0;outline:none;">
+        </td>
+        <td valign="middle" style="font-family:{{ font_stack }};font-size:12px;color:{{ color_text }};line-height:1.5;">
+          {{ address }}
+        </td>
+      </tr>
+      <tr>
+        <td valign="middle" style="padding:3px 7px 3px 0;">
+          <img src="{{ email_icon_url }}" width="14" height="14" alt="" style="display:block;border:0;outline:none;">
+        </td>
+        <td valign="middle" style="font-family:{{ font_stack }};font-size:12px;color:{{ color_text }};line-height:1.5;">
+          <a href="mailto:{{ company_email }}" style="color:{{ color_text }};text-decoration:none;">{{ company_email }}</a>
+        </td>
+      </tr>
+      <tr>
+        <td valign="middle" style="padding:3px 7px 3px 0;">
+          <img src="{{ phone_icon_url }}" width="14" height="14" alt="" style="display:block;border:0;outline:none;">
+        </td>
+        <td valign="middle" style="font-family:{{ font_stack }};font-size:12px;color:{{ color_text }};line-height:1.5;">
+          {{ company_phone }}
+        </td>
+      </tr>
+    </table>
     {#-
       Inline-block wrappers around each link give Gmail a clean wrap
       point so on narrow widths each link drops to its own line instead

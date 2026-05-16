@@ -17,6 +17,12 @@ shared:
   facebook_url: "https://www.facebook.com/Himalayanfibres"
   facebook_icon_url: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Social%20Icons/facebook.png"
 
+  # Footer contact icons — hosted PNGs (same proven approach as the social
+  # icons; emoji 📍📧📞 rendered as broken glyphs in Gmail).
+  location_icon_url: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Footer%20Icons/location.png"
+  email_icon_url: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Footer%20Icons/email.png"
+  phone_icon_url: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/public/wa-template-images/Asset/Footer%20Icons/phone.png"
+
   privacy_url: "https://www.himalayanfibres.com/privacy-policy"
   terms_url: "https://www.himalayanfibres.com/terms-conditions"
   refund_url: "https://www.himalayanfibres.com/refund-cancellation"
