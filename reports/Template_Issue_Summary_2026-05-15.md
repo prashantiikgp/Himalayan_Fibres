@@ -2,7 +2,40 @@
 
 **Source:** `reports/Gmail & Whatsapp testing.pdf` (114 pages, tester review of every Gmail template, sent to "Rohit")
 **Compiled:** 2026-05-15
-**Status:** Issues catalogued + root-cause investigation done (see § F)
+**Status: RESOLVED — Wave 5 + hardened re-audit PASS (2026-05-16).** All 34 templates render on v2 (no crash), fleet phrase/subject scan clean.
+
+> **Correction (post `/review`):** the first Wave 5 sign-off claimed "57/57 URLs 200" and "A2 RESOLVED" — that audit covered only `shared.yml` media and **missed image URLs hardcoded inside templates**. A hardened fleet audit (every rendered `<img>` across all 34 templates) then found **11 additional dead inline images** (cloudhq 403 banner, winback 400 fallback, 9 legacy `category/`/`field/` literals from the `24ca013` bucket cleanup). All repointed to valid `media.*`/`banner_url`. **Re-audit now: 39/39 fleet inline images = 200, 0 broken.** The earlier A2 claim was overclaimed; this is the corrected, accurate status.
+
+---
+
+## I. Final sign-off (Wave 5, 2026-05-16, v2-verified)
+
+| Issue | Status | Where fixed |
+|---|---|---|
+| **A1** footer icon/text alignment | ✅ RESOLVED | Wave 0 (already fixed by `55e2e0b`; v2 footer confirmed clean) |
+| **A2** broken images | ✅ RESOLVED | Wave 1 (7 `shared.yml` images recompressed + re-uploaded) **+ Wave 5 `/review`** (11 dead *inline* template literals repointed to `media.*`). Hardened fleet audit: **39/39 rendered images 200**. Earlier "57/57 / RESOLVED" was shared.yml-scoped only — corrected here. |
+| **A3** social/contact icons | ✅ RESOLVED | Wave 0 (social icons OK; footer fix) |
+| **A4** oversized buttons | ✅ RESOLVED | Wave 3 (`cta_button`/`whatsapp_help_button` compacted) |
+| **A5** casual copy | ✅ RESOLVED | Wave 4 (12 templates B2B-grounded; fleet scan 0 residual) |
+| **A6** whitespace / image-text | ✅ RESOLVED (core) | Wave 3 (`image_split` empty-cell collapse). Per-template image-size proportion tuning → **deferred to Wave 6** visual pass (subjective, not a defect) |
+| **B1** duplicate-send | ✅ RESOLVED | Wave 0 (already fixed in `api_v2`; live re-tested) |
+| **B2** feedback → 404 | ✅ RESOLVED | Wave 0 (valid `mailto:` on v2; was a v1 artefact) |
+| **B3** dead catalog button | ✅ RESOLVED | Wave 2 (config-driven `catalog_link`; catalogue hosted) |
+| **B4** invisible sample/catalog CTAs | ✅ RESOLVED | Wave 2 (config-driven `sample_request_link`/`sample_form_link`) |
+| **B5** Proforma PDF button | ✅ RESOLVED | Wave 2 (promise gated on `invoice_url`) |
+| **B6** GST/Tax column | ✅ RESOLVED | Wave 2 (conditional row in proforma + order_confirmation; renders when `gst_amount` supplied by composer) |
+| **B7** "Dear Himalayan Fibres" | ✅ RESOLVED | Wave 2/4 (`contact_company`/`first_name`; file-render fix) |
+| **B8** risky claims | ✅ RESOLVED | Wave 4 (softened, source-honest; unsourced numbers de-numbered) |
+| **B9** "Fibers" misspelling | ✅ RESOLVED | Wave 2/4/5 (campaign files + `database.py` + boot reconcile + `transactional/welcome`; 0 fleet-wide incl. subjects) |
+| **B10** truncated "Let'" | ✅ RESOLVED | Wave 0 (already fixed) |
+| **B11** stale "three days ago" | ✅ RESOLVED | Wave 2 (evergreen) |
+| **B12** missing-var crash | ✅ RESOLVED | Wave 2 (`SafeUndefined`; 34/34 render no crash) |
+
+**Every reported issue is resolved.** Only subjective per-template image-proportion tuning (A6 tail) is deferred into the Wave 6 visual pass — not a defect, a polish. Commits on `template-remediation`: `83efc05 c2442fb bb1e27b d9ca1c3 6db555e 9d3ca64 b9fd5c1 af49cc5 bf9cdc3` — each v2-verified.
+
+---
+
+**(historical detail below)** Status: Issues catalogued + root-cause investigation done (see § F)
 
 ---
 
@@ -82,6 +115,30 @@ Triaged via the **Email Broadcast → Preview iframe** (renders real template HT
 | 🟡 **Await Wave 2 trace** | **B3** (catalog button), **B4** (sample/catalog CTA visibility) |
 
 **Wave 0 complete.** Net effect: Wave 3 shrinks to A4+A6 (A1 done); B1/B10/**B2** drop to regression-only; Wave 2 gains B12. Active Wave 2 set: **B5, B6, B7, B9, B12** + B3/B4 traces. B8 is copy (Wave 4). Proceed to Wave 1 (7 images — needs originals) and Wave 2.
+
+---
+
+## H. Wave 2 execution log (2026-05-15)
+
+**Architectural finding (important):** the 5 campaign templates (`sustainability`, `tariff_advantage`, `welcome_final`, `welcome_production`, `b2b_introduction`) had **no `emails/<slug>.html` file**, so `render_template_by_slug` fell back to a **DB `html_content` row seeded once** from the campaign files by `database.py:_seed_default_templates` (plain insert, never refreshed). Editing the campaign files — or `database.py` subjects — silently never reached the renderer. This is why B7 first verified red despite the file edit. **Fixed at the root:** `email_sender.py` now has `NON_SHELL_TEMPLATE_FILES` (slug→path) and the renderer prefers the on-disk campaign/transactional file over the stale DB copy → edits ship via the normal deploy flow; the whole "edit didn't apply" class is gone. No prod-DB writes.
+
+| Issue | Fix | Status |
+|---|---|---|
+| A2 | 7 dead images recompressed (8–40 MB → 0.1–0.7 MB webp) + re-uploaded to identical bucket paths; `noor_Silver` (orphan, unused) filled w/ Noor_1 | ✅ **Wave 1 done** — URL audit **57/57=200**; collections/nettle/hemp 7/7 imgs 200 on v2 |
+| B3 | catalog CTA → config `catalog_pdf_url` default via build_send_variables | ✅ verified on v2 (catalogue hosted, 9.8→0.92 MB) |
+| B4 | sample/catalog CTAs → config `sample_request_url` (himalayanfibres.com/contact) | ✅ verified on v2 |
+| B5 | proforma download-button promise gated on `invoice_url` | ✅ verified on v2 |
+| B6 | conditional GST/Tax row in proforma + order_confirmation | ✅ template done (renders when `gst_amount` passed) |
+| B7 | campaign greeting `{{company_name}}`→`{{ contact_company or first_name or 'there' }}` + file-render fix | ✅ **v2-verified** (sustainability+tariff greet `Acme Carpets`) |
+| B9 | "Himalayan Fibers"→"Fibres" (campaign files + database.py subjects) + file-render fix | ✅ **v2-verified** (0 occurrences across campaign templates) |
+| B11 | welcome_day_3 evergreen line | ✅ done |
+| B12 | `SafeUndefined` — missing var → '' not a 500 (systemic) + post_sample_followup guard | ✅ verified on v2 |
+
+**Review fixes (post `/review`, commit `d9ca1c3`):** B9 was only half-done — `database.py` subject edits only apply on first-run seed, so already-seeded prod rows kept serving "Himalayan Fibers" subjects (subject has no file fallback). Added `reconcile_campaign_subjects(db)` (idempotent, runs every boot via `CAMPAIGN_TEMPLATE_DEFS`) → a deploy self-heals; **v2-verified: 0 stale subjects remain.** Also aligned `b2b_introduction` greeting to `{{ contact_company or first_name or 'there' }}`. **B9 fully closed.**
+
+**Wave 3 (commit `6db555e`) — ✅ v2-verified:** A1 already done in Wave 0. A4 — `cta_button` 14/32·14px·700 → 11/26·13px·600 (order_shipped TRACK SHIPMENT confirms live); `whatsapp_help_button` 14/24·13px → 10/22·12px. A6 — `image_split` collapses the image `<td>` when `image_url` falsy (collections_focus renders clean). Per-template image-size tuning deferred to Wave 5 visual pass.
+
+Commits on `template-remediation`: `83efc05`, `c2442fb`, `bb1e27b`, `d9ca1c3`, `6db555e`. Done: Wave 0,1,2,3 + review fixes. Pending: **Wave 4** (copy — user inputs: Hemp client name + B8 claim verdict), Wave 5 (regression), Wave 6 (standardization, after 4).
 
 ---
 

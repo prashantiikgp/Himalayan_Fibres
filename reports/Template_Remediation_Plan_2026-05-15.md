@@ -103,9 +103,16 @@ One change to a shared partial propagates to all templates.
 
 Apply the report's explicit line-level rewrites. Per decision: I edit, **Prashant reviews each template's new copy before it deploys**. Batch by review session.
 
-| Template | Change set |
-|---|---|
-| Hemp campaign | Simplify English; replace "design partner, Auroville" with **correct client name** (Prashant to supply); emphasise yarn applicability/functionality. |
+> **Fleet-wide claim rule (added from /review):** soften *every* unverifiable
+> quantified claim (e.g. "3–4× longer", "four times faster CO₂", "73%",
+> "15–25%") to qualitative wording — not only the 2 B8 templates. Hemp's
+> were softened in this wave.
+> **Welcome Production note:** the "no copy change" entry below refers to its
+> *UI*; its *copy* still needs the 4 B2B replacements (same as Welcome Final).
+
+| Template | Change set | Status |
+|---|---|---|
+| Hemp campaign | Client name → "Carpet Designer, Bhadohi / Mirzapur"; reframed apparel/bedding → carpets/rugs; claims softened; English simplified | ✅ done (commit `9d3ca64`), v2-verify in flight |
 | Order Flow Step 1 | "feels in your hands" → B2B phrasing. |
 | Post-Sample Follow-up | Apply report's full refined B2B version. |
 | Sample Invitation (copy) | Apply report's refined B2B version. |
@@ -129,6 +136,19 @@ Templates the report rated good and **needing no copy change**: Tibetan Wool (UI
 - Walk the full § C catalogue; mark each issue closed/deferred.
 - Final pass of the URL audit (expect 100% 200).
 - Update both report docs to "Resolved" with evidence links.
+
+---
+
+## Wave 6 — Template standardization (DESIGN APPROVED-PENDING)
+
+Full design: **`reports/Template_Standardization_Design_2026-05-15.md`**.
+Summary: lift layout dimensions (width 720→**768**, content width, etc.) into
+`shared.yml`+`SharedEmailConfig` as config knobs; migrate the 6 divergent
+standalone templates (`campaigns/*` + `transactional/welcome.html`) onto
+`base.html` + shared partials so all 30 templates are one family; retire the
+`NON_SHELL_TEMPLATE_FILES` / `database.py` campaign-seed stopgap. Per-template
+before/after render review gate. Runs **after Wave 1 + Wave 4** so we
+standardize final copy/imagery. 3 open questions in the design doc.
 
 ---
 
