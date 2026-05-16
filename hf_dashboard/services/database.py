@@ -332,7 +332,7 @@ def _seed_segments(db: Session):
 CAMPAIGN_TEMPLATE_DEFS = [
     ("B2B Introduction - Carpet Exporters", "b2b_introduction", "campaigns/b2b_introduction_carpet_exporters.html", "Premium Himalayan Fibres for {{company_name}}"),
     ("Sustainability Compliance", "sustainability", "campaigns/sustainability_compliance_campaign.html", "Meet EU & US Sustainability Standards"),
-    ("Tariff Advantage", "tariff_advantage", "campaigns/tariff_advantage_campaign.html", "Beat Import Tariffs with Domestic Himalayan Fibres"),
+    ("Tariff Advantage", "tariff_advantage", "campaigns/tariff_advantage_campaign.html", "A Domestic Sourcing Advantage for Carpet Exporters"),
     ("Welcome Email Final", "welcome_final", "campaigns/welcome_email_final.html", "Welcome to Himalayan Fibres, {{name}}"),
     ("Welcome Email Production", "welcome_production", "campaigns/welcome_email_production.html", "Welcome to Himalayan Fibres"),
     # NOTE: legacy `order_confirmation` removed — replaced by the new
@@ -413,7 +413,7 @@ def _seed_default_flows(db: Session):
             steps=[
                 {"day": 0, "template_slug": "b2b_introduction", "subject": "Premium Himalayan Fibres for {{company_name}}"},
                 {"day": 3, "template_slug": "sustainability", "subject": "Meet EU & US Sustainability Standards"},
-                {"day": 7, "template_slug": "tariff_advantage", "subject": "Beat Import Tariffs with Domestic Himalayan Fibres"},
+                {"day": 7, "template_slug": "tariff_advantage", "subject": "A Domestic Sourcing Advantage for Carpet Exporters"},
             ],
         ),
         Flow(
