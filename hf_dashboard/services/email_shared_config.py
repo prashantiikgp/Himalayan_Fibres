@@ -72,6 +72,17 @@ class SharedEmailConfig(BaseModel):
     # `{{ sample_request_link }}` / `{{ sample_form_link }}` CTAs.
     sample_request_url: str = ""
 
+    # ── Layout (Wave 6) — single source of truth for shell dimensions
+    # and the optional "card" treatment. Surfaced into every render via
+    # build_send_variables → base.html / partials.
+    email_width: int = 720
+    content_max_width: int = 680
+    card_variant: bool = False
+    card_radius: int = 10
+    card_shadow: str = "0 0 18px rgba(0,0,0,0.12)"
+    card_margin: int = 16
+    card_heading_font: str = "'Amiri', Georgia, serif"
+
 
 class _SharedEmailConfigDocument(BaseModel):
     model_config = ConfigDict(extra="forbid")

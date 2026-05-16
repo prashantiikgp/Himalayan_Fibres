@@ -50,6 +50,20 @@ shared:
   # for `{{ sample_request_link }}` / `{{ sample_form_link }}` CTAs.
   sample_request_url: "https://www.himalayanfibres.com/contact"
 
+  # ── Layout (Wave 6 standardization) ──────────────────────────────────
+  # Single source of truth for the email shell dimensions/look. Surfaced
+  # to base.html + partials so a change here re-flows the whole fleet.
+  email_width: 768            # outer shell px width (was hardcoded 720)
+  content_max_width: 680      # inner content/image column ceiling
+  # Optional "card" treatment (premium look). Default OFF so the ~24
+  # shell templates stay plain; migrated campaign templates opt in by
+  # passing card_variant=True into their render context (Step 2).
+  card_variant: false
+  card_radius: 10             # px corner radius when card_variant
+  card_shadow: "0 0 18px rgba(0,0,0,0.12)"
+  card_margin: 16             # px side gutter on mobile when card_variant
+  card_heading_font: "'Amiri', Georgia, serif"   # premium serif accent
+
   # Curated public-bucket image URLs. Reference via {{ media.<key> }} in templates.
   # Bucket `wa-template-images` is public; URLs do not expire.
   media:
