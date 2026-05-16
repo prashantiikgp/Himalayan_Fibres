@@ -97,9 +97,11 @@ NON_SHELL_TEMPLATE_FILES: dict[str, str] = {
     "b2b_introduction": "campaigns/b2b_introduction_carpet_exporters.html",
     "sustainability": "campaigns/sustainability_compliance_campaign.html",
     "tariff_advantage": "campaigns/tariff_advantage_campaign.html",
-    "welcome_final": "campaigns/welcome_email_final.html",
-    "welcome_production": "campaigns/welcome_email_production.html",
-    "welcome_transactional": "transactional/welcome.html",
+    # Wave 6 dedup: the 3 near-identical campaign-welcome slugs now render
+    # ONE canonical shell template (subjects still differ per slug/flow).
+    "welcome_final": "emails/welcome_campaign.html",
+    "welcome_production": "emails/welcome_campaign.html",
+    "welcome_transactional": "emails/welcome_campaign.html",
 }
 
 _JINJA_ENV: Environment | None = None

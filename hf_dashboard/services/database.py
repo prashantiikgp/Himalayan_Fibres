@@ -333,12 +333,12 @@ CAMPAIGN_TEMPLATE_DEFS = [
     ("B2B Introduction - Carpet Exporters", "b2b_introduction", "campaigns/b2b_introduction_carpet_exporters.html", "Premium Himalayan Fibres for your carpet business"),
     ("Sustainability Compliance", "sustainability", "campaigns/sustainability_compliance_campaign.html", "Meet EU & US Sustainability Standards"),
     ("Tariff Advantage", "tariff_advantage", "campaigns/tariff_advantage_campaign.html", "A Domestic Sourcing Advantage for Carpet Exporters"),
-    ("Welcome Email Final", "welcome_final", "campaigns/welcome_email_final.html", "Welcome to Himalayan Fibres, {{name}}"),
-    ("Welcome Email Production", "welcome_production", "campaigns/welcome_email_production.html", "Welcome to Himalayan Fibres"),
+    ("Welcome Email Final", "welcome_final", "emails/welcome_campaign.html", "Welcome to Himalayan Fibres, {{name}}"),
+    ("Welcome Email Production", "welcome_production", "emails/welcome_campaign.html", "Welcome to Himalayan Fibres"),
     # NOTE: legacy `order_confirmation` removed — replaced by the new
     # seed loader that reads from config/email/templates_seed/ and
     # compiles Jinja2 templates with the locked shell partials.
-    ("Welcome (Transactional)", "welcome_transactional", "transactional/welcome.html", "Welcome to Himalayan Fibres, {{first_name}}"),
+    ("Welcome (Transactional)", "welcome_transactional", "emails/welcome_campaign.html", "Welcome to Himalayan Fibres, {{first_name}}"),
 ]
 
 

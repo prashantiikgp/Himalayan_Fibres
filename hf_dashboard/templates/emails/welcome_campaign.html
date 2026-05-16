@@ -1,0 +1,42 @@
+{#-
+  CANONICAL welcome campaign — consolidates the former near-duplicate
+  welcome_email_final.html + welcome_email_production.html (Wave 6 dedup,
+  approved). Both the `welcome_final` and `welcome_production` slugs render
+  THIS file via NON_SHELL_TEMPLATE_FILES; their subjects differ per
+  flow-step (welcome_nurture_flow: production day-0, final day-5), the
+  body is one shared, standardised template.
+
+  On the shared shell: shared banner / social / footer; card variant for
+  the premium look. No top hero (shell banner is the single top visual).
+  Copy is the Wave 4 B2B-grounded version.
+-#}
+{% extends 'layout/base.html' %}
+{% set card_variant = True %}
+{% from 'partials/middle/heading.html' import heading with context %}
+{% from 'partials/middle/paragraph.html' import paragraph with context %}
+{% from 'partials/middle/info_card.html' import info_card with context %}
+{% from 'partials/middle/cta_button.html' import cta_button with context %}
+{% from 'partials/middle/whatsapp_help_button.html' import whatsapp_help_button with context %}
+
+{% block content %}
+
+{{ heading('Welcome to Himalayan Fibres') }}
+
+{{ paragraph('Hi <strong>' + (name or first_name or 'there') + '</strong>,') }}
+
+{{ paragraph("Thank you for joining <strong>Himalayan Fibres</strong>. We'd be glad to know what you're sourcing for — hemp, nettle, Tibetan wool, or a custom blend? Let us know your sourcing or product requirements and we'll be happy to assist.") }}
+
+{{ info_card('What we offer',
+   '<strong>Himalayan Stinging Nettle</strong> &mdash; a wild Himalayan plant (1200&ndash;2000&nbsp;m) grown without pesticides or fertilizers; sustainably harvested and spun into 100% or blended yarns, used by buyers across Europe and the US.<br><br>'
+   '<strong>Himalayan Hemp</strong> &mdash; from wild <em>Cannabis sativa</em>; durable, breathable, eco-friendly &mdash; ideal for sustainable textile collections.<br><br>'
+   '<strong>Tibetan Wool</strong> &mdash; authentic high-altitude wool; soft, strong, suited to warm, premium blends.') }}
+
+{{ paragraph("We offer <strong>fibres, yarns, and custom blends</strong> suitable for export-focused and sustainability-driven textile markets.") }}
+
+{{ cta_button('Explore Himalayan Fibres', catalog_link or 'https://www.himalayanfibres.com/') }}
+
+{{ paragraph('&mdash; Prashant<br><span style="color:#888;font-size:13px;">Founder, Himalayan Fibres</span>') }}
+
+{{ whatsapp_help_button('Hi Prashant — I would like to chat about products or place an order.') }}
+
+{% endblock %}
