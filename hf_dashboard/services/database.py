@@ -426,7 +426,9 @@ def _seed_default_flows(db: Session):
             is_active=False,
             steps=[
                 {"day": 0, "template_slug": "welcome_production", "subject": "Welcome to Himalayan Fibres"},
-                {"day": 5, "template_slug": "welcome_final", "subject": "Discover Our Product Range"},
+                # Wave 6: day-5 step removed — welcome_final now renders the
+                # same consolidated body as day-0 (dedup), so a 2nd send
+                # would be a duplicate. (Flow is is_active=False anyway.)
             ],
         ),
         Flow(
