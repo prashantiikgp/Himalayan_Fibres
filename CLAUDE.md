@@ -46,7 +46,20 @@ targets the deprecated Space.
 - **v2 is password-gated.** Verifying via `api_v2` (curl) or Playwright
   needs the `APP_PASSWORD`; pass it as a Bearer token to `/api/v2/*`.
   Useful endpoints: `POST /api/v2/email/render-preview` (server-side
-  Jinja render of a template) and `POST /api/v2/email/test-send`.
+  Jinja render of a template), `POST /api/v2/email/test-sends`, and
+  `POST /api/v2/email/attachments` (multipart upload → Supabase →
+  ref used as `{kind}_url` + email attachment).
+- **Required v2 Space secrets** (HF Space → Settings → Variables &
+  secrets — values mirror the repo `.env`, exact case-sensitive names):
+  `APP_PASSWORD`, `DATABASE_URL`, **`SUPABASE_URL`**,
+  **`SUPABASE_SERVICE_KEY`** (the service_role key — needed by
+  `services/supabase_storage.py` for the catalogue/price-list/footer-icon
+  uploads AND the per-send document-upload endpoint; without these the
+  upload route 500s `"SUPABASE_URL is not set"`). Secrets are read at
+  container start — adding/renaming one needs a Space restart/rebuild
+  (a redeploy, or `HfApi.add_space_secret` which auto-restarts). They
+  must be on the **v2** Space (`Prashantiitkgp08/Himalayan_Fibrer_v2`),
+  not the deprecated v1.
 - **Templates + `hf_dashboard/config/email/shared.yml` are shared**
   between v1 and v2, so email-template fixes apply to both; the
   duplicate-send dedupe logic is v2-specific in
