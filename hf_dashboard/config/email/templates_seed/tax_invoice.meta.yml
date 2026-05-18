@@ -1,0 +1,111 @@
+template:
+  slug: tax_invoice
+  name: "Transactional — Tax Invoice (GST)"
+  category: transactional
+  subject_template: "Tax invoice {{ invoice_number }} — Himalayan Fibres"
+  is_active: true
+  expected_attachments:
+    - invoice
+  required_variables:
+    - first_name
+    - invoice_number
+  optional_variables:
+    - invoice_date
+    - seller_gstin
+    - buyer_gstin
+    - place_of_supply
+    - ship_to_html
+    - items_html
+    - taxable_value
+    - cgst
+    - sgst
+    - igst
+    - gst_amount
+    - total
+    - bank_details_html
+    - invoice_url
+  variables:
+    - name: invoice_number
+      label: "Invoice number"
+      type: text
+      placeholder: "INV-2026-001"
+      example: "INV-2026-001"
+      required: true
+    - name: invoice_date
+      label: "Invoice date"
+      type: text
+      placeholder: "16 May 2026"
+      example: "16 May 2026"
+      required: false
+    - name: seller_gstin
+      label: "Our GSTIN"
+      type: text
+      placeholder: "23ABCDE1234F1Z5"
+      example: "23ABCDE1234F1Z5"
+      required: false
+    - name: buyer_gstin
+      label: "Buyer GSTIN"
+      type: text
+      placeholder: "21FGHIJ5678K2Z9"
+      example: ""
+      required: false
+    - name: place_of_supply
+      label: "Place of supply"
+      type: text
+      placeholder: "Odisha (21)"
+      example: "Odisha (21)"
+      required: false
+    - name: ship_to_html
+      label: "Billed to (HTML)"
+      type: textarea
+      placeholder: "Mrs. Alisha Panda<br>Brahmapur, Odisha 760004"
+      example: "Mrs. Alisha Panda<br>Brahmapur, Odisha 760004"
+      required: false
+    - name: items_html
+      label: "Items (HTML)"
+      type: textarea
+      placeholder: '<p style="margin:4px 0;">Himalayan nettle yarn × 50 kg</p>'
+      example: '<p style="margin:4px 0;">Himalayan nettle yarn × 50 kg</p>'
+      required: false
+    - name: taxable_value
+      label: "Taxable value"
+      type: text
+      placeholder: "₹45,000"
+      example: "₹45,000"
+      required: false
+    - name: cgst
+      label: "CGST"
+      type: text
+      placeholder: "₹4,050"
+      example: "₹4,050"
+      required: false
+    - name: sgst
+      label: "SGST"
+      type: text
+      placeholder: "₹4,050"
+      example: "₹4,050"
+      required: false
+    - name: igst
+      label: "IGST"
+      type: text
+      placeholder: "₹8,100"
+      example: ""
+      required: false
+    - name: gst_amount
+      label: "GST / Tax (single line, if no CGST/SGST split)"
+      type: text
+      placeholder: "₹8,100"
+      example: "₹8,100"
+      required: false
+    - name: total
+      label: "Grand total"
+      type: text
+      placeholder: "₹53,100"
+      example: "₹53,100"
+      required: false
+    - name: bank_details_html
+      label: "Payment / bank details (HTML)"
+      type: textarea
+      placeholder: "<p>Paid via bank transfer — Ref. TXN123</p>"
+      example: ""
+      required: false

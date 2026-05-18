@@ -45,7 +45,7 @@ shared:
   # scripts/upload_price_list.py). 1-year signed URL — refresh annually
   # OR whenever the price list is updated by re-running the script.
   # Source of truth on disk: G:/My Drive/1. Media & Marketing/9. Customer Engagement/Catalogue _Distribution/XYZ_Price_List_16_Aug.pdf
-  price_list_pdf_url: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/sign/email-invoices/canonical/current_price_list.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83OTM3MzgzNi1iZDQyLTQ0M2EtOTA5My03NzA5MTI3YjNjODAiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJlbWFpbC1pbnZvaWNlcy9jYW5vbmljYWwvY3VycmVudF9wcmljZV9saXN0LnBkZiIsImlhdCI6MTc3ODA0NDAzOCwiZXhwIjoxODA5NTgwMDM4fQ.a_UXh7wUJU9PmK1Az6FWRreGxBScB2_8SezYQro-z90"
+  price_list_pdf_url: "https://yxlofrkkzjkxtbowyryj.supabase.co/storage/v1/object/sign/email-invoices/canonical/current_price_list.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83OTM3MzgzNi1iZDQyLTQ0M2EtOTA5My03NzA5MTI3YjNjODAiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJlbWFpbC1pbnZvaWNlcy9jYW5vbmljYWwvY3VycmVudF9wcmljZV9saXN0LnBkZiIsImlhdCI6MTc3OTA4ODk3OSwiZXhwIjoxODEwNjI0OTc5fQ.ukjpoOUYWO7C5uOa--xv1Bh0f0v_W8RYI8NPYpjH1z0"
 
   # Canonical product-catalogue PDF — signed Supabase URL (1-year expiry).
   # Refresh with `python scripts/upload_catalogue.py <local-pdf-path>`.

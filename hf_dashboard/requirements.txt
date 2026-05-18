@@ -20,6 +20,12 @@ email-validator>=2.1.0
 python-dateutil>=2.8.2
 python-dotenv>=1.0.1
 requests>=2.31.0
+# Supabase Storage client — used by services/supabase_storage.py for the
+# catalogue / price-list / footer-icon uploads AND the per-send document
+# upload endpoint. Was only in the root requirements.txt, so the v2 image
+# (installs api_v2 → -r hf_dashboard reqs) lacked it → runtime
+# "No module named 'storage3'" on POST /api/v2/email/attachments.
+storage3==0.7.7
 # huggingface_hub 1.x dropped HfFolder which Gradio 4.44.x and possibly
 # Gradio 5.x reference. Gradio 6.x switched to get_token() and is compatible
 # with hf_hub 1.x — re-evaluate this cap once we land on Gradio 6.
