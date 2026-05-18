@@ -7,6 +7,40 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { apiFetch } from "./client";
+import { getToken } from "@/lib/auth";
+import { apiBase } from "@/lib/env";
+import { ApiError } from "@/lib/queryClient";
+
+export type AttachmentRef = {
+  url: string;
+  file_name: string;
+  content_type: string;
+  kind: string;
+  size: number;
+};
+
+/** Multipart upload — bypasses apiFetch (which forces JSON content-type);
+ * the browser sets the multipart boundary itself. */
+export function useUploadAttachment() {
+  return useMutation({
+    mutationFn: async (args: { file: File; kind: string }) => {
+      const fd = new FormData();
+      fd.append("file", args.file);
+      fd.append("kind", args.kind);
+      const token = getToken();
+      const res = await fetch(`${apiBase()}/api/v2/email/attachments`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: fd,
+      });
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        throw new ApiError(res.status, body, "/api/v2/email/attachments");
+      }
+      return (await res.json()) as AttachmentRef;
+    },
+  });
+}
 
 export type RenderPreviewBody = {
   template_id: number;
@@ -14,6 +48,7 @@ export type RenderPreviewBody = {
   contact_id?: string | null;
   html_content_override?: string | null;
   subject_template_override?: string | null;
+  attachments?: AttachmentRef[];
 };
 
 export type RenderPreviewResponse = {
@@ -36,6 +71,7 @@ export type SendOneEmailBody = {
   contact_id: string;
   variables: Record<string, string>;
   subject_override?: string | null;
+  attachments?: AttachmentRef[];
 };
 
 export type SendOneEmailResponse = {

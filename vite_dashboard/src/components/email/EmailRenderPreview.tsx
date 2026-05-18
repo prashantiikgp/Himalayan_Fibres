@@ -12,9 +12,9 @@
  * Phase 7.1 (Day_4_improvememt/PLAN_email.md).
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDebouncedValue } from "@/lib/hooks";
-import { useRenderEmailPreview } from "@/api/email_send";
+import { useRenderEmailPreview, type AttachmentRef } from "@/api/email_send";
 
 type ViewportMode = "desktop" | "mobile";
 
@@ -24,6 +24,7 @@ export function EmailRenderPreview({
   contactId,
   htmlContentOverride,
   subjectTemplateOverride,
+  attachments,
 }: {
   templateId: number | null;
   variables: Record<string, string>;
@@ -35,6 +36,9 @@ export function EmailRenderPreview({
   /** Override the rendered subject. Used by ComposeTab + EmailSendPage
    * where the user can type a custom subject override. */
   subjectTemplateOverride?: string | null;
+  /** Uploaded docs — surfaced as {kind}_url so the template's download
+   * button shows in the preview. */
+  attachments?: AttachmentRef[];
 }) {
   const [viewport, setViewport] = useState<ViewportMode>("desktop");
 
@@ -43,6 +47,11 @@ export function EmailRenderPreview({
   const debouncedVars = useDebouncedValue(variables, 200);
   const debouncedHtml = useDebouncedValue(htmlContentOverride ?? null, 200);
   const debouncedSubject = useDebouncedValue(subjectTemplateOverride ?? null, 200);
+  // Stable key so the effect re-runs only when the attachment set changes.
+  const attKey = useMemo(
+    () => (attachments ?? []).map((a) => `${a.kind}:${a.url}`).join("|"),
+    [attachments],
+  );
 
   const mutation = useRenderEmailPreview();
   const { mutate, data, isPending, error } = mutation;
@@ -55,9 +64,10 @@ export function EmailRenderPreview({
       contact_id: contactId ?? null,
       html_content_override: debouncedHtml,
       subject_template_override: debouncedSubject,
+      attachments: attachments ?? [],
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [templateId, debouncedVars, debouncedHtml, debouncedSubject, contactId]);
+  }, [templateId, debouncedVars, debouncedHtml, debouncedSubject, contactId, attKey]);
 
   const subject = data?.subject ?? "";
   const html = data?.html ?? "";

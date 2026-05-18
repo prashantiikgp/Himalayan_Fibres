@@ -31,6 +31,22 @@ class EmailVariableSpec(BaseModel):
     required: bool = False
 
 
+class AttachmentRef(BaseModel):
+    """A document uploaded via POST /email/attachments. Carried in the
+    send/preview request so it can be (a) surfaced as `{kind}_url` in the
+    template and (b) attached to the actual email."""
+
+    url: str
+    file_name: str
+    content_type: str = "application/pdf"
+    kind: str = "invoice"          # invoice | price_list | document | ...
+    size: int = 0
+
+
+class AttachmentUploadResponse(AttachmentRef):
+    pass
+
+
 class RenderPreviewRequest(BaseModel):
     template_id: int
     variables: dict[str, str] = Field(default_factory=dict)
@@ -41,6 +57,9 @@ class RenderPreviewRequest(BaseModel):
     """Studio Advanced mode: render this HTML instead of the saved body."""
     subject_template_override: str | None = None
     """Render this subject string instead of `template.subject_template`."""
+    attachments: list[AttachmentRef] = Field(default_factory=list)
+    """Uploaded docs — each surfaced as `{kind}_url` so the template's
+    download button renders in the preview."""
 
 
 class RenderPreviewResponse(BaseModel):
@@ -53,6 +72,9 @@ class TestSendRequest(BaseModel):
     contact_id: str
     variables: dict[str, str] = Field(default_factory=dict)
     subject_override: str | None = None
+    attachments: list[AttachmentRef] = Field(default_factory=list)
+    """Uploaded docs — surfaced as `{kind}_url` in the template AND
+    attached to the sent email (multipart/mixed)."""
 
 
 class TestSendResponse(BaseModel):

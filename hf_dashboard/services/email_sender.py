@@ -30,6 +30,7 @@ import re
 import smtplib
 import ssl
 from datetime import datetime, timezone
+from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formataddr, formatdate, make_msgid
@@ -316,7 +317,8 @@ class EmailSender:
             return {"success": False, "message": f"SMTP error: {e}"}
 
     def send_email(self, to_email: str, subject: str, html_content: str,
-                   plain_text: str = None, reply_to: str = None, to_name: str = None) -> dict:
+                   plain_text: str = None, reply_to: str = None, to_name: str = None,
+                   attachments: list[dict] | None = None) -> dict:
         """Dispatch to the configured transport.
 
         Returns ``{"success": bool, "message": str, "message_id"?: str,
@@ -339,6 +341,7 @@ class EmailSender:
             msg = self._build_mime_message(
                 to_email=to_email, subject=subject, html_content=html_content,
                 plain_text=plain_text, reply_to=reply_to, to_name=to_name,
+                attachments=attachments,
             )
         except Exception as e:
             return {"success": False, "message": f"Failed to build message: {e}"}
@@ -350,10 +353,39 @@ class EmailSender:
     def _build_mime_message(
         self, *, to_email: str, subject: str, html_content: str,
         plain_text: str | None, reply_to: str | None, to_name: str | None,
+        attachments: list[dict] | None = None,
     ) -> MIMEMultipart:
         html_content = self._preprocess_html(html_content)
 
-        msg = MIMEMultipart("alternative")
+        if not plain_text:
+            plain_text = re.sub("<[^<]+?>", "", html_content)
+            plain_text = re.sub(r"\s+", " ", plain_text).strip()[:5000]
+
+        # text+html always go in an alternative part. With attachments the
+        # whole thing is wrapped in multipart/mixed; without, the
+        # alternative part IS the message (unchanged behaviour).
+        alt = MIMEMultipart("alternative")
+        alt.attach(MIMEText(plain_text, "plain", "utf-8"))
+        alt.attach(MIMEText(html_content, "html", "utf-8"))
+
+        if attachments:
+            msg: MIMEMultipart = MIMEMultipart("mixed")
+            msg.attach(alt)
+            for att in attachments:
+                data = att.get("content") or b""
+                if not data:
+                    continue
+                ctype = att.get("content_type") or "application/octet-stream"
+                subtype = ctype.split("/", 1)[1] if "/" in ctype else "octet-stream"
+                part = MIMEApplication(data, _subtype=subtype)
+                part.add_header(
+                    "Content-Disposition", "attachment",
+                    filename=att.get("file_name") or "attachment",
+                )
+                msg.attach(part)
+        else:
+            msg = alt
+
         msg["Subject"] = subject
         msg["From"] = formataddr((self.from_name, self.from_email))
         msg["To"] = formataddr((to_name, to_email)) if to_name else to_email
@@ -361,13 +393,6 @@ class EmailSender:
         msg["Message-ID"] = make_msgid(domain=self.from_email.split("@")[1])
         msg["List-Unsubscribe"] = f"<mailto:{self.from_email}?subject=Unsubscribe>"
         msg["Reply-To"] = reply_to or self.from_email
-
-        if not plain_text:
-            plain_text = re.sub("<[^<]+?>", "", html_content)
-            plain_text = re.sub(r"\s+", " ", plain_text).strip()[:5000]
-
-        msg.attach(MIMEText(plain_text, "plain", "utf-8"))
-        msg.attach(MIMEText(html_content, "html", "utf-8"))
         return msg
 
     def _send_via_gmail_api(self, to_email: str, msg: MIMEMultipart) -> dict:

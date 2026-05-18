@@ -20,7 +20,11 @@ import {
   useEmailTemplate,
   type EmailTemplateOut,
 } from "@/api/email_templates";
-import { useSendOneEmail } from "@/api/email_send";
+import {
+  useSendOneEmail,
+  useUploadAttachment,
+  type AttachmentRef,
+} from "@/api/email_send";
 import type { ContactRow } from "@/api/contacts";
 import { ContactPicker } from "./components/ContactPicker";
 import { EmailTemplatePicker } from "./components/EmailTemplatePicker";
@@ -44,8 +48,11 @@ export function EmailSendPage() {
   const [subjectOverride, setSubjectOverride] = useState<string>("");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
+  const [attachments, setAttachments] = useState<AttachmentRef[]>([]);
+  const [attachKind, setAttachKind] = useState<string>("invoice");
 
   const sendMutation = useSendOneEmail();
+  const uploadMutation = useUploadAttachment();
 
   // Reset form whenever the template changes — different vars, different
   // defaults. EmailVariablesForm seeds its own defaults on mount but we
@@ -55,6 +62,7 @@ export function EmailSendPage() {
     setSubjectOverride("");
     setSubmitError(null);
     setResultMessage(null);
+    setAttachments([]);
   }, [templateId, template?.variable_spec]);
 
   const requiredNames = useMemo(
@@ -81,6 +89,7 @@ export function EmailSendPage() {
         contact_id: contact.id,
         variables,
         subject_override: subjectOverride.trim() || null,
+        attachments,
       },
       {
         onSuccess: (res) => {
@@ -151,6 +160,88 @@ export function EmailSendPage() {
               />
             )}
 
+            {template && (
+              <div>
+                <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Attach a document
+                </h2>
+                <p className="mb-2 text-xs text-text-muted">
+                  Uploads to secure storage; the file is attached to the
+                  email and its download button is filled in automatically.
+                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <select
+                    aria-label="Document type"
+                    value={attachKind}
+                    onChange={(e) => setAttachKind(e.target.value)}
+                    className="h-9 rounded-md border border-border bg-card px-2 text-sm"
+                  >
+                    <option value="invoice">Invoice / Proforma</option>
+                    <option value="price_list">Price list</option>
+                    <option value="document">Other document</option>
+                  </select>
+                  <Input
+                    type="file"
+                    aria-label="Choose document"
+                    accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx"
+                    className="max-w-[220px] text-sm"
+                    disabled={uploadMutation.isPending}
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (!f) return;
+                      setSubmitError(null);
+                      uploadMutation.mutate(
+                        { file: f, kind: attachKind },
+                        {
+                          onSuccess: (ref) =>
+                            setAttachments((prev) => [
+                              ...prev.filter((a) => a.kind !== ref.kind),
+                              ref,
+                            ]),
+                          onError: (err) =>
+                            setSubmitError(
+                              err instanceof Error
+                                ? err.message
+                                : "Upload failed",
+                            ),
+                        },
+                      );
+                      e.target.value = "";
+                    }}
+                  />
+                  {uploadMutation.isPending && (
+                    <span className="text-xs text-text-muted">Uploading…</span>
+                  )}
+                </div>
+                {attachments.length > 0 && (
+                  <ul className="mt-2 flex flex-col gap-1">
+                    {attachments.map((a) => (
+                      <li
+                        key={a.kind + a.url}
+                        className="flex items-center justify-between gap-2 rounded border border-border bg-card/60 px-2 py-1 text-xs"
+                      >
+                        <span className="truncate">
+                          <span className="text-text-muted">[{a.kind}]</span>{" "}
+                          {a.file_name}
+                        </span>
+                        <button
+                          type="button"
+                          className="text-danger hover:underline"
+                          onClick={() =>
+                            setAttachments((prev) =>
+                              prev.filter((x) => x.url !== a.url),
+                            )
+                          }
+                        >
+                          remove
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+
             {submitError && (
               <p role="alert" className="text-sm text-danger">
                 {submitError}
@@ -193,6 +284,7 @@ export function EmailSendPage() {
             subjectTemplateOverride={
               subjectOverride.trim().length > 0 ? subjectOverride : null
             }
+            attachments={attachments}
           />
         </section>
       </div>

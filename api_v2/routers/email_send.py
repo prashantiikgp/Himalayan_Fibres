@@ -17,17 +17,30 @@ Two endpoints, both new:
 from __future__ import annotations
 
 import logging
+import re as _re
+import uuid as _uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    UploadFile,
+    status,
+)
 
 from api_v2.deps import require_auth
 from api_v2.schemas.email_send import (
+    AttachmentUploadResponse,
     RenderPreviewRequest,
     RenderPreviewResponse,
     TestSendRequest,
     TestSendResponse,
 )
+
+from services.supabase_storage import upload_file  # type: ignore[import-not-found]
 
 from services.database import get_db  # type: ignore[import-not-found]
 from services.email_personalization import build_send_variables  # type: ignore[import-not-found]
@@ -104,6 +117,11 @@ def render_preview(req: RenderPreviewRequest) -> RenderPreviewResponse:
             attachments={},
             extra=_coerce_vars(req.variables),
         )
+        # Surface uploaded docs as {kind}_url so the template's download
+        # button renders in the live preview.
+        for att in req.attachments:
+            if att.url:
+                merged[f"{att.kind}_url"] = att.url
 
         try:
             if req.html_content_override is not None:
@@ -203,6 +221,9 @@ def test_send(req: TestSendRequest) -> TestSendResponse:
         merged = build_send_variables(
             contact, attachments={}, extra=_coerce_vars(req.variables)
         )
+        for att in req.attachments:
+            if att.url:
+                merged[f"{att.kind}_url"] = att.url
         subject_src = (
             req.subject_override
             if req.subject_override is not None
@@ -217,11 +238,31 @@ def test_send(req: TestSendRequest) -> TestSendResponse:
                 status_code=500, detail=f"Render failed: {e}"
             ) from e
 
+        # Fetch each uploaded doc's bytes so it rides as a real
+        # attachment (the {kind}_url link is already in the body above).
+        email_attachments: list[dict] = []
+        for att in req.attachments:
+            if not att.url:
+                continue
+            try:
+                import requests as _rq
+
+                resp = _rq.get(att.url, timeout=30)
+                resp.raise_for_status()
+                email_attachments.append({
+                    "file_name": att.file_name or "document.pdf",
+                    "content_type": att.content_type or "application/pdf",
+                    "content": resp.content,
+                })
+            except Exception:
+                log.exception("could not fetch attachment %s", att.url)
+
         result = sender.send_email(
             to_email=contact.email,
             subject=rendered_subject,
             html_content=rendered_html,
             to_name=(contact.first_name or None),
+            attachments=email_attachments or None,
         )
 
         # Retry path: if an earlier failed row exists for this key, update
@@ -268,3 +309,46 @@ def test_send(req: TestSendRequest) -> TestSendResponse:
         )
     finally:
         db.close()
+
+
+_SAFE = _re.compile(r"[^A-Za-z0-9._-]+")
+
+
+@router.post(
+    "/email/attachments",
+    response_model=AttachmentUploadResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def upload_attachment(
+    file: UploadFile = File(...),
+    kind: str = Form("document"),
+) -> AttachmentUploadResponse:
+    """Upload a per-send document to Supabase and return a reference.
+
+    The returned ref is passed back in the test-send / render-preview
+    request: it is surfaced to the template as ``{kind}_url`` AND
+    attached to the sent email.
+    """
+    data = await file.read()
+    if not data:
+        raise HTTPException(status_code=400, detail="Empty file")
+    if len(data) > 15 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="File too large (max 15 MB)")
+
+    safe_name = _SAFE.sub("_", (file.filename or "document.pdf")).strip("_") or "document.pdf"
+    ym = datetime.now(timezone.utc).strftime("%Y%m")
+    path = f"uploads/{ym}/{_uuid.uuid4().hex}-{safe_name}"
+    ctype = file.content_type or "application/pdf"
+    try:
+        url = upload_file("email-invoices", path, data, content_type=ctype)
+    except Exception as e:  # pragma: no cover - storage failure surfaced to UI
+        log.exception("attachment upload failed")
+        raise HTTPException(status_code=502, detail=f"Upload failed: {e}") from e
+
+    return AttachmentUploadResponse(
+        url=url,
+        file_name=safe_name,
+        content_type=ctype,
+        kind=(kind or "document").strip() or "document",
+        size=len(data),
+    )
